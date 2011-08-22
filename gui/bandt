@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#
+# This is a quick and dirty script to build the TestEBuilder class and run it.
+#
+
+javac *.java
+java TestEBuilder
