@@ -18,7 +18,7 @@ public class Attribute {
 
     /**
      * If our type is "REFERENCE", then this is the class that
-     * we reference.
+     * we reference.  Otherwise, this is null.
      */
     private ClassDescription classDescription;
 
@@ -49,6 +49,16 @@ public class Attribute {
      */
     public Attribute(String name, Type type) {
         this(name, type, null, Cardinality.N_A);
+    }
+
+
+    public String getName() {
+        return(name);
+    }
+
+
+    public ClassDescription getClassDescription() {
+        return(classDescription);
     }
 
 
