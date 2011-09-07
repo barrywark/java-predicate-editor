@@ -1,11 +1,11 @@
-//package com.physion.ovation.gui.ebuilder.datatypes;
+package com.physion.ovation.gui.ebuilder.datatypes;
 
 import java.util.ArrayList;
 
 /**
  * 
  */
-class ClassDescription {
+public class ClassDescription {
 
     /**
      */

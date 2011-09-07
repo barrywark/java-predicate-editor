@@ -1,10 +1,10 @@
-//package com.physion.ovation.gui.ebuilder.datatypes;
+package com.physion.ovation.gui.ebuilder.datatypes;
 
 
 /**
  * 
  */
-class Attribute {
+public class Attribute {
 
     /**
      * The name of this attribute.  E.g. "owner", "uuid", "keywords".
