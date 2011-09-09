@@ -1,4 +1,4 @@
-//package com.physion.ovation.gui.ebuilder.datamodel;
+package com.physion.ovation.gui.ebuilder.datamodel;
 
 import java.util.ArrayList;
 
@@ -199,44 +199,17 @@ class RowData {
     }
 
 
+    public String getRowString() {
+        return(getRowString(""));
+    }
+
+
     /**
-     * Get the "childmost" or "leaf" Attribute that is specified
-     * by this row.
+     * Get the String representation of just this row.  I.e. not this
+     * row and its children.
      */
-    public Attribute getChildmostAttribute() {
-
-        if (attributePath.isEmpty()) {
-            //System.out.println("attributePath.isEmpty()");
-            return(null);
-        }
-        else
-            return(attributePath.get(attributePath.size()-1));
-    }
-
-
-    public ClassDescription getParentClass() {
-
-        if (parentRow == null) {
-            //System.out.println("parentRow == null");
-            return(classUnderQualification);
-        }
-        else {
-            if (parentRow.getChildmostAttribute() == null) {
-                //System.out.println("parentRow.getChildmostAttribute == null");
-                return(classUnderQualification);
-            }
-            else {
-                //System.out.println("parentRow.getChildmostAttribute != null");
-                //System.out.println("parentRow.getChildmostAttribute().getClassDescription() = "+parentRow.getChildmostAttribute().getClassDescription());
-                //System.out.println("parentRow.getChildmostAttribute() = "+parentRow.getChildmostAttribute());
-                return(parentRow.getChildmostAttribute().getClassDescription());
-            }
-        }
-    }
-
-
-    public String toString(String indent) {
-
+    public String getRowString(String indent) {
+        
         //String string = indent+parentClass.getName()+" |";
 
         //ClassDescription parentClass = getParentClass();
@@ -303,19 +276,120 @@ class RowData {
             string += " \""+attributeValue+"\"";
         }
 
+        return(string);
+    }
+
+
+    /**
+     * Get the "childmost" or "leaf" Attribute that is specified
+     * by this row.
+     */
+    public Attribute getChildmostAttribute() {
+
+        if (attributePath.isEmpty()) {
+            //System.out.println("attributePath.isEmpty()");
+            return(null);
+        }
+        else
+            return(attributePath.get(attributePath.size()-1));
+    }
+
+
+    public ClassDescription getParentClass() {
+
+        if (parentRow == null) {
+            //System.out.println("parentRow == null");
+            return(classUnderQualification);
+        }
+        else {
+            if (parentRow.getChildmostAttribute() == null) {
+                //System.out.println("parentRow.getChildmostAttribute == null");
+                return(classUnderQualification);
+            }
+            else {
+                //System.out.println("parentRow.getChildmostAttribute != null");
+                //System.out.println("parentRow.getChildmostAttribute().getClassDescription() = "+parentRow.getChildmostAttribute().getClassDescription());
+                //System.out.println("parentRow.getChildmostAttribute() = "+parentRow.getChildmostAttribute());
+                return(parentRow.getChildmostAttribute().getClassDescription());
+            }
+        }
+    }
+
+
+    public String toString(String indent) {
+
+/*
+        //String string = indent+parentClass.getName()+" |";
+
+        //ClassDescription parentClass = getParentClass();
+        //String string = indent+getParentClass().getName()+" |";
+        String string;
+        if (getParentClass() != null) 
+            string = indent+getParentClass().getName()+" |";
+        else 
+            string = indent+"ERROR: No Parent Class"+" |";
+
+
+        if (collectionOperator != null &&
+            collectionOperator.isCompoundOperator() &&
+            attributeOperator != null) {
+            string += "ERROR: RowData is in an inconsistent state.";
+            string += "\ncollectionOperator = "+collectionOperator;
+            string += "\nattributeOperator = "+attributeOperator;
+            return(string);
+        }
+
+        //if (!attributePath.isEmpty()) {
+        //}
+        boolean first = true;
+        //for (String attributeName : attributePath) {
+        for (Attribute attribute : attributePath) {
+
+            if (first)
+                string += " ";
+            else
+                string += ".";
+
+            //string += attributeName;
+            string += attribute.getName();
+
+            first = false;
+        }
+
+        if (collectionOperator != null)
+            string += " "+collectionOperator;
+
+        if (attributeOperator != null)
+            string += " "+attributeOperator;
+
+        if ((attributeOperator != null) &&
+            ((attributeOperator != "is null") &&
+             (attributeOperator != "is not null")) &&
+            (attributeValue == null)) {
+            string += "ERROR: RowData is in an inconsistent state.";
+            string += "\nattributeOperator = "+attributeOperator;
+            string += "\nattributeValue = "+attributeValue;
+            return(string);
+        }
+
+        if (attributeValue != null) {
+            string += " \""+attributeValue+"\"";
+        }
+*/
+        String string = getRowString(indent);
+
         for (RowData childRow : childRows)
             string += "\n"+childRow.toString(indent+"  ");
 
         return(string);
     }
 
-    
-    /**
-     * This is a simple test program for this class.
-     */
-    public static void main(String[] args) {
 
-        System.out.println("RowData test is starting...");
+    /**
+     * This method creates a RowData initialized with a few values
+     * for testing purposes.
+     */
+    public static RowData createTestRowData() {
 
         ClassDescription entityBaseCD =
             new ClassDescription("EntityBase", null);
@@ -474,10 +548,22 @@ class RowData {
         childRows3.add(rowData4);
         rowData3.setChildRows(childRows3);
 
-
         childRows.add(rowData3);
 
         rootRow.setChildRows(childRows);
+
+        return(rootRow);
+    }
+
+    
+    /**
+     * This is a simple test program for this class.
+     */
+    public static void main(String[] args) {
+
+        System.out.println("RowData test is starting...");
+
+        RowData rootRow = createTestRowData();
         System.out.println(rootRow);
 
         System.out.println("RowData test is ending.");
