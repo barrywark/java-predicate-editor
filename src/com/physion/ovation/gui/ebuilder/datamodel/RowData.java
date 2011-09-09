@@ -318,64 +318,6 @@ class RowData {
 
     public String toString(String indent) {
 
-/*
-        //String string = indent+parentClass.getName()+" |";
-
-        //ClassDescription parentClass = getParentClass();
-        //String string = indent+getParentClass().getName()+" |";
-        String string;
-        if (getParentClass() != null) 
-            string = indent+getParentClass().getName()+" |";
-        else 
-            string = indent+"ERROR: No Parent Class"+" |";
-
-
-        if (collectionOperator != null &&
-            collectionOperator.isCompoundOperator() &&
-            attributeOperator != null) {
-            string += "ERROR: RowData is in an inconsistent state.";
-            string += "\ncollectionOperator = "+collectionOperator;
-            string += "\nattributeOperator = "+attributeOperator;
-            return(string);
-        }
-
-        //if (!attributePath.isEmpty()) {
-        //}
-        boolean first = true;
-        //for (String attributeName : attributePath) {
-        for (Attribute attribute : attributePath) {
-
-            if (first)
-                string += " ";
-            else
-                string += ".";
-
-            //string += attributeName;
-            string += attribute.getName();
-
-            first = false;
-        }
-
-        if (collectionOperator != null)
-            string += " "+collectionOperator;
-
-        if (attributeOperator != null)
-            string += " "+attributeOperator;
-
-        if ((attributeOperator != null) &&
-            ((attributeOperator != "is null") &&
-             (attributeOperator != "is not null")) &&
-            (attributeValue == null)) {
-            string += "ERROR: RowData is in an inconsistent state.";
-            string += "\nattributeOperator = "+attributeOperator;
-            string += "\nattributeValue = "+attributeValue;
-            return(string);
-        }
-
-        if (attributeValue != null) {
-            string += " \""+attributeValue+"\"";
-        }
-*/
         String string = getRowString(indent);
 
         for (RowData childRow : childRows)
