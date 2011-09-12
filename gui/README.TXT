@@ -1,7 +1,14 @@
+
+Code for Expression Builder GUI is under the directory trunk/src/com/physion...
+
+I have not yet written a crude build/run script for it, but will do that soon.
+
+========= Old Comments Below =========
+
 This is the start of the "Expression Builder" GUI.  All these files
 will be moved around and changed long before the GUI is completed.
 
-The contects of this directory are simply a way to get something up
+The contents of this directory are simply a way to get something up
 and running using the Physion Subversion source code control.
 
 
