@@ -26,13 +26,14 @@ public class EBuilderListModel
 
 
     public int getSize() {
-        return(1);
+        return(rootRow.getNumDescendents()+1);
     }
 
 
     public Object getElementAt(int index) {
     
-        RowData rowData = getRowDataForIndex(index);
+        //RowData rowData = getRowDataForIndex(index);
+        RowData rowData = rootRow.getDescendentAt(index);
 
         if (rowData == null) {
             String string = "ERROR:  In EBuilderListModel:getElementAt("+
@@ -42,7 +43,7 @@ public class EBuilderListModel
             return(string);
         }
 
-        return(rowData.getRowString());
+        return(rowData.getIndentString()+rowData.getRowString());
     }
 
 

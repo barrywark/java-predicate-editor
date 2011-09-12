@@ -113,6 +113,67 @@ class RowData {
 
 
     /**
+     * Get the number of descendents from this node.  I.e. this is returns
+     * the count of our direct children, plus all their children, and all
+     * our childrens' children, and so on.
+     */
+    public int getNumDescendents() {
+
+        int count = childRows.size();
+        for (RowData childRow : childRows) {
+            count += childRow.getNumDescendents();
+        }
+        return(count);
+    }
+
+
+    /**
+     * This returns the RowData object that is at the specified "index".
+     * This method is inteded to be used to get the RowData object at
+     * the specified index as far as a List GUI widget is concerned.
+     * This RowData object is at index 0.  Its first child is at index 1.
+     * If the first child has a child, then that child is at index 2.
+     * If the first child does not have a child, then the second child
+     * is at index 2.  (I.e. the first child's sibling.)
+     *
+     * A simple "picture" of RowData objects and their "indexes" as
+     * far as a List widget is concerned, makes this more obvious:
+     *
+     *      RowData 0
+     *          RowData 1
+     *          RowData 2
+     *          RowData 3
+     *               RowData 4
+     *          RowData 5
+     *               RowData 6
+     *               RowData 7
+     *               RowData 8
+     *          RowData 9
+     */
+    public RowData getDescendentAt(int index) {
+
+        if (index == 0)
+            return(this);
+
+
+        for (RowData childRow : childRows) {
+
+            index--;
+            RowData rd = childRow.getDescendentAt(index);
+            if (rd != null)
+                return(rd);
+
+            index -= childRow.getNumDescendents();
+
+            if (index == 0)
+                return(childRow);
+        }
+
+        return(null);
+    }
+
+
+    /**
      * Returns true if this row ends with the Any, All, or None
      * "collection" operator.
      */
@@ -191,6 +252,23 @@ class RowData {
         this.childRows = childRows;
         for (RowData childRow : childRows)
             childRow.setParentRow(this);
+    }
+
+
+    /**
+     * Get the amount a RowString should be indented.
+     * This method will probably be unused once I switch to using
+     * widgets to render a cell.
+     */
+    public String getIndentString() {
+
+        String indentString = "";
+        for (RowData rowData = parentRow; rowData != null;
+             rowData = rowData.parentRow) {
+
+            indentString += "    ";
+        }
+        return(indentString);
     }
 
 
