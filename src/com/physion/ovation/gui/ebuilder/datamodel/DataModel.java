@@ -134,6 +134,16 @@ public class DataModel {
         epochGroupCD.addAttribute(attribute);
     }
 
+
+    public static ArrayList<ClassDescription> getAllClassDescriptions() {
+        return(allClassDescriptions);
+    }
+
+
+    public static ArrayList<ClassDescription> getPossibleCUQs() {
+        return(possibleCUQs);
+    }
+
     
     /**
      * This is a simple test program for this class.

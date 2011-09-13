@@ -317,13 +317,13 @@ public class RowData {
     }
 
 
-    /*
-    public void setAttributePath(ArrayList<String> attributePath) {
-        this.attributePath = attributePath;
-    }
-    */
     public void setAttributePath(ArrayList<Attribute> attributePath) {
         this.attributePath = attributePath;
+    }
+
+
+    public ArrayList<Attribute> getAttributePath() {
+        return(attributePath);
     }
 
 
