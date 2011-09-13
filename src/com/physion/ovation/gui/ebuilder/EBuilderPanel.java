@@ -4,14 +4,14 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JPanel;
-import javax.swing.JList;
+import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 //import javax.swing.DefaultListModel;
 import java.util.Iterator;
 import java.util.Arrays;
 
-import com.physion.ovation.gui.ebuilder.datamodel.EBuilderListModel;
+import com.physion.ovation.gui.ebuilder.datamodel.EBuilderTableModel;
 
 public class EBuilderPanel
     extends JPanel {
@@ -23,9 +23,17 @@ public class EBuilderPanel
 
         //final EBuilderTree tree = new EBuilderTree();
 
-        EBuilderListModel listModel = new EBuilderListModel();
+        EBuilderTableModel tableModel = new EBuilderTableModel();
 
-        final JList list = new JList(listModel);
+        //final JList list = new JList(listModel);
+        //final JTable table = new JTable(tableModel);
+        final ExpressionTable table = new ExpressionTable(tableModel);
+
+        /*
+        ExpressionCellRenderer expressionCellRenderer =
+            new ExpressionCellRenderer();
+        list.setCellRenderer(expressionCellRenderer);
+        */
 
         /**
          * Create some filler strings for testing DnD.
@@ -50,7 +58,7 @@ public class EBuilderPanel
             defModel.addElement (it.next());
 */
 
-        JScrollPane scrollPane = new JScrollPane(list,
+        JScrollPane scrollPane = new JScrollPane(table,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 

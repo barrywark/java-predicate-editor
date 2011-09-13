@@ -174,6 +174,27 @@ class RowData {
 
 
     /**
+     * Remove the specified child RowData object from this RowData object's
+     * list of direct children.
+     */
+    public void removeChild(RowData rowData) {
+        childRows.remove(rowData);
+    }
+
+
+    /**
+     * Remove this RowData object from its parent's list of direct children.
+     */
+    public void removeFromParent() {
+
+        System.out.println("Removing rowData: "+this.getRowString());
+        System.out.println("from parent: "+getParentRow().getRowString());
+
+        getParentRow().getChildRows().remove(this);
+    }
+
+
+    /**
      * Returns true if this row ends with the Any, All, or None
      * "collection" operator.
      */
@@ -215,6 +236,15 @@ class RowData {
     */
     public void setParentRow(RowData parentRow) {
         this.parentRow = parentRow;
+    }
+
+    private RowData getParentRow() {
+        return(parentRow);
+    }
+
+
+    private ArrayList<RowData> getChildRows() {
+        return(childRows);
     }
 
     public void setCollectionOperator(CollectionOperator collectionOperator) {
@@ -263,8 +293,8 @@ class RowData {
     public String getIndentString() {
 
         String indentString = "";
-        for (RowData rowData = parentRow; rowData != null;
-             rowData = rowData.parentRow) {
+        for (RowData rowData = this.getParentRow(); rowData != null;
+             rowData = rowData.getParentRow()) {
 
             indentString += "    ";
         }
