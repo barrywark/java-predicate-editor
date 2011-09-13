@@ -64,11 +64,16 @@ public class ClassDescription {
 
 
     public String toString() {
-        return(toString(""));
+        return(name);
     }
 
 
-    public String toString(String indent) {
+    public String toStringDebug() {
+        return(toStringDebug(""));
+    }
+
+
+    public String toStringDebug(String indent) {
 
         String string;
 
@@ -81,7 +86,7 @@ public class ClassDescription {
 
         if (parentClass != null) {
             string += "\n"+indent+" Parent Class:\n";
-            string += parentClass.toString(indent+"  ");
+            string += parentClass.toStringDebug(indent+"  ");
         }
 
         return(string);
@@ -146,8 +151,8 @@ public class ClassDescription {
          * Print out values.
          */
         //System.out.println("\nentityBaseCD.toString() below:\n"+entityBaseCD);
-        System.out.println("\nuserCD.toString() below:\n"+userCD);
-        System.out.println("\nkeywordTagCD.toString() below:\n"+keywordTagCD);
+        System.out.println("\nuserCD.toString() below:\n"+userCD.toStringDebug());
+        System.out.println("\nkeywordTagCD.toString() below:\n"+keywordTagCD.toStringDebug());
         //System.out.println("\ntaggableEntityBaseCD.toString() below:\n"+
         //                   taggableEntityBaseCD);
         System.out.println("ClassDescription test is ending.");

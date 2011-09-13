@@ -2,6 +2,7 @@ package com.physion.ovation.gui.ebuilder.datamodel;
 
 
 /**
+ * TODO:  Many member data and values in here should be statics.
  */
 public enum CollectionOperator {
 
@@ -9,6 +10,23 @@ public enum CollectionOperator {
      * 
      */
     COUNT, ANY, ALL, NONE;
+
+
+    private static CollectionOperator[] compoundCollectionOperators;
+
+
+    static {
+
+        compoundCollectionOperators = new CollectionOperator[
+            CollectionOperator.values().length-1];
+
+        int index = 0;
+        for (CollectionOperator collectionOperator :
+             CollectionOperator.values())
+            if (collectionOperator != CollectionOperator.COUNT)
+                compoundCollectionOperators[index++] = collectionOperator;
+
+    }
 
 
     /**
@@ -34,6 +52,18 @@ public enum CollectionOperator {
         }
 
         return("ERROR: CollectionOperator.toString() = "+super.toString());
+    }
+
+
+    /**
+     * This returns an array of all CollectionOperators that are
+     * "Compound" operators.  I.e. all operators except for the
+     * COUNT operator.
+     *
+     * The array returned can be used to create a ComboBoxModel.
+     */
+    public static CollectionOperator[] getCompoundCollectionOperators() {
+        return(compoundCollectionOperators);
     }
 
 
