@@ -47,6 +47,20 @@ class ExpressionTable
     }
 
 
+    @Override
+    public int getRowHeight(int row) {
+        return(getRowHeight());
+    }
+
+
+    @Override
+    public int getRowHeight() {
+
+        Component component = getCellRenderer(0,0).getTableCellRendererComponent(this, null, true, true, 0, 0);
+        return(component.getPreferredSize().height);
+    }
+
+
     /*
     @Override
     public boolean isCellEditable(int row, int column) {
@@ -66,6 +80,28 @@ class ExpressionTable
         EBuilderTableModel model = (EBuilderTableModel)getModel();
         System.out.println("Calling model.deleteRow("+row+")");
         model.deleteRow(row);
+        tableChanged(null);  // Should this be in the table or the model?
+    }
+
+
+    public void createCompoundRow() {
+
+        int row = getSelectedRow();
+
+        EBuilderTableModel model = (EBuilderTableModel)getModel();
+        System.out.println("Calling model.createCompoundRow("+row+")");
+        model.createCompoundRow(row);
+        tableChanged(null);  // Should this be in the table or the model?
+    }
+
+
+    public void createAttributeRow() {
+
+        int row = getSelectedRow();
+
+        EBuilderTableModel model = (EBuilderTableModel)getModel();
+        System.out.println("Calling model.createAttributeRow("+row+")");
+        model.createAttributeRow(row);
         tableChanged(null);  // Should this be in the table or the model?
     }
 }

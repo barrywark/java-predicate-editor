@@ -11,11 +11,14 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 /**
  * 
  */
-class RowData {
+public class RowData {
 
     /**
      * This is the "topmost", or "root" class that is the ancestor
-     * of all other rows.
+     * of ALL other rows.
+     *
+     * Please note this is a static member data that applies to ALL
+     * the RowData objects that exist.
      */
     private static ClassDescription classUnderQualification;
 
@@ -195,6 +198,63 @@ class RowData {
 
 
     /**
+     * Create a child row for this row that is of type Compound Row.
+     */
+    public void createCompoundRow() {
+
+        System.out.println("createCompoundRow rowData: "+this.getRowString());
+
+        Attribute attribute = getChildmostAttribute();
+        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
+        attributePath.add(attribute);
+        RowData compoundRow = new RowData();
+        compoundRow.setAttributePath(attributePath);
+        compoundRow.setCollectionOperator(CollectionOperator.ANY);
+
+        addChildRow(compoundRow);
+    }
+
+
+    /**
+     * Create a child row for this row that is of type Attribute Row.
+     */
+    public void createAttributeRow() {
+
+        System.out.println("createAttributeRow rowData: "+this.getRowString());
+
+        Attribute attribute = getChildmostAttribute();
+        ClassDescription classDescription = attribute.getClassDescription();
+        if (classDescription == null) {
+            System.out.println("ERROR: In createAttributeRow "+
+                "classDescription == null.  This should never happen.");
+            return;
+        }
+
+        ArrayList<Attribute> attributes = classDescription.getAllAttributes();
+        if (attributes.isEmpty()) {
+            System.out.println("ERROR: In createAttributeRow "+
+                "attributes.isEmpty == true.  This should never happen.");
+            return;
+        }
+
+        /**
+         * For initial development, just get the first attribute.
+         */
+        attribute = attributes.get(0);
+        //attribute = attributes.get(1);
+        //attribute = attributes.get(2);
+
+        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
+        attributePath.add(attribute);
+
+        RowData attributeRow = new RowData();
+        attributeRow.setAttributePath(attributePath);
+
+        addChildRow(attributeRow);
+    }
+
+
+    /**
      * Returns true if this row ends with the Any, All, or None
      * "collection" operator.
      */
@@ -282,6 +342,13 @@ class RowData {
         this.childRows = childRows;
         for (RowData childRow : childRows)
             childRow.setParentRow(this);
+    }
+
+
+    public void addChildRow(RowData childRow) {
+
+        childRow.setParentRow(this);
+        childRows.add(childRow);
     }
 
 
@@ -394,8 +461,16 @@ class RowData {
      */
     public Attribute getChildmostAttribute() {
 
+        //if (getParentRow() == null) {
+            /**
+             * This is the root row, which does not have an attribute path,
+             * so use the classUnderQualification value.
+             */
+        //    return(classUnderQualification);
+        //}
+        //else if (attributePath.isEmpty()) {
         if (attributePath.isEmpty()) {
-            //System.out.println("attributePath.isEmpty()");
+            System.out.println("attributePath.isEmpty()");
             return(null);
         }
         else
@@ -601,6 +676,17 @@ class RowData {
         childRows.add(rowData3);
 
         rootRow.setChildRows(childRows);
+
+        /**
+         * The only reason we create an attributePath for the
+         * root row is so the getChildmostAttribute() method
+         * can be used to get the class of the root row.
+         */
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("epoch", Type.REFERENCE,
+                                  epochCD, Cardinality.TO_ONE);
+        attributePath.add(attribute);
+        rootRow.setAttributePath(attributePath);
 
         return(rootRow);
     }

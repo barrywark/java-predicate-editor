@@ -61,7 +61,8 @@ public class EBuilderTableModel
             return(string);
         }
 
-        return(rowData.getIndentString()+rowData.getRowString());
+        //return(rowData.getIndentString()+rowData.getRowString());
+        return(rowData);
     }
 
 
@@ -88,5 +89,21 @@ public class EBuilderTableModel
         //fireTableDataChanged();  // Data AND structure changed, so no good.
 
         //fireTableChanged(null);  // Should this be in the model or the table?
+    }
+
+
+    public void createCompoundRow(int index) {
+
+        RowData rowData = rootRow.getDescendentAt(index);
+        System.out.println("Calling rowData.createCompoundRow(): "+rowData);
+        rowData.createCompoundRow();
+    }
+    
+
+    public void createAttributeRow(int index) {
+
+        RowData rowData = rootRow.getDescendentAt(index);
+        System.out.println("Calling rowData.createAttributeRow(): "+rowData);
+        rowData.createAttributeRow();
     }
 }

@@ -52,6 +52,16 @@ public class Attribute {
     }
 
 
+    /*
+    public Attribute(Attribute attribute) {
+        this.name = attribute.name;
+        this.type = attribute.type;
+        this.classDescription = attribute.classDescription;
+        this.cardinality = attribute.cardinality;
+    }
+    */
+
+
     public String getName() {
         return(name);
     }

@@ -16,7 +16,8 @@ import javax.swing.JTable;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 
-//import com.physion.ovation.gui.ebuilder.datamodel.RowData;
+import com.physion.ovation.gui.ebuilder.datamodel.RowData;
+import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
 
 class ExpressionCellRenderer
     extends JPanel
@@ -27,6 +28,8 @@ class ExpressionCellRenderer
 
     private JLabel label;
     private JButton deleteButton;
+    private JButton createCompoundRowButton;
+    private JButton createAttributeRowButton;
 
     private ExpressionTable table;
 
@@ -48,16 +51,28 @@ class ExpressionCellRenderer
         deleteButton = new JButton("-");
         deleteButton.addActionListener(this);
 
+        createCompoundRowButton = new JButton("++");
+        createCompoundRowButton.addActionListener(this);
+
+        createAttributeRowButton = new JButton("+");
+        createAttributeRowButton.addActionListener(this);
+
         gc = new GridBagConstraints();
         gc.gridx = 0;
-        gc.gridy = 0;
         gc.weightx = 1;
         gc.anchor = GridBagConstraints.WEST;
         add(label, gc);
         
         gc = new GridBagConstraints();
         gc.gridx = 1;
-        gc.gridy = 0;
+        add(createAttributeRowButton, gc);
+
+        gc = new GridBagConstraints();
+        gc.gridx = 2;
+        add(createCompoundRowButton, gc);
+
+        gc = new GridBagConstraints();
+        gc.gridx = 3;
         add(deleteButton, gc);
     }
 
@@ -72,9 +87,19 @@ class ExpressionCellRenderer
                                                    int row,
                                                    int column) {
 
+        RowData rowData = (RowData)value;
+        String stringValue;
+
+        if (rowData != null) {
+            stringValue = rowData.getIndentString()+rowData.getRowString();
+        }
+        else {
+            stringValue = "";
+        }
+
         this.table = (ExpressionTable)table;
 
-        label.setText(value.toString());
+        label.setText(stringValue);
 
         Color background;
         Color foreground;
@@ -121,12 +146,30 @@ class ExpressionCellRenderer
          * The very first row cannot be deleted.
          */
         if (row == 0) {
-            deleteButton.setVisible(false);
+            //deleteButton.setVisible(false);
+            //deleteButton.setOpaque(false);
+            //deleteButton.setBackground(deleteButton.getParent().getBackground());
+            //deleteButton.setForeground(deleteButton.getParent().getBackground());
             deleteButton.setEnabled(false);
         }
         else {
-            deleteButton.setVisible(true);
+            //deleteButton.setVisible(true);
             deleteButton.setEnabled(true);
+        }
+
+        /**
+         * See if this row can have child rows.
+         */
+        Attribute attribute = null;
+        if (rowData != null)
+            attribute = rowData.getChildmostAttribute();
+        if ((attribute != null) && (attribute.getClassDescription() != null)) {
+            createCompoundRowButton.setEnabled(true);
+            createAttributeRowButton.setEnabled(true);
+        }
+        else {
+            createCompoundRowButton.setEnabled(false);
+            createAttributeRowButton.setEnabled(false);
         }
 
         return this;
@@ -180,11 +223,15 @@ class ExpressionCellRenderer
     public void actionPerformed(ActionEvent e) {
 
         //System.out.println("Value being edited = "+valueBeingEdited);
-        if (e.getSource() == deleteButton) {
+        if (e.getSource() == createCompoundRowButton) {
+            table.createCompoundRow();
+        }
+        else if (e.getSource() == createAttributeRowButton) {
+            table.createAttributeRow();
+        }
+        else if (e.getSource() == deleteButton) {
             System.out.println("deleteButton pressed");
-            
             table.deleteSelectedRow();
-
             //table.tableChanged(null);
         }
     }
