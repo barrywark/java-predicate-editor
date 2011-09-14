@@ -63,6 +63,44 @@ public class Attribute {
     */
 
 
+    /**
+     * TODO:  Finish this.
+     */
+    @Override
+    public boolean equals(Object rhs) {
+
+        if (rhs == null)
+            return(false);
+
+        if (!(rhs instanceof Attribute))
+            return(false);
+
+        Attribute other = (Attribute)rhs;
+
+        if (this == rhs)
+            return(true);
+
+        if (this.name != other.name)
+            return(false);
+
+        if (this.type != other.type)
+            return(false);
+
+        if (this.cardinality != other.cardinality)
+            return(false);
+
+        if ((this.classDescription == null) &&
+            (other.classDescription != null))
+            return(false);
+
+        if ((this.classDescription != null) &&
+            (!this.classDescription.equals(other.classDescription)))
+            return(false);
+
+        return(true);
+    }
+
+
     public String getName() {
         return(name);
     }
@@ -74,6 +112,11 @@ public class Attribute {
 
 
     public String toString() {
+        return(name);
+    }
+
+
+    public String toStringDebug() {
 
         String string;
 

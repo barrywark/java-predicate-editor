@@ -117,6 +117,10 @@ public class DataModel {
                                   epochCD, Cardinality.TO_ONE);
         epochCD.addAttribute(attribute);
 
+        attribute = new Attribute("epochGroup", Type.REFERENCE,
+                                  epochGroupCD, Cardinality.TO_ONE);
+        epochCD.addAttribute(attribute);
+
         /**
          * Initialize values of the Source class.
          */

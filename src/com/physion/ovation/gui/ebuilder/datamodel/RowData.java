@@ -76,7 +76,6 @@ public class RowData {
      * TODO:  Do we want a list of Attribute objects or just Strings.
      */
     private ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
-    //private ArrayList<String> attributePath = new ArrayList<String>();
 
     /**
      * The operator the user selected for this attribute.
@@ -648,7 +647,7 @@ public class RowData {
 
         Attribute attribute;
         ArrayList<Attribute> attributePath;
-/*
+///*
         RowData rowData = new RowData();
 
 
@@ -669,12 +668,13 @@ public class RowData {
         ArrayList<RowData> childRows = new ArrayList<RowData>();
 
         childRows.add(rowData);
+        rootRow.setChildRows(childRows);
 
         /**
          * Create another child row.
          */
 
-/*
+///*
         rowData = new RowData();
         //rowData.setParentClass(epochCD);
         rowData.setCollectionOperator(CollectionOperator.ALL);
@@ -708,7 +708,7 @@ public class RowData {
         /**
          * Create another child row.
          */
-/*
+///*
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
@@ -736,7 +736,7 @@ public class RowData {
         childRows.add(rowData3);
 
         rootRow.setChildRows(childRows);
-*/
+//*/
         /**
          * The only reason we create an attributePath for the
          * root row is so the getChildmostAttribute() method

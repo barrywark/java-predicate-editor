@@ -106,7 +106,8 @@ class ExpressionCellRenderer
 
         int gridx = 0;
 
-        if (row == 0) {
+        if ((row == 0) || rowData.isCompoundRow()) {
+        //if (rowData.isCompoundRow()) {
             
             /**
              * The first/topmost row always has the
@@ -133,10 +134,17 @@ class ExpressionCellRenderer
         else {
 
             /**
-             * We are not the first row, so the widgets we contain
-             * is based on the values in this row's RowData object.
+             * We are an Attribute Row, so the widgets we contain
+             * are based on the values in this row's RowData object.
              */
 
+            for (Attribute attribute : rowData.getAttributePath()) {
+
+                gc = new GridBagConstraints();
+                gc.gridx = gridx;
+                //gc.anchor = GridBagConstraints.WEST;
+                add(comboBoxes[gridx++], gc);
+            }
 
             /**
              * Use a JLabel until such time as I have implemented
@@ -336,11 +344,57 @@ class ExpressionCellRenderer
             comboBoxes[1].setSelectedItem(RowData.getRootRow().
                 getCollectionOperator());
         }
+        else {
 
-        /**
-         * The leftmost comboBox shows the list of attributes of
-         * this row's "parent" class.
-         */
+            if (rowData.isCompoundRow()) {
+            }
+            else {
+                /**
+                 * This is an Attribute Row.
+                 * The leftmost comboBox shows the list of attributes of
+                 * this row's "parent" class.
+                 */
+
+                ClassDescription parentClass = rowData.getParentClass();
+                ArrayList<Attribute> attributes =
+                    parentClass.getAllAttributes();
+
+                Attribute[] values = attributes.toArray(new Attribute[0]);
+                System.out.println("values[3] = "+values[3]);
+                System.out.println("values[3].hashCode() = "+
+                                    values[3].hashCode());
+
+                DefaultComboBoxModel model = new DefaultComboBoxModel(values);
+                comboBoxes[0].setModel(model);
+
+                /**
+                 * Now set the value of the comboBox to reflect the value
+                 * of this row's RowData object.
+                 */
+
+                attributes = rowData.getAttributePath();
+                System.out.println("attributes.size() = "+attributes.size());
+                if (attributes.size() > 0) {
+
+                    /*
+                    classDescription = attributes.get(0).getClassDescription();
+                    System.out.println("classDescription = "+classDescription);
+                    System.out.println("classDescription.hashCode() = "+
+                        classDescription.hashCode());
+
+                    if (classDescription != null)
+                        comboBoxes[0].setSelectedItem(classDescription);
+                    else
+                        comboBoxes[0].setSelectedIndex(0);
+                    */
+                    System.out.println("attributes.get(0) = "+
+                                       attributes.get(0));
+                    System.out.println("attributes.get(0).hashCode() = "+
+                                       attributes.get(0).hashCode());
+                    comboBoxes[0].setSelectedItem(attributes.get(0));
+                }
+            }
+        }
 
         /*
         ClassDescription classDescription = rowData.getParentClass();
