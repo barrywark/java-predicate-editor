@@ -3,6 +3,7 @@ package com.physion.ovation.gui.ebuilder.datatypes;
 
 /**
  * 
+ * TODO: Write equals() method.
  */
 public class Attribute {
 

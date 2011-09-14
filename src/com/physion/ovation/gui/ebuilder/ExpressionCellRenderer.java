@@ -8,6 +8,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.event.CellEditorListener;
@@ -27,7 +29,8 @@ import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 
 class ExpressionCellRenderer
     extends JPanel
-    implements TableCellRenderer, TableCellEditor, ActionListener {
+    implements TableCellRenderer, TableCellEditor,
+    ActionListener, ItemListener {
 
     private static final int MAX_NUM_COMBOBOXES = 20;
 
@@ -70,8 +73,11 @@ class ExpressionCellRenderer
         createAttributeRowButton.addActionListener(this);
 
         for (int count = 0; count < MAX_NUM_COMBOBOXES; count++) {
-            comboBoxes[count] = new JComboBox();
-            comboBoxes[count].setEditable(false);
+            JComboBox comboBox = new JComboBox();
+            comboBoxes[count] = comboBox;
+            comboBox.setEditable(false);
+            comboBox.addItemListener(this);
+            //comboBox.addActionListener(this);
         }
     }
 
@@ -103,9 +109,9 @@ class ExpressionCellRenderer
         if (row == 0) {
             
             /**
-             * The first/topmost row only, (and always), has the
+             * The first/topmost row always has the
              * Class Under Qualification comboBox and the
-             * Collection Operator combobox.
+             * Collection Operator comboBox, (and only those comboBoxes).
              */
 
             gc = new GridBagConstraints();
@@ -125,6 +131,12 @@ class ExpressionCellRenderer
             add(new JLabel(" of the following"), gc);
         }
         else {
+
+            /**
+             * We are not the first row, so the widgets we contain
+             * is based on the values in this row's RowData object.
+             */
+
 
             /**
              * Use a JLabel until such time as I have implemented
@@ -250,11 +262,21 @@ class ExpressionCellRenderer
          * See if this row can have child rows.
          * Compound Rows can have child rows.
          * Attribute Rows cannot have child rows.
+         * The "root" row is a special case that is a Compound Row.
          */
+
         Attribute attribute = null;
-        if (rowData != null)
+        if (rowData != null) 
             attribute = rowData.getChildmostAttribute();
-        if ((attribute != null) && (attribute.getClassDescription() != null)) {
+
+        ClassDescription classDescription = null;
+        if (attribute != null)
+            classDescription = attribute.getClassDescription();
+
+        if (rowData == RowData.getRootRow())
+            classDescription = RowData.getClassUnderQualification();
+
+        if (classDescription != null) {
             createCompoundRowButton.setEnabled(true);
             createAttributeRowButton.setEnabled(true);
         }
@@ -283,28 +305,36 @@ class ExpressionCellRenderer
                 DataModel.getInstance().getPossibleCUQs().
                 toArray(new ClassDescription[0]);
 
-            /*
-            ArrayList<String> values = new ArrayList<String>();
-            for (ClassDescription classDescription :
-                 DataModel.getInstance().getPossibleCUQs()) {
-                values.add(classDescription.getName());
-            }
-            DefaultComboBoxModel model = new DefaultComboBoxModel(values.toArray(new String[0]));
-            */
             DefaultComboBoxModel model = new DefaultComboBoxModel(values);
             comboBoxes[0].setModel(model);
 
-            /*
-            for (CollectionOperator operator : CollectionOperator.values()) {
-                values
-            }
-            DefaultComboBoxModel model = new DefaultComboBoxModel(values);
-            comboBoxes[0].setModel(model);
-            */
-            //model = new DefaultComboBoxModel(CollectionOperator.values());
+            /**
+             * We have set the data model for the Class Under Qualification
+             * comboBox, i.e. what choices in contains,
+             * now set the currently selected value to be the
+             * value in this row's RowData object.
+             */
+
+            System.out.println("RowData.getClassUnderQualification() = "+
+                RowData.getClassUnderQualification());
+            System.out.println("RowData.getClassUnderQualification() = "+
+                RowData.getClassUnderQualification().hashCode());
+            comboBoxes[0].setSelectedItem(
+                RowData.getClassUnderQualification());
+
+            /**
+             * Now do the same for the Collection Operator combobox.
+             */
             model = new DefaultComboBoxModel(CollectionOperator.
                                              getCompoundCollectionOperators());
             comboBoxes[1].setModel(model);
+
+            System.out.println("RowData.getClassUnderQualification() = "+
+                RowData.getClassUnderQualification());
+            System.out.println("RowData.getClassUnderQualification() = "+
+                RowData.getClassUnderQualification().hashCode());
+            comboBoxes[1].setSelectedItem(RowData.getRootRow().
+                getCollectionOperator());
         }
 
         /**
@@ -368,10 +398,11 @@ class ExpressionCellRenderer
         return(true);
     }
 
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        //System.out.println("Value being edited = "+valueBeingEdited);
+        System.out.println("Enter actionPerformed = "+e);
         if (e.getSource() == createCompoundRowButton) {
             table.createCompoundRow();
         }
@@ -382,6 +413,105 @@ class ExpressionCellRenderer
             System.out.println("deleteButton pressed");
             table.deleteSelectedRow();
             //table.tableChanged(null);
+        }
+        else if (e.getSource() instanceof JComboBox) {
+            comboBoxChanged((JComboBox)e.getSource());
+        }
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        System.out.println("Enter itemStateChanged = "+e);
+        comboBoxChanged((JComboBox)e.getSource());
+    }
+
+
+    private void comboBoxChanged(JComboBox comboBox) {
+
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow < 0) {
+            return;
+        }
+
+        /**
+         * Figure out which comboBox was changed.
+         */
+        int comboBoxIndex = -1;
+        for (int index = 0; index < comboBoxes.length; index++) {
+            //if (e.getSource() == comboBoxes[index]) {
+            if (comboBox == comboBoxes[index]) {
+                comboBoxIndex = index;
+            }
+        }
+
+        if (comboBoxIndex < 0) {
+            System.out.println("ERROR:  In comboBoxChanged.  "+
+                "comboBoxIndex = "+comboBoxIndex+
+                ".  This should never happen.");
+            return;
+        }
+
+        if (selectedRow < 0) {
+            System.out.println("ERROR:  In comboBoxChanged.  "+
+                "selectedRow = "+selectedRow+
+                ".  This should never happen.");
+            return;
+        }
+
+        /**
+         * At this point we know which row is being edited by the user,
+         * and we know which comboBox within that row is being changed.
+         *
+         * So, now change the appropriate value in this row's RowData
+         * object.
+         */
+
+        System.out.println("comboBoxIndex = "+comboBoxIndex);
+        System.out.println("selectedRow = "+selectedRow);
+
+        if (selectedRow == 0) {
+            /**
+             * The first/topmost row is being edited.  So we need to
+             * adjust the value of the "root" row.  Also known as the
+             * Class Under Qualification.
+             */
+            RowData rowData = RowData.getRootRow();
+
+            if (comboBoxIndex == 0) {
+                /**
+                 * User is changing the value of the Class Under Qualification.
+                 */
+                ClassDescription classDescription =
+                    (ClassDescription)comboBox.getSelectedItem();
+                System.out.println("selected classDescription = "+
+                    classDescription);
+                System.out.println("selected classDescription = "+
+                    classDescription.hashCode());
+                if (!rowData.getClassUnderQualification().equals(
+                    classDescription)) {
+                    rowData.setClassUnderQualification(classDescription);
+                    table.tableChanged(null);
+                }
+            }
+            else if (comboBoxIndex == 1) {
+                /**
+                 * User is changing the value of the Collection Operator.
+                 */
+                CollectionOperator collectionOperator =
+                    (CollectionOperator)comboBox.getSelectedItem();
+                System.out.println("selected collectionOperator = "+
+                    collectionOperator);
+                System.out.println("selected collectionOperator = "+
+                    collectionOperator.hashCode());
+                if (!rowData.getCollectionOperator().equals(
+                    collectionOperator)) {
+                    rowData.setCollectionOperator(collectionOperator);
+                    table.tableChanged(null);
+                }
+            }
+        }
+        else {
+            System.out.println("TODO: write code to handle this comboBox.");
         }
     }
 

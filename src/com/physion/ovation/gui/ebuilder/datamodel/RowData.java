@@ -14,6 +14,13 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 public class RowData {
 
     /**
+     * This is the "root" row for the whole tree.
+     *
+     * TODO: I'm not sure if I want to keep this value here.
+     */
+    private static RowData rootRow;
+
+    /**
      * This is the "topmost", or "root" class that is the ancestor
      * of ALL other rows.
      *
@@ -223,7 +230,11 @@ public class RowData {
         System.out.println("createAttributeRow rowData: "+this.getRowString());
 
         Attribute attribute = getChildmostAttribute();
-        ClassDescription classDescription = attribute.getClassDescription();
+        ClassDescription classDescription;
+        if (this == getRootRow())
+            classDescription = getClassUnderQualification();
+        else
+            classDescription = attribute.getClassDescription();
         if (classDescription == null) {
             System.out.println("ERROR: In createAttributeRow "+
                 "classDescription == null.  This should never happen.");
@@ -271,6 +282,10 @@ public class RowData {
     }
 
 
+    /**
+     * TODO:  Decide whether I should make this a static method
+     * that operates on the "rootRow" member data.
+     */
     public /*static*/ void setClassUnderQualification(
         ClassDescription classUnderQualification) {
 
@@ -286,6 +301,21 @@ public class RowData {
             System.out.println("INFO:  Clearing all childRows.");
             childRows.clear();
         }
+    }
+
+
+    public static ClassDescription getClassUnderQualification() {
+        return(classUnderQualification);
+    }
+
+
+    public static RowData getRootRow() {
+        return(rootRow);
+    }
+
+
+    public static void setRootRow(RowData rowData) {
+        rootRow = rowData;
     }
 
 
@@ -309,6 +339,11 @@ public class RowData {
 
     public void setCollectionOperator(CollectionOperator collectionOperator) {
         this.collectionOperator = collectionOperator;
+    }
+
+
+    public CollectionOperator getCollectionOperator() {
+        return(collectionOperator);
     }
 
 
@@ -461,15 +496,15 @@ public class RowData {
      */
     public Attribute getChildmostAttribute() {
 
-        //if (getParentRow() == null) {
+        if (getParentRow() == null) {
             /**
-             * This is the root row, which does not have an attribute path,
-             * so use the classUnderQualification value.
+             * This is the root row, which does not have an attribute path.
              */
-        //    return(classUnderQualification);
-        //}
-        //else if (attributePath.isEmpty()) {
-        if (attributePath.isEmpty()) {
+            //return(classUnderQualification);
+            System.out.println("getParentRow() == null");
+            return(null);
+        }
+        else if (attributePath.isEmpty()) {
             System.out.println("attributePath.isEmpty()");
             return(null);
         }
@@ -516,6 +551,7 @@ public class RowData {
      */
     public static RowData createTestRowData() {
 
+        /*
         ClassDescription entityBaseCD =
             new ClassDescription("EntityBase", null);
         ClassDescription taggableEntityBaseCD =
@@ -532,10 +568,28 @@ public class RowData {
             new ClassDescription("EpochGroup", timelineElementCD);
         ClassDescription sourceCD =
             new ClassDescription("Source", taggableEntityBaseCD);
+        */
+        ClassDescription entityBaseCD =
+            DataModel.getClassDescription("EntityBase");
+        ClassDescription taggableEntityBaseCD =
+            DataModel.getClassDescription("TaggableEntityBase");
+        ClassDescription userCD =
+            DataModel.getClassDescription("User");
+        ClassDescription keywordTagCD =
+            DataModel.getClassDescription("KeywordTag");
+        ClassDescription timelineElementCD =
+            DataModel.getClassDescription("TimelineElement");
+        ClassDescription epochCD =
+            DataModel.getClassDescription("Epoch");
+        ClassDescription epochGroupCD =
+            DataModel.getClassDescription("EpochGroup");
+        ClassDescription sourceCD =
+            DataModel.getClassDescription("Source");
 
         /**
          * Initialize values of the EntityBase class.
          */
+/*
         Attribute attribute = new Attribute("owner", Type.REFERENCE,
                                             userCD, Cardinality.TO_ONE);
         entityBaseCD.addAttribute(attribute);
@@ -545,10 +599,11 @@ public class RowData {
 
         attribute = new Attribute("incomplete", Type.BOOLEAN);
         entityBaseCD.addAttribute(attribute);
-
+*/
         /**
          * Initialize values of the Epoch class.
          */
+/*
         attribute = new Attribute("protocolID", Type.UTF_8_STRING);
         epochCD.addAttribute(attribute);
 
@@ -558,43 +613,46 @@ public class RowData {
         attribute = new Attribute("nextEpoch", Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         epochCD.addAttribute(attribute);
-
+*/
         /**
          * Initialize values of the Source class.
          */
+/*
         attribute = new Attribute("label", Type.UTF_8_STRING);
         sourceCD.addAttribute(attribute);
 
         attribute = new Attribute("parent", Type.REFERENCE,
                                   sourceCD, Cardinality.TO_ONE);
         sourceCD.addAttribute(attribute);
-
+*/
         /**
          * Initialize values of the EpochGroup class.
          */
+/*
         attribute = new Attribute("label", Type.UTF_8_STRING);
         epochGroupCD.addAttribute(attribute);
 
         attribute = new Attribute("source", Type.REFERENCE,
                                   sourceCD, Cardinality.TO_ONE);
         epochGroupCD.addAttribute(attribute);
+*/
 
         /**
          * Now create some RowData values.
          */
         RowData rootRow = new RowData();
-        //rootRow.setParentClass(epochCD);
+        RowData.setRootRow(rootRow);
         rootRow.setClassUnderQualification(epochCD);
-        //RowData.setClassUnderQualification(epochCD);
 
         rootRow.setCollectionOperator(CollectionOperator.ANY);
 
+        Attribute attribute;
+        ArrayList<Attribute> attributePath;
+/*
         RowData rowData = new RowData();
-        //rowData.setParentClass(epochCD);
-        //rowData.setParentRow(rootRow);
 
-        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
-        //ArrayList<String> attributePath = new ArrayList<String>();
+
+        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
         attributePath.add(attribute);
@@ -616,6 +674,7 @@ public class RowData {
          * Create another child row.
          */
 
+/*
         rowData = new RowData();
         //rowData.setParentClass(epochCD);
         rowData.setCollectionOperator(CollectionOperator.ALL);
@@ -649,6 +708,7 @@ public class RowData {
         /**
          * Create another child row.
          */
+/*
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
@@ -676,17 +736,19 @@ public class RowData {
         childRows.add(rowData3);
 
         rootRow.setChildRows(childRows);
-
+*/
         /**
          * The only reason we create an attributePath for the
          * root row is so the getChildmostAttribute() method
          * can be used to get the class of the root row.
          */
+        /*
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epoch", Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         attributePath.add(attribute);
         rootRow.setAttributePath(attributePath);
+        */
 
         return(rootRow);
     }

@@ -9,7 +9,10 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 
 
 /**
- * 
+ * This class manages all the data types/classes that are part
+ * of the system.
+ *
+ * TODO:  Have this class read values from a configuration file.
  */
 public class DataModel {
 
@@ -86,6 +89,7 @@ public class DataModel {
         ClassDescription epochGroupCD =
             new ClassDescription("EpochGroup", timelineElementCD);
         allClassDescriptions.add(epochGroupCD);
+        possibleCUQs.add(epochGroupCD);
 
         /**
          * Initialize values of the EntityBase class.
@@ -126,12 +130,35 @@ public class DataModel {
         /**
          * Initialize values of the EpochGroup class.
          */
-        attribute = new Attribute("label", Type.UTF_8_STRING);
-        epochGroupCD.addAttribute(attribute);
-
         attribute = new Attribute("source", Type.REFERENCE,
                                   sourceCD, Cardinality.TO_ONE);
         epochGroupCD.addAttribute(attribute);
+
+        attribute = new Attribute("label", Type.UTF_8_STRING);
+        epochGroupCD.addAttribute(attribute);
+    }
+
+
+    /**
+     * Get a ClassDescription object using its name member data.
+     *
+     * @param name - The name of the ClassDescription.  For example,
+     * "Epoch", "Source", "TaggableEntityBase".
+     */
+    public static ClassDescription getClassDescription(String name) {
+
+        /**
+         * Be sure we are initialized.
+         */
+        getInstance();
+
+        for (ClassDescription classDescription : allClassDescriptions)
+            if (classDescription.getName().equals(name))
+                return(classDescription);
+
+        System.out.println("ERROR:  In getClassDescription().  "+
+            "Caller asked for unknown class with name \""+name+"\".");
+        return(null);
     }
 
 

@@ -24,6 +24,44 @@ public class ClassDescription {
     }
 
 
+    @Override
+    public boolean equals(Object rhs) {
+
+        if (rhs == null)
+            return(false);
+
+        if (!(rhs instanceof ClassDescription))
+            return(false);
+
+        ClassDescription other = (ClassDescription)rhs;
+
+        if (this == rhs)
+            return(true);
+
+        if (!this.name.equals(other.name))
+            return(false);
+
+        if ((this.parentClass == null) && (other.parentClass != null))
+            return(false);
+        if ((this.parentClass != null) && (other.parentClass == null))
+            return(false);
+        if ((this.parentClass != null) && (other.parentClass != null))
+            if (!this.parentClass.equals(other.parentClass))
+                return(false);
+
+        if (this.attributes.size() != other.attributes.size())
+            return(false);
+        for (int index = 0; index < this.attributes.size(); index++) {
+            if (!this.attributes.get(index).equals(
+                other.attributes.get(index))) {
+                return(false);
+            }
+        }
+
+        return(true);
+    }
+
+
     public String getName() {
         return(name);
     }
