@@ -7,6 +7,9 @@ package com.physion.ovation.gui.ebuilder.datatypes;
  */
 public class Attribute {
 
+    public static final Attribute SELECT_ATTRIBUTE =
+        new Attribute("Select Attribute", Type.REFERENCE);
+
     /**
      * The name of this attribute.  E.g. "owner", "uuid", "keywords".
      */
@@ -106,8 +109,18 @@ public class Attribute {
     }
 
 
+    public Type getType() {
+        return(type);
+    }
+
+
     public ClassDescription getClassDescription() {
         return(classDescription);
+    }
+
+
+    public boolean isPrimitive() {
+        return(type.isPrimitive());
     }
 
 

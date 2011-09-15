@@ -138,7 +138,7 @@ public class RowData {
 
     /**
      * This returns the RowData object that is at the specified "index".
-     * This method is inteded to be used to get the RowData object at
+     * This method is intended to be used to get the RowData object at
      * the specified index as far as a List GUI widget is concerned.
      * This RowData object is at index 0.  Its first child is at index 1.
      * If the first child has a child, then that child is at index 2.
@@ -159,7 +159,8 @@ public class RowData {
      *               RowData 8
      *          RowData 9
      */
-    public RowData getDescendentAt(int index) {
+    //public RowData getDescendentAt(int index) {
+    public RowData getChild(int index) {
 
         if (index == 0)
             return(this);
@@ -168,7 +169,8 @@ public class RowData {
         for (RowData childRow : childRows) {
 
             index--;
-            RowData rd = childRow.getDescendentAt(index);
+            //RowData rd = childRow.getDescendentAt(index);
+            RowData rd = childRow.getChild(index);
             if (rd != null)
                 return(rd);
 
@@ -270,9 +272,11 @@ public class RowData {
      */
     public boolean isCompoundRow() {
 
+        /*
         if (childRows.isEmpty())
             System.err.println(
                 "WARNING: Compound row with no child rows defined.");
+        */
 
         if (collectionOperator == null)
             return(false);
@@ -500,7 +504,7 @@ public class RowData {
              * This is the root row, which does not have an attribute path.
              */
             //return(classUnderQualification);
-            System.out.println("getParentRow() == null");
+            //System.out.println("getParentRow() == null");
             return(null);
         }
         else if (attributePath.isEmpty()) {
@@ -674,7 +678,7 @@ public class RowData {
          * Create another child row.
          */
 
-///*
+/*
         rowData = new RowData();
         //rowData.setParentClass(epochCD);
         rowData.setCollectionOperator(CollectionOperator.ALL);
@@ -708,7 +712,7 @@ public class RowData {
         /**
          * Create another child row.
          */
-///*
+/*
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
@@ -736,7 +740,7 @@ public class RowData {
         childRows.add(rowData3);
 
         rootRow.setChildRows(childRows);
-//*/
+*/
         /**
          * The only reason we create an attributePath for the
          * root row is so the getChildmostAttribute() method

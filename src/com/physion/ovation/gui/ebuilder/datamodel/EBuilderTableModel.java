@@ -51,7 +51,7 @@ public class EBuilderTableModel
     public Object getElementAt(int index) {
     
         //RowData rowData = getRowDataForIndex(index);
-        RowData rowData = rootRow.getDescendentAt(index);
+        RowData rowData = rootRow.getChild(index);
 
         if (rowData == null) {
             String string = "ERROR:  In EBuilderListModel:getElementAt("+
@@ -68,7 +68,7 @@ public class EBuilderTableModel
 
     /*
     private RowData getRowDataAt(int index) {
-        return(rootRow.getDescendentAt(index));
+        return(rootRow.getChild(index));
     }
     */
 
@@ -82,7 +82,7 @@ public class EBuilderTableModel
     public void deleteRow(int index) {
 
         //RowData rowData = getRowDataAt(index);
-        RowData rowData = rootRow.getDescendentAt(index);
+        RowData rowData = rootRow.getChild(index);
         System.out.println("Calling rowData.removeFromParent(): "+rowData);
         rowData.removeFromParent();
 
@@ -94,7 +94,7 @@ public class EBuilderTableModel
 
     public void createCompoundRow(int index) {
 
-        RowData rowData = rootRow.getDescendentAt(index);
+        RowData rowData = rootRow.getChild(index);
         System.out.println("Calling rowData.createCompoundRow(): "+rowData);
         rowData.createCompoundRow();
     }
@@ -102,7 +102,7 @@ public class EBuilderTableModel
 
     public void createAttributeRow(int index) {
 
-        RowData rowData = rootRow.getDescendentAt(index);
+        RowData rowData = rootRow.getChild(index);
         System.out.println("Calling rowData.createAttributeRow(): "+rowData);
         rowData.createAttributeRow();
     }

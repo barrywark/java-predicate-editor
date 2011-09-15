@@ -18,12 +18,13 @@ class TestEBuilder {
         lookAndFeel = UIManager.getLookAndFeel().toString();
         System.out.println("Current look and feel is: "+lookAndFeel);
 
-        lookAndFeel = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-        lookAndFeel = "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
+        //lookAndFeel = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+        //lookAndFeel = "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
         lookAndFeel = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
-        lookAndFeel = UIManager.getCrossPlatformLookAndFeelClassName();
+        //lookAndFeel = UIManager.getCrossPlatformLookAndFeelClassName();
         //lookAndFeel = UIManager.getSystemLookAndFeelClassName();
 
+        /*
         try {
             System.out.println("Setting look and feel to: "+lookAndFeel);
             UIManager.setLookAndFeel(lookAndFeel);
@@ -31,6 +32,7 @@ class TestEBuilder {
         catch(Exception e) {
             e.printStackTrace();
         }
+        */
 
     }
 
