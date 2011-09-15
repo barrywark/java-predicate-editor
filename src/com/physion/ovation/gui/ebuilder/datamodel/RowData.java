@@ -458,7 +458,10 @@ public class RowData {
                 string += ".";
 
             //string += attributeName;
-            string += attribute.getName();
+            if (attribute != null)
+                string += attribute.getName();
+            else
+                string += "ERROR: attribute == null";
 
             first = false;
         }
