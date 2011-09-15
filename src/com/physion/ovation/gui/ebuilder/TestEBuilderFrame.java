@@ -12,5 +12,6 @@ public class TestEBuilderFrame
         getContentPane().add(panel);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
+        setSize(1000, getSize().height);
     }
 }

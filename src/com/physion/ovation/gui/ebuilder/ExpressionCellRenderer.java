@@ -51,6 +51,7 @@ class ExpressionCellRenderer
     private JButton createCompoundRowButton;
     private JButton createAttributeRowButton;
     private JComboBox[] comboBoxes = new JComboBox[MAX_NUM_COMBOBOXES];
+    private JLabel indentWidget;
 
     private ExpressionTable table;
 
@@ -68,6 +69,11 @@ class ExpressionCellRenderer
 
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
+
+        /**
+         * TODO:  Perhaps change this to a JPanel that has a minimum size?
+         */
+        indentWidget = new JLabel();
 
         label = new JLabel();
         label.setOpaque(true);
@@ -110,10 +116,23 @@ class ExpressionCellRenderer
         removeAll();
 
         /**
-         * Now add the components that are needed.
+         * The widget we use to indent rows is always the first/leftmost
+         * widget.
          */
 
         int gridx = 0;
+
+        gc = new GridBagConstraints();
+        gc.gridx = gridx++;
+        add(indentWidget, gc);
+        if (rowData != null)
+            indentWidget.setText(rowData.getIndentString());
+        else
+            indentWidget.setText("");
+
+        /**
+         * Now add the components that are needed.
+         */
 
         System.out.println("Laying out components for row "+row);
 
@@ -435,23 +454,6 @@ class ExpressionCellRenderer
                  * this row's "parent" class.
                  */
 
-/*
-                ClassDescription parentClass = rowData.getParentClass();
-                ArrayList<Attribute> attributes =
-                    parentClass.getAllAttributes();
-
-                Attribute[] values = attributes.toArray(new Attribute[0]);
-*/
-                /*
-                System.out.println("values[3] = "+values[3]);
-                System.out.println("values[3].hashCode() = "+
-                                    values[3].hashCode());
-                */
-
-/*
-                DefaultComboBoxModel model = new DefaultComboBoxModel(values);
-                comboBoxes[0].setModel(model);
-*/
                 /**
                  * Set the model for each comboBox.
                  * Here we iterate through the list of Attributes in this
@@ -466,14 +468,6 @@ class ExpressionCellRenderer
                          * class of its parent row.
                          */
                         ClassDescription parentClass = rowData.getParentClass();
-/*
-                        ArrayList<Attribute> atts =
-                            parentClass.getAllAttributes();
-
-                        Attribute[] values = atts.toArray(new Attribute[0]);
-                        DefaultComboBoxModel model = new DefaultComboBoxModel(values);
-                        comboBoxes[index].setModel(model);
-*/
                         setComboBoxModel(comboBoxes[index], parentClass, true);
                     }
                     else {
@@ -483,24 +477,6 @@ class ExpressionCellRenderer
                          * the class of the comboBox to its left.
                          */
                         Attribute att = attributes.get(index-1);
-/*
-                        ClassDescription cD = att.getClassDescription();
-if (cD != null) { // delete this test                   
-                        /**
-                         * TODO: Write utility method to fill comboBox with
-                         * a class's attributes.  Use it here and above and???
-                         */
-/*
-                        ArrayList<Attribute> atts = cD.getAllAttributes();
-                        //Attribute[] values = attributes.toArray(new Attribute[0]);
-                        Attribute[] values = atts.toArray(new Attribute[0]);
-                        DefaultComboBoxModel model = new DefaultComboBoxModel(values);
-                        comboBoxes[index].setModel(model);
-}
-else {
-    System.out.println("att with null cD.  att = "+att.toStringDebug());
-}
-*/
                         setComboBoxModel(comboBoxes[index],
                                          att.getClassDescription(), true);
                     }
@@ -569,40 +545,29 @@ else {
 
                 attributes = rowData.getAttributePath();
                 System.out.println("attributes.size() = "+attributes.size());
-                if (attributes.size() > 0) {
 
-                    /*
-                    classDescription = attributes.get(0).getClassDescription();
-                    System.out.println("classDescription = "+classDescription);
-                    System.out.println("classDescription.hashCode() = "+
-                        classDescription.hashCode());
-
-                    if (classDescription != null)
-                        comboBoxes[0].setSelectedItem(classDescription);
-                    else
-                        comboBoxes[0].setSelectedIndex(0);
-                    */
-                    /*
-                    System.out.println("attributes.get(0) = "+
-                                       attributes.get(0));
-                    System.out.println("attributes.get(0).hashCode() = "+
-                                       attributes.get(0).hashCode());
-                    */
-                    //comboBoxes[0].setSelectedItem(attributes.get(0));
-                }
-                // TODO:  Delete the above block.
                 int index = 0;
                 for (Attribute att : attributes)
                     comboBoxes[index++].setSelectedItem(att);
 
                 /**
-                 * If the rightmost Attribute is a class, as opposed
-                 * to a "primitive" type such as int, float, string,
-                 * we need to display a comboBox that the user can
-                 * use to choose an Attribute of that class or
-                 * chose a special item such as "is null", "is not null",
-                 * "Any Property", "My Property".
+                 * If this RowData's rightmost child attribute is a
+                 * primitive type such as int, float, string,
+                 * we need to set the value of the operator
+                 * to be whatever this RowData's value is currently
+                 * set to.
                  */
+                if (rowData.getChildmostAttribute().isPrimitive()) {
+                    String attributeOperator = rowData.getAttributeOperator();
+                    if ((attributeOperator == null) ||
+                        (attributeOperator.isEmpty())) {
+                        System.err.println("ERROR:  operator not set.");
+                        attributeOperator = "ERROR";
+                    }
+                    comboBoxes[attributes.size()].setSelectedItem(
+                        attributeOperator);
+                }
+
             }
         }
 
@@ -741,7 +706,7 @@ else {
         }
 
         if (comboBoxIndex < 0) {
-            System.out.println("ERROR:  In comboBoxChanged.  "+
+            System.err.println("ERROR:  In comboBoxChanged.  "+
                 "comboBoxIndex = "+comboBoxIndex+
                 ".  This should never happen.");
             return;
@@ -749,7 +714,7 @@ else {
 
         /*
         if (selectedRow < 0) {
-            System.out.println("POSSIBLE ERROR:  In comboBoxChanged.  "+
+            System.err.println("POSSIBLE ERROR:  In comboBoxChanged.  "+
                 "selectedRow = "+selectedRow+
                 ".  Should this ever happen???");
             //return;
@@ -757,7 +722,7 @@ else {
         */
 
         if (editingRow < 0) {
-            System.out.println("ERROR:  In comboBoxChanged.  "+
+            System.err.println("ERROR:  In comboBoxChanged.  "+
                 "editingRow = "+editingRow+
                 ".  This should never happen.");
             return;
@@ -820,7 +785,6 @@ else {
             }
         }
         else {
-            System.out.println("TODO: write code to handle this comboBox.");
 
             //ClassDescription classDescription =
             //    (ClassDescription)comboBox.getSelectedItem();
@@ -828,46 +792,99 @@ else {
             ArrayList<Attribute> attributes = rowData.getAttributePath();
             //Attribute attribute = attributes.get(comboBoxIndex);
 
-            Attribute selectedAttribute = (Attribute)comboBox.getSelectedItem();
+            Object selectedObject = comboBox.getSelectedItem();
+            if (selectedObject instanceof Attribute) {
 
-            if (attributes.size() > comboBoxIndex) {
-                /**
-                 * The user is setting the value of an Attribute
-                 * that is already in this RowData's attributePath.
-                 */
-                attributes.set(comboBoxIndex, selectedAttribute);
-            }
-            else if (attributes.size() == comboBoxIndex) {
-                /**
-                 * This is the rightmost comboBox and this RowData
-                 * is having this entry in its attributePath set
-                 * to an "initial" value.  I.e. the comboBox used
-                 * to say "Select Attribute" before the user selected
-                 * a value for the first time.
-                 */
-                attributes.add(selectedAttribute);
-            }
-            else if (attributes.size() < comboBoxIndex) {
-                /**
-                 * This should never happen.
-                 */
-                System.out.println("ERROR: Coding error.  Too many comboBoxes "+
-                    "or too few Attributes in the class's attributePath.");
-            }
+                Attribute selectedAttribute = (Attribute)selectedObject;
 
-            /**
-             * Set the entry in the RowData's attributePath to have
-             * the Attribute value the user selected.
-             */
-            
-            rowData.setAttributeOperator(null);
-            rowData.setAttributeValue(null);
+                if (attributes.size() > comboBoxIndex) {
+                    /**
+                     * The user is setting the value of an Attribute
+                     * that is already in this RowData's attributePath.
+                     */
+                    attributes.set(comboBoxIndex, selectedAttribute);
+                }
+                else if (attributes.size() == comboBoxIndex) {
+                    /**
+                     * This is the rightmost comboBox and this RowData
+                     * is having this entry in its attributePath set
+                     * to an "initial" value.  I.e. the comboBox used
+                     * to say "Select Attribute" before the user selected
+                     * a value for the first time.
+                     */
+                    attributes.add(selectedAttribute);
+                }
+                else if (attributes.size() < comboBoxIndex) {
+                    /**
+                     * This should never happen.
+                     */
+                    System.err.println("ERROR: Coding error.  "+
+                        "Too many comboBoxes "+
+                        "or too few Attributes in the class's attributePath.");
+                }
 
-            /**
-             * Remove Attributes that are "after" the one being changed.
-             */
-            //attributes.removeRange(comboBoxIndex+1, attributes.size());
-            attributes.subList(comboBoxIndex+1, attributes.size()).clear();
+                /**
+                 * If the user set the value of a primitive type,
+                 * that means we need to be sure the operator is
+                 * initialized to an appropriate value for that
+                 * type.  E.g. "==" for an int or string, "is true" for
+                 * a boolean.
+                 *
+                 * TODO:  Add methods to the RowData class that are
+                 * used to access the attributePath that automatically
+                 * handle this sort of business logic.
+                 */
+                Attribute childmostAttribute = rowData.getChildmostAttribute();
+                if (childmostAttribute.isPrimitive()) {
+
+                    String attributeOperator;
+                    switch (childmostAttribute.getType()) {
+                        case BOOLEAN:
+                            attributeOperator = OPERATORS_BOOLEAN[0];
+                        break;
+                        case UTF_8_STRING:
+                            attributeOperator = OPERATORS_STRING[0];
+                        break;
+                        case INT_16:
+                        case INT_32:
+                        //case FLOAT_32:
+                        case FLOAT_64:
+                        case DATE_TIME:
+                            attributeOperator = OPERATORS_ARITHMATIC[0];
+                        break;
+                        default:
+                            System.err.println("ERROR: Unhandled operator.");
+                            attributeOperator = "ERROR";
+                    }
+
+                    rowData.setAttributeOperator(attributeOperator);
+                }
+
+                /**
+                 * Set the entry in the RowData's attributePath to have
+                 * the Attribute value the user selected.
+                 */
+                
+                rowData.setAttributeOperator(null);
+                rowData.setAttributeValue(null);
+
+                /**
+                 * Remove Attributes that are "after" the one being changed.
+                 */
+                //attributes.removeRange(comboBoxIndex+1, attributes.size());
+                attributes.subList(comboBoxIndex+1, attributes.size()).clear();
+            }
+            else if ((selectedObject instanceof String) &&
+                     rowData.getChildmostAttribute().isPrimitive()) {
+
+                System.out.println("User selected primitive operator "+
+                                   selectedObject);
+                /**
+                 * The user has selected a value in primitive operator
+                 * comboBox.  E.g. ==, !=, >.
+                 */
+                rowData.setAttributeOperator((String)selectedObject);
+            }
 
             /**
              * 

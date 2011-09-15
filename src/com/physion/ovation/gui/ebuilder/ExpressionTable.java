@@ -2,6 +2,7 @@
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import javax.swing.ListCellRenderer;
@@ -10,12 +11,14 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+//import org.jdesktop.swingx.JXTable;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 
 import com.physion.ovation.gui.ebuilder.datamodel.EBuilderTableModel;
 
 class ExpressionTable
+    //extends JXTable {
     extends JTable {
 
     ExpressionCellRenderer expressionCellRenderer;
@@ -26,9 +29,39 @@ class ExpressionTable
 
         setTableHeader(null);
 
+        /**
+         * Turn off auto resizing or the JTable will resize itself to
+         * the available space in the scrollpane, making the horizontal
+         * scrollbar useless.
+         */
+        //setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        /**
+         * Try out JXTable.
+         */
+        //setHorizontalScrollEnabled(true);  // JXTable
+
         expressionCellRenderer = new ExpressionCellRenderer();
         expressionCellEditor = new ExpressionCellRenderer();
     }
+
+
+    /*
+    @Override
+    public boolean getScrollableTracksViewportWidth() {
+        return(false);
+    }
+    */
+
+    /*
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        
+        Dimension size = super.getPreferredScrollableViewportSize();
+        return(new Dimension(Math.min(getPreferredSize().width, size.width),
+               size.height));
+    }
+    */
 
 
     @Override

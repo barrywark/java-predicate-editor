@@ -60,6 +60,7 @@ public class EBuilderPanel
 
         JScrollPane scrollPane = new JScrollPane(table,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+            //ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         GridBagConstraints gc = new GridBagConstraints();

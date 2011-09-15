@@ -102,6 +102,8 @@ public class RowData {
      *
      * For example, if the attributePath is:  epochGroup.source.label
      * then attributeValue might be something like "Test 27".
+     *
+     * TODO:  Perhaps this should be a String?
      */
     private Object attributeValue;
 
@@ -355,6 +357,11 @@ public class RowData {
     }
 
 
+    public String getAttributeOperator() {
+        return(attributeOperator);
+    }
+
+
     public void setAttributePath(ArrayList<Attribute> attributePath) {
         this.attributePath = attributePath;
     }
@@ -367,6 +374,11 @@ public class RowData {
 
     public void setAttributeValue(Object attributeValue) {
         this.attributeValue = attributeValue;
+    }
+
+
+    public Object getAttributeValue(Object attributeValue) {
+        return(attributeValue);
     }
 
 
@@ -391,6 +403,19 @@ public class RowData {
 
 
     /**
+     * Get the number of "levels" that this row is indented.
+     */
+    public int getIndentCount() {
+
+        int count = 0;
+        for (RowData rowData = this.getParentRow(); rowData != null;
+             rowData = rowData.getParentRow())
+            count++;
+        return(count);
+    }
+
+
+    /**
      * Get the amount a RowString should be indented.
      * This method will probably be unused once I switch to using
      * widgets to render a cell.
@@ -401,7 +426,7 @@ public class RowData {
         for (RowData rowData = this.getParentRow(); rowData != null;
              rowData = rowData.getParentRow()) {
 
-            indentString += "    ";
+            indentString += "      ";
         }
         return(indentString);
     }
