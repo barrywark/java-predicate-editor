@@ -105,7 +105,7 @@ public class RowData {
      *
      * TODO:  Perhaps this should be a String?
      */
-    private Object attributeValue;
+    private String attributeValue;
 
     /**
      * If this row is a "compound" row, this will be set to
@@ -372,12 +372,12 @@ public class RowData {
     }
 
 
-    public void setAttributeValue(Object attributeValue) {
+    public void setAttributeValue(String attributeValue) {
         this.attributeValue = attributeValue;
     }
 
 
-    public Object getAttributeValue(Object attributeValue) {
+    public String getAttributeValue() {
         return(attributeValue);
     }
 

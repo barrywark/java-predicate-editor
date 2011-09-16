@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
+import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 
@@ -51,7 +52,9 @@ class ExpressionCellRenderer
     private JButton createCompoundRowButton;
     private JButton createAttributeRowButton;
     private JComboBox[] comboBoxes = new JComboBox[MAX_NUM_COMBOBOXES];
+    private JTextField textField;
     private JLabel indentWidget;
+    private JPanel buttonPanel;
 
     private ExpressionTable table;
 
@@ -94,6 +97,25 @@ class ExpressionCellRenderer
             comboBox.addItemListener(this);
             //comboBox.addActionListener(this);
         }
+
+        textField = new JTextField();
+
+        buttonPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gc;
+        gc = new GridBagConstraints();
+        gc.gridx = 0;
+        gc.fill = GridBagConstraints.VERTICAL;
+        buttonPanel.add(createAttributeRowButton, gc);
+
+        gc = new GridBagConstraints();
+        gc.gridx = 1;
+        gc.fill = GridBagConstraints.VERTICAL;
+        buttonPanel.add(createCompoundRowButton, gc);
+
+        gc = new GridBagConstraints();
+        gc.gridx = 2;
+        gc.fill = GridBagConstraints.VERTICAL;
+        buttonPanel.add(deleteButton, gc);
     }
 
 
@@ -136,6 +158,8 @@ class ExpressionCellRenderer
 
         System.out.println("Laying out components for row "+row);
 
+        boolean someWidgetFillingEmptySpace = false;
+
         if ((row == 0) || rowData.isCompoundRow()) {
         //if (rowData.isCompoundRow()) {
             
@@ -158,12 +182,15 @@ class ExpressionCellRenderer
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.weightx = 1;
+            someWidgetFillingEmptySpace = true;
             gc.anchor = GridBagConstraints.WEST;
             add(new JLabel(" of the following"), gc);
         }
         else {
 
             ArrayList<Attribute> attributes = rowData.getAttributePath();
+            System.out.println("Add comboboxes for: "+rowData.getRowString());
+
             /**
              * We are an Attribute Row, so the widgets we contain
              * are based on the values in this row's RowData object.
@@ -171,12 +198,13 @@ class ExpressionCellRenderer
              * Add one comboBox for every Attribute on this row's
              * attributePath.
              */
+            int comboBoxIndex = 0;
             for (Attribute attribute : attributes) {
 
-                System.out.println("Adding comboBox at gridx "+gridx);
+                //System.out.println("Adding comboBox at gridx "+gridx);
                 gc = new GridBagConstraints();
-                gc.gridx = gridx;
-                add(comboBoxes[gridx++], gc);
+                gc.gridx = gridx++;
+                add(comboBoxes[comboBoxIndex++], gc);
             }
 
             /**
@@ -209,24 +237,40 @@ class ExpressionCellRenderer
              * a comboBox that has a selection of operators such as
              * =, !=, <, >=, etc.
              */
-            Attribute rightmostAttribute = attributes.get(attributes.size()-1);
+            //Attribute rightmostAttribute = attributes.get(attributes.size()-1);
+            Attribute rightmostAttribute = rowData.getChildmostAttribute();
             if (!rightmostAttribute.isPrimitive() &&
                 !rightmostAttribute.equals(Attribute.SELECT_ATTRIBUTE)) {
                 System.out.println("Adding Select Attribute comboBox at gridx "+
                     gridx);
                 gc = new GridBagConstraints();
-                gc.gridx = gridx;
-                add(comboBoxes[gridx++], gc);
+                gc.gridx = gridx++;
+                add(comboBoxes[comboBoxIndex++], gc);
             }
             else if (rightmostAttribute.isPrimitive()) {
                 /**
                  * Create a comboBox that will hold operators such
-                 * as ==, !=, >, etc.
+                 * as ==, !=, >, is true.
                  */
                 System.out.println("Adding operator comboBox at gridx "+gridx);
                 gc = new GridBagConstraints();
-                gc.gridx = gridx;
-                add(comboBoxes[gridx++], gc);
+                gc.gridx = gridx++;
+                add(comboBoxes[comboBoxIndex++], gc);
+
+                if (rightmostAttribute.getType() != Type.BOOLEAN) {
+                    /**
+                     * Create a text field into which the user can enter a
+                     * value of some sort.
+                     */
+                    System.out.println("Adding text field at gridx "+gridx);
+                    gc = new GridBagConstraints();
+                    gc.gridx = gridx++;
+                    gc.weightx = 1;
+                    someWidgetFillingEmptySpace = true;
+                    gc.fill = GridBagConstraints.BOTH;
+                    textField.setText("<Enter Value>");
+                    add(textField, gc);
+                }
             }
             else {
                 /**
@@ -241,24 +285,30 @@ class ExpressionCellRenderer
              * Use a JLabel until such time as I have implemented
              * the other components for this RowData type.
              */
+            /*
+            System.out.println("Adding label at gridx "+gridx);
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.weightx = 1;
+            someWidgetFillingEmptySpace = true;
             gc.anchor = GridBagConstraints.WEST;
             add(label, gc);
+            */
         }
 
+        /**
+         * Add the panel that holds the -/+/++ buttons to
+         * the far right side of this row.
+         * If there is no other widget that will fill
+         * the extra space in the row, tell the GridBagLayout
+         * manager that the buttonPanel will do it.
+         */
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
-        add(createAttributeRowButton, gc);
-
-        gc = new GridBagConstraints();
-        gc.gridx = gridx++;
-        add(createCompoundRowButton, gc);
-
-        gc = new GridBagConstraints();
-        gc.gridx = gridx++;
-        add(deleteButton, gc);
+        gc.anchor = GridBagConstraints.EAST;
+        if (someWidgetFillingEmptySpace == false)
+            gc.weightx = 1;
+        add(buttonPanel, gc);
     }
 
 
@@ -346,14 +396,9 @@ class ExpressionCellRenderer
          * The very first row cannot be deleted.
          */
         if (row == 0) {
-            //deleteButton.setVisible(false);
-            //deleteButton.setOpaque(false);
-            //deleteButton.setBackground(deleteButton.getParent().getBackground());
-            //deleteButton.setForeground(deleteButton.getParent().getBackground());
             deleteButton.setEnabled(false);
         }
         else {
-            //deleteButton.setVisible(true);
             deleteButton.setEnabled(true);
         }
 
@@ -387,7 +432,7 @@ class ExpressionCellRenderer
         }
 
         /**
-         * Initialize the comboBoxes, if any, for this row.
+         * Initialize the comboBoxes for this row.
          */
         System.out.println("Setting the model for row "+row);
         modelRow = row;
@@ -468,7 +513,10 @@ class ExpressionCellRenderer
                          * class of its parent row.
                          */
                         ClassDescription parentClass = rowData.getParentClass();
+                        System.out.println("Set model for comboBox "+index+
+                            " to be "+parentClass);
                         setComboBoxModel(comboBoxes[index], parentClass, true);
+                        comboBoxes[index].setBackground(Color.blue);
                     }
                     else {
                         /**
@@ -477,8 +525,12 @@ class ExpressionCellRenderer
                          * the class of the comboBox to its left.
                          */
                         Attribute att = attributes.get(index-1);
+                        System.out.println("Set model for comboBox "+index+
+                            " to be "+att.getClassDescription());
                         setComboBoxModel(comboBoxes[index],
                                          att.getClassDescription(), true);
+                        if (index == 1)
+                        comboBoxes[index].setBackground(Color.yellow);
                     }
                 }
 
@@ -522,6 +574,8 @@ class ExpressionCellRenderer
                     else
                         model = new DefaultComboBoxModel(
                             OPERATORS_ARITHMATIC);
+                    System.out.println("Set model for comboBox "+
+                        attributes.size()+" to be operator of some type.");
                     comboBoxes[attributes.size()].setModel(model);
                 }
                 else {
@@ -556,6 +610,8 @@ class ExpressionCellRenderer
                  * we need to set the value of the operator
                  * to be whatever this RowData's value is currently
                  * set to.
+                 *
+                 * If the user can enter a value, set the textField.
                  */
                 if (rowData.getChildmostAttribute().isPrimitive()) {
                     String attributeOperator = rowData.getAttributeOperator();
@@ -566,6 +622,14 @@ class ExpressionCellRenderer
                     }
                     comboBoxes[attributes.size()].setSelectedItem(
                         attributeOperator);
+
+                    if (rowData.getChildmostAttribute().getType() != 
+                        Type.BOOLEAN) {
+                        String attributeValue = rowData.getAttributeValue();
+                        if (attributeValue == null)
+                            attributeValue = "<Enter Value>";
+                        textField.setText(attributeValue);
+                    }
                 }
 
             }
@@ -865,8 +929,8 @@ class ExpressionCellRenderer
                  * the Attribute value the user selected.
                  */
                 
-                rowData.setAttributeOperator(null);
-                rowData.setAttributeValue(null);
+                //rowData.setAttributeOperator(null);
+                //rowData.setAttributeValue(null);
 
                 /**
                  * Remove Attributes that are "after" the one being changed.
