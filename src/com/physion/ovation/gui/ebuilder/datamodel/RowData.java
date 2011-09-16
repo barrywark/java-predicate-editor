@@ -10,6 +10,14 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 
 /**
  * 
+ * TODO: Perhaps change how the "is null" and "is not null" values are
+ * handled.  Right now, I set the attributeOperator to be "is null" or
+ * "is not null".  But, I also have to have the last Attribute on the
+ * RowData's attributePath be the Attribute.IS_NULL or IS_NOT_NULL value.
+ * This seems a bit redundant.  The problem is, I need the Attribute on
+ * the path in order to have the comboBox that holds "is null" etc. be created.
+ * So, maybe we should not also store that information in the attributeOperator
+ * member data?
  */
 public class RowData {
 
@@ -81,6 +89,7 @@ public class RowData {
      * The operator the user selected for this attribute.
      * For example, ==, !=, >=, <=, <, >.
      * Note that "is null" and "is not null" are also considered operators.
+     * TODO: Change above comments to be consistent with how I implemented it.
      *
      * Please note, this might be null if this row is a "compound" row
      * that ends with Any, All, or None.
@@ -99,6 +108,7 @@ public class RowData {
      * set to "is null" or "is not null", then this value is the
      * value that the user entered as the desired value for the
      * attribute.
+     * TODO: Change above comments to be consistent with how I implemented it.
      *
      * For example, if the attributePath is:  epochGroup.source.label
      * then attributeValue might be something like "Test 27".
@@ -501,11 +511,11 @@ public class RowData {
          * Another quick sanity check.
          * If the user specified an attributeOperator other than
          * the "is null" and "is not null" values, then s/he also
-         * must have specified an attributeValue.
+         * must also specify an attributeValue.
          */
         if ((attributeOperator != null) &&
-            ((attributeOperator != "is null") &&
-             (attributeOperator != "is not null")) &&
+            (!attributeOperator.equals(Attribute.IS_NULL.toString()) &&
+             !attributeOperator.equals(Attribute.IS_NOT_NULL.toString())) &&
             (attributeValue == null)) {
             string += "ERROR: RowData is in an inconsistent state.";
             string += "\nattributeOperator = "+attributeOperator;
@@ -582,24 +592,6 @@ public class RowData {
      */
     public static RowData createTestRowData() {
 
-        /*
-        ClassDescription entityBaseCD =
-            new ClassDescription("EntityBase", null);
-        ClassDescription taggableEntityBaseCD =
-            new ClassDescription("TaggableEntityBase", entityBaseCD);
-        ClassDescription userCD =
-            new ClassDescription("User", taggableEntityBaseCD);
-        ClassDescription keywordTagCD =
-            new ClassDescription("KeywordTag", entityBaseCD);
-        ClassDescription timelineElementCD =
-            new ClassDescription("TimelineElement", taggableEntityBaseCD);
-        ClassDescription epochCD =
-            new ClassDescription("Epoch", timelineElementCD);
-        ClassDescription epochGroupCD =
-            new ClassDescription("EpochGroup", timelineElementCD);
-        ClassDescription sourceCD =
-            new ClassDescription("Source", taggableEntityBaseCD);
-        */
         ClassDescription entityBaseCD =
             DataModel.getClassDescription("EntityBase");
         ClassDescription taggableEntityBaseCD =
@@ -616,57 +608,6 @@ public class RowData {
             DataModel.getClassDescription("EpochGroup");
         ClassDescription sourceCD =
             DataModel.getClassDescription("Source");
-
-        /**
-         * Initialize values of the EntityBase class.
-         */
-/*
-        Attribute attribute = new Attribute("owner", Type.REFERENCE,
-                                            userCD, Cardinality.TO_ONE);
-        entityBaseCD.addAttribute(attribute);
-
-        attribute = new Attribute("uuid", Type.UTF_8_STRING);
-        entityBaseCD.addAttribute(attribute);
-
-        attribute = new Attribute("incomplete", Type.BOOLEAN);
-        entityBaseCD.addAttribute(attribute);
-*/
-        /**
-         * Initialize values of the Epoch class.
-         */
-/*
-        attribute = new Attribute("protocolID", Type.UTF_8_STRING);
-        epochCD.addAttribute(attribute);
-
-        attribute = new Attribute("excludeFromAnalysis", Type.BOOLEAN);
-        epochCD.addAttribute(attribute);
-
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  epochCD, Cardinality.TO_ONE);
-        epochCD.addAttribute(attribute);
-*/
-        /**
-         * Initialize values of the Source class.
-         */
-/*
-        attribute = new Attribute("label", Type.UTF_8_STRING);
-        sourceCD.addAttribute(attribute);
-
-        attribute = new Attribute("parent", Type.REFERENCE,
-                                  sourceCD, Cardinality.TO_ONE);
-        sourceCD.addAttribute(attribute);
-*/
-        /**
-         * Initialize values of the EpochGroup class.
-         */
-/*
-        attribute = new Attribute("label", Type.UTF_8_STRING);
-        epochGroupCD.addAttribute(attribute);
-
-        attribute = new Attribute("source", Type.REFERENCE,
-                                  sourceCD, Cardinality.TO_ONE);
-        epochGroupCD.addAttribute(attribute);
-*/
 
         /**
          * Now create some RowData values.
@@ -781,6 +722,7 @@ public class RowData {
         attributePath.add(attribute);
         rootRow.setAttributePath(attributePath);
         */
+        System.out.println("rootRow:\n"+rootRow.toString());
 
         return(rootRow);
     }

@@ -9,6 +9,10 @@ public class Attribute {
 
     public static final Attribute SELECT_ATTRIBUTE =
         new Attribute("Select Attribute", Type.REFERENCE);
+    public static final Attribute IS_NULL =
+        new Attribute("is null", Type.REFERENCE);
+    public static final Attribute IS_NOT_NULL =
+        new Attribute("is not null", Type.REFERENCE);
 
     /**
      * The name of this attribute.  E.g. "owner", "uuid", "keywords".
@@ -120,6 +124,13 @@ public class Attribute {
 
 
     public boolean isPrimitive() {
+
+        if (this.equals(Attribute.SELECT_ATTRIBUTE) ||
+            this.equals(Attribute.IS_NULL) ||
+            this.equals(Attribute.IS_NOT_NULL)) {
+            return(false);
+        }
+
         return(type.isPrimitive());
     }
 

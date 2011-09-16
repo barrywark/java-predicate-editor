@@ -140,6 +140,21 @@ public class DataModel {
 
         attribute = new Attribute("label", Type.UTF_8_STRING);
         epochGroupCD.addAttribute(attribute);
+
+        /**
+         * Initialize values of the TimelineElement class.
+         */
+        attribute = new Attribute("startTime", Type.DATE_TIME);
+        timelineElementCD.addAttribute(attribute);
+
+        attribute = new Attribute("endTime", Type.DATE_TIME);
+        timelineElementCD.addAttribute(attribute);
+
+        attribute = new Attribute("startTimeZone", Type.UTF_8_STRING);
+        timelineElementCD.addAttribute(attribute);
+
+        attribute = new Attribute("endTimeZone", Type.UTF_8_STRING);
+        timelineElementCD.addAttribute(attribute);
     }
 
 

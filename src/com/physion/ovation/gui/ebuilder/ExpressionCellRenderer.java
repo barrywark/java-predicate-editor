@@ -29,6 +29,10 @@ import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 
+
+/**
+ * TODO:  Pull parts of this code out into utility methods.
+ */
 class ExpressionCellRenderer
     extends JPanel
     implements TableCellRenderer, TableCellEditor,
@@ -36,15 +40,25 @@ class ExpressionCellRenderer
 
     private static final int MAX_NUM_COMBOBOXES = 20;
 
+    /**
+     * Please note, we are using "name" that the special
+     * Attribute.IS_NULL and IS_NOT_NULL for the OPERATOR_IS_NULL
+     * and OPERATOR_IS_NOT_NULL operators.
+     *
+     * TODO: Perhaps put all these operator lists and strings
+     * into the DataModel class so they are easily configurable?
+     */
     private static final String[] OPERATORS_BOOLEAN = {"is true", "is false"};
     private static final String[] OPERATORS_ARITHMATIC = {"==", "!=", "<", "<=",
         ">", ">="};
     private static final String[] OPERATORS_STRING = {"==", "!=", "<", "<=",
         ">", ">=", "~=", "~~="};
-
+    /*
+    private static final String OPERATOR_IS_NULL = Attribute.IS_NULL.getName();
+    private static final String OPERATOR_IS_NOT_NULL =
+        Attribute.IS_NULL.getName();
+    */
     private int modelRow; // Temp hack.
-
-    //private DefaultCellEditor;
 
 
     private JLabel label;
@@ -84,16 +98,17 @@ class ExpressionCellRenderer
         deleteButton = new JButton("-");
         deleteButton.addActionListener(this);
 
-        createCompoundRowButton = new JButton("++");
-        createCompoundRowButton.addActionListener(this);
-
         createAttributeRowButton = new JButton("+");
         createAttributeRowButton.addActionListener(this);
+
+        createCompoundRowButton = new JButton("++");
+        createCompoundRowButton.addActionListener(this);
 
         for (int count = 0; count < MAX_NUM_COMBOBOXES; count++) {
             JComboBox comboBox = new JComboBox();
             comboBoxes[count] = comboBox;
             comboBox.setEditable(false);
+            comboBox.setMaximumRowCount(20);  // Number of items before scroll.
             comboBox.addItemListener(this);
             //comboBox.addActionListener(this);
         }
@@ -240,7 +255,9 @@ class ExpressionCellRenderer
             //Attribute rightmostAttribute = attributes.get(attributes.size()-1);
             Attribute rightmostAttribute = rowData.getChildmostAttribute();
             if (!rightmostAttribute.isPrimitive() &&
-                !rightmostAttribute.equals(Attribute.SELECT_ATTRIBUTE)) {
+                !rightmostAttribute.equals(Attribute.SELECT_ATTRIBUTE) &&
+                !rightmostAttribute.equals(Attribute.IS_NULL) &&
+                !rightmostAttribute.equals(Attribute.IS_NOT_NULL)) {
                 System.out.println("Adding Select Attribute comboBox at gridx "+
                     gridx);
                 gc = new GridBagConstraints();
@@ -411,6 +428,7 @@ class ExpressionCellRenderer
          * Based on the above, enable/disable the +, ++, - buttons.
          */
 
+        /*
         Attribute attribute = null;
         if (rowData != null) 
             attribute = rowData.getChildmostAttribute();
@@ -422,7 +440,21 @@ class ExpressionCellRenderer
         if (rowData == RowData.getRootRow())
             classDescription = RowData.getClassUnderQualification();
 
-        if (classDescription != null) {
+        System.out.println("Setting button sensitivity based on rowData: "+
+            rowData);
+        System.out.println("Setting button sensitivity based on Attribute: "+
+            attribute);
+        System.out.println("Setting button sensitivity based on CD: "+
+            classDescription);
+        if (!Attribute.SELECT_ATTRIBUTE.equals(attribute) &&
+            !Attribute.IS_NULL.equals(attribute) &&
+            !Attribute.IS_NOT_NULL.equals(attribute) &&
+            (classDescription != null)) {
+            createCompoundRowButton.setEnabled(true);
+            createAttributeRowButton.setEnabled(true);
+        }
+        */
+        if ((rowData != null) && rowData.isCompoundRow()) {
             createCompoundRowButton.setEnabled(true);
             createAttributeRowButton.setEnabled(true);
         }
@@ -549,7 +581,9 @@ class ExpressionCellRenderer
                 Attribute rightmostAttribute =
                     attributes.get(attributes.size()-1);
                 if (!rightmostAttribute.isPrimitive() &&
-                    !rightmostAttribute.equals(Attribute.SELECT_ATTRIBUTE)) {
+                    !rightmostAttribute.equals(Attribute.SELECT_ATTRIBUTE) &&
+                    !rightmostAttribute.equals(Attribute.IS_NULL) &&
+                    !rightmostAttribute.equals(Attribute.IS_NOT_NULL)) {
                     /**
                      * Set the comboBox model to hold attributes of
                      * the class that is selected in the comboBox to our left.
@@ -595,6 +629,8 @@ class ExpressionCellRenderer
                  * TODO: Perhaps set the model and the value in the
                  * same loop as opposed to setting the values in a
                  * separate loop AFTER setting all the models?
+                 * Or, put the model setting code in one method and the
+                 * value setting code in another method.
                  */
 
                 attributes = rowData.getAttributePath();
@@ -648,6 +684,17 @@ class ExpressionCellRenderer
     }
 
 
+    /**
+     * Set the model for the passed in comboBox to be the attributes
+     * of the passed in classDescription.
+     *
+     * In addition, we will append the special Attributes
+     * Attribute.IS_NULL and Attribute.IS_NOT_NULL.
+     * TODO:  Do we want to do that always?
+     *
+     * @param hasSelectAttribute - If this is true, we will prepend the
+     * special Attribute.SELECT_ATTRIBUTE to the list of the choices.
+     */
     private void setComboBoxModel(JComboBox comboBox,
                                   ClassDescription classDescription,
                                   boolean hasSelectAttribute) {
@@ -655,15 +702,19 @@ class ExpressionCellRenderer
         ArrayList<Attribute> attributes = classDescription.getAllAttributes();
         Attribute[] values;
 
-        if (hasSelectAttribute) {
-            ArrayList<Attribute> copy = new ArrayList<Attribute>(attributes);
-            copy.add(0, Attribute.SELECT_ATTRIBUTE);
-            values = copy.toArray(new Attribute[0]);
-        }
-        else {
-            values = attributes.toArray(new Attribute[0]);
-        }
+        ArrayList<Attribute> copy = new ArrayList<Attribute>(attributes);
+        copy.add(Attribute.IS_NULL);
+        copy.add(Attribute.IS_NOT_NULL);
 
+        if (hasSelectAttribute)
+            copy.add(0, Attribute.SELECT_ATTRIBUTE);
+
+        /**
+         * All the monkey business with the list of Attributes is
+         * finished, so create a DefaultComboBoxModel out of the list
+         * Attributes and install it in the comboBox.
+         */
+        values = copy.toArray(new Attribute[0]);
         DefaultComboBoxModel model = new DefaultComboBoxModel(values);
         comboBox.setModel(model);
     }
@@ -757,7 +808,6 @@ class ExpressionCellRenderer
             return;
         }
 
-
         /**
          * Figure out which comboBox was changed.
          */
@@ -796,7 +846,7 @@ class ExpressionCellRenderer
 
         /**
          * At this point we know which row is being edited by the user,
-         * and we know which comboBox within that row is being changed.
+         * and we know which comboBox within that row was changed.
          *
          * So, now change the appropriate value in this row's RowData
          * object.
@@ -849,17 +899,38 @@ class ExpressionCellRenderer
             }
         }
         else {
-
-            //ClassDescription classDescription =
-            //    (ClassDescription)comboBox.getSelectedItem();
+            /**
+             * User is editing a row other than the first row.
+             */
 
             ArrayList<Attribute> attributes = rowData.getAttributePath();
-            //Attribute attribute = attributes.get(comboBoxIndex);
 
             Object selectedObject = comboBox.getSelectedItem();
             if (selectedObject instanceof Attribute) {
 
                 Attribute selectedAttribute = (Attribute)selectedObject;
+                System.out.println("selectedAttribute = "+selectedAttribute);
+                System.out.println("Attribute.IS_NULL = "+Attribute.IS_NULL);
+                System.out.println(
+                    "selectedAttribute.equals(Attribute.IS_NULL) = "+
+                    selectedAttribute.equals(Attribute.IS_NULL));
+
+                /*
+                if (selectedAttribute.equals(Attribute.IS_NULL)) {
+                    rowData.setAttributeOperator(OPERATOR_IS_NULL);
+                }
+                else if (selectedAttribute.equals(Attribute.IS_NOT_NULL)) {
+                    rowData.setAttributeOperator(OPERATOR_IS_NOT_NULL);
+                }
+                */
+                if ((selectedAttribute.equals(Attribute.IS_NULL)) ||
+                    (selectedAttribute.equals(Attribute.IS_NOT_NULL))) {
+                    System.out.println("Setting attributeOperator to: "+
+                        selectedAttribute.getName());
+                    rowData.setAttributeOperator(selectedAttribute.getName());
+                    rowData.setAttributeValue(null);
+                }
+                System.out.println("After op rowData: "+rowData.getRowString());
 
                 if (attributes.size() > comboBoxIndex) {
                     /**
@@ -886,6 +957,12 @@ class ExpressionCellRenderer
                         "Too many comboBoxes "+
                         "or too few Attributes in the class's attributePath.");
                 }
+                System.out.println("After at rowData: "+rowData.getRowString());
+
+                /**
+                 * Remove Attributes that are "after" the one being changed.
+                 */
+                attributes.subList(comboBoxIndex+1, attributes.size()).clear();
 
                 /**
                  * If the user set the value of a primitive type,
@@ -924,19 +1001,6 @@ class ExpressionCellRenderer
                     rowData.setAttributeOperator(attributeOperator);
                 }
 
-                /**
-                 * Set the entry in the RowData's attributePath to have
-                 * the Attribute value the user selected.
-                 */
-                
-                //rowData.setAttributeOperator(null);
-                //rowData.setAttributeValue(null);
-
-                /**
-                 * Remove Attributes that are "after" the one being changed.
-                 */
-                //attributes.removeRange(comboBoxIndex+1, attributes.size());
-                attributes.subList(comboBoxIndex+1, attributes.size()).clear();
             }
             else if ((selectedObject instanceof String) &&
                      rowData.getChildmostAttribute().isPrimitive()) {
@@ -949,6 +1013,8 @@ class ExpressionCellRenderer
                  */
                 rowData.setAttributeOperator((String)selectedObject);
             }
+
+            System.out.println("rowData's new value: "+rowData.getRowString());
 
             /**
              * 
