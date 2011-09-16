@@ -252,10 +252,14 @@ public class RowData {
             /**
              * TODO:  Not sure I like this mucking around.
              */
+            RowData parent = getParentRow();
             while (classDescription == null) {
-                Attribute attribute = getParentRow().getChildmostAttribute();
+                Attribute attribute = parent.getChildmostAttribute();
                 if (attribute != null)
                     classDescription = attribute.getClassDescription();
+                parent = parent.getParentRow();
+                if (parent == null)
+                    classDescription = getClassUnderQualification();
             }
         }
         else {
