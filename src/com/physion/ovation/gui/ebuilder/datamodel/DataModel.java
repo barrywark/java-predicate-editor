@@ -146,6 +146,10 @@ public class DataModel {
                                   sourceCD, Cardinality.TO_ONE);
         epochGroupCD.addAttribute(attribute);
 
+        attribute = new Attribute("epochs", Type.REFERENCE,
+                                  epochCD, Cardinality.TO_MANY);
+        epochGroupCD.addAttribute(attribute);
+
         attribute = new Attribute("label", Type.UTF_8_STRING);
         epochGroupCD.addAttribute(attribute);
 

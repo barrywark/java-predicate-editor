@@ -25,7 +25,6 @@ public enum CollectionOperator {
              CollectionOperator.values())
             if (collectionOperator != CollectionOperator.COUNT)
                 compoundCollectionOperators[index++] = collectionOperator;
-
     }
 
 
@@ -70,6 +69,7 @@ public enum CollectionOperator {
     /**
      * This is a simple test program for this class.
      */
+    /*
     public static void main(String[] args) {
 
         System.out.println("CollectionOperator test is starting...");
@@ -81,4 +81,5 @@ public enum CollectionOperator {
 
         System.out.println("CollectionOperator test is ending.");
     }
+    */
 }

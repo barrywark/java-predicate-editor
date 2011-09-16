@@ -224,9 +224,11 @@ public class RowData {
 
         System.out.println("createCompoundRow rowData: "+this.getRowString());
 
-        //Attribute attribute = getChildmostAttribute();
-        //ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
-        //attributePath.add(attribute);
+        /*
+        Attribute attribute = Attribute.SELECT_ATTRIBUTE;
+        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
+        attributePath.add(attribute);
+        */
 
         RowData compoundRow = new RowData();
         compoundRow.setParentRow(this);
@@ -244,12 +246,27 @@ public class RowData {
 
         System.out.println("createAttributeRow rowData: "+this.getRowString());
 
-        Attribute attribute = getChildmostAttribute();
-        ClassDescription classDescription;
-        if (this == getRootRow())
-            classDescription = getClassUnderQualification();
-        else
-            classDescription = attribute.getClassDescription();
+        ClassDescription classDescription = null;
+
+        if ((this != getRootRow()) && isSimpleCompoundRow()) {
+            /**
+             * TODO:  Not sure I like this mucking around.
+             */
+            while (classDescription == null) {
+                Attribute attribute = getParentRow().getChildmostAttribute();
+                if (attribute != null)
+                    classDescription = attribute.getClassDescription();
+            }
+        }
+        else {
+            Attribute attribute = getChildmostAttribute();
+            if (this == getRootRow())
+                classDescription = getClassUnderQualification();
+            else
+                classDescription = attribute.getClassDescription();
+        }
+
+
         if (classDescription == null) {
             System.out.println("ERROR: In createAttributeRow "+
                 "classDescription == null.  This should never happen.");
@@ -263,12 +280,7 @@ public class RowData {
             return;
         }
 
-        /**
-         * For initial development, just get the first attribute.
-         */
-        //attribute = attributes.get(0);
-        attribute = Attribute.SELECT_ATTRIBUTE;
-
+        Attribute attribute = Attribute.SELECT_ATTRIBUTE;
         ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
         attributePath.add(attribute);
 
@@ -280,16 +292,11 @@ public class RowData {
 
 
     /**
-     * Returns true if this row ends with the Any, All, or None
-     * "collection" operator.
+     * Returns true if this row is a Compound Row, (simple or not).
+     * I.e. this means the row ends with a "compound" Collection Operator
+     * Any, All, or None.
      */
     public boolean isCompoundRow() {
-
-        /*
-        if (childRows.isEmpty())
-            System.err.println(
-                "WARNING: Compound row with no child rows defined.");
-        */
 
         if (collectionOperator == null)
             return(false);
@@ -297,6 +304,37 @@ public class RowData {
         return(collectionOperator.isCompoundOperator());
     }
 
+
+    /**
+     * Returns true if this is a "simple" Compound Row.
+     * I.e. a row that only contains a Collection Operator comboBox.
+     */
+    public boolean isSimpleCompoundRow() {
+
+        if (isCompoundRow() == false)
+            return(false);
+
+        if ((attributePath == null) || attributePath.isEmpty())
+            return(true);
+
+        return(false);
+    }
+
+    /**
+     * Returns true if the user can create child rows under this row.
+     */
+/*
+    public boolean rowCanHaveChildren() {
+
+        if (this == rootRow)
+            return(true);
+
+        if (collectionOperator == null)
+            return(false);
+
+        return(collectionOperator != CollectionOperator.COUNT);
+    }
+*/
 
     /**
      * TODO:  Decide whether I should make this a static method
@@ -474,7 +512,7 @@ public class RowData {
          * Do a quick sanity check.
          */
         if (collectionOperator != null &&
-            collectionOperator.isCompoundOperator() &&
+            (collectionOperator != CollectionOperator.COUNT) &&
             attributeOperator != null) {
             string += "ERROR: RowData is in an inconsistent state.";
             string += "\ncollectionOperator = "+collectionOperator;
@@ -665,6 +703,7 @@ public class RowData {
         /**
          * Create another child row.
          */
+        /*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("resources", Type.REFERENCE,
@@ -675,6 +714,7 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
+        */
 
         /**
          * Create another child row.
