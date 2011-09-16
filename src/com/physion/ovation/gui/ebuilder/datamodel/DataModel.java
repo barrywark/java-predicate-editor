@@ -91,6 +91,10 @@ public class DataModel {
         allClassDescriptions.add(epochGroupCD);
         possibleCUQs.add(epochGroupCD);
 
+        ClassDescription resourceCD =
+            new ClassDescription("Resource", taggableEntityBaseCD);
+        allClassDescriptions.add(resourceCD);
+
         /**
          * Initialize values of the EntityBase class.
          */
@@ -102,6 +106,10 @@ public class DataModel {
         entityBaseCD.addAttribute(attribute);
 
         attribute = new Attribute("incomplete", Type.BOOLEAN);
+        entityBaseCD.addAttribute(attribute);
+
+        attribute = new Attribute("resources", Type.REFERENCE,
+                                  resourceCD, Cardinality.TO_MANY);
         entityBaseCD.addAttribute(attribute);
 
         /**
@@ -155,6 +163,18 @@ public class DataModel {
 
         attribute = new Attribute("endTimeZone", Type.UTF_8_STRING);
         timelineElementCD.addAttribute(attribute);
+
+        /**
+         * Initialize values of the Resource class.
+         */
+        attribute = new Attribute("uti", Type.UTF_8_STRING);
+        resourceCD.addAttribute(attribute);
+
+        attribute = new Attribute("notes", Type.UTF_8_STRING);
+        resourceCD.addAttribute(attribute);
+
+        attribute = new Attribute("name", Type.UTF_8_STRING);
+        resourceCD.addAttribute(attribute);
     }
 
 

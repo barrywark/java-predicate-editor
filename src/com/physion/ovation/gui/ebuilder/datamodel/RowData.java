@@ -224,11 +224,13 @@ public class RowData {
 
         System.out.println("createCompoundRow rowData: "+this.getRowString());
 
-        Attribute attribute = getChildmostAttribute();
-        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
-        attributePath.add(attribute);
+        //Attribute attribute = getChildmostAttribute();
+        //ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
+        //attributePath.add(attribute);
+
         RowData compoundRow = new RowData();
-        compoundRow.setAttributePath(attributePath);
+        compoundRow.setParentRow(this);
+        //compoundRow.setAttributePath(attributePath);
         compoundRow.setCollectionOperator(CollectionOperator.ANY);
 
         addChildRow(compoundRow);
@@ -264,9 +266,8 @@ public class RowData {
         /**
          * For initial development, just get the first attribute.
          */
-        attribute = attributes.get(0);
-        //attribute = attributes.get(1);
-        //attribute = attributes.get(2);
+        //attribute = attributes.get(0);
+        attribute = Attribute.SELECT_ATTRIBUTE;
 
         ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
         attributePath.add(attribute);
@@ -513,10 +514,26 @@ public class RowData {
          * the "is null" and "is not null" values, then s/he also
          * must also specify an attributeValue.
          */
+        /*
         if ((attributeOperator != null) &&
             (!attributeOperator.equals(Attribute.IS_NULL.toString()) &&
              !attributeOperator.equals(Attribute.IS_NOT_NULL.toString())) &&
             (attributeValue == null)) {
+            string += "ERROR: RowData is in an inconsistent state.";
+            string += "\nattributeOperator = "+attributeOperator;
+            string += "\nattributeValue = "+attributeValue;
+            return(string);
+        }
+        */
+
+        /**
+         * If the user specified the "is null" or "is not null" operator,
+         * then s/he cannot also specify a value.
+         */
+        if ((attributeOperator != null) &&
+            (attributeOperator.equals(Attribute.IS_NULL.toString()) ||
+             attributeOperator.equals(Attribute.IS_NOT_NULL.toString())) &&
+            (attributeValue != null)) {
             string += "ERROR: RowData is in an inconsistent state.";
             string += "\nattributeOperator = "+attributeOperator;
             string += "\nattributeValue = "+attributeValue;
@@ -608,6 +625,8 @@ public class RowData {
             DataModel.getClassDescription("EpochGroup");
         ClassDescription sourceCD =
             DataModel.getClassDescription("Source");
+        ClassDescription resourceCD =
+            DataModel.getClassDescription("Resource");
 
         /**
          * Now create some RowData values.
@@ -620,10 +639,12 @@ public class RowData {
 
         Attribute attribute;
         ArrayList<Attribute> attributePath;
-///*
-        RowData rowData = new RowData();
 
+        RowData rowData;
+        ArrayList<RowData> childRows = new ArrayList<RowData>();
 
+/*
+        rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
@@ -638,7 +659,19 @@ public class RowData {
         rowData.setAttributeOperator("==");
         rowData.setAttributeValue("Test 27");
 
-        ArrayList<RowData> childRows = new ArrayList<RowData>();
+        childRows.add(rowData);
+        rootRow.setChildRows(childRows);
+*/
+        /**
+         * Create another child row.
+         */
+        rowData = new RowData();
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("resources", Type.REFERENCE,
+                                  resourceCD, Cardinality.TO_MANY);
+        attributePath.add(attribute);
+        rowData.setAttributePath(attributePath);
+        rowData.setCollectionOperator(CollectionOperator.NONE);
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);

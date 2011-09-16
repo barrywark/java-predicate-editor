@@ -3,7 +3,7 @@ package com.physion.ovation.gui.ebuilder.datatypes;
 import java.util.ArrayList;
 
 /**
- * 
+ * TODO: Provide method to get an Attribute of a class via its name.
  */
 public class ClassDescription {
 

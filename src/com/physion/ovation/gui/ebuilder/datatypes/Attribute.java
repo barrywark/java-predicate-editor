@@ -123,6 +123,11 @@ public class Attribute {
     }
 
 
+    public Cardinality getCardinality() {
+        return(cardinality);
+    }
+
+
     public boolean isPrimitive() {
 
         if (this.equals(Attribute.SELECT_ATTRIBUTE) ||
