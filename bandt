@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#
+# This is a quick and dirty script to build the test class and run it.
+#
+
+export CLASSPATH="src"
+javac src/com/physion/ovation/gui/ebuilder/*.java
+java com.physion.ovation.gui.ebuilder.TestEBuilder
