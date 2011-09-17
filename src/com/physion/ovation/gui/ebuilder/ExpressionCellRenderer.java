@@ -37,6 +37,16 @@ import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 
 
 /**
+ * This class creates all the widgets that are used to render (draw)
+ * a row and edit a row.  A JTable uses the same row renderer like a
+ * "rubber stamp" to draw each row.  In a similar way, the same
+ * row editor is reused to edit whichever row the user is currently
+ * editing.
+ *
+ * We create all the widgets we will need in our constructor, and
+ * thereafter we simply add or remove them from the JPanel based on
+ * the RowData value for that row.
+ *
  * TODO:  Pull parts of this code out into utility methods.
  */
 class ExpressionCellRenderer
@@ -50,27 +60,9 @@ class ExpressionCellRenderer
      */
     private static final int MAX_NUM_COMBOBOXES = 20;
 
-    /**
-     * Please note, we are using "name" that the special
-     * Attribute.IS_NULL and IS_NOT_NULL for the OPERATOR_IS_NULL
-     * and OPERATOR_IS_NOT_NULL operators.
-     *
-     * TODO: Perhaps put all these operator lists and strings
-     * into the DataModel class so they are easily configurable?
-     */
-/*
-    private static final String OPERATOR_TRUE = "is true";
-    private static final String OPERATOR_FALSE = "is false";
-    private static final String[] OPERATORS_BOOLEAN = {OPERATOR_TRUE,
-                                                       OPERATOR_FALSE};
-    private static final String[] OPERATORS_ARITHMATIC = {"==", "!=", "<", "<=",
-        ">", ">="};
-    private static final String[] OPERATORS_STRING = {"==", "!=", "<", "<=",
-        ">", ">=", "~=", "~~="};
-*/
     private int modelRow; // Temp hack.
 
-    private JLabel label;
+    //private JLabel label;
     private JButton deleteButton;
     private JButton createCompoundRowButton;
     private JButton createAttributeRowButton;
@@ -78,6 +70,7 @@ class ExpressionCellRenderer
     private JTextField textField;
     private JLabel indentWidget;
     private JPanel buttonPanel;
+    private JLabel ofTheFollowingLabel;
 
     private ExpressionTable table;
 
@@ -91,9 +84,7 @@ class ExpressionCellRenderer
 
         setBorder(BorderFactory.createEmptyBorder(3,10,3,10));
 
-        //setBackground(Color.green);
         setOpaque(true);
-        //defaultCellEditor = new DefaultCellEditor();
 
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -103,8 +94,9 @@ class ExpressionCellRenderer
          */
         indentWidget = new JLabel();
 
-        label = new JLabel();
-        label.setOpaque(true);
+        //label = new JLabel();
+        //label.setOpaque(true);
+        ofTheFollowingLabel = new JLabel(" of the following");
 
         deleteButton = new JButton("-");
         deleteButton.addActionListener(this);
@@ -152,10 +144,13 @@ class ExpressionCellRenderer
 
     /**
      * Layout whatever components the RowData for this row needs.
+     * This method places the assorted comboBoxes, text fields, labels,
+     * and buttons in a panel using the GridBagLayout layout manager.
      *
      * @param rowData - The RowData object this row will display and/or edit.
      *
-     * @param row - Row index of this row.
+     * @param row - Row index of this row.  The first row, (the root row),
+     * is row 0.
      */
     private void layoutNeededComponents(RowData rowData, int row) {
 
@@ -189,6 +184,16 @@ class ExpressionCellRenderer
 
         System.out.print("Laying out components for row "+row+",");
 
+        /**
+         * If a row is filled with widgets that do
+         * not stretch, we need to have the cell that
+         * holds the buttons on the right side of the
+         * row use the empty space.
+         *
+         * This gets set to true if some other widget
+         * uses the extra space.  E.g. the textField
+         * will use the extra space if it exists in this row.
+         */
         boolean someWidgetFillingEmptySpace = false;
 
         if (row == 0) {
@@ -214,30 +219,39 @@ class ExpressionCellRenderer
             gc.weightx = 1;
             someWidgetFillingEmptySpace = true;
             gc.anchor = GridBagConstraints.WEST;
-            add(new JLabel(" of the following"), gc);
+            //add(new JLabel(" of the following"), gc);
+            add(ofTheFollowingLabel, gc);
         }
         else if (rowData.isSimpleCompoundRow()) {
 
+            /**
+             * A "simple" compound row is a row that
+             * only contains a Collection Operator comboBox,
+             * and the -, +, ++ buttons on the right side.
+             */
             System.out.println(" which is a simple Compound Row.");
 
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             add(comboBoxes[0], gc);
 
-            /*
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            add(comboBoxes[1], gc);
-            */
-
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.weightx = 1;
             someWidgetFillingEmptySpace = true;
             gc.anchor = GridBagConstraints.WEST;
-            add(new JLabel(" of the following"), gc);
+            add(ofTheFollowingLabel, gc);
         }
         else {
+            /**
+             * This is an Attribute Row that contains one
+             * or more comboBoxes for selecting attributes,
+             * possibly a Collection Operator comboBox,
+             * possibly a true/false comboBox, possibly
+             * an Attribute Operator (==, !=, <, >, ...) comboBox,
+             * or any number of other widgets.  It also contains
+             * the +, ++, - buttons.
+             */
             System.out.println(" which is an Attribute Row.");
 
             ArrayList<Attribute> attributes = rowData.getAttributePath();
@@ -260,23 +274,25 @@ class ExpressionCellRenderer
             }
 
             /**
-             * If the rightmost Attribute is a class, as opposed
-             * to a "primitive" type such as int, float, string,
-             * we need to display another comboBox to its right
-             * that the user can use to choose an Attribute of
-             * that class or chose a special item such as "is null",
-             * "is not null", "Any Property", "My Property".
-             *
-             * If it is a primitive type, then we need to display
-             * a comboBox that has a selection of operators such as
-             * =, !=, <, >=, etc.
+             * We have inserted comboBoxes for every Attribute on this
+             * RowData's attributePath.  No insert any other widgets
+             * that are needed.
              */
+
             Attribute rightmostAttribute = rowData.getChildmostAttribute();
             if (!rightmostAttribute.isPrimitive() &&
                 !rightmostAttribute.equals(Attribute.SELECT_ATTRIBUTE) &&
                 !rightmostAttribute.equals(Attribute.IS_NULL) &&
                 !rightmostAttribute.equals(Attribute.IS_NOT_NULL) &&
                 (rowData.getCollectionOperator() == null)) {
+                /**
+                 * The rightmost Attribute is a class, as opposed
+                 * to a "primitive" type such as int, float, string,
+                 * so we need to display another comboBox to its right
+                 * that the user can use to choose an Attribute of
+                 * that class or choose a special item such as "is null",
+                 * "is not null", "Any Property", "My Property".
+                 */
                 System.out.println("Adding Select Attribute comboBox at gridx "+
                     gridx);
                 gc = new GridBagConstraints();
@@ -285,7 +301,9 @@ class ExpressionCellRenderer
             }
             else if (rightmostAttribute.isPrimitive()) {
                 /**
-                 * Create a comboBox that will hold operators such
+                 * The rightmost Attribute is a primitive Attribute
+                 * such as an int, float, string, so now create a
+                 * comboBox that will hold operators such
                  * as ==, !=, >, is true.
                  */
                 System.out.println("Adding operator comboBox at gridx "+gridx);
@@ -383,7 +401,7 @@ class ExpressionCellRenderer
                 gc.weightx = 1;
                 someWidgetFillingEmptySpace = true;
                 gc.anchor = GridBagConstraints.WEST;
-                add(new JLabel(" of the following"), gc);
+                add(ofTheFollowingLabel, gc);
             }
 
             /**
@@ -418,6 +436,11 @@ class ExpressionCellRenderer
 
 
     /**
+     * This method returns the Component that the JTable should
+     * use to draw the specified cell in the table.
+     * This method is called by the JTable when it wants to draw
+     * a cell.  (In our case, because we only have one column,
+     * you can think of this as drawing a row.)
      */
     @Override
     public Component getTableCellRendererComponent(JTable table,
@@ -445,20 +468,21 @@ class ExpressionCellRenderer
 
         String stringValue;
 
+        /**
+         * Temporarily using a JLabel until we implement all the
+         * other components in the row.
+         */
+        /*
         if (rowData != null) {
             stringValue = rowData.getIndentString()+rowData.getRowString();
         }
         else {
             stringValue = "";
         }
+        label.setText(stringValue);
+        */
 
         this.table = (ExpressionTable)table;
-
-        /**
-         * Temporarily using a JLabel until we implement all the
-         * other components in the row.
-         */
-        label.setText(stringValue);
 
         Color background;
         Color foreground;
@@ -493,12 +517,14 @@ class ExpressionCellRenderer
             foreground = Color.BLACK;
         }
 */
-        label.setBackground(background);
-        //setBackground(background);
-        label.setForeground(foreground);
+
+        /**
+         * Enable/disable the +,++,- buttons.
+         */
 
         /**
          * The very first row cannot be deleted.
+         * All other rows can always be deleted.
          */
         if (row == 0) {
             deleteButton.setEnabled(false);
@@ -509,9 +535,8 @@ class ExpressionCellRenderer
 
         /**
          * See if this row can have child rows.
-         * Based on that, enable/disable the +, ++, - buttons.
+         * Based on that, enable/disable the +, ++ buttons.
          */
-
         if ((rowData != null) && rowData.isCompoundRow()) {
             createCompoundRowButton.setEnabled(true);
             createAttributeRowButton.setEnabled(true);
@@ -541,9 +566,8 @@ class ExpressionCellRenderer
              * for the Class Under Qualification.  The comboBox on the
              * right contains the Any/All/None CollectionOperator.
              *
-             * TODO:  The list of CUQs must come from a configuration file.
-             *
-             * TODO:  Create the comboBox models only once and reuse them.
+             * TODO:  Create the comboBox models only once and reuse them?
+             * Create a cache of them?
              */
             
             ClassDescription[] values =
@@ -560,29 +584,17 @@ class ExpressionCellRenderer
              * value in this row's RowData object.
              */
 
-            /*
-            System.out.println("RowData.getClassUnderQualification() = "+
-                RowData.getClassUnderQualification());
-            System.out.println("RowData.getClassUnderQualification() = "+
-                RowData.getClassUnderQualification().hashCode());
-            */
             comboBoxes[0].setSelectedItem(
                 RowData.getClassUnderQualification());
 
             /**
-             * Now do the same for the Collection Operator combobox.
+             * Now set the model and selected value of the 
+             * Collection Operator combobox.
              */
-            //System.out.println("Setting model to NOT contain COUNT.");
             model = new DefaultComboBoxModel(CollectionOperator.
                                              getCompoundCollectionOperators());
             comboBoxes[1].setModel(model);
 
-            /*
-            System.out.println("RowData.getClassUnderQualification() = "+
-                RowData.getClassUnderQualification());
-            System.out.println("RowData.getClassUnderQualification() = "+
-                RowData.getClassUnderQualification().hashCode());
-            */
             comboBoxes[1].setSelectedItem(RowData.getRootRow().
                 getCollectionOperator());
         }
@@ -591,16 +603,14 @@ class ExpressionCellRenderer
             /**
              * This is a "simple" Compound Row.  I.e. it only has
              * the Collection Operator comboBox in it.
-             *
-             * Set the comboBox model and selected item.
+             * Set the comboBox model.
              */
-
             DefaultComboBoxModel model = new DefaultComboBoxModel(
                 CollectionOperator.getCompoundCollectionOperators());
             comboBoxes[0].setModel(model);
 
             /**
-             * Set the value of the Collection Operator comboBox
+             * Set the selected item of the Collection Operator comboBox
              * to be this row's value.
              */
             comboBoxes[0].setSelectedItem(rowData.getCollectionOperator());
@@ -608,6 +618,16 @@ class ExpressionCellRenderer
         else {
 
             /**
+             * This isn't the first row, nor is it a simple Compound Row,
+             * so we have to do alot more work to set up this row's
+             * widgets.  The code below basically works its way from
+             * left to right initializing the values of the widgets
+             * in this row.
+             */
+
+            /**
+             * The leftmost widgets are one or more comboBoxes displaying
+             * this RowData's attributePath.
              * Set the model for each comboBox displaying a list of attributes
              * in a class.
              * The leftmost comboBox shows the list of attributes of
@@ -644,7 +664,7 @@ class ExpressionCellRenderer
                 }
 
                 /**
-                 * Now set the selected value in the comboBox.
+                 * Now set the selected item in the comboBox.
                  */
                 comboBoxes[index].setSelectedItem(attributes.get(index));
             }
@@ -652,7 +672,12 @@ class ExpressionCellRenderer
             /**
              * By this point, all the models and values of the comboBoxes
              * that correspond to Attributes on this RowData's attributePath
-             * have been set.
+             * have been set.  E.g. if the row looks like this:
+             *
+             *      epochGroup.epochs Count == 5
+             *
+             * we have set the model and selected item in the epochGroup and 
+             * epochs comboBoxes.
              *
              * Now we need to handle the comboBoxes and other widgets
              * that hold things like collection operators, attribute operators,
@@ -665,8 +690,15 @@ class ExpressionCellRenderer
             if (childmostAttribute.getCardinality() == Cardinality.TO_MANY) {
 
                 /**
-                 * Set the comboBox to hold all the Collection Operators:
-                 * Any, All, None, Count.
+                 * The item selected in the "childmost" (i.e. last)
+                 * Attribute in this RowData's attributePath is an
+                 * Attribute that has a to-many relationship with the
+                 * class that contains it.  So, there is a comboBox
+                 * to the right of it that the user can use to select
+                 * the Collection Operator to use.
+                 *
+                 * Set that comboBox's model to the list of all the
+                 * Collection Operators: Any, All, None, Count.
                  */
                 DefaultComboBoxModel model = new DefaultComboBoxModel(
                     CollectionOperator.values());
@@ -684,6 +716,10 @@ class ExpressionCellRenderer
                     CollectionOperator.COUNT) {
 
                     /**
+                     * This row is something like:
+                     *
+                     *      epochGroup.epochs Count == 5
+                     *
                      * Set the operator that is used for the Count.
                      * E.g. ==, >, <=
                      */
@@ -699,23 +735,19 @@ class ExpressionCellRenderer
 
                     String attributeValue = rowData.getAttributeValue();
                     if (attributeValue == null)
-                        //attributeValue = "<Enter Value>";
                         attributeValue = "";
                     textField.setText(attributeValue);
                 }
             }
-
-
-            /**
-             * If the rightmost Attribute is a primitive type,
-             * then we need to display
-             * a comboBox that has a selection of operators such as
-             * =, !=, <, >=, etc.
-             */
-            if (childmostAttribute.isPrimitive()) {
+            else if (childmostAttribute.isPrimitive()) {
                 /**
-                 * Set the comboBox model to hold operators such
-                 * as ==, !=, >, etc.
+                 * The rightmost Attribute is a primitive type,
+                 * so we need to display a comboBox that has a
+                 * selection of operators such as =, !=, <, >=, etc.
+                 *
+                 * Set the comboBox model to hold operators appropriate
+                 * for the Type (int, string, float, boolean) of the
+                 * Attribute.
                  */
                 DefaultComboBoxModel model;
                 if (childmostAttribute.getType() == Type.BOOLEAN)
@@ -727,14 +759,16 @@ class ExpressionCellRenderer
                 else
                     model = new DefaultComboBoxModel(
                         DataModel.OPERATORS_ARITHMATIC);
-                System.out.println("Set model for comboBox "+
-                    widgetIndex+" to be operator of some type.");
+                //System.out.println("Set model for comboBox "+
+                //                 widgetIndex+" to be operator of some type.");
                 comboBoxes[widgetIndex].setModel(model);
 
+                /*
                 System.out.println("childmostAttribute.getType() = "+
                                    childmostAttribute.getType());
                 System.out.println("rowData.getAttributeValue() = "+
                                    rowData.getAttributeValue());
+                */
 
                 if (childmostAttribute.getType() == Type.BOOLEAN) {
                     if (DataModel.OPERATOR_TRUE.equals(
@@ -751,7 +785,6 @@ class ExpressionCellRenderer
 
                     String attributeValue = rowData.getAttributeValue();
                     if (attributeValue == null)
-                        //attributeValue = "<Enter Value>";
                         attributeValue = "";
                     textField.setText(attributeValue);
                 }
@@ -764,9 +797,9 @@ class ExpressionCellRenderer
                 rowData.getCollectionOperator() == null) {
 
                 /**
-                 * If the rightmost Attribute is a class, as opposed
+                 * The rightmost Attribute is a class, as opposed
                  * to a "primitive" type such as int, float, string,
-                 * we need to display another comboBox to its right
+                 * so we need to display another comboBox to its right
                  * that the user can use to choose an Attribute of
                  * that class or choose a special item such as "is null",
                  * "is not null", "Any Property", "My Property".
@@ -792,17 +825,18 @@ class ExpressionCellRenderer
              *
              * If the user can enter a value, set the textField.
              */
+            /*
             if (rowData.getChildmostAttribute().isPrimitive()) {
 
                 if (rowData.getChildmostAttribute().getType() != 
                     Type.BOOLEAN) {
                     String attributeValue = rowData.getAttributeValue();
                     if (attributeValue == null)
-                        //attributeValue = "<Enter Value>";
                         attributeValue = "";
                     textField.setText(attributeValue);
                 }
             }
+            */
         }
 
         return this;
@@ -927,6 +961,12 @@ class ExpressionCellRenderer
     }
 
 
+    /**
+     * This method is called when the user changes the selected
+     * item in a comboBox.
+     *
+     * TODO: Clean up and comment this.
+     */
     private void comboBoxChanged(JComboBox comboBox) {
 
         System.out.println("Enter comboBoxChanged");
@@ -1178,7 +1218,6 @@ class ExpressionCellRenderer
 
             table.tableChanged(null);
         }
-
 
         System.out.println("rootRow:\n"+RowData.getRootRow());
     }
