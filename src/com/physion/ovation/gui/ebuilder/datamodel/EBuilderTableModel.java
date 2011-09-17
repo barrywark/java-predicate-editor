@@ -106,4 +106,9 @@ public class EBuilderTableModel
         System.out.println("Calling rowData.createAttributeRow(): "+rowData);
         rowData.createAttributeRow();
     }
+
+
+    public String toStringDebug() {
+        return(rootRow.toString());
+    }
 }

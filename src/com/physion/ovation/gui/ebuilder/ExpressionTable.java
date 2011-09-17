@@ -137,4 +137,11 @@ class ExpressionTable
         model.createAttributeRow(row);
         tableChanged(null);  // Should this be in the table or the model?
     }
+
+
+    public void printModel() {
+        
+        EBuilderTableModel model = (EBuilderTableModel)getModel();
+        System.out.println("\nCurrent Value:\n"+model.toStringDebug());
+    }
 }

@@ -16,47 +16,17 @@ import com.physion.ovation.gui.ebuilder.datamodel.EBuilderTableModel;
 public class EBuilderPanel
     extends JPanel {
 
+    private ExpressionTable table;
+
+
     EBuilderPanel() {
 
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
 
-        //final EBuilderTree tree = new EBuilderTree();
-
         EBuilderTableModel tableModel = new EBuilderTableModel();
 
-        //final JList list = new JList(listModel);
-        //final JTable table = new JTable(tableModel);
-        final ExpressionTable table = new ExpressionTable(tableModel);
-
-        /*
-        ExpressionCellRenderer expressionCellRenderer =
-            new ExpressionCellRenderer();
-        list.setCellRenderer(expressionCellRenderer);
-        */
-
-        /**
-         * Create some filler strings for testing DnD.
-         */
-/*
-        DefaultListModel defModel = new DefaultListModel();
-        list.setModel (defModel);
-        String[] listItems = {
-            "Any of the following",
-            "        <attribute> = foobar",
-            "        <attribute> ~= 12",
-            "        path.to.attribute >= 27",
-            "        All of the following",
-            "               <attribute> - ^",
-            "               path.to.attribute >= 27",
-            "        All of the following",
-            "        path.to.attribute >= 56",
-            "        <attribute> = 2"
-        };
-        Iterator it = Arrays.asList(listItems).iterator();
-        while (it.hasNext())
-            defModel.addElement (it.next());
-*/
+        table = new ExpressionTable(tableModel);
 
         JScrollPane scrollPane = new JScrollPane(table,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
@@ -69,5 +39,10 @@ public class EBuilderPanel
         gc.weightx = 1;
         gc.weighty = 1;
         add(scrollPane, gc);
+    }
+
+
+    public void print() {
+        table.printModel();
     }
 }
