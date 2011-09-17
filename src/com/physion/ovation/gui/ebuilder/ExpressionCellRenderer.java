@@ -297,7 +297,8 @@ class ExpressionCellRenderer
                     someWidgetFillingEmptySpace = true;
                     gc.fill = GridBagConstraints.BOTH;
                     //textField.setText("<Enter Value>");
-                    textField.setText("");
+                    //System.out.println("Calling setText1");
+                    //textField.setText("");
                     add(textField, gc);
                 }
             }
@@ -336,7 +337,8 @@ class ExpressionCellRenderer
                 someWidgetFillingEmptySpace = true;
                 gc.fill = GridBagConstraints.BOTH;
                 //textField.setText("<Enter Value>");
-                textField.setText("");
+                //System.out.println("Calling setText2");
+                //textField.setText("");
                 add(textField, gc);
             }
             else if (rowData.getCollectionOperator() != null) {
@@ -500,45 +502,6 @@ class ExpressionCellRenderer
          * Based on that, enable/disable the +, ++, - buttons.
          */
 
-        /*
-        Attribute attribute = null;
-        if (rowData != null) 
-            attribute = rowData.getChildmostAttribute();
-
-        ClassDescription classDescription = null;
-        if (attribute != null)
-            classDescription = attribute.getClassDescription();
-
-        if (rowData == RowData.getRootRow())
-            classDescription = RowData.getClassUnderQualification();
-
-        System.out.println("Setting button sensitivity based on rowData: "+
-            rowData);
-        System.out.println("Setting button sensitivity based on Attribute: "+
-            attribute);
-        System.out.println("Setting button sensitivity based on CD: "+
-            classDescription);
-        if (!Attribute.SELECT_ATTRIBUTE.equals(attribute) &&
-            !Attribute.IS_NULL.equals(attribute) &&
-            !Attribute.IS_NOT_NULL.equals(attribute) &&
-            (classDescription != null)) {
-            createCompoundRowButton.setEnabled(true);
-            createAttributeRowButton.setEnabled(true);
-        }
-        */
-        /*
-        Attribute childmostAttribute = null;
-        if (rowData != null) 
-            childmostAttribute = rowData.getChildmostAttribute();
-
-        if ((row == 0) ||
-            ((rowData != null) && rowData.isCompoundRow() &&
-            (childmostAttribute != null) &&
-            (childmostAttribute.getType() == Type.REFERENCE))) {
-            createCompoundRowButton.setEnabled(true);
-            createAttributeRowButton.setEnabled(true);
-        }
-        */
         if ((rowData != null) && rowData.isCompoundRow()) {
             createCompoundRowButton.setEnabled(true);
             createAttributeRowButton.setEnabled(true);
@@ -1234,5 +1197,11 @@ class ExpressionCellRenderer
 
         RowData rowData = RowData.getRootRow().getChild(editingRow);
         rowData.setAttributeValue(textField.getText());
+
+        if (editingRow == 0) {
+            System.out.println("Changed Text Of Root Row");
+            System.out.println("textField.isVisible() = "+textField.isVisible());
+            System.exit(0);
+        }
     }
 }
