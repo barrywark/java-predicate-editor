@@ -31,6 +31,10 @@ public class DataModel {
         ">", ">=", "~=", "~~="};
 
 
+    /**
+     * The one an only instance of this DataModel.
+     * We are a singleton.
+     */
     private static DataModel instance;
 
     /**

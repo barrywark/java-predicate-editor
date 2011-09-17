@@ -21,6 +21,9 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.text.BadLocationException;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
@@ -37,7 +40,7 @@ import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 class ExpressionCellRenderer
     extends JPanel
     implements TableCellRenderer, TableCellEditor,
-    ActionListener, ItemListener {
+    ActionListener, ItemListener, DocumentListener {
 
     /**
      * TODO: Possibly change to an ArrayList of these to allow an infinite
@@ -118,6 +121,7 @@ class ExpressionCellRenderer
         }
 
         textField = new JTextField();
+        textField.getDocument().addDocumentListener(this);
 
         buttonPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gc;
@@ -292,7 +296,8 @@ class ExpressionCellRenderer
                     gc.weightx = 1;
                     someWidgetFillingEmptySpace = true;
                     gc.fill = GridBagConstraints.BOTH;
-                    textField.setText("<Enter Value>");
+                    //textField.setText("<Enter Value>");
+                    textField.setText("");
                     add(textField, gc);
                 }
             }
@@ -330,7 +335,8 @@ class ExpressionCellRenderer
                 gc.weightx = 1;
                 someWidgetFillingEmptySpace = true;
                 gc.fill = GridBagConstraints.BOTH;
-                textField.setText("<Enter Value>");
+                //textField.setText("<Enter Value>");
+                textField.setText("");
                 add(textField, gc);
             }
             else if (rowData.getCollectionOperator() != null) {
@@ -720,7 +726,8 @@ class ExpressionCellRenderer
 
                     String attributeValue = rowData.getAttributeValue();
                     if (attributeValue == null)
-                        attributeValue = "<Enter Value>";
+                        //attributeValue = "<Enter Value>";
+                        attributeValue = "";
                     textField.setText(attributeValue);
                 }
             }
@@ -771,7 +778,8 @@ class ExpressionCellRenderer
 
                     String attributeValue = rowData.getAttributeValue();
                     if (attributeValue == null)
-                        attributeValue = "<Enter Value>";
+                        //attributeValue = "<Enter Value>";
+                        attributeValue = "";
                     textField.setText(attributeValue);
                 }
                 widgetIndex++;
@@ -817,7 +825,8 @@ class ExpressionCellRenderer
                     Type.BOOLEAN) {
                     String attributeValue = rowData.getAttributeValue();
                     if (attributeValue == null)
-                        attributeValue = "<Enter Value>";
+                        //attributeValue = "<Enter Value>";
+                        attributeValue = "";
                     textField.setText(attributeValue);
                 }
             }
@@ -1201,4 +1210,29 @@ class ExpressionCellRenderer
         System.out.println("rootRow:\n"+RowData.getRootRow());
     }
 
+
+    public void insertUpdate(DocumentEvent event) {
+        valueTextFieldChanged();
+    }
+
+    public void removeUpdate(DocumentEvent event) {
+        valueTextFieldChanged();
+    }
+
+    public void changedUpdate(DocumentEvent event) {
+        //valueTextFieldChanged();
+    }
+
+    private void valueTextFieldChanged() {
+
+        int editingRow = table.getEditingRow();
+        if (editingRow < 0) {
+            return;
+        }
+        if (editingRow != modelRow)
+            return;
+
+        RowData rowData = RowData.getRootRow().getChild(editingRow);
+        rowData.setAttributeValue(textField.getText());
+    }
 }
