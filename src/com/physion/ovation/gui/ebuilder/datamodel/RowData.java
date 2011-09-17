@@ -396,7 +396,18 @@ public class RowData {
     }
 
     public void setCollectionOperator(CollectionOperator collectionOperator) {
+
         this.collectionOperator = collectionOperator;
+
+        /**
+         * Blank out the attribute operator if the user
+         * is selecting Any, All, or None.
+         */
+        if ((collectionOperator != null) &&
+            collectionOperator.isCompoundOperator()) {
+            setAttributeOperator(null);
+            setAttributeValue(null);
+        }
     }
 
 
@@ -406,7 +417,17 @@ public class RowData {
 
 
     public void setAttributeOperator(String attributeOperator) {
+
         this.attributeOperator = attributeOperator;
+
+        /**
+         * Blank out the attributeValue if the attributeOperator
+         * is being set to a boolean.
+         */
+        if (DataModel.OPERATOR_TRUE.equals(attributeOperator) ||
+            DataModel.OPERATOR_FALSE.equals(attributeOperator)) {
+            setAttributeValue(null);
+        }
     }
 
 

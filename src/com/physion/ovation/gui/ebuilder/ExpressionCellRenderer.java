@@ -39,6 +39,10 @@ class ExpressionCellRenderer
     implements TableCellRenderer, TableCellEditor,
     ActionListener, ItemListener {
 
+    /**
+     * TODO: Possibly change to an ArrayList of these to allow an infinite
+     * number?
+     */
     private static final int MAX_NUM_COMBOBOXES = 20;
 
     /**
@@ -49,6 +53,7 @@ class ExpressionCellRenderer
      * TODO: Perhaps put all these operator lists and strings
      * into the DataModel class so they are easily configurable?
      */
+/*
     private static final String OPERATOR_TRUE = "is true";
     private static final String OPERATOR_FALSE = "is false";
     private static final String[] OPERATORS_BOOLEAN = {OPERATOR_TRUE,
@@ -57,13 +62,8 @@ class ExpressionCellRenderer
         ">", ">="};
     private static final String[] OPERATORS_STRING = {"==", "!=", "<", "<=",
         ">", ">=", "~=", "~~="};
-    /*
-    private static final String OPERATOR_IS_NULL = Attribute.IS_NULL.getName();
-    private static final String OPERATOR_IS_NOT_NULL =
-        Attribute.IS_NULL.getName();
-    */
+*/
     private int modelRow; // Temp hack.
-
 
     private JLabel label;
     private JButton deleteButton;
@@ -708,7 +708,8 @@ class ExpressionCellRenderer
                      * Set the operator that is used for the Count.
                      * E.g. ==, >, <=
                      */
-                    model = new DefaultComboBoxModel(OPERATORS_ARITHMATIC);
+                    model = new DefaultComboBoxModel(
+                        DataModel.OPERATORS_ARITHMATIC);
                     System.out.println("Set model for comboBox "+
                         widgetIndex+" to be numeric operator.");
                     comboBoxes[widgetIndex].setModel(model);
@@ -739,13 +740,13 @@ class ExpressionCellRenderer
                 DefaultComboBoxModel model;
                 if (childmostAttribute.getType() == Type.BOOLEAN)
                     model = new DefaultComboBoxModel(
-                        OPERATORS_BOOLEAN);
+                        DataModel.OPERATORS_BOOLEAN);
                 else if (childmostAttribute.getType() == Type.UTF_8_STRING)
                     model = new DefaultComboBoxModel(
-                        OPERATORS_STRING);
+                        DataModel.OPERATORS_STRING);
                 else
                     model = new DefaultComboBoxModel(
-                        OPERATORS_ARITHMATIC);
+                        DataModel.OPERATORS_ARITHMATIC);
                 System.out.println("Set model for comboBox "+
                     widgetIndex+" to be operator of some type.");
                 comboBoxes[widgetIndex].setModel(model);
@@ -756,10 +757,13 @@ class ExpressionCellRenderer
                                    rowData.getAttributeValue());
 
                 if (childmostAttribute.getType() == Type.BOOLEAN) {
-                    if (OPERATOR_TRUE.equals(rowData.getAttributeOperator()))
-                        comboBoxes[widgetIndex].setSelectedItem(OPERATOR_TRUE);
+                    if (DataModel.OPERATOR_TRUE.equals(
+                        rowData.getAttributeOperator()))
+                        comboBoxes[widgetIndex].setSelectedItem(
+                            DataModel.OPERATOR_TRUE);
                     else
-                        comboBoxes[widgetIndex].setSelectedItem(OPERATOR_FALSE);
+                        comboBoxes[widgetIndex].setSelectedItem(
+                            DataModel.OPERATOR_FALSE);
                 }
                 else {
                     comboBoxes[widgetIndex].setSelectedItem(
@@ -1069,7 +1073,8 @@ class ExpressionCellRenderer
                 else if (selectedAttribute.getCardinality() ==
                          Cardinality.TO_MANY) {
                     rowData.setCollectionOperator(CollectionOperator.COUNT);
-                    rowData.setAttributeOperator(OPERATORS_ARITHMATIC[0]);
+                    rowData.setAttributeOperator(
+                        DataModel.OPERATORS_ARITHMATIC[0]);
                     rowData.setAttributeValue("0");
                 }
 
@@ -1078,11 +1083,11 @@ class ExpressionCellRenderer
                     System.out.println("Setting attributeOperator to: "+
                         selectedAttribute.getName());
                     rowData.setAttributeOperator(selectedAttribute.getName());
-                    rowData.setAttributeValue(null);
+                    //rowData.setAttributeValue(null);
                 }
                 else if (selectedAttribute.getType() == Type.BOOLEAN) {
-                    rowData.setAttributeOperator(OPERATOR_TRUE);
-                    rowData.setAttributeValue(null);
+                    rowData.setAttributeOperator(DataModel.OPERATOR_TRUE);
+                    //rowData.setAttributeValue(null);
                 }
 
                 System.out.println("After op rowData: "+rowData.getRowString());
@@ -1136,17 +1141,18 @@ class ExpressionCellRenderer
                     String attributeOperator;
                     switch (childmostAttribute.getType()) {
                         case BOOLEAN:
-                            attributeOperator = OPERATORS_BOOLEAN[0];
+                            attributeOperator = DataModel.OPERATORS_BOOLEAN[0];
                         break;
                         case UTF_8_STRING:
-                            attributeOperator = OPERATORS_STRING[0];
+                            attributeOperator = DataModel.OPERATORS_STRING[0];
                         break;
                         case INT_16:
                         case INT_32:
                         //case FLOAT_32:
                         case FLOAT_64:
                         case DATE_TIME:
-                            attributeOperator = OPERATORS_ARITHMATIC[0];
+                            attributeOperator = 
+                                DataModel.OPERATORS_ARITHMATIC[0];
                         break;
                         default:
                             System.err.println("ERROR: Unhandled operator.");

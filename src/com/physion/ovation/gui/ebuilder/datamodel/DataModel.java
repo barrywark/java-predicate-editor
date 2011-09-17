@@ -16,6 +16,21 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
  */
 public class DataModel {
 
+    /**
+     * Please note, we are using "name" that the special
+     * Attribute.IS_NULL and IS_NOT_NULL for the OPERATOR_IS_NULL
+     * and OPERATOR_IS_NOT_NULL operators.
+     */
+    public static final String OPERATOR_TRUE = "is true";
+    public static final String OPERATOR_FALSE = "is false";
+    public static final String[] OPERATORS_BOOLEAN = {OPERATOR_TRUE,
+                                                       OPERATOR_FALSE};
+    public static final String[] OPERATORS_ARITHMATIC = {"==", "!=", "<", "<=",
+        ">", ">="};
+    public static final String[] OPERATORS_STRING = {"==", "!=", "<", "<=",
+        ">", ">=", "~=", "~~="};
+
+
     private static DataModel instance;
 
     /**
