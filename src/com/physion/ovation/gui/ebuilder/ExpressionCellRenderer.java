@@ -3,6 +3,7 @@ package com.physion.ovation.gui.ebuilder;
 import java.util.EventObject;
 import java.util.ArrayList;
 import java.awt.Color;
+import java.awt.Insets;
 import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -24,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
+import javax.swing.BorderFactory;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
@@ -87,6 +89,8 @@ class ExpressionCellRenderer
      */
     public ExpressionCellRenderer() {
 
+        setBorder(BorderFactory.createEmptyBorder(3,10,3,10));
+
         //setBackground(Color.green);
         setOpaque(true);
         //defaultCellEditor = new DefaultCellEditor();
@@ -118,6 +122,7 @@ class ExpressionCellRenderer
             comboBox.setMaximumRowCount(20);  // Number of items before scroll.
             comboBox.addItemListener(this);
             //comboBox.addActionListener(this);
+            comboBox.setBorder(BorderFactory.createEmptyBorder(0,7,0,0));
         }
 
         textField = new JTextField();
@@ -128,16 +133,19 @@ class ExpressionCellRenderer
         gc = new GridBagConstraints();
         gc.gridx = 0;
         gc.fill = GridBagConstraints.VERTICAL;
+        gc.insets = new Insets(0,7,0,0);
         buttonPanel.add(createAttributeRowButton, gc);
 
         gc = new GridBagConstraints();
         gc.gridx = 1;
         gc.fill = GridBagConstraints.VERTICAL;
+        gc.insets = new Insets(0,7,0,0);
         buttonPanel.add(createCompoundRowButton, gc);
 
         gc = new GridBagConstraints();
         gc.gridx = 2;
         gc.fill = GridBagConstraints.VERTICAL;
+        gc.insets = new Insets(0,7,0,0);
         buttonPanel.add(deleteButton, gc);
     }
 
@@ -296,6 +304,7 @@ class ExpressionCellRenderer
                     gc.weightx = 1;
                     someWidgetFillingEmptySpace = true;
                     gc.fill = GridBagConstraints.BOTH;
+                    gc.insets = new Insets(0,7,0,0);
                     //textField.setText("<Enter Value>");
                     //System.out.println("Calling setText1");
                     //textField.setText("");
@@ -336,6 +345,7 @@ class ExpressionCellRenderer
                 gc.weightx = 1;
                 someWidgetFillingEmptySpace = true;
                 gc.fill = GridBagConstraints.BOTH;
+                gc.insets = new Insets(0,7,0,0);
                 //textField.setText("<Enter Value>");
                 //System.out.println("Calling setText2");
                 //textField.setText("");
@@ -562,7 +572,7 @@ class ExpressionCellRenderer
             /**
              * Now do the same for the Collection Operator combobox.
              */
-            System.out.println("Setting model to NOT contain COUNT.");
+            //System.out.println("Setting model to NOT contain COUNT.");
             model = new DefaultComboBoxModel(CollectionOperator.
                                              getCompoundCollectionOperators());
             comboBoxes[1].setModel(model);
@@ -890,7 +900,7 @@ class ExpressionCellRenderer
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        System.out.println("Enter actionPerformed = "+e);
+        //System.out.println("Enter actionPerformed = "+e);
         if (e.getSource() == createCompoundRowButton) {
             table.createCompoundRow();
         }
@@ -898,7 +908,7 @@ class ExpressionCellRenderer
             table.createAttributeRow();
         }
         else if (e.getSource() == deleteButton) {
-            System.out.println("deleteButton pressed");
+            //System.out.println("deleteButton pressed");
             table.deleteSelectedRow();
             //table.tableChanged(null);
         }

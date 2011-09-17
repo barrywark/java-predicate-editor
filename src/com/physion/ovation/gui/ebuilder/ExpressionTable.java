@@ -21,8 +21,10 @@ class ExpressionTable
     //extends JXTable {
     extends JTable {
 
-    ExpressionCellRenderer expressionCellRenderer;
-    ExpressionCellRenderer expressionCellEditor;
+    private static int rowHeight = 0;
+
+    private ExpressionCellRenderer expressionCellRenderer;
+    private ExpressionCellRenderer expressionCellEditor;
 
     public ExpressionTable(TableModel model) {
         super(model);
@@ -85,12 +87,15 @@ class ExpressionTable
         return(getRowHeight());
     }
 
-
     @Override
     public int getRowHeight() {
 
-        Component component = getCellRenderer(0,0).getTableCellRendererComponent(this, null, true, true, 0, 0);
-        return(component.getPreferredSize().height);
+        if (rowHeight == 0) {
+            Component component = getCellRenderer(0,0).
+                getTableCellRendererComponent(this, null, true, true, 0, 0);
+            rowHeight = component.getPreferredSize().height;
+        }
+        return(rowHeight);
     }
 
 
