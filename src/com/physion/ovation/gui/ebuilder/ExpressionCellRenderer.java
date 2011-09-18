@@ -1247,9 +1247,10 @@ class ExpressionCellRenderer
              * 
              */
 
-            table.tableChanged(null);
+            //table.tableChanged(null);
         }
 
+        table.tableChanged(null);
         System.out.println("rootRow:\n"+RowData.getRootRow());
     }
 
