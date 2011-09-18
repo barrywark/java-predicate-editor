@@ -1133,8 +1133,8 @@ class ExpressionCellRenderer
 
                 if ((selectedAttribute.equals(Attribute.IS_NULL)) ||
                     (selectedAttribute.equals(Attribute.IS_NOT_NULL))) {
-                    System.out.println("Setting attributeOperator to: "+
-                        selectedAttribute.getName());
+                    //System.out.println("Setting attributeOperator to: "+
+                    //    selectedAttribute.getName());
                     rowData.setAttributeOperator(selectedAttribute.getName());
                     //rowData.setAttributeValue(null);
                 }

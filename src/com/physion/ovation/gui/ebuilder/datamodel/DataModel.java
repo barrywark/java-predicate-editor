@@ -17,8 +17,8 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 public class DataModel {
 
     /**
-     * Please note, we are using "name" that the special
-     * Attribute.IS_NULL and IS_NOT_NULL for the OPERATOR_IS_NULL
+     * Please note, we are using Attribute.IS_NULL and
+     * IS_NOT_NULL for the OPERATOR_IS_NULL
      * and OPERATOR_IS_NOT_NULL operators.
      */
     public static final String OPERATOR_TRUE = "is true";
@@ -29,6 +29,9 @@ public class DataModel {
         ">", ">="};
     public static final String[] OPERATORS_STRING = {"==", "!=", "<", "<=",
         ">", ">=", "~=", "~~="};
+    public static final String OPERATOR_IS_NULL = Attribute.IS_NULL.getName();
+    public static final String OPERATOR_IS_NOT_NULL =
+        Attribute.IS_NOT_NULL.getName();
 
 
     /**

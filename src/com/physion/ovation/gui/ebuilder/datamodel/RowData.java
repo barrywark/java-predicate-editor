@@ -416,16 +416,36 @@ public class RowData {
     }
 
 
+    /**
+     * Set the attributeOperator of this row.
+     *
+     * TODO: Cleanup/reorganize where these assorted operator strings
+     * are stored.  Is creating enums overkill?
+     *
+     * @param attributeOperator - A value such as, but not limited to:
+     * ==, !=, >, <, ~=, is null, is not null, is true, is false.
+     */
     public void setAttributeOperator(String attributeOperator) {
 
+        System.out.println("Setting attributeOperator to "+attributeOperator);
         this.attributeOperator = attributeOperator;
 
         /**
          * Blank out the attributeValue if the attributeOperator
-         * is being set to a boolean.
+         * is being set to the operator "is true", "is false", "is null"
+         * "is not null".  (If the operator is set to one of those
+         * values, the attributeValue member data is meaningless.)
+         *
+         * TODO: I don't like the fact that the user *chooses* the
+         * "is null" or "is not null" operator using an Attribute comboBox,
+         * but we save the operator in the RowData's attributeOperator member
+         * data.  That is the way the user sees it in the GUI though.
          */
         if (DataModel.OPERATOR_TRUE.equals(attributeOperator) ||
-            DataModel.OPERATOR_FALSE.equals(attributeOperator)) {
+            DataModel.OPERATOR_FALSE.equals(attributeOperator) ||
+            DataModel.OPERATOR_IS_NULL.equals(attributeOperator) ||
+            DataModel.OPERATOR_IS_NOT_NULL.equals(attributeOperator)) {
+            System.out.println("Setting attributeValue to null");
             setAttributeValue(null);
         }
     }
