@@ -7,12 +7,22 @@ package com.physion.ovation.gui.ebuilder.datatypes;
  */
 public class Attribute {
 
+    /**
+     * TODO: I'm not happy with the fact that the Attribute class
+     * is uased to hold "special" values that aren't really attributes,
+     * such as SELECT_ATTRIBUTE, IS_NULL, MY_PROPERTY.
+     * But, I don't see a cleaner way that doesn't create more code.
+     */
     public static final Attribute SELECT_ATTRIBUTE =
         new Attribute("Select Attribute", Type.REFERENCE);
     public static final Attribute IS_NULL =
         new Attribute("is null", Type.REFERENCE);
     public static final Attribute IS_NOT_NULL =
         new Attribute("is not null", Type.REFERENCE);
+    public static final Attribute MY_PROPERTY =
+        new Attribute("My Property", Type.REFERENCE);
+    public static final Attribute ANY_PROPERTY =
+        new Attribute("Any Property", Type.REFERENCE);
 
     /**
      * The name of this attribute.  E.g. "owner", "uuid", "keywords".
@@ -128,15 +138,39 @@ public class Attribute {
     }
 
 
+    /**
+     * This returns true if this Attribute is a "primitive"
+     * attribute such as an int, float, string, date etc.
+     */
     public boolean isPrimitive() {
 
         if (this.equals(Attribute.SELECT_ATTRIBUTE) ||
             this.equals(Attribute.IS_NULL) ||
-            this.equals(Attribute.IS_NOT_NULL)) {
+            this.equals(Attribute.IS_NOT_NULL) ||
+            this.equals(Attribute.MY_PROPERTY) ||
+            this.equals(Attribute.ANY_PROPERTY)) {
             return(false);
         }
 
         return(type.isPrimitive());
+    }
+
+
+    /**
+     * This returns true if this Attribute is a "special" attribute.
+     * By "special" we mean it is not really an attribute, but is
+     * instead a special value the GUI uses.
+     */
+    public boolean isSpecial() {
+
+        if (this.equals(Attribute.SELECT_ATTRIBUTE) ||
+            this.equals(Attribute.IS_NULL) ||
+            this.equals(Attribute.IS_NOT_NULL) ||
+            this.equals(Attribute.MY_PROPERTY) ||
+            this.equals(Attribute.ANY_PROPERTY)) {
+            return(true);
+        }
+        return(false);
     }
 
 

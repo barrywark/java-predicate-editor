@@ -661,7 +661,7 @@ class ExpressionCellRenderer
                     System.out.println("Set model for comboBox "+index+
                         " to be "+parentClass);
                     setComboBoxModel(comboBoxes[index], parentClass,
-                                     true, false, attributes.get(index));
+                                     true, false, false, attributes.get(index));
                 }
                 else {
                     /**
@@ -675,7 +675,7 @@ class ExpressionCellRenderer
                         " to be "+att.getClassDescription());
                     setComboBoxModel(comboBoxes[index],
                                      att.getClassDescription(), true, true,
-                                     attributes.get(index));
+                                     true, attributes.get(index));
                 }
 
                 /**
@@ -809,6 +809,8 @@ class ExpressionCellRenderer
                 !childmostAttribute.equals(Attribute.SELECT_ATTRIBUTE) &&
                 !childmostAttribute.equals(Attribute.IS_NULL) &&
                 !childmostAttribute.equals(Attribute.IS_NOT_NULL) &&
+                !childmostAttribute.equals(Attribute.MY_PROPERTY) &&
+                !childmostAttribute.equals(Attribute.ANY_PROPERTY) &&
                 rowData.getCollectionOperator() == null) {
 
                 /**
@@ -826,7 +828,7 @@ class ExpressionCellRenderer
                  */
                 setComboBoxModel(comboBoxes[widgetIndex],
                                  childmostAttribute.getClassDescription(),
-                                 true, true, Attribute.SELECT_ATTRIBUTE);
+                                 true, true, true, Attribute.SELECT_ATTRIBUTE);
             }
 
             /**
@@ -864,12 +866,24 @@ class ExpressionCellRenderer
      * Attribute.SELECT_ATTRIBUTE attribute, and we will append
      * the special Attribute.IS_NULL and Attribute.IS_NOT_NULL.
      *
-     * @param hasSelectAttribute - If this is true, we will prepend the
-     * special Attribute.SELECT_ATTRIBUTE to the list of the choices.
+     * @param comboBox - The JComboBox whose model and selectedItem
+     * we will set.
+     *
+     * @param classDescription - We will set the comboBox's model to
+     * be the list of attributes of this ClassDescription.  (We also
+     * might add a few more special values to the list.)
+     * 
+     * @param prependSelectAttribute - If this is true, we will prepend
+     * the special Attribute.SELECT_ATTRIBUTE to the list of items
+     * in the comboBox's model.
      *
      * @param appendNulls - If this is true, we will append the
      * special Attribute.IS_NULL and IS_NOT_NULL to the end of the
      * list of the choices.
+     *
+     * @param appendMyAnyProperty - If this is true, we will also append
+     * the special Attributes.MY_PROPERTY and Attribute.ANY_PROPERTY to
+     * the end of the list of items in the comboBox's model.
      *
      * @param selectedItem - After setting the model, this method sets
      * the selected item to this value.  Pass null if you do not want to
@@ -877,21 +891,28 @@ class ExpressionCellRenderer
      */
     private void setComboBoxModel(JComboBox comboBox,
                                   ClassDescription classDescription,
-                                  boolean hasSelectAttribute,
-                                  boolean appendNulls, Object selectedItem) {
+                                  boolean prependSelectAttribute,
+                                  boolean appendNulls,
+                                  boolean appendMyAnyProperty,
+                                  Object selectedItem) {
 
         ArrayList<Attribute> attributes = classDescription.getAllAttributes();
         Attribute[] values;
 
         ArrayList<Attribute> copy = new ArrayList<Attribute>(attributes);
 
+        if (prependSelectAttribute)
+            copy.add(0, Attribute.SELECT_ATTRIBUTE);
+
         if (appendNulls) {
             copy.add(Attribute.IS_NULL);
             copy.add(Attribute.IS_NOT_NULL);
         }
 
-        if (hasSelectAttribute)
-            copy.add(0, Attribute.SELECT_ATTRIBUTE);
+        if (appendMyAnyProperty) {
+            copy.add(Attribute.MY_PROPERTY);
+            copy.add(Attribute.ANY_PROPERTY);
+        }
 
         /**
          * All the monkey business with the list of Attributes is
