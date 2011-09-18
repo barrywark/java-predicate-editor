@@ -574,8 +574,10 @@ class ExpressionCellRenderer
                 DataModel.getInstance().getPossibleCUQs().
                 toArray(new ClassDescription[0]);
 
-            DefaultComboBoxModel model = new DefaultComboBoxModel(values);
-            comboBoxes[0].setModel(model);
+            //DefaultComboBoxModel model = new DefaultComboBoxModel(values);
+            //comboBoxes[0].setModel(model);
+            setComboBoxModel(comboBoxes[0], values,
+                             RowData.getClassUnderQualification());
 
             /**
              * We have set the data model for the Class Under Qualification
@@ -584,19 +586,24 @@ class ExpressionCellRenderer
              * value in this row's RowData object.
              */
 
-            comboBoxes[0].setSelectedItem(
-                RowData.getClassUnderQualification());
+            //comboBoxes[0].setSelectedItem(
+            //    RowData.getClassUnderQualification());
 
             /**
              * Now set the model and selected value of the 
              * Collection Operator combobox.
              */
+            /*
             model = new DefaultComboBoxModel(CollectionOperator.
                                              getCompoundCollectionOperators());
             comboBoxes[1].setModel(model);
+            */
+            setComboBoxModel(comboBoxes[1], CollectionOperator.
+                             getCompoundCollectionOperators(),
+                             RowData.getRootRow().getCollectionOperator());
 
-            comboBoxes[1].setSelectedItem(RowData.getRootRow().
-                getCollectionOperator());
+            //comboBoxes[1].setSelectedItem(RowData.getRootRow().
+            //    getCollectionOperator());
         }
         else if (rowData.isSimpleCompoundRow()) {
 
@@ -605,15 +612,20 @@ class ExpressionCellRenderer
              * the Collection Operator comboBox in it.
              * Set the comboBox model.
              */
+            /*
             DefaultComboBoxModel model = new DefaultComboBoxModel(
                 CollectionOperator.getCompoundCollectionOperators());
             comboBoxes[0].setModel(model);
+            */
+            setComboBoxModel(comboBoxes[0], CollectionOperator.
+                             getCompoundCollectionOperators(),
+                             rowData.getCollectionOperator());
 
             /**
              * Set the selected item of the Collection Operator comboBox
              * to be this row's value.
              */
-            comboBoxes[0].setSelectedItem(rowData.getCollectionOperator());
+            //comboBoxes[0].setSelectedItem(rowData.getCollectionOperator());
         }
         else {
 
@@ -643,30 +655,33 @@ class ExpressionCellRenderer
                      * The leftmost comboBox is filled with the
                      * attributes of the parentClass.  I.e. the
                      * class of its parent row.
+                     * Also set the selected item in the comboBox.
                      */
                     ClassDescription parentClass = rowData.getParentClass();
                     System.out.println("Set model for comboBox "+index+
                         " to be "+parentClass);
                     setComboBoxModel(comboBoxes[index], parentClass,
-                                     true, false);
+                                     true, false, attributes.get(index));
                 }
                 else {
                     /**
                      * This is NOT the leftmost comboBox.
                      * Each comboBox is filled with the attributes of
                      * the class of the comboBox to its left.
+                     * Also set the selected item in the comboBox.
                      */
                     Attribute att = attributes.get(index-1);
                     System.out.println("Set model for comboBox "+index+
                         " to be "+att.getClassDescription());
                     setComboBoxModel(comboBoxes[index],
-                                     att.getClassDescription(), true, true);
+                                     att.getClassDescription(), true, true,
+                                     attributes.get(index));
                 }
 
                 /**
                  * Now set the selected item in the comboBox.
                  */
-                comboBoxes[index].setSelectedItem(attributes.get(index));
+                //comboBoxes[index].setSelectedItem(attributes.get(index));
             }
 
             /**
@@ -811,9 +826,7 @@ class ExpressionCellRenderer
                  */
                 setComboBoxModel(comboBoxes[widgetIndex],
                                  childmostAttribute.getClassDescription(),
-                                 true, true);
-                comboBoxes[widgetIndex++].setSelectedItem(
-                    Attribute.SELECT_ATTRIBUTE);
+                                 true, true, Attribute.SELECT_ATTRIBUTE);
             }
 
             /**
@@ -857,11 +870,15 @@ class ExpressionCellRenderer
      * @param appendNulls - If this is true, we will append the
      * special Attribute.IS_NULL and IS_NOT_NULL to the end of the
      * list of the choices.
+     *
+     * @param selectedItem - After setting the model, this method sets
+     * the selected item to this value.  Pass null if you do not want to
+     * set the selected item.
      */
     private void setComboBoxModel(JComboBox comboBox,
                                   ClassDescription classDescription,
                                   boolean hasSelectAttribute,
-                                  boolean appendNulls) {
+                                  boolean appendNulls, Object selectedItem) {
 
         ArrayList<Attribute> attributes = classDescription.getAllAttributes();
         Attribute[] values;
@@ -882,8 +899,22 @@ class ExpressionCellRenderer
          * Attributes and install it in the comboBox.
          */
         values = copy.toArray(new Attribute[0]);
-        DefaultComboBoxModel model = new DefaultComboBoxModel(values);
+        setComboBoxModel(comboBox, values, selectedItem);
+    }
+
+
+    /**
+     * @param selectedItem - After setting the model, this method sets
+     * the selected item to this value.  Pass null if you do not want to
+     * set the selected item.
+     */
+    private void setComboBoxModel(JComboBox comboBox, Object[] items,
+                                  Object selectedItem) {
+
+        DefaultComboBoxModel model = new DefaultComboBoxModel(items);
         comboBox.setModel(model);
+        if (selectedItem != null)
+            comboBox.setSelectedItem(selectedItem);
     }
 
 
