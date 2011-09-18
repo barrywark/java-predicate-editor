@@ -55,8 +55,8 @@ class ExpressionCellRenderer
     ActionListener, ItemListener, DocumentListener {
 
     /**
-     * TODO: Possibly change to an ArrayList of these to allow an infinite
-     * number?
+     * TODO: Change to an ArrayList of these to allow an infinite
+     * number.
      */
     private static final int MAX_NUM_COMBOBOXES = 20;
 
