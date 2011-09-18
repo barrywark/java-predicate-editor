@@ -276,14 +276,18 @@ class ExpressionCellRenderer
             /**
              * We have inserted comboBoxes for every Attribute on this
              * RowData's attributePath.  No insert any other widgets
-             * that are needed.
+             * that are needed  based on what the childmost (i.e. rightmost)
+             * attribute is in this row.
              */
 
             Attribute rightmostAttribute = rowData.getChildmostAttribute();
             if (!rightmostAttribute.isPrimitive() &&
+                /*
                 !rightmostAttribute.equals(Attribute.SELECT_ATTRIBUTE) &&
                 !rightmostAttribute.equals(Attribute.IS_NULL) &&
                 !rightmostAttribute.equals(Attribute.IS_NOT_NULL) &&
+                */
+                !rightmostAttribute.isSpecial() &&
                 (rowData.getCollectionOperator() == null)) {
                 /**
                  * The rightmost Attribute is a class, as opposed
@@ -328,6 +332,28 @@ class ExpressionCellRenderer
                     //textField.setText("");
                     add(textField, gc);
                 }
+            }
+            else if (rightmostAttribute.equals(Attribute.MY_PROPERTY) ||
+                     rightmostAttribute.equals(Attribute.ANY_PROPERTY)) {
+                /**
+                 * The rightmost attribute is either "My Property" or
+                 * "Any Property" so add the widgets that are to the
+                 * right of that attribute.  For example, for a row
+                 * that looks like this: 
+                 *
+                 *      epochGroup.source.My Property.animalID string == X123
+                 *
+                 * we would need to add a text field where the user
+                 * can enter "animalID", a comboBox where the user
+                 * can select the type of the value (e.g. int, string, float,
+                 * boolean), a comboBox to select the operator (e.g. ==, !=, >),
+                 * and a text field where the user can enter a value.
+                 * Note that for boolean types, we would not have a
+                 * value text field, but instead the operator comboBox would
+                 * let the user choose, "is true" or "is false".
+                 */
+                System.out.println(
+                    "\nTODO: Write code to handle My/Any Property.\n");
             }
             else if (rowData.getCollectionOperator() ==
                      CollectionOperator.COUNT) {
