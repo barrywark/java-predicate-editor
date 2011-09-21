@@ -618,8 +618,11 @@ public class RowData {
             }
         }
 
-        if (collectionOperator != null)
+        if (collectionOperator != null) {
             string += " "+collectionOperator;
+            //if (!collectionOperator.equals(CollectionOperator.COUNT))
+            //    string += " of the following";
+        }
 
         if (propName != null) {
             string += "."+propName;
