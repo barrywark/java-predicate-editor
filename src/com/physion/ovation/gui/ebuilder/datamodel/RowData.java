@@ -570,21 +570,16 @@ public class RowData {
 
 
     /**
-     * Get the String representation of just this row.  I.e. not this
+     * Get the String representation of JUST THIS row.  I.e. not this
      * row and its children.
      */
     public String getRowString(String indent) {
         
-        //String string = indent+parentClass.getName()+" |";
-
-        //ClassDescription parentClass = getParentClass();
-        //String string = indent+getParentClass().getName()+" |";
         String string;
         if (getParentClass() != null) 
             string = indent+getParentClass().getName()+" |";
         else 
             string = indent+"ERROR: No Parent Class"+" |";
-
 
         /**
          * Do a quick sanity check.
@@ -598,24 +593,29 @@ public class RowData {
             return(string);
         }
 
-        //if (!attributePath.isEmpty()) {
-        //}
         boolean first = true;
-        //for (String attributeName : attributePath) {
         for (Attribute attribute : attributePath) {
 
-            if (first)
-                string += " ";
-            else
-                string += ".";
+            if (attribute != null) {
+                if (!attribute.isSpecial()) {
+                    /**
+                     * Put a dot between each attribute on the path.
+                     */
+                    if (first) {
+                        string += " ";
+                        first = false;
+                    }
+                    else {
+                        string += ".";
+                    }
 
-            //string += attributeName;
-            if (attribute != null)
-                string += attribute.getName();
-            else
+                    string += attribute.getName();
+                }
+            }
+            else {
+                System.err.println("ERROR:  null Attribute in attributePath.");
                 string += "ERROR: attribute == null";
-
-            first = false;
+            }
         }
 
         if (collectionOperator != null)
@@ -625,13 +625,11 @@ public class RowData {
             string += "."+propName;
         }
         if (propType != null) {
-            string += " "+propType;
+            string += "("+propType+")";
         }
 
         if (attributeOperator != null)
             string += " "+attributeOperator;
-        //else
-        //    string += " xx";
 
         /**
          * Another quick sanity check.
