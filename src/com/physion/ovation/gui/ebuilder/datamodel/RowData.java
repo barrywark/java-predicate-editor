@@ -118,6 +118,14 @@ public class RowData {
     private String attributeValue;
 
     /**
+     * If the user is specifying a custom "My Property" or "Any Property"
+     * attribute, the propName member data will be set to the custom
+     * property name that the user entered in the row.
+     */
+    private String propName;
+    private String propType;
+    
+    /**
      * If this row is a "compound" row, this will be set to
      * Any, All, or None.
      *
@@ -476,6 +484,31 @@ public class RowData {
     }
 
 
+    public void setPropName(String propName) {
+        this.propName = propName;
+    }
+
+
+    public String getPropName() {
+        return(propName);
+    }
+
+
+    public void setPropType(String propType) {
+
+        this.propType = propType;
+        if (DataModel.PROP_TYPE_BOOLEAN.equals(propType)) {
+            setAttributeOperator(DataModel.OPERATOR_TRUE);
+            //setAttributeValue(null);
+        }
+    }
+
+
+    public String getPropType() {
+        return(propType);
+    }
+
+
     /**
      * TODO: Do we want to set the parentRow of every child to
      * be this RowData instance?  If so, then we probably want
@@ -588,8 +621,17 @@ public class RowData {
         if (collectionOperator != null)
             string += " "+collectionOperator;
 
+        if (propName != null) {
+            string += "."+propName;
+        }
+        if (propType != null) {
+            string += " "+propType;
+        }
+
         if (attributeOperator != null)
             string += " "+attributeOperator;
+        //else
+        //    string += " xx";
 
         /**
          * Another quick sanity check.
@@ -725,6 +767,22 @@ public class RowData {
 
         RowData rowData;
         ArrayList<RowData> childRows = new ArrayList<RowData>();
+
+        rowData = new RowData();
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("nextEpoch", Type.REFERENCE,
+                                  epochCD, Cardinality.TO_ONE);
+        attributePath.add(attribute);
+        attributePath.add(Attribute.MY_PROPERTY);
+
+        rowData.setPropName("animalID");
+        rowData.setPropType(DataModel.PROP_TYPE_STRING);
+        rowData.setAttributeOperator("==");
+        rowData.setAttributeValue("x123");
+        rowData.setAttributePath(attributePath);
+
+        childRows.add(rowData);
+        rootRow.setChildRows(childRows);
 
 /*
         rowData = new RowData();

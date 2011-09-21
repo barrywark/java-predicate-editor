@@ -33,6 +33,19 @@ public class DataModel {
     public static final String OPERATOR_IS_NOT_NULL =
         Attribute.IS_NOT_NULL.getName();
 
+    /**
+     * TODO: What are the possible types?
+     */
+    public static final String PROP_TYPE_INT = "int";
+    public static final String PROP_TYPE_FLOAT = "float";
+    public static final String PROP_TYPE_STRING = "string";
+    public static final String PROP_TYPE_TIME = "time";
+    public static final String PROP_TYPE_BOOLEAN = "boolean";
+    public static final String[] PROP_TYPES = {PROP_TYPE_INT,
+                                               PROP_TYPE_FLOAT,
+                                               PROP_TYPE_STRING,
+                                               PROP_TYPE_TIME,
+                                               PROP_TYPE_BOOLEAN};
 
     /**
      * The one an only instance of this DataModel.
