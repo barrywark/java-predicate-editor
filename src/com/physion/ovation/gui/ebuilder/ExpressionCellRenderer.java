@@ -159,7 +159,8 @@ class ExpressionCellRenderer
         gc = new GridBagConstraints();
         gc.gridx = 0;
         gc.fill = GridBagConstraints.VERTICAL;
-        gc.insets = LEFT_INSETS;
+        //gc.insets = LEFT_INSETS;
+        gc.insets = new Insets(0,INSET*3,0,0);
         buttonPanel.add(createAttributeRowButton, gc);
 
         gc = new GridBagConstraints();
@@ -669,9 +670,11 @@ class ExpressionCellRenderer
          */
         if (row == 0) {
             deleteButton.setDraw(false);
+            //deleteButton.setVisible(false);
         }
         else {
             deleteButton.setDraw(true);
+            //deleteButton.setVisible(true);
         }
 
         /**
@@ -1008,7 +1011,17 @@ class ExpressionCellRenderer
      *
      * In addition, we will (optionally) prepend the special
      * Attribute.SELECT_ATTRIBUTE attribute, and we will append
-     * the special Attribute.IS_NULL and Attribute.IS_NOT_NULL.
+     * the special Attribute.IS_NULL and Attribute.IS_NOT_NULL,
+     * and we will append the special Attribute.MY_PROPERTY and
+     * Attribute.ANY_PROPERTY.
+     *
+     * Any attributes that are of type Type.PER_USER will cause
+     * two entries to be added to the comboBox model.  One entry
+     * will be prepended with the string "My" and the other with
+     * the string "All".  For example, if the attribute was called
+     * "analysisRecords", instead of inserting an entry called
+     * "analysisRecords" into the comboBox, we will insert two
+     * entries:  "My analysisRecords" and "All analysisRecords".
      *
      * @param comboBox - The JComboBox whose model and selectedItem
      * we will set.
@@ -1046,10 +1059,35 @@ class ExpressionCellRenderer
         else
             attributes = new ArrayList<Attribute>();
 
-        ArrayList<Attribute> copy = new ArrayList<Attribute>(attributes);
+        ArrayList<Attribute> copy = new ArrayList<Attribute>();
 
+        /**
+         * First, prepend the special "Select Attribute" attribute
+         * if requested.
+         */
         if (prependSelectAttribute)
-            copy.add(0, Attribute.SELECT_ATTRIBUTE);
+            copy.add(Attribute.SELECT_ATTRIBUTE);
+
+        /**
+         * Go through the list of attributes adding them to our
+         * copy of the ArrayList.  But, if an attribute is of type
+         * Type.PER_USER, insert two entries into our copy, one
+         * entry is prefaced with "My " and the other with "All ".
+         */
+        for (Attribute attribute : attributes) {
+
+            if (attribute.getType() != Type.PER_USER) {
+                copy.add(attribute);
+            }
+            else {
+                Attribute myAllAttribute = new Attribute(attribute);
+                myAllAttribute.setName("My "+myAllAttribute.getName());
+                copy.add(myAllAttribute);
+                myAllAttribute = new Attribute(attribute);
+                myAllAttribute.setName("All "+myAllAttribute.getName());
+                copy.add(myAllAttribute);
+            }
+        }
 
         if (appendNulls) {
             copy.add(Attribute.IS_NULL);
@@ -1084,6 +1122,17 @@ class ExpressionCellRenderer
         comboBox.setModel(model);
         if (selectedItem != null)
             comboBox.setSelectedItem(selectedItem);
+
+        if (((DefaultComboBoxModel)(comboBox.getModel())).
+            getIndexOf(selectedItem) < 0) {
+
+            System.err.println("ERROR:  Desired selectedItem not found in "+
+                "list.\nselectedItem = "+selectedItem+"\nItems in list:\n");
+            for (Object item : items) {
+                //System.out.println("  "+((Attribute)item).toStringDebug());
+                System.out.println("  "+item);
+            }
+        }
     }
 
 

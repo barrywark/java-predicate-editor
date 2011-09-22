@@ -819,18 +819,17 @@ public class RowData {
         /**
          * Create a "Per User" row.
          */
-/*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
-        attribute = new Attribute("derivedResponses", Type.PER_USER,
+        attribute = new Attribute("All derivedResponses", Type.PER_USER,
                                   derivedResponseCD, Cardinality.TO_MANY);
         attributePath.add(attribute);
 
+        rowData.setCollectionOperator(CollectionOperator.ALL);
         rowData.setAttributePath(attributePath);
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
-*/
 
 /*
         rowData = new RowData();

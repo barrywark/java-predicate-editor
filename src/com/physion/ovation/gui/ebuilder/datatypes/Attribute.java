@@ -49,6 +49,11 @@ public class Attribute {
     private Cardinality cardinality;
 
 
+    public Attribute(Attribute other) {
+        this(other.name, other.type, other.classDescription, other.cardinality);
+    }
+
+
     /**
      * @param classDescription - If 
      */
@@ -115,7 +120,7 @@ public class Attribute {
         if (this == rhs)
             return(true);
 
-        if (this.name != other.name)
+        if (!this.name.equals(other.name))
             return(false);
 
         if (this.type != other.type)
@@ -133,6 +138,11 @@ public class Attribute {
             return(false);
 
         return(true);
+    }
+
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 
