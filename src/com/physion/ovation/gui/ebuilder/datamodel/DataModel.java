@@ -130,6 +130,18 @@ public class DataModel {
             new ClassDescription("Resource", taggableEntityBaseCD);
         allClassDescriptions.add(resourceCD);
 
+        ClassDescription iOBaseCD =
+            new ClassDescription("IOBase", taggableEntityBaseCD);
+        allClassDescriptions.add(iOBaseCD);
+
+        ClassDescription responseBaseCD =
+            new ClassDescription("ResponseBase", iOBaseCD);
+        allClassDescriptions.add(responseBaseCD);
+
+        ClassDescription derivedResponseCD =
+            new ClassDescription("DerivedResponse", responseBaseCD);
+        allClassDescriptions.add(derivedResponseCD);
+
         /**
          * Initialize values of the EntityBase class.
          */
@@ -153,11 +165,19 @@ public class DataModel {
         attribute = new Attribute("protocolID", Type.UTF_8_STRING);
         epochCD.addAttribute(attribute);
 
+        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
+                                  null, Cardinality.N_A);
+        epochCD.addAttribute(attribute);
+
         attribute = new Attribute("excludeFromAnalysis", Type.BOOLEAN);
         epochCD.addAttribute(attribute);
 
         attribute = new Attribute("nextEpoch", Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
+        epochCD.addAttribute(attribute);
+
+        attribute = new Attribute("derivedResponses", Type.PER_USER,
+                                  derivedResponseCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 
         attribute = new Attribute("epochGroup", Type.REFERENCE,

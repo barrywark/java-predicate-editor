@@ -19,8 +19,12 @@ public enum Type {
     REFERENCE,
 
     /**
+     * This is a "parameters map" type.
+     */
+    PARAMETERS_MAP,
+
+    /**
      * This is "per-user" reference type.
-     * (Not sure if this is really correct.)
      */
     PER_USER;
 
@@ -30,7 +34,9 @@ public enum Type {
      * E.g. an int, float, boolean, etc.
      */
     public boolean isPrimitive() {
-        return((this != REFERENCE) && (this != PER_USER));
+        return((this != REFERENCE) &&
+               (this != PARAMETERS_MAP) &&
+               (this != PER_USER));
     }
 
 

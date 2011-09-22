@@ -753,22 +753,35 @@ public class RowData {
             DataModel.getClassDescription("Source");
         ClassDescription resourceCD =
             DataModel.getClassDescription("Resource");
+        ClassDescription derivedResponseCD =
+            DataModel.getClassDescription("DerivedResponse");
 
         /**
          * Now create some RowData values.
          */
-        RowData rootRow = new RowData();
-        RowData.setRootRow(rootRow);
-        rootRow.setClassUnderQualification(epochCD);
 
+        /**
+         * Create the "root" RowData object.  All of the other
+         * rows are children of this row.
+         */
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ANY);
+        RowData.setRootRow(rootRow);
 
         Attribute attribute;
         ArrayList<Attribute> attributePath;
-
         RowData rowData;
         ArrayList<RowData> childRows = new ArrayList<RowData>();
 
+        /**
+         * Start creating child rows of the rootRow.
+         */
+
+        /**
+         * Create a "My Property" row.
+         */
+/*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("nextEpoch", Type.REFERENCE,
@@ -784,6 +797,40 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
+*/
+        /**
+         * Create a "Parameters Map" row.
+         */
+        rowData = new RowData();
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
+                                  null, Cardinality.N_A);
+        attributePath.add(attribute);
+
+        rowData.setPropName("stimulusFrequency");
+        rowData.setPropType(DataModel.PROP_TYPE_INT);
+        rowData.setAttributeOperator("==");
+        rowData.setAttributeValue("5");
+        rowData.setAttributePath(attributePath);
+
+        childRows.add(rowData);
+        rootRow.setChildRows(childRows);
+
+        /**
+         * Create a "Per User" row.
+         */
+/*
+        rowData = new RowData();
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("derivedResponses", Type.PER_USER,
+                                  derivedResponseCD, Cardinality.TO_MANY);
+        attributePath.add(attribute);
+
+        rowData.setAttributePath(attributePath);
+
+        childRows.add(rowData);
+        rootRow.setChildRows(childRows);
+*/
 
 /*
         rowData = new RowData();

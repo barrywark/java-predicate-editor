@@ -58,6 +58,24 @@ public class Attribute {
         this.type = type;
         this.classDescription = classDescription;
         this.cardinality = cardinality;
+
+        if ((this.type == Type.PARAMETERS_MAP) &&
+            (this.cardinality != Cardinality.N_A)) {
+
+            System.err.println("WARNING:  type is PARAMETERS_MAP but "+
+                               "cardinality is not N_A.  "+
+                               "The code MIGHT need to be updated to handle "+
+                               "that.  Attribute = "+this);
+        }
+
+        /*
+        if ((this.type == Type.REFERENCE) && (this.classDescription == null)) {
+
+            System.err.println("ERROR:  type is REFERENCE but "+
+                               "classDescription is null.  "+
+                               "That does not make sense.  Attribute = "+this);
+        }
+        */
     }
 
 

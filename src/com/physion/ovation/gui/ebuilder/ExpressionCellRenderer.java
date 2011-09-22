@@ -77,9 +77,9 @@ class ExpressionCellRenderer
     private int modelRow; // Temp hack.
 
     //private JLabel label;
-    private JButton deleteButton;
-    private JButton createCompoundRowButton;
-    private JButton createAttributeRowButton;
+    private InvisibleButton deleteButton;
+    private InvisibleButton createCompoundRowButton;
+    private InvisibleButton createAttributeRowButton;
     private JComboBox[] comboBoxes = new JComboBox[MAX_NUM_COMBOBOXES];
     private JTextField valueTextField;
     private JTextField propNameTextField;
@@ -115,13 +115,13 @@ class ExpressionCellRenderer
         //label.setOpaque(true);
         ofTheFollowingLabel = new JLabel(" of the following");
 
-        deleteButton = new JButton("-");
+        deleteButton = new InvisibleButton("-");
         deleteButton.addActionListener(this);
 
-        createAttributeRowButton = new JButton("+");
+        createAttributeRowButton = new InvisibleButton("+");
         createAttributeRowButton.addActionListener(this);
 
-        createCompoundRowButton = new JButton("++");
+        createCompoundRowButton = new InvisibleButton("++");
         createCompoundRowButton.addActionListener(this);
 
         for (int count = 0; count < MAX_NUM_COMBOBOXES; count++) {
@@ -319,12 +319,8 @@ class ExpressionCellRenderer
 
             Attribute rightmostAttribute = rowData.getChildmostAttribute();
             if (!rightmostAttribute.isPrimitive() &&
-                /*
-                !rightmostAttribute.equals(Attribute.SELECT_ATTRIBUTE) &&
-                !rightmostAttribute.equals(Attribute.IS_NULL) &&
-                !rightmostAttribute.equals(Attribute.IS_NOT_NULL) &&
-                */
                 !rightmostAttribute.isSpecial() &&
+                (rightmostAttribute.getType() != Type.PARAMETERS_MAP) &&
                 (rowData.getCollectionOperator() == null)) {
                 /**
                  * The rightmost Attribute is a class, as opposed
@@ -342,6 +338,8 @@ class ExpressionCellRenderer
                 add(comboBoxes[comboBoxIndex++], gc);
             }
             else if (rightmostAttribute.isPrimitive()) {
+
+                System.out.println("Rightmost attribute is a primitive type.");
                 /**
                  * The rightmost Attribute is a primitive Attribute
                  * such as an int, float, string, so now place the
@@ -373,19 +371,29 @@ class ExpressionCellRenderer
                 }
             }
             else if (rightmostAttribute.equals(Attribute.MY_PROPERTY) ||
-                     rightmostAttribute.equals(Attribute.ANY_PROPERTY)) {
+                     rightmostAttribute.equals(Attribute.ANY_PROPERTY) ||
+                     (rightmostAttribute.getType() == Type.PARAMETERS_MAP)) {
+
+                System.out.println("Rightmost attribute is "+
+                    "\"My/Any Property\" or PARAMETERS_MAP");
+
                 /**
                  * The rightmost attribute is either "My Property" or
-                 * "Any Property" so add the widgets that are to the
-                 * right of that attribute.  For example, for a row
-                 * that looks like this: 
+                 * "Any Property", or is of Type.PARAMETERS_MAP,
+                 * so add the widgets that are to the right of that
+                 * attribute.  For example, for a row that looks like this: 
                  *
                  *      epochGroup.source.My Property.animalID string == X123
                  *
-                 * we would need to add a text field where the user
-                 * can enter "animalID", a comboBox where the user
-                 * can select the type of the value (e.g. int, string, float,
-                 * boolean), a comboBox to select the operator (e.g. ==, !=, >),
+                 * or this:
+                 *
+                 *      protocolParameters.stimulusFrequency int == 5
+                 *
+                 * For the first example, we would need to add a text
+                 * field where the user can enter "animalID",
+                 * a comboBox where the user can select the type of the value
+                 * (e.g. int, string, float, boolean),
+                 * a comboBox to select the operator (e.g. ==, !=, >),
                  * and a text field where the user can enter a value.
                  * Note that for boolean types, we would not have a
                  * value text field, but instead the operator comboBox would
@@ -433,27 +441,6 @@ class ExpressionCellRenderer
                  * Set the model of this comboBox depending on the
                  * selected value in the propTypeComboBox.
                  */
-                /*
-                if (DataModel.PROP_TYPE_INT.equals(
-                    propTypeComboBox.getSelectedItem()) ||
-                    DataModel.PROP_TYPE_FLOAT.equals(
-                    propTypeComboBox.getSelectedItem())) {
-                    operatorComboBox.setModel(OPERATORS_ARITHMATIC_MODEL);
-                }
-                else if (DataModel.PROP_TYPE_STRING.equals(
-                         propTypeComboBox.getSelectedItem())) {
-                    operatorComboBox.setModel(OPERATORS_STRING_MODEL);
-                }
-                else if (DataModel.PROP_TYPE_TIME.equals(
-                         propTypeComboBox.getSelectedItem())) {
-                    operatorComboBox.setModel(OPERATORS_ARITHMATIC_MODEL);
-                }
-                else if (DataModel.PROP_TYPE_BOOLEAN.equals(
-                         propTypeComboBox.getSelectedItem())) {
-                    System.out.println("Prop type is boolean.");
-                    operatorComboBox.setModel(OPERATORS_BOOLEAN_MODEL);
-                }
-                */
                 if (DataModel.PROP_TYPE_INT.equals(rowData.getPropType()) ||
                     DataModel.PROP_TYPE_FLOAT.equals(rowData.getPropType())) {
                     operatorComboBox.setModel(OPERATORS_ARITHMATIC_MODEL);
@@ -472,12 +459,6 @@ class ExpressionCellRenderer
                     operatorComboBox.setModel(OPERATORS_BOOLEAN_MODEL);
                 }
 
-                /*
-                if (!DataModel.PROP_TYPE_BOOLEAN.equals(
-                    propTypeComboBox.getSelectedItem()) &&
-                    !DataModel.PROP_TYPE_TIME.equals(
-                    propTypeComboBox.getSelectedItem())) {
-                */
                 if (!DataModel.PROP_TYPE_BOOLEAN.equals(
                     rowData.getPropType()) &&
                     !DataModel.PROP_TYPE_TIME.equals(rowData.getPropType())) {
@@ -562,7 +543,6 @@ class ExpressionCellRenderer
                  */
             }
 
-            //if ((rowData.getCollectionOperator() != null) && 
             if (rowData.isCompoundRow()) {
 
                 gc = new GridBagConstraints();
@@ -657,6 +637,7 @@ class ExpressionCellRenderer
         Color foreground;
 
         // check if this cell represents the current DnD drop location
+        /*
         JTable.DropLocation dropLocation = table.getDropLocation();
         if (dropLocation != null
                 && !dropLocation.isInsertRow()
@@ -676,19 +657,10 @@ class ExpressionCellRenderer
             background = Color.WHITE;
             foreground = Color.BLACK;
         };
-/*
-        if (isSelected) {
-            background = Color.RED;
-            foreground = Color.WHITE;
-        }
-        else {
-            background = Color.WHITE;
-            foreground = Color.BLACK;
-        }
-*/
+        */
 
         /**
-         * Enable/disable the +,++,- buttons.
+         * Show/hide the +,++,- buttons.
          */
 
         /**
@@ -696,23 +668,23 @@ class ExpressionCellRenderer
          * All other rows can always be deleted.
          */
         if (row == 0) {
-            deleteButton.setEnabled(false);
+            deleteButton.setDraw(false);
         }
         else {
-            deleteButton.setEnabled(true);
+            deleteButton.setDraw(true);
         }
 
         /**
          * See if this row can have child rows.
-         * Based on that, enable/disable the +, ++ buttons.
+         * Based on that, show/hide the +, ++ buttons.
          */
         if ((rowData != null) && rowData.isCompoundRow()) {
-            createCompoundRowButton.setEnabled(true);
-            createAttributeRowButton.setEnabled(true);
+            createCompoundRowButton.setDraw(true);
+            createAttributeRowButton.setDraw(true);
         }
         else {
-            createCompoundRowButton.setEnabled(false);
-            createAttributeRowButton.setEnabled(false);
+            createCompoundRowButton.setDraw(false);
+            createAttributeRowButton.setDraw(false);
         }
 
         /**
@@ -781,6 +753,7 @@ class ExpressionCellRenderer
         */
         else {
 
+            System.out.println("This is an Attribute Row.");
             /**
              * This isn't the first row, nor is it a simple Compound Row,
              * so we have to do alot more work to set up this row's
@@ -802,18 +775,28 @@ class ExpressionCellRenderer
              */
             ArrayList<Attribute> attributes = rowData.getAttributePath();
             for (int index = 0; index < attributes.size(); index++) {
+                System.out.println("Setting model/value for attribute "+index);
                 if (index == 0) {
                     /**
-                     * The leftmost comboBox is filled with the
-                     * attributes of the parentClass.  I.e. the
+                     * Set the model and selected item of the leftmost
+                     * comboBox.  The leftmost comboBox is filled with
+                     * the attributes of the parentClass.  I.e. the
                      * class of its parent row.
                      * Also set the selected item in the comboBox.
                      */
                     ClassDescription parentClass = rowData.getParentClass();
                     System.out.println("Set model for comboBox "+index+
+                        " to be "+parentClass+", and set the selected item "+
+                        "to be "+attributes.get(index));
+                    System.out.println("Set model for comboBox "+index+
                         " to be "+parentClass);
                     setComboBoxModel(comboBoxes[index], parentClass,
                                      true, false, false, attributes.get(index));
+                    /*
+                    System.out.println(
+                        ((DefaultComboBoxModel)(comboBoxes[index].getModel())).
+                        getIndexOf(attributes.get(index)));
+                    */
                 }
                 else {
                     /**
@@ -963,7 +946,8 @@ class ExpressionCellRenderer
                 !childmostAttribute.equals(Attribute.IS_NOT_NULL) &&
                 !childmostAttribute.equals(Attribute.MY_PROPERTY) &&
                 !childmostAttribute.equals(Attribute.ANY_PROPERTY) &&
-                rowData.getCollectionOperator() == null) {
+                (childmostAttribute.getType() != Type.PARAMETERS_MAP) &&
+                (rowData.getCollectionOperator() == null)) {
 
                 /**
                  * The rightmost Attribute is a class, as opposed
@@ -982,10 +966,9 @@ class ExpressionCellRenderer
                                  childmostAttribute.getClassDescription(),
                                  true, true, true, Attribute.SELECT_ATTRIBUTE);
             }
-            else if (Attribute.MY_PROPERTY.equals(
-                 rowData.getChildmostAttribute()) ||
-                 Attribute.ANY_PROPERTY.equals(
-                 rowData.getChildmostAttribute())) {
+            else if (Attribute.MY_PROPERTY.equals(childmostAttribute) ||
+                     Attribute.ANY_PROPERTY.equals(childmostAttribute) ||
+                     Type.PARAMETERS_MAP == childmostAttribute.getType()) {
 
                 propNameTextField.setText(rowData.getPropName());
                 propTypeComboBox.setSelectedItem(rowData.getPropType());
@@ -1057,8 +1040,11 @@ class ExpressionCellRenderer
                                   boolean appendMyAnyProperty,
                                   Object selectedItem) {
 
-        ArrayList<Attribute> attributes = classDescription.getAllAttributes();
-        Attribute[] values;
+        ArrayList<Attribute> attributes;
+        if (classDescription.getAllAttributes() != null)
+            attributes = classDescription.getAllAttributes();
+        else
+            attributes = new ArrayList<Attribute>();
 
         ArrayList<Attribute> copy = new ArrayList<Attribute>(attributes);
 
@@ -1080,6 +1066,7 @@ class ExpressionCellRenderer
          * finished, so create a DefaultComboBoxModel out of the list
          * Attributes and install it in the comboBox.
          */
+        Attribute[] values;
         values = copy.toArray(new Attribute[0]);
         setComboBoxModel(comboBox, values, selectedItem);
     }
@@ -1335,7 +1322,8 @@ class ExpressionCellRenderer
                 */
 
                 if (!selectedAttribute.equals(Attribute.MY_PROPERTY) &&
-                    !selectedAttribute.equals(Attribute.ANY_PROPERTY)) {
+                    !selectedAttribute.equals(Attribute.ANY_PROPERTY) &&
+                    (selectedAttribute.getType() != Type.PARAMETERS_MAP)) {
                     rowData.setPropType(null);
                     rowData.setPropName(null);
                 }
@@ -1360,13 +1348,14 @@ class ExpressionCellRenderer
                     //rowData.setAttributeValue(null);
                 }
                 else if (selectedAttribute.equals(Attribute.MY_PROPERTY) ||
-                         selectedAttribute.equals(Attribute.ANY_PROPERTY)) {
+                         selectedAttribute.equals(Attribute.ANY_PROPERTY) ||
+                         (selectedAttribute.getType() == Type.PARAMETERS_MAP)) {
                     System.out.println("My/Any Property selected.");
                     rowData.setPropType(DataModel.PROP_TYPE_INT);
+                    rowData.setAttributeOperator(
+                        DataModel.OPERATORS_ARITHMATIC[0]);
                     rowData.setPropName(null);
                     rowData.setAttributeValue(null);
-                    //rowData.setAttributeOperator(DataModel.OPERATOR_EQUALS);
-                    //table.tableChanged(null);
                 }
                 else if (selectedAttribute.getType() == Type.BOOLEAN) {
                     rowData.setAttributeOperator(DataModel.OPERATOR_TRUE);
