@@ -4,6 +4,7 @@
 # This is a quick and dirty script to build the test class and run it.
 #
 
-export CLASSPATH="src"
+export CLASSPATH="src:lib/datetimepicker3.3.jar"
+echo CLASSPATH=${CLASSPATH}
 javac src/com/physion/ovation/gui/ebuilder/*.java
 java com.physion.ovation.gui.ebuilder.TestEBuilder
