@@ -1,10 +1,29 @@
 #!/bin/bash
 
 #
-# This is a quick and dirty script to build the test class and run it.
+# This is a quick and dirty script to checkout, build the test class,
+# and run it.
 #
+
+if [ -z $1 ]
+then
+    echo You must specify the relative or full path to the directory under
+    echo "which we will checkout the source tree 'trunk' directory."
+    echo For example:
+    echo "    bandt /home/barry/test01"
+    echo "    bandt ../../test01"
+    echo "    bandt ."
+    exit
+fi
 
 export CLASSPATH="src:lib/datetimepicker3.3.jar"
 echo CLASSPATH=${CLASSPATH}
+
+# Checkout or update the source tree.
+./checkout $1 $2
+
+# Build the source tree.
 javac src/com/physion/ovation/gui/ebuilder/*.java
+
+# Run the test program.
 java com.physion.ovation.gui.ebuilder.TestEBuilder
