@@ -1,6 +1,7 @@
 package com.physion.ovation.gui.ebuilder.datamodel;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
@@ -112,10 +113,8 @@ public class RowData {
      *
      * For example, if the attributePath is:  epochGroup.source.label
      * then attributeValue might be something like "Test 27".
-     *
-     * TODO:  Perhaps this should be a String?
      */
-    private String attributeValue;
+    private Object attributeValue;
 
     /**
      * If the user is specifying a custom "My Property" or "Any Property"
@@ -474,12 +473,12 @@ public class RowData {
     }
 
 
-    public void setAttributeValue(String attributeValue) {
+    public void setAttributeValue(Object attributeValue) {
         this.attributeValue = attributeValue;
     }
 
 
-    public String getAttributeValue() {
+    public Object getAttributeValue() {
         return(attributeValue);
     }
 
@@ -779,6 +778,21 @@ public class RowData {
          */
 
         /**
+         * Create a "Date/Time" row.
+         */
+        rowData = new RowData();
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("startTime", Type.DATE_TIME);
+        attributePath.add(attribute);
+
+        rowData.setAttributeOperator("==");
+        rowData.setAttributeValue(new Date());
+        rowData.setAttributePath(attributePath);
+
+        childRows.add(rowData);
+        rootRow.setChildRows(childRows);
+
+        /**
          * Create a "My Property" row.
          */
 /*
@@ -801,6 +815,7 @@ public class RowData {
         /**
          * Create a "Parameters Map" row.
          */
+/*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
@@ -815,10 +830,11 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
-
+*/
         /**
          * Create a "Per User" row.
          */
+/*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("All derivedResponses", Type.PER_USER,
@@ -830,6 +846,7 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
+*/
 
 /*
         rowData = new RowData();

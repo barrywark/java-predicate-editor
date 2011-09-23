@@ -2,6 +2,7 @@ package com.physion.ovation.gui.ebuilder;
 
 import java.util.EventObject;
 import java.util.ArrayList;
+import java.util.Date;
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.Component;
@@ -27,6 +28,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.text.Document;
 import javax.swing.text.BadLocationException;
 import javax.swing.BorderFactory;
+
+import com.lavantech.gui.comp.DateTimePicker;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
@@ -85,10 +88,28 @@ class ExpressionCellRenderer
     private JTextField propNameTextField;
     private JComboBox propTypeComboBox;
     private JComboBox operatorComboBox;
-    private JLabel indentWidget;
-    private JPanel buttonPanel;
-    private JLabel ofTheFollowingLabel;
+    private DateTimePicker dateTimePicker;
 
+    /**
+     * This is simply a "spacer" that we put on the left side of
+     * the row to indent the widgets to the right of it.
+     */
+    private JLabel indentWidget;
+
+    /**
+     * This holds all the buttons on the right side of the row.
+     * I.e. the +/++/- buttons.
+     */
+    private JPanel buttonPanel;
+
+    /**
+     * This label never changes.
+     */
+    private final JLabel ofTheFollowingLabel = new JLabel(" of the following");
+
+    /**
+     * This is the table that is using this ExpressionCellRenderer.
+     */
     private ExpressionTable table;
 
 
@@ -113,7 +134,7 @@ class ExpressionCellRenderer
 
         //label = new JLabel();
         //label.setOpaque(true);
-        ofTheFollowingLabel = new JLabel(" of the following");
+        //ofTheFollowingLabel = new JLabel(" of the following");
 
         deleteButton = new InvisibleButton("-");
         deleteButton.addActionListener(this);
@@ -139,6 +160,9 @@ class ExpressionCellRenderer
 
         propNameTextField = new JTextField();
         propNameTextField.getDocument().addDocumentListener(this);
+
+        dateTimePicker = new DateTimePicker();
+        dateTimePicker.addActionListener(this);
 
         /**
          * The model, (i.e. the selectable items), for this comboBox
@@ -343,7 +367,7 @@ class ExpressionCellRenderer
                 System.out.println("Rightmost attribute is a primitive type.");
                 /**
                  * The rightmost Attribute is a primitive Attribute
-                 * such as an int, float, string, so now place the
+                 * such as an int, float, string, date/time, so now place the
                  * comboBox that will hold operators such
                  * as ==, !=, >, is true.
                  */
@@ -353,7 +377,21 @@ class ExpressionCellRenderer
                 gc.insets = LEFT_INSETS;
                 add(comboBoxes[comboBoxIndex++], gc);
 
-                if (rightmostAttribute.getType() != Type.BOOLEAN) {
+                /**
+                 * Now add the widget the user can use to edit the
+                 * value.  E.g. a text field or a time/date picker.
+                 */
+
+                if (rightmostAttribute.getType() == Type.DATE_TIME) {
+                    gc = new GridBagConstraints();
+                    gc.gridx = gridx++;
+                    //gc.weightx = 1;
+                    //someWidgetFillingEmptySpace = true;
+                    gc.fill = GridBagConstraints.BOTH;
+                    gc.insets = LEFT_INSETS;
+                    add(dateTimePicker, gc);
+                }
+                else if (rightmostAttribute.getType() != Type.BOOLEAN) {
                     /**
                      * Place a text field into which the user can enter an
                      * attribute value of some sort.
@@ -882,7 +920,7 @@ class ExpressionCellRenderer
                         rowData.getAttributeOperator());
                     widgetIndex++;
 
-                    String attributeValue = rowData.getAttributeValue();
+                    String attributeValue = (String)rowData.getAttributeValue();
                     if (attributeValue == null)
                         attributeValue = "";
                     valueTextField.setText(attributeValue);
@@ -932,11 +970,23 @@ class ExpressionCellRenderer
                         comboBoxes[widgetIndex].setSelectedItem(
                             DataModel.OPERATOR_FALSE);
                 }
+                else if (childmostAttribute.getType() == Type.DATE_TIME) {
+                    comboBoxes[widgetIndex].setSelectedItem(
+                        rowData.getAttributeOperator());
+
+                    Date attributeValue = (Date)rowData.getAttributeValue();
+                    if (attributeValue == null)
+                        attributeValue = new Date();
+                    valueTextField.setText(attributeValue.toString());
+                }
+                /**
+                 * TODO:  Handle other types.
+                 */
                 else {
                     comboBoxes[widgetIndex].setSelectedItem(
                         rowData.getAttributeOperator());
 
-                    String attributeValue = rowData.getAttributeValue();
+                    String attributeValue = (String)rowData.getAttributeValue();
                     if (attributeValue == null)
                         attributeValue = "";
                     valueTextField.setText(attributeValue);
@@ -982,7 +1032,7 @@ class ExpressionCellRenderer
                     DataModel.PROP_TYPE_STRING.equals(rowData.getPropType())) {
                     
                     valueTextField.setText(
-                        rowData.getAttributeValue());
+                        rowData.getAttributeValue().toString());
                 }
                 else if (DataModel.PROP_TYPE_TIME.equals(
                          rowData.getPropType())) {
@@ -1193,10 +1243,16 @@ class ExpressionCellRenderer
         else if (e.getSource() == deleteButton) {
             //System.out.println("deleteButton pressed");
             table.deleteSelectedRow();
-            //table.tableChanged(null);
         }
         else if (e.getSource() instanceof JComboBox) {
             comboBoxChanged((JComboBox)e.getSource());
+        }
+        else if (e.getSource() instanceof DateTimePicker) {
+            System.out.println("dateTimePicker changed");
+        }
+        else {
+            System.err.println("ERROR: actionPerformed() does not handle "+
+                "events from this widget.  event = "+e);
         }
     }
 
