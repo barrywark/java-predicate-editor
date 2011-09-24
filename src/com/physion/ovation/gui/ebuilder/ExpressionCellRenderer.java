@@ -30,6 +30,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.BorderFactory;
 
 import com.lavantech.gui.comp.DateTimePicker;
+import com.lavantech.gui.comp.TimePanel;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
@@ -162,6 +163,8 @@ class ExpressionCellRenderer
         propNameTextField.getDocument().addDocumentListener(this);
 
         dateTimePicker = new DateTimePicker();
+        TimePanel timePanel = dateTimePicker.getTimePanel();
+        timePanel.setSecDisplayed(false);
         dateTimePicker.addActionListener(this);
 
         /**
@@ -1248,12 +1251,27 @@ class ExpressionCellRenderer
             comboBoxChanged((JComboBox)e.getSource());
         }
         else if (e.getSource() instanceof DateTimePicker) {
-            System.out.println("dateTimePicker changed");
+            dateTimeChanged();
         }
         else {
             System.err.println("ERROR: actionPerformed() does not handle "+
                 "events from this widget.  event = "+e);
         }
+    }
+
+
+    private void dateTimeChanged() {
+
+        int editingRow = table.getEditingRow();
+        if (editingRow < 0) {
+            return;
+        }
+        if (editingRow != modelRow)
+            return;
+
+        Date date = dateTimePicker.getDate();
+        RowData rowData = RowData.getRootRow().getChild(editingRow);
+        rowData.setAttributeValue(date);
     }
 
 

@@ -784,12 +784,20 @@ public class RowData {
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("startTime", Type.DATE_TIME);
         attributePath.add(attribute);
-
-        rowData.setAttributeOperator("==");
+        rowData.setAttributeOperator(">=");
         rowData.setAttributeValue(new Date());
         rowData.setAttributePath(attributePath);
-
         childRows.add(rowData);
+
+        rowData = new RowData();
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("endTime", Type.DATE_TIME);
+        attributePath.add(attribute);
+        rowData.setAttributeOperator("<=");
+        rowData.setAttributeValue(new Date());
+        rowData.setAttributePath(attributePath);
+        childRows.add(rowData);
+
         rootRow.setChildRows(childRows);
 
         /**
