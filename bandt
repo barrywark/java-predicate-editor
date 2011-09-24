@@ -27,6 +27,8 @@ echo CLASSPATH=${CLASSPATH}
 ./checkout $1 $2
 
 # Build the source tree.
+cd $1/trunk
+echo pwd=`pwd`
 javac src/com/physion/ovation/gui/ebuilder/*.java
 
 # Run the test program.
