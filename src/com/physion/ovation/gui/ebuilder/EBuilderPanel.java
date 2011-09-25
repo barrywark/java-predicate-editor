@@ -2,6 +2,7 @@ package com.physion.ovation.gui.ebuilder;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.BorderLayout;
 import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -11,12 +12,12 @@ import javax.swing.ScrollPaneConstants;
 import java.util.Iterator;
 import java.util.Arrays;
 
-import com.physion.ovation.gui.ebuilder.datamodel.EBuilderTableModel;
+import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 
 public class EBuilderPanel
     extends JPanel {
 
-    private ExpressionTable table;
+    private ExpressionPanel expressionPanel;
 
 
     EBuilderPanel() {
@@ -24,14 +25,15 @@ public class EBuilderPanel
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
 
-        EBuilderTableModel tableModel = new EBuilderTableModel();
+        RowData rootRow = RowData.createTestRowData();
+        expressionPanel = new ExpressionPanel(rootRow);
 
-        table = new ExpressionTable(tableModel);
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(expressionPanel, BorderLayout.NORTH);
 
-        JScrollPane scrollPane = new JScrollPane(table,
+        JScrollPane scrollPane = new JScrollPane(panel,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-            //ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         GridBagConstraints gc = new GridBagConstraints();
         gc.insets = new Insets(5,5,5,5);
@@ -43,6 +45,6 @@ public class EBuilderPanel
 
 
     public void print() {
-        table.printModel();
+        expressionPanel.print();
     }
 }

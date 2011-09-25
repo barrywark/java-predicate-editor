@@ -50,7 +50,7 @@ public class TestEBuilderFrame
         buttonPanel.add(cancelButton, gc);
 
         pack();
-        setSize(1000, getSize().height);
+        //setSize(800, getSize().height+300);
     }
 
 

@@ -2,6 +2,7 @@ package com.physion.ovation.gui.ebuilder.datamodel;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
@@ -144,6 +145,7 @@ public class RowData {
      * Get the number of descendents from this node.  I.e. this is returns
      * the count of our direct children, plus all their children, and all
      * our childrens' children, and so on.
+     * This is NOT the same thing as getting the number of this node's children.
      */
     public int getNumDescendents() {
 
@@ -177,8 +179,11 @@ public class RowData {
      *               RowData 7
      *               RowData 8
      *          RowData 9
+     *
+     * So, just to repeat, "this" RowData object is returned if
+     * you pass an index of 0.  This RowData's first child is at
+     * index 1.
      */
-    //public RowData getDescendentAt(int index) {
     public RowData getChild(int index) {
 
         if (index == 0)
@@ -188,7 +193,6 @@ public class RowData {
         for (RowData childRow : childRows) {
 
             index--;
-            //RowData rd = childRow.getDescendentAt(index);
             RowData rd = childRow.getChild(index);
             if (rd != null)
                 return(rd);
@@ -200,6 +204,22 @@ public class RowData {
         }
 
         return(null);
+    }
+
+
+    /**
+     * Get this RowData and all its descendents as an ArrayList of
+     * RowData objects.
+     */
+    public ArrayList<RowData> getRows() {
+
+        int count = getNumDescendents()+1;
+
+        ArrayList<RowData> rows = new ArrayList<RowData>();
+        for (int index = 0; index < count; index++)
+            rows.add(getChild(index));
+
+        return(rows);
     }
 
 
@@ -384,6 +404,11 @@ public class RowData {
     }
 
 
+    public boolean isRootRow() {
+        return(this == rootRow);
+    }
+
+
     /*
     public void setParentClass(ClassDescription parentClass) {
         this.parentClass = parentClass;
@@ -474,6 +499,17 @@ public class RowData {
 
 
     public void setAttributeValue(Object attributeValue) {
+
+        System.out.print("setAttributeValue("+attributeValue+")");
+        /*
+        if (attributeValue != null) {
+            System.out.println(" class("+attributeValue.getClass()+")");
+            if (attributeValue.toString().contains("NZDT") &&
+                !(attributeValue instanceof Date)) {
+                int x = 1/0;
+            }
+        }
+        */
         this.attributeValue = attributeValue;
     }
 
@@ -778,14 +814,34 @@ public class RowData {
          */
 
         /**
-         * Create a "Date/Time" row.
+         * Create a row:
+         *
+         *      epochGroup.source is null
+         */
+
+        rowData = new RowData();
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("epochGroup", Type.REFERENCE,
+                                  epochGroupCD, Cardinality.TO_ONE);
+        attributePath.add(attribute);
+        attribute = new Attribute("source", Type.REFERENCE,
+                                  sourceCD, Cardinality.TO_ONE);
+        attributePath.add(attribute);
+        attributePath.add(Attribute.IS_NULL);
+        rowData.setAttributePath(attributePath);
+        childRows.add(rowData);
+        rootRow.setChildRows(childRows);
+
+
+        /**
+         * Create a couple "Date/Time" rows.
          */
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("startTime", Type.DATE_TIME);
         attributePath.add(attribute);
         rowData.setAttributeOperator(">=");
-        rowData.setAttributeValue(new Date());
+        rowData.setAttributeValue(new GregorianCalendar(2011, 0, 1).getTime());
         rowData.setAttributePath(attributePath);
         childRows.add(rowData);
 
@@ -803,7 +859,6 @@ public class RowData {
         /**
          * Create a "My Property" row.
          */
-/*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("nextEpoch", Type.REFERENCE,
@@ -819,11 +874,10 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
-*/
+
         /**
          * Create a "Parameters Map" row.
          */
-/*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
@@ -838,11 +892,10 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
-*/
+
         /**
          * Create a "Per User" row.
          */
-/*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("All derivedResponses", Type.PER_USER,
@@ -854,9 +907,7 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
-*/
 
-/*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
@@ -874,11 +925,10 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
-*/
+
         /**
          * Create another child row.
          */
-        /*
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("resources", Type.REFERENCE,
@@ -889,15 +939,11 @@ public class RowData {
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
-        */
 
         /**
          * Create another child row.
          */
-
-/*
         rowData = new RowData();
-        //rowData.setParentClass(epochCD);
         rowData.setCollectionOperator(CollectionOperator.ALL);
 
         attributePath = new ArrayList<Attribute>();
@@ -911,15 +957,15 @@ public class RowData {
         rowData.setAttributePath(attributePath);
 
         childRows.add(rowData);
+        rootRow.setChildRows(childRows);
 
         RowData rowData2 = new RowData();
-        //rowData2.setParentClass(epochCD);
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("startTime", Type.DATE_TIME);
         attributePath.add(attribute);
 
         rowData2.setAttributeOperator(">=");
-        rowData2.setAttributeValue("07/23/2011");
+        rowData2.setAttributeValue(new GregorianCalendar(2010, 0, 1).getTime());
 
         rowData2.setAttributePath(attributePath);
         ArrayList<RowData> childRows2 = new ArrayList<RowData>();
@@ -934,8 +980,9 @@ public class RowData {
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
         attributePath.add(attribute);
-        attribute = new Attribute("source", Type.REFERENCE,
-                                  sourceCD, Cardinality.TO_ONE);
+
+        attribute = new Attribute("epochs", Type.REFERENCE,
+                                  sourceCD, Cardinality.TO_MANY);
         attributePath.add(attribute);
 
         RowData rowData3 = new RowData();
@@ -955,21 +1002,9 @@ public class RowData {
         rowData3.setChildRows(childRows3);
 
         childRows.add(rowData3);
-
         rootRow.setChildRows(childRows);
 */
-        /**
-         * The only reason we create an attributePath for the
-         * root row is so the getChildmostAttribute() method
-         * can be used to get the class of the root row.
-         */
-        /*
-        attributePath = new ArrayList<Attribute>();
-        attribute = new Attribute("epoch", Type.REFERENCE,
-                                  epochCD, Cardinality.TO_ONE);
-        attributePath.add(attribute);
-        rootRow.setAttributePath(attributePath);
-        */
+
         System.out.println("rootRow:\n"+rootRow.toString());
 
         return(rootRow);

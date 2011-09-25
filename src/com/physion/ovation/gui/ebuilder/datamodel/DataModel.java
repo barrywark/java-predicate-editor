@@ -1,6 +1,7 @@
 package com.physion.ovation.gui.ebuilder.datamodel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
@@ -83,6 +84,29 @@ public class DataModel {
         initialize();
     }
 
+
+    public static boolean isOperatorBoolean(String operator) {
+
+        ArrayList<String> operators = new ArrayList<String>(
+            Arrays.asList(OPERATORS_BOOLEAN));
+        return(operators.contains(operator));
+    }
+
+
+    public static boolean isOperatorArithmatic(String operator) {
+
+        ArrayList<String> operators = new ArrayList<String>(
+            Arrays.asList(OPERATORS_ARITHMATIC));
+        return(operators.contains(operator));
+    }
+
+
+    public static boolean isOperatorString(String operator) {
+
+        ArrayList<String> operators = new ArrayList<String>(
+            Arrays.asList(OPERATORS_STRING));
+        return(operators.contains(operator));
+    }
 
 
     /**
