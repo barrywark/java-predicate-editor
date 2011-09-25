@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.awt.Color;
 import java.awt.Insets;
+import java.awt.Graphics;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.GridBagLayout;
@@ -114,6 +115,9 @@ class RowPanel
 
     private boolean inProcess = false;
 
+    private int gridx;
+    private boolean someWidgetFillingEmptySpace;
+
 
     /**
      * Create whatever components this renderer will need.
@@ -211,8 +215,18 @@ class RowPanel
         gc.insets = LEFT_INSETS;
         buttonPanel.add(deleteButton, gc);
 
-        layoutNeededComponents(rowData);
-        setModelsAndValues(rowData);
+        initializeComponents();
+    }
+
+
+    private void initializeComponents() {
+
+        if (inProcess)
+            return;
+
+        inProcess = true;
+        initializeComponentsProtected();
+        inProcess = false;
     }
 
 
@@ -225,7 +239,7 @@ class RowPanel
      *
      * @param rowData - The RowData object this row will display and edit.
      */
-    private void layoutNeededComponents(RowData rowData) {
+    private void initializeComponentsProtected() {
 
         GridBagConstraints gc;
 
@@ -237,10 +251,28 @@ class RowPanel
         removeAll();
 
         /**
-         * The widget we use to indent rows is always the first/leftmost
+         * Start our "gridx" counter that is incremented every time
+         * we add another widget to this row.  This counter is always
+         * set to the gridx location of the next widget to be placed
+         * in this RowPanel's GridBagLayout.
+         *
+         * The indentWidget we use to indent rows is always the first/leftmost
          * widget.
          */
-        int gridx = 0;
+        gridx = 0;
+
+        /**
+         * If a row is filled with widgets that do
+         * not stretch, we need to have the cell that
+         * holds the buttons on the right side of the
+         * row use the empty space.
+         *
+         * This gets set to true if some other widget
+         * uses the extra space.  E.g. the valueTextField
+         * will use the extra space if it exists in this row.
+         */
+        someWidgetFillingEmptySpace = false;
+
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
         add(indentWidget, gc);
@@ -253,44 +285,8 @@ class RowPanel
          * Now add the components that are needed.
          */
 
-        /**
-         * If a row is filled with widgets that do
-         * not stretch, we need to have the cell that
-         * holds the buttons on the right side of the
-         * row use the empty space.
-         *
-         * This gets set to true if some other widget
-         * uses the extra space.  E.g. the valueTextField
-         * will use the extra space if it exists in this row.
-         */
-        boolean someWidgetFillingEmptySpace = false;
-
         if (rowData.isRootRow()) {
-
-            System.out.println(" which is the root row.");
-
-            /**
-             * The first/topmost row always has the
-             * Class Under Qualification comboBox and the
-             * Collection Operator comboBox, (and only those comboBoxes).
-             */
-
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.insets = LEFT_INSETS;
-            add(comboBoxes[0], gc);
-
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.insets = LEFT_INSETS;
-            add(comboBoxes[1], gc);
-
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.weightx = 1;
-            someWidgetFillingEmptySpace = true;
-            gc.anchor = GridBagConstraints.WEST;
-            add(ofTheFollowingLabel, gc);
+            layoutRootRow();
         }
         else if (rowData.isSimpleCompoundRow()) {
 
@@ -299,683 +295,16 @@ class RowPanel
              * only contains a Collection Operator comboBox,
              * and the -, +, ++ buttons on the right side.
              */
-            System.out.println(" which is a simple Compound Row.");
-
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.insets = LEFT_INSETS;
-            add(comboBoxes[0], gc);
-
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.weightx = 1;
-            someWidgetFillingEmptySpace = true;
-            gc.anchor = GridBagConstraints.WEST;
-            add(ofTheFollowingLabel, gc);
+            layoutSimpleCompoundRow();
         }
         else {
-            /**
-             * This is an Attribute Row that contains one
-             * or more comboBoxes for selecting attributes,
-             * possibly a Collection Operator comboBox,
-             * possibly a true/false comboBox, possibly
-             * an Attribute Operator (==, !=, <, >, ...) comboBox,
-             * or any number of other widgets.  It also contains
-             * the +, ++, - buttons.
-             */
-            System.out.println(" which is an Attribute Row.");
-
-            ArrayList<Attribute> attributes = rowData.getAttributePath();
-            System.out.println("Add comboboxes for: "+rowData.getRowString());
-
-            /**
-             * We are an Attribute Row, so the widgets we contain
-             * are based on the values in this row's RowData object.
-             *
-             * Add one comboBox for every Attribute on this row's
-             * attributePath.
-             */
-            int comboBoxIndex = 0;
-            for (Attribute attribute : attributes) {
-
-                //System.out.println("Adding comboBox at gridx "+gridx);
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.insets = LEFT_INSETS;
-                add(comboBoxes[comboBoxIndex++], gc);
-            }
-
-            /**
-             * We have inserted comboBoxes for every Attribute on this
-             * RowData's attributePath.  Now insert any other widgets
-             * that are needed  based on what the childmost (i.e. rightmost)
-             * attribute is in this row.
-             */
-
-            Attribute rightmostAttribute = rowData.getChildmostAttribute();
-            if (!rightmostAttribute.isPrimitive() &&
-                !rightmostAttribute.isSpecial() &&
-                (rightmostAttribute.getType() != Type.PARAMETERS_MAP) &&
-                (rowData.getCollectionOperator() == null)) {
-                /**
-                 * The rightmost Attribute is a class, as opposed
-                 * to a "primitive" type such as int, float, string,
-                 * so we need to display another comboBox to its right
-                 * that the user can use to choose an Attribute of
-                 * that class or choose a special item such as "is null",
-                 * "is not null", "Any Property", "My Property".
-                 */
-                System.out.println("Adding Select Attribute comboBox at gridx "+
-                    gridx);
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.insets = LEFT_INSETS;
-                add(comboBoxes[comboBoxIndex++], gc);
-            }
-            else if (rightmostAttribute.isPrimitive()) {
-
-                System.out.println("Rightmost attribute is a primitive type.");
-                /**
-                 * The rightmost Attribute is a primitive Attribute
-                 * such as an int, float, string, date/time, so now place the
-                 * comboBox that will hold operators such
-                 * as ==, !=, >, is true.
-                 */
-                System.out.println("Adding operator comboBox at gridx "+gridx);
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.insets = LEFT_INSETS;
-                add(comboBoxes[comboBoxIndex++], gc);
-
-                /**
-                 * Now add the widget the user can use to edit the
-                 * value.  E.g. a text field or a time/date picker.
-                 */
-
-                if (rightmostAttribute.getType() == Type.DATE_TIME) {
-                    gc = new GridBagConstraints();
-                    gc.gridx = gridx++;
-                    gc.fill = GridBagConstraints.BOTH;
-                    gc.insets = LEFT_INSETS;
-                    add(dateTimePicker, gc);
-                }
-                else if (rightmostAttribute.getType() != Type.BOOLEAN) {
-                    /**
-                     * Place a text field into which the user can enter an
-                     * attribute value of some sort.
-                     */
-                    System.out.println("Adding text field at gridx "+gridx);
-                    gc = new GridBagConstraints();
-                    gc.gridx = gridx++;
-                    gc.weightx = 1;
-                    someWidgetFillingEmptySpace = true;
-                    gc.fill = GridBagConstraints.BOTH;
-                    gc.insets = LEFT_INSETS;
-                    add(valueTextField, gc);
-                }
-            }
-            else if (rightmostAttribute.equals(Attribute.MY_PROPERTY) ||
-                     rightmostAttribute.equals(Attribute.ANY_PROPERTY) ||
-                     (rightmostAttribute.getType() == Type.PARAMETERS_MAP)) {
-
-                System.out.println("Rightmost attribute is "+
-                    "\"My/Any Property\" or PARAMETERS_MAP");
-
-                /**
-                 * The rightmost attribute is either "My Property" or
-                 * "Any Property", or is of Type.PARAMETERS_MAP,
-                 * so add the widgets that are to the right of that
-                 * attribute.  For example, for a row that looks like this: 
-                 *
-                 *      epochGroup.source.My Property.animalID string == X123
-                 *
-                 * or this:
-                 *
-                 *      protocolParameters.stimulusFrequency int == 5
-                 *
-                 * For the first example, we would need to add a text
-                 * field where the user can enter "animalID",
-                 * a comboBox where the user can select the type of the value
-                 * (e.g. int, string, float, boolean),
-                 * a comboBox to select the operator (e.g. ==, !=, >),
-                 * and a text field where the user can enter a value.
-                 * Note that for boolean types, we would not have a
-                 * value text field, but instead the operator comboBox would
-                 * let the user choose, "is true" or "is false".
-                 */
-
-                /** 
-                 * Add the propNameTextField where the user can enter
-                 * the custom property name.  "animalID" in the example
-                 * in the comments above.
-                 */
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.weightx = 1;
-                gc.fill = GridBagConstraints.BOTH;
-                someWidgetFillingEmptySpace = true;
-                gc.insets = LEFT_INSETS;
-                add(propNameTextField, gc);
-                
-                /** 
-                 * Add the propTypeComboBox where the user can select the
-                 * the type of the custom property.  "string" in the
-                 * example in the comments above.
-                 */
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.insets = LEFT_INSETS;
-                add(propTypeComboBox, gc);
-
-                /** 
-                 * Add the attributeOperatorComboBox where the user can
-                 * select the operator for the custom property.  "==" in the
-                 * example in the comments above.
-                 *
-                 * Later, other code will set the model of this comboBox
-                 * depending on the selected value in the propTypeComboBox.
-                 */
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.insets = LEFT_INSETS;
-                add(operatorComboBox, gc);
-
-                /**
-                 * Set the model of this comboBox depending on the
-                 * selected value in the propTypeComboBox.
-                 */
-                if (DataModel.PROP_TYPE_INT.equals(rowData.getPropType()) ||
-                    DataModel.PROP_TYPE_FLOAT.equals(rowData.getPropType()) ||
-                    DataModel.PROP_TYPE_TIME.equals(rowData.getPropType())) {
-                    operatorComboBox.setModel(new DefaultComboBoxModel(
-                        DataModel.OPERATORS_ARITHMATIC));
-                }
-                else if (DataModel.PROP_TYPE_STRING.equals(
-                         rowData.getPropType())) {
-                    operatorComboBox.setModel(new DefaultComboBoxModel(
-                        DataModel.OPERATORS_STRING));
-                }
-                else if (DataModel.PROP_TYPE_BOOLEAN.equals(
-                         rowData.getPropType())) {
-                    operatorComboBox.setModel(new DefaultComboBoxModel(
-                        DataModel.OPERATORS_BOOLEAN));
-                }
-
-                if (DataModel.PROP_TYPE_TIME.equals(rowData.getPropType())) {
-                    
-                    /** 
-                     * Add the dateTimePicker where the user can enter the
-                     * the value of the custom property. 
-                     */
-                    gc = new GridBagConstraints();
-                    gc.gridx = gridx++;
-                    gc.weightx = 1;
-                    gc.fill = GridBagConstraints.BOTH;
-                    gc.insets = LEFT_INSETS;
-                    add(dateTimePicker, gc);
-                }
-                else if (!DataModel.PROP_TYPE_BOOLEAN.equals(
-                         rowData.getPropType())) {
-
-                    /** 
-                     * Add the valueTextField where the user can enter the
-                     * the value of the custom property.  "x123" in the
-                     * example in the comments above.
-                     */
-                    gc = new GridBagConstraints();
-                    gc.gridx = gridx++;
-                    gc.weightx = 1;
-                    gc.fill = GridBagConstraints.BOTH;
-                    gc.insets = LEFT_INSETS;
-                    add(valueTextField, gc);
-                }
-            }
-            else if (rowData.getCollectionOperator() ==
-                     CollectionOperator.COUNT) {
-
-                /**
-                 * This row says something like:
-                 *
-                 *      epochGroups.epochs Count == 5
-                 */
-
-                /** 
-                 * Add comboBox for the Collection Operator.
-                 */
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.insets = LEFT_INSETS;
-                add(comboBoxes[comboBoxIndex++], gc);
-
-                /** 
-                 * Add comboBox for the Attribute Operator.
-                 */
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.insets = LEFT_INSETS;
-                add(comboBoxes[comboBoxIndex++], gc);
-
-                /** 
-                 * Add count text field.
-                 *
-                 * TODO: This should be a clicker of some sort so
-                 * the user cannot enter an illegal value?
-                 */
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.weightx = 1;
-                someWidgetFillingEmptySpace = true;
-                gc.fill = GridBagConstraints.BOTH;
-                gc.insets = LEFT_INSETS;
-                add(valueTextField, gc);
-            }
-            else if (rowData.getCollectionOperator() != null) {
-
-                /**
-                 * This row says something like:
-                 *
-                 *      epochGroups.epochs Any of the following
-                 */
-
-                /** 
-                 * Add comboBox for the Collection Operator.
-                 */
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.insets = LEFT_INSETS;
-                add(comboBoxes[comboBoxIndex++], gc);
-            }
-            else {
-                /**
-                 * The last Attribute on the right is a primitive
-                 * or it is the special "Select Attribute" Attribute.
-                 * So we don't need any more comboBoxes to the right
-                 * of the last one in this row.
-                 */
-            }
-
-            if (rowData.isCompoundRow()) {
-
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.weightx = 1;
-                someWidgetFillingEmptySpace = true;
-                gc.anchor = GridBagConstraints.WEST;
-                add(ofTheFollowingLabel, gc);
-            }
+            layoutAttributeRow();
         }
-
-        /**
-         * Add the panel that holds the -/+/++ buttons to
-         * the far right side of this row.
-         * If there is no other widget that will fill
-         * the extra space in the row, tell the GridBagLayout
-         * manager that the buttonPanel will do it.
-         */
-        gc = new GridBagConstraints();
-        gc.gridx = gridx++;
-        gc.anchor = GridBagConstraints.EAST;
-        if (someWidgetFillingEmptySpace == false)
-            gc.weightx = 1;
-        add(buttonPanel, gc);
-    }
-
-
-    /**
-     * This method sets the models and current values of
-     * the widgets in this row.
-     */
-    private void setModelsAndValues(RowData rowData) {
-
-        if (inProcess)
-            return;
-        inProcess = true;
-        setModelsAndValuesProtected(rowData);
-        inProcess = false;
-    }
-
-
-    private void setModelsAndValuesProtected(RowData rowData) {
-
-        System.out.println("Enter setModelsAndValues()");
-
-        /**
-         * Now set the values of the components in this row.
-         */
-
-        String stringValue;
 
         /**
          * Show/hide the +,++,- buttons.
          */
-
-        /**
-         * The very first row cannot be deleted.
-         * All other rows can always be deleted.
-         */
-        if (rowData.isRootRow()) {
-            deleteButton.setDraw(false);
-            //deleteButton.setVisible(false);
-        }
-        else {
-            deleteButton.setDraw(true);
-            //deleteButton.setVisible(true);
-        }
-
-        /**
-         * See if this row can have child rows.
-         * Based on that, show/hide the +, ++ buttons.
-         */
-        if ((rowData != null) && rowData.isCompoundRow()) {
-            createCompoundRowButton.setDraw(true);
-            createAttributeRowButton.setDraw(true);
-        }
-        else {
-            createCompoundRowButton.setDraw(false);
-            createAttributeRowButton.setDraw(false);
-        }
-
-        /**
-         * TODO: The setting of the models and selected values in the
-         * attributePath comboboxes is the same for all row types,
-         * so combine all that code into one location.  Only the
-         * operators and value setting code is different.
-         */
-
-        /**
-         * Initialize the comboBoxes for this row.
-         */
-        if (rowData.isRootRow()) {
-
-            /**
-             * This is the first row, so it has two comboBoxes.
-             * The leftmost comboBox contains the list of possible choices
-             * for the Class Under Qualification.  The comboBox on the
-             * right contains the Any/All/None CollectionOperator.
-             *
-             * TODO:  Create the comboBox models only once and reuse them?
-             * Create a cache of them?
-             */
-            
-            ClassDescription[] values =
-                DataModel.getInstance().getPossibleCUQs().
-                toArray(new ClassDescription[0]);
-
-            setComboBoxModel(comboBoxes[0], values,
-                             RowData.getClassUnderQualification());
-
-            /**
-             * Now set the model and selected value of the 
-             * Collection Operator combobox.
-             */
-            setComboBoxModel(comboBoxes[1], CollectionOperator.
-                             getCompoundCollectionOperators(),
-                             RowData.getRootRow().getCollectionOperator());
-        }
-        else if (rowData.isSimpleCompoundRow()) {
-
-            System.out.println("This is a simple Compound Row.");
-            /**
-             * This is a "simple" Compound Row.  I.e. it only has
-             * the Collection Operator comboBox in it.
-             * Set the comboBox model.
-             */
-            setComboBoxModel(comboBoxes[0], CollectionOperator.
-                             getCompoundCollectionOperators(),
-                             rowData.getCollectionOperator());
-        }
-        else {
-
-            System.out.println("This is an Attribute Row.");
-            /**
-             * This isn't the first row, nor is it a simple Compound Row,
-             * so we have to do alot more work to set up this row's
-             * widgets.  The code below basically works its way from
-             * left to right initializing the values of the widgets
-             * in this row.
-             */
-
-            /**
-             * The leftmost widgets are one or more comboBoxes displaying
-             * this RowData's attributePath.
-             * Set the model for each comboBox displaying a list of attributes
-             * in a class.
-             * The leftmost comboBox shows the list of attributes of
-             * this row's "parent" class.
-             *
-             * Here we iterate through the list of Attributes in this
-             * row, setting the data model for each comboBox.
-             */
-            ArrayList<Attribute> attributes = rowData.getAttributePath();
-            for (int index = 0; index < attributes.size(); index++) {
-                System.out.println("Setting model/value for attribute "+index);
-                if (index == 0) {
-                    /**
-                     * Set the model and selected item of the leftmost
-                     * comboBox.  The leftmost comboBox is filled with
-                     * the attributes of the parentClass.  I.e. the
-                     * class of its parent row.
-                     * Also set the selected item in the comboBox.
-                     */
-                    ClassDescription parentClass = rowData.getParentClass();
-                    System.out.println("Set model for comboBox "+index+
-                        " to be "+parentClass+", and set the selected item "+
-                        "to be "+attributes.get(index));
-                    System.out.println("Set model for comboBox "+index+
-                        " to be "+parentClass);
-                    setComboBoxModel(comboBoxes[index], parentClass,
-                                     true, false, false, attributes.get(index));
-                    /*
-                    System.out.println(
-                        ((DefaultComboBoxModel)(comboBoxes[index].getModel())).
-                        getIndexOf(attributes.get(index)));
-                    */
-                }
-                else {
-                    /**
-                     * This is NOT the leftmost comboBox.
-                     * Each comboBox is filled with the attributes of
-                     * the class of the comboBox to its left.
-                     * Also set the selected item in the comboBox.
-                     */
-                    Attribute att = attributes.get(index-1);
-                    System.out.println("Set model for comboBox "+index+
-                        " to be "+att.getClassDescription());
-                    setComboBoxModel(comboBoxes[index],
-                                     att.getClassDescription(), true, true,
-                                     true, attributes.get(index));
-                }
-            }
-
-            /**
-             * By this point, all the models and values of the comboBoxes
-             * that correspond to Attributes on this RowData's attributePath
-             * have been set.  E.g. if the row looks like this:
-             *
-             *      epochGroup.epochs Count == 5
-             *
-             * we have set the model and selected item in the epochGroup and 
-             * epochs comboBoxes.
-             *
-             * Now we need to handle the comboBoxes and other widgets
-             * that hold things like collection operators, attribute operators,
-             * text fields, and so forth.
-             */
-
-            int widgetIndex = attributes.size();
-
-            Attribute childmostAttribute = rowData.getChildmostAttribute();
-            if (childmostAttribute.getCardinality() == Cardinality.TO_MANY) {
-
-                /**
-                 * The item selected in the "childmost" (i.e. last)
-                 * Attribute in this RowData's attributePath is an
-                 * Attribute that has a to-many relationship with the
-                 * class that contains it.  So, there is a comboBox
-                 * to the right of it that the user can use to select
-                 * the Collection Operator to use.
-                 *
-                 * Set that comboBox's model to the list of all the
-                 * Collection Operators: Any, All, None, Count.
-                 */
-                DefaultComboBoxModel model = new DefaultComboBoxModel(
-                    CollectionOperator.values());
-                comboBoxes[widgetIndex].setModel(model);
-
-                /**
-                 * Set the value of the Collection Operator comboBox
-                 * to be this row's value.
-                 */
-                comboBoxes[widgetIndex].setSelectedItem(
-                    rowData.getCollectionOperator());
-                widgetIndex++;
-
-                if (rowData.getCollectionOperator() ==
-                    CollectionOperator.COUNT) {
-
-                    /**
-                     * This row is something like:
-                     *
-                     *      epochGroup.epochs Count == 5
-                     *
-                     * Set the operator that is used for the Count.
-                     * E.g. ==, >, <=
-                     */
-                    comboBoxes[widgetIndex].setModel(
-                        new DefaultComboBoxModel(
-                            DataModel.OPERATORS_ARITHMATIC));
-
-                    comboBoxes[widgetIndex].setSelectedItem(
-                        rowData.getAttributeOperator());
-                    widgetIndex++;
-
-                    String attributeValue = (String)rowData.getAttributeValue();
-                    if (attributeValue == null)
-                        attributeValue = "";
-                    valueTextField.setText(attributeValue);
-                }
-            }
-            else if (childmostAttribute.isPrimitive()) {
-                /**
-                 * The rightmost Attribute is a primitive type,
-                 * so we need to display a comboBox that has a
-                 * selection of operators such as =, !=, <, >=, etc.
-                 *
-                 * Set the comboBox model to hold operators appropriate
-                 * for the Type (int, string, float, boolean) of the
-                 * Attribute.
-                 */
-                if (childmostAttribute.getType() == Type.BOOLEAN) {
-                    comboBoxes[widgetIndex].setModel(
-                        new DefaultComboBoxModel(DataModel.OPERATORS_BOOLEAN));
-                }
-                else if (childmostAttribute.getType() == Type.UTF_8_STRING) {
-                    comboBoxes[widgetIndex].setModel(
-                        new DefaultComboBoxModel(
-                            DataModel.OPERATORS_STRING));
-                }
-                else {
-                    comboBoxes[widgetIndex].setModel(
-                        new DefaultComboBoxModel(
-                            DataModel.OPERATORS_ARITHMATIC));
-                }
-
-                System.out.println("childmostAttribute.getType() = "+
-                                   childmostAttribute.getType());
-                System.out.println("rowData.getAttributeValue() = "+
-                                   rowData.getAttributeValue());
-
-                if (childmostAttribute.getType() == Type.BOOLEAN) {
-                    if (DataModel.OPERATOR_TRUE.equals(
-                        rowData.getAttributeOperator())) {
-                        comboBoxes[widgetIndex].setSelectedItem(
-                            DataModel.OPERATOR_TRUE);
-                    }
-                    else {
-                        comboBoxes[widgetIndex].setSelectedItem(
-                            DataModel.OPERATOR_FALSE);
-                    }
-                }
-                else if (childmostAttribute.getType() == Type.DATE_TIME) {
-
-                    comboBoxes[widgetIndex].setSelectedItem(
-                        rowData.getAttributeOperator());
-                    Date attributeValue = (Date)rowData.getAttributeValue();
-                    if (attributeValue == null)
-                        attributeValue = new Date();
-                    dateTimePicker.setDate(attributeValue);
-                }
-                else {
-                    comboBoxes[widgetIndex].setSelectedItem(
-                        rowData.getAttributeOperator());
-
-                    Object attributeValue = rowData.getAttributeValue();
-                    if (attributeValue == null)
-                        attributeValue = "";
-                    valueTextField.setText(attributeValue.toString());
-                }
-                widgetIndex++;
-            }
-            else if (!childmostAttribute.isPrimitive() &&
-                !childmostAttribute.equals(Attribute.SELECT_ATTRIBUTE) &&
-                !childmostAttribute.equals(Attribute.IS_NULL) &&
-                !childmostAttribute.equals(Attribute.IS_NOT_NULL) &&
-                !childmostAttribute.equals(Attribute.MY_PROPERTY) &&
-                !childmostAttribute.equals(Attribute.ANY_PROPERTY) &&
-                (childmostAttribute.getType() != Type.PARAMETERS_MAP) &&
-                (rowData.getCollectionOperator() == null)) {
-
-                /**
-                 * The rightmost Attribute is a class, as opposed
-                 * to a "primitive" type such as int, float, string,
-                 * so we need to display another comboBox to its right
-                 * that the user can use to choose an Attribute of
-                 * that class or choose a special item such as "is null",
-                 * "is not null", "Any Property", "My Property".
-                 */
-
-                /**
-                 * Set the comboBox model to hold attributes of
-                 * the class that is selected in the comboBox to our left.
-                 */
-                setComboBoxModel(comboBoxes[widgetIndex],
-                                 childmostAttribute.getClassDescription(),
-                                 true, true, true, Attribute.SELECT_ATTRIBUTE);
-            }
-            else if (Attribute.MY_PROPERTY.equals(childmostAttribute) ||
-                     Attribute.ANY_PROPERTY.equals(childmostAttribute) ||
-                     Type.PARAMETERS_MAP == childmostAttribute.getType()) {
-
-                propNameTextField.setText(rowData.getPropName());
-                propTypeComboBox.setSelectedItem(rowData.getPropType());
-                operatorComboBox.setSelectedItem(
-                    rowData.getAttributeOperator());
-                if (DataModel.PROP_TYPE_INT.equals(rowData.getPropType()) ||
-                    DataModel.PROP_TYPE_FLOAT.equals(rowData.getPropType()) ||
-                    DataModel.PROP_TYPE_STRING.equals(rowData.getPropType())) {
-                    
-                    if (rowData.getAttributeValue() != null)
-                        valueTextField.setText(
-                            rowData.getAttributeValue().toString());
-                    else
-                        valueTextField.setText("");
-                }
-                else if (DataModel.PROP_TYPE_TIME.equals(
-                         rowData.getPropType())) {
-                    System.out.println(
-                        "\n*** Write code to handle PROP_TYPE_TIME.\n");
-                }
-                else if (DataModel.PROP_TYPE_BOOLEAN.equals(
-                         rowData.getPropType())) {
-                    /**
-                     * No valueTextField is displayed in this case because
-                     * the operatorComboBox serves that function.
-                     * I.e.  "is true" and "is false" is both an operator
-                     * and a "value".
-                     */
-                }
-            }
-        }
+        layoutButtons();
     }
 
 
@@ -1176,8 +505,6 @@ class RowPanel
 
         if (inProcess)
             return;
-
-        //inProcess = true;
 
         System.out.println("Enter comboBoxChanged");
 
@@ -1440,13 +767,685 @@ class RowPanel
 
             System.out.println("rowData's new value: "+rowData.getRowString());
 
-            layoutNeededComponents(rowData);
-            setModelsAndValues(rowData);
+            initializeComponents();
         }
 
         System.out.println("rootRow:\n"+RowData.getRootRow());
+    }
 
-        //inProcess = false;
+
+    private void layoutButtons() {
+
+        /**
+         * The very first row cannot be deleted.
+         * All other rows can always be deleted.
+         */
+        if (rowData.isRootRow()) {
+            deleteButton.setDraw(false);
+            //deleteButton.setVisible(false);
+        }
+        else {
+            deleteButton.setDraw(true);
+            //deleteButton.setVisible(true);
+        }
+
+        /**
+         * See if this row can have child rows.
+         * Based on that, show/hide the +, ++ buttons.
+         */
+        if ((rowData != null) && rowData.isCompoundRow()) {
+            createCompoundRowButton.setDraw(true);
+            createAttributeRowButton.setDraw(true);
+        }
+        else {
+            createCompoundRowButton.setDraw(false);
+            createAttributeRowButton.setDraw(false);
+        }
+
+        /**
+         * Add the panel that holds the -/+/++ buttons to
+         * the far right side of this row.
+         * If there is no other widget that will fill
+         * the extra space in the row, tell the GridBagLayout
+         * manager that the buttonPanel will do it.
+         */
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.gridx = gridx++;
+        gc.anchor = GridBagConstraints.EAST;
+        if (someWidgetFillingEmptySpace == false)
+            gc.weightx = 1;
+        add(buttonPanel, gc);
+    }
+
+
+    private void layoutRootRow() {
+
+        GridBagConstraints gc;
+
+
+        /**
+         * The first/topmost row always has the
+         * Class Under Qualification comboBox and the
+         * Collection Operator comboBox, (and only those comboBoxes).
+         */
+
+        gc = new GridBagConstraints();
+        gc.gridx = gridx++;
+        gc.insets = LEFT_INSETS;
+        add(comboBoxes[0], gc);
+
+        gc = new GridBagConstraints();
+        gc.gridx = gridx++;
+        gc.insets = LEFT_INSETS;
+        add(comboBoxes[1], gc);
+
+        gc = new GridBagConstraints();
+        gc.gridx = gridx++;
+        gc.weightx = 1;
+        someWidgetFillingEmptySpace = true;
+        gc.anchor = GridBagConstraints.WEST;
+        add(ofTheFollowingLabel, gc);
+
+        /**
+         * This is the first row, so it has two comboBoxes.
+         * The leftmost comboBox contains the list of possible choices
+         * for the Class Under Qualification.  The comboBox on the
+         * right contains the Any/All/None CollectionOperator.
+         *
+         * TODO:  Create the comboBox models only once and reuse them?
+         * Create a cache of them?
+         */
+        
+        ClassDescription[] values =
+            DataModel.getInstance().getPossibleCUQs().
+            toArray(new ClassDescription[0]);
+
+        setComboBoxModel(comboBoxes[0], values,
+                         RowData.getClassUnderQualification());
+
+        /**
+         * Now set the model and selected value of the 
+         * Collection Operator combobox.
+         */
+        setComboBoxModel(comboBoxes[1], CollectionOperator.
+                         getCompoundCollectionOperators(),
+                         RowData.getRootRow().getCollectionOperator());
+    }
+
+
+    /**
+     * A "simple" compound row is a row that
+     * only contains a Collection Operator comboBox,
+     * and the -, +, ++ buttons on the right side.
+     */
+    private void layoutSimpleCompoundRow() {
+
+        GridBagConstraints gc;
+
+
+        gc = new GridBagConstraints();
+        gc.gridx = gridx++;
+        gc.insets = LEFT_INSETS;
+        add(comboBoxes[0], gc);
+
+        gc = new GridBagConstraints();
+        gc.gridx = gridx++;
+        gc.weightx = 1;
+        someWidgetFillingEmptySpace = true;
+        gc.anchor = GridBagConstraints.WEST;
+        add(ofTheFollowingLabel, gc);
+
+        /**
+         * This is a "simple" Compound Row.  I.e. it only has
+         * the Collection Operator comboBox in it.
+         * Set the comboBox model.
+         */
+        setComboBoxModel(comboBoxes[0], CollectionOperator.
+                         getCompoundCollectionOperators(),
+                         rowData.getCollectionOperator());
+    }
+
+
+    /**
+     * This is an Attribute Row that contains one
+     * or more comboBoxes for selecting attributes,
+     * possibly a Collection Operator comboBox,
+     * possibly a true/false comboBox, possibly
+     * an Attribute Operator (==, !=, <, >, ...) comboBox,
+     * or any number of other widgets.  It also contains
+     * the +, ++, - buttons.
+     */
+    private void layoutAttributeRow() {
+
+        GridBagConstraints gc;
+
+        ArrayList<Attribute> attributes = rowData.getAttributePath();
+        System.out.println("Add comboboxes for: "+rowData.getRowString());
+
+        /**
+         * We are an Attribute Row, so the widgets we contain
+         * are based on the values in this row's RowData object.
+         *
+         * Add one comboBox for every Attribute on this row's
+         * attributePath.
+         */
+        int comboBoxIndex = 0;
+        for (Attribute attribute : attributes) {
+
+            //System.out.println("Adding comboBox at gridx "+gridx);
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.insets = LEFT_INSETS;
+            add(comboBoxes[comboBoxIndex++], gc);
+        }
+
+        /**
+         * We have inserted comboBoxes for every Attribute on this
+         * RowData's attributePath.  Now insert any other widgets
+         * that are needed  based on what the childmost (i.e. rightmost)
+         * attribute is in this row.
+         */
+
+        Attribute rightmostAttribute = rowData.getChildmostAttribute();
+        if (!rightmostAttribute.isPrimitive() &&
+            !rightmostAttribute.isSpecial() &&
+            (rightmostAttribute.getType() != Type.PARAMETERS_MAP) &&
+            (rowData.getCollectionOperator() == null)) {
+            /**
+             * The rightmost Attribute is a class, as opposed
+             * to a "primitive" type such as int, float, string,
+             * so we need to display another comboBox to its right
+             * that the user can use to choose an Attribute of
+             * that class or choose a special item such as "is null",
+             * "is not null", "Any Property", "My Property".
+             */
+            System.out.println("Adding Select Attribute comboBox at gridx "+
+                gridx);
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.insets = LEFT_INSETS;
+            add(comboBoxes[comboBoxIndex++], gc);
+        }
+        else if (rightmostAttribute.isPrimitive()) {
+
+            System.out.println("Rightmost attribute is a primitive type.");
+            /**
+             * The rightmost Attribute is a primitive Attribute
+             * such as an int, float, string, date/time, so now place the
+             * comboBox that will hold operators such
+             * as ==, !=, >, is true.
+             */
+            System.out.println("Adding operator comboBox at gridx "+gridx);
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.insets = LEFT_INSETS;
+            add(comboBoxes[comboBoxIndex++], gc);
+
+            /**
+             * Now add the widget the user can use to edit the
+             * value.  E.g. a text field or a time/date picker.
+             */
+
+            if (rightmostAttribute.getType() == Type.DATE_TIME) {
+                gc = new GridBagConstraints();
+                gc.gridx = gridx++;
+                gc.fill = GridBagConstraints.BOTH;
+                gc.insets = LEFT_INSETS;
+                add(dateTimePicker, gc);
+            }
+            else if (rightmostAttribute.getType() != Type.BOOLEAN) {
+                /**
+                 * Place a text field into which the user can enter an
+                 * attribute value of some sort.
+                 */
+                System.out.println("Adding text field at gridx "+gridx);
+                gc = new GridBagConstraints();
+                gc.gridx = gridx++;
+                gc.weightx = 1;
+                someWidgetFillingEmptySpace = true;
+                gc.fill = GridBagConstraints.BOTH;
+                gc.insets = LEFT_INSETS;
+                add(valueTextField, gc);
+            }
+        }
+        else if (rightmostAttribute.equals(Attribute.MY_PROPERTY) ||
+                 rightmostAttribute.equals(Attribute.ANY_PROPERTY) ||
+                 (rightmostAttribute.getType() == Type.PARAMETERS_MAP)) {
+
+            System.out.println("Rightmost attribute is "+
+                "\"My/Any Property\" or PARAMETERS_MAP");
+
+            /**
+             * The rightmost attribute is either "My Property" or
+             * "Any Property", or is of Type.PARAMETERS_MAP,
+             * so add the widgets that are to the right of that
+             * attribute.  For example, for a row that looks like this: 
+             *
+             *      epochGroup.source.My Property.animalID string == X123
+             *
+             * or this:
+             *
+             *      protocolParameters.stimulusFrequency int == 5
+             *
+             * For the first example, we would need to add a text
+             * field where the user can enter "animalID",
+             * a comboBox where the user can select the type of the value
+             * (e.g. int, string, float, boolean),
+             * a comboBox to select the operator (e.g. ==, !=, >),
+             * and a text field where the user can enter a value.
+             * Note that for boolean types, we would not have a
+             * value text field, but instead the operator comboBox would
+             * let the user choose, "is true" or "is false".
+             */
+
+            /** 
+             * Add the propNameTextField where the user can enter
+             * the custom property name.  "animalID" in the example
+             * in the comments above.
+             */
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.weightx = 1;
+            gc.fill = GridBagConstraints.BOTH;
+            someWidgetFillingEmptySpace = true;
+            gc.insets = LEFT_INSETS;
+            add(propNameTextField, gc);
+            
+            /** 
+             * Add the propTypeComboBox where the user can select the
+             * the type of the custom property.  "string" in the
+             * example in the comments above.
+             */
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.insets = LEFT_INSETS;
+            add(propTypeComboBox, gc);
+
+            /** 
+             * Add the attributeOperatorComboBox where the user can
+             * select the operator for the custom property.  "==" in the
+             * example in the comments above.
+             *
+             * Later, other code will set the model of this comboBox
+             * depending on the selected value in the propTypeComboBox.
+             */
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.insets = LEFT_INSETS;
+            add(operatorComboBox, gc);
+
+            /**
+             * Set the model of this comboBox depending on the
+             * selected value in the propTypeComboBox.
+             */
+            if (DataModel.PROP_TYPE_INT.equals(rowData.getPropType()) ||
+                DataModel.PROP_TYPE_FLOAT.equals(rowData.getPropType()) ||
+                DataModel.PROP_TYPE_TIME.equals(rowData.getPropType())) {
+                operatorComboBox.setModel(new DefaultComboBoxModel(
+                    DataModel.OPERATORS_ARITHMATIC));
+            }
+            else if (DataModel.PROP_TYPE_STRING.equals(
+                     rowData.getPropType())) {
+                operatorComboBox.setModel(new DefaultComboBoxModel(
+                    DataModel.OPERATORS_STRING));
+            }
+            else if (DataModel.PROP_TYPE_BOOLEAN.equals(
+                     rowData.getPropType())) {
+                operatorComboBox.setModel(new DefaultComboBoxModel(
+                    DataModel.OPERATORS_BOOLEAN));
+            }
+
+            if (DataModel.PROP_TYPE_TIME.equals(rowData.getPropType())) {
+                
+                /** 
+                 * Add the dateTimePicker where the user can enter the
+                 * the value of the custom property. 
+                 */
+                gc = new GridBagConstraints();
+                gc.gridx = gridx++;
+                gc.weightx = 1;
+                gc.fill = GridBagConstraints.BOTH;
+                gc.insets = LEFT_INSETS;
+                add(dateTimePicker, gc);
+            }
+            else if (!DataModel.PROP_TYPE_BOOLEAN.equals(
+                     rowData.getPropType())) {
+
+                /** 
+                 * Add the valueTextField where the user can enter the
+                 * the value of the custom property.  "x123" in the
+                 * example in the comments above.
+                 */
+                gc = new GridBagConstraints();
+                gc.gridx = gridx++;
+                gc.weightx = 1;
+                gc.fill = GridBagConstraints.BOTH;
+                gc.insets = LEFT_INSETS;
+                add(valueTextField, gc);
+            }
+        }
+        else if (rowData.getCollectionOperator() ==
+                 CollectionOperator.COUNT) {
+
+            /**
+             * This row says something like:
+             *
+             *      epochGroups.epochs Count == 5
+             */
+
+            /** 
+             * Add comboBox for the Collection Operator.
+             */
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.insets = LEFT_INSETS;
+            add(comboBoxes[comboBoxIndex++], gc);
+
+            /** 
+             * Add comboBox for the Attribute Operator.
+             */
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.insets = LEFT_INSETS;
+            add(comboBoxes[comboBoxIndex++], gc);
+
+            /** 
+             * Add count text field.
+             *
+             * TODO: This should be a clicker of some sort so
+             * the user cannot enter an illegal value?
+             */
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.weightx = 1;
+            someWidgetFillingEmptySpace = true;
+            gc.fill = GridBagConstraints.BOTH;
+            gc.insets = LEFT_INSETS;
+            add(valueTextField, gc);
+        }
+        else if (rowData.getCollectionOperator() != null) {
+
+            /**
+             * This row says something like:
+             *
+             *      epochGroups.epochs Any of the following
+             */
+
+            /** 
+             * Add comboBox for the Collection Operator.
+             */
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.insets = LEFT_INSETS;
+            add(comboBoxes[comboBoxIndex++], gc);
+        }
+        else {
+            /**
+             * The last Attribute on the right is a primitive
+             * or it is the special "Select Attribute" Attribute.
+             * So we don't need any more comboBoxes to the right
+             * of the last one in this row.
+             */
+        }
+
+        if (rowData.isCompoundRow()) {
+
+            gc = new GridBagConstraints();
+            gc.gridx = gridx++;
+            gc.weightx = 1;
+            someWidgetFillingEmptySpace = true;
+            gc.anchor = GridBagConstraints.WEST;
+            add(ofTheFollowingLabel, gc);
+        }
+
+            /**
+             * This isn't the first row, nor is it a simple Compound Row,
+             * so we have to do alot more work to set up this row's
+             * widgets.  The code below basically works its way from
+             * left to right initializing the values of the widgets
+             * in this row.
+             */
+
+            /**
+             * The leftmost widgets are one or more comboBoxes displaying
+             * this RowData's attributePath.
+             * Set the model for each comboBox displaying a list of attributes
+             * in a class.
+             * The leftmost comboBox shows the list of attributes of
+             * this row's "parent" class.
+             *
+             * Here we iterate through the list of Attributes in this
+             * row, setting the data model for each comboBox.
+             */
+            //ArrayList<Attribute> attributes = rowData.getAttributePath();
+            for (int index = 0; index < attributes.size(); index++) {
+                System.out.println("Setting model/value for attribute "+index);
+                if (index == 0) {
+                    /**
+                     * Set the model and selected item of the leftmost
+                     * comboBox.  The leftmost comboBox is filled with
+                     * the attributes of the parentClass.  I.e. the
+                     * class of its parent row.
+                     * Also set the selected item in the comboBox.
+                     */
+                    ClassDescription parentClass = rowData.getParentClass();
+                    System.out.println("Set model for comboBox "+index+
+                        " to be "+parentClass+", and set the selected item "+
+                        "to be "+attributes.get(index));
+                    System.out.println("Set model for comboBox "+index+
+                        " to be "+parentClass);
+                    setComboBoxModel(comboBoxes[index], parentClass,
+                                     true, false, false, attributes.get(index));
+                    /*
+                    System.out.println(
+                        ((DefaultComboBoxModel)(comboBoxes[index].getModel())).
+                        getIndexOf(attributes.get(index)));
+                    */
+                }
+                else {
+                    /**
+                     * This is NOT the leftmost comboBox.
+                     * Each comboBox is filled with the attributes of
+                     * the class of the comboBox to its left.
+                     * Also set the selected item in the comboBox.
+                     */
+                    Attribute att = attributes.get(index-1);
+                    System.out.println("Set model for comboBox "+index+
+                        " to be "+att.getClassDescription());
+                    setComboBoxModel(comboBoxes[index],
+                                     att.getClassDescription(), true, true,
+                                     true, attributes.get(index));
+                }
+            }
+
+            /**
+             * By this point, all the models and values of the comboBoxes
+             * that correspond to Attributes on this RowData's attributePath
+             * have been set.  E.g. if the row looks like this:
+             *
+             *      epochGroup.epochs Count == 5
+             *
+             * we have set the model and selected item in the epochGroup and 
+             * epochs comboBoxes.
+             *
+             * Now we need to handle the comboBoxes and other widgets
+             * that hold things like collection operators, attribute operators,
+             * text fields, and so forth.
+             */
+
+            int widgetIndex = attributes.size();
+
+            Attribute childmostAttribute = rowData.getChildmostAttribute();
+            if (childmostAttribute.getCardinality() == Cardinality.TO_MANY) {
+
+                /**
+                 * The item selected in the "childmost" (i.e. last)
+                 * Attribute in this RowData's attributePath is an
+                 * Attribute that has a to-many relationship with the
+                 * class that contains it.  So, there is a comboBox
+                 * to the right of it that the user can use to select
+                 * the Collection Operator to use.
+                 *
+                 * Set that comboBox's model to the list of all the
+                 * Collection Operators: Any, All, None, Count.
+                 */
+                DefaultComboBoxModel model = new DefaultComboBoxModel(
+                    CollectionOperator.values());
+                comboBoxes[widgetIndex].setModel(model);
+
+                /**
+                 * Set the value of the Collection Operator comboBox
+                 * to be this row's value.
+                 */
+                comboBoxes[widgetIndex].setSelectedItem(
+                    rowData.getCollectionOperator());
+                widgetIndex++;
+
+                if (rowData.getCollectionOperator() ==
+                    CollectionOperator.COUNT) {
+
+                    /**
+                     * This row is something like:
+                     *
+                     *      epochGroup.epochs Count == 5
+                     *
+                     * Set the operator that is used for the Count.
+                     * E.g. ==, >, <=
+                     */
+                    comboBoxes[widgetIndex].setModel(
+                        new DefaultComboBoxModel(
+                            DataModel.OPERATORS_ARITHMATIC));
+
+                    comboBoxes[widgetIndex].setSelectedItem(
+                        rowData.getAttributeOperator());
+                    widgetIndex++;
+
+                    String attributeValue = (String)rowData.getAttributeValue();
+                    if (attributeValue == null)
+                        attributeValue = "";
+                    valueTextField.setText(attributeValue);
+                }
+            }
+            else if (childmostAttribute.isPrimitive()) {
+                /**
+                 * The rightmost Attribute is a primitive type,
+                 * so we need to display a comboBox that has a
+                 * selection of operators such as =, !=, <, >=, etc.
+                 *
+                 * Set the comboBox model to hold operators appropriate
+                 * for the Type (int, string, float, boolean) of the
+                 * Attribute.
+                 */
+                if (childmostAttribute.getType() == Type.BOOLEAN) {
+                    comboBoxes[widgetIndex].setModel(
+                        new DefaultComboBoxModel(DataModel.OPERATORS_BOOLEAN));
+                }
+                else if (childmostAttribute.getType() == Type.UTF_8_STRING) {
+                    comboBoxes[widgetIndex].setModel(
+                        new DefaultComboBoxModel(
+                            DataModel.OPERATORS_STRING));
+                }
+                else {
+                    comboBoxes[widgetIndex].setModel(
+                        new DefaultComboBoxModel(
+                            DataModel.OPERATORS_ARITHMATIC));
+                }
+
+                System.out.println("childmostAttribute.getType() = "+
+                                   childmostAttribute.getType());
+                System.out.println("rowData.getAttributeValue() = "+
+                                   rowData.getAttributeValue());
+
+                if (childmostAttribute.getType() == Type.BOOLEAN) {
+                    if (DataModel.OPERATOR_TRUE.equals(
+                        rowData.getAttributeOperator())) {
+                        comboBoxes[widgetIndex].setSelectedItem(
+                            DataModel.OPERATOR_TRUE);
+                    }
+                    else {
+                        comboBoxes[widgetIndex].setSelectedItem(
+                            DataModel.OPERATOR_FALSE);
+                    }
+                }
+                else if (childmostAttribute.getType() == Type.DATE_TIME) {
+
+                    comboBoxes[widgetIndex].setSelectedItem(
+                        rowData.getAttributeOperator());
+                    Date attributeValue = (Date)rowData.getAttributeValue();
+                    if (attributeValue == null)
+                        attributeValue = new Date();
+                    dateTimePicker.setDate(attributeValue);
+                }
+                else {
+                    comboBoxes[widgetIndex].setSelectedItem(
+                        rowData.getAttributeOperator());
+
+                    Object attributeValue = rowData.getAttributeValue();
+                    if (attributeValue == null)
+                        attributeValue = "";
+                    valueTextField.setText(attributeValue.toString());
+                }
+                widgetIndex++;
+            }
+            else if (!childmostAttribute.isPrimitive() &&
+                !childmostAttribute.equals(Attribute.SELECT_ATTRIBUTE) &&
+                !childmostAttribute.equals(Attribute.IS_NULL) &&
+                !childmostAttribute.equals(Attribute.IS_NOT_NULL) &&
+                !childmostAttribute.equals(Attribute.MY_PROPERTY) &&
+                !childmostAttribute.equals(Attribute.ANY_PROPERTY) &&
+                (childmostAttribute.getType() != Type.PARAMETERS_MAP) &&
+                (rowData.getCollectionOperator() == null)) {
+
+                /**
+                 * The rightmost Attribute is a class, as opposed
+                 * to a "primitive" type such as int, float, string,
+                 * so we need to display another comboBox to its right
+                 * that the user can use to choose an Attribute of
+                 * that class or choose a special item such as "is null",
+                 * "is not null", "Any Property", "My Property".
+                 */
+
+                /**
+                 * Set the comboBox model to hold attributes of
+                 * the class that is selected in the comboBox to our left.
+                 */
+                setComboBoxModel(comboBoxes[widgetIndex],
+                                 childmostAttribute.getClassDescription(),
+                                 true, true, true, Attribute.SELECT_ATTRIBUTE);
+            }
+            else if (Attribute.MY_PROPERTY.equals(childmostAttribute) ||
+                     Attribute.ANY_PROPERTY.equals(childmostAttribute) ||
+                     Type.PARAMETERS_MAP == childmostAttribute.getType()) {
+
+                propNameTextField.setText(rowData.getPropName());
+                propTypeComboBox.setSelectedItem(rowData.getPropType());
+                operatorComboBox.setSelectedItem(
+                    rowData.getAttributeOperator());
+                if (DataModel.PROP_TYPE_INT.equals(rowData.getPropType()) ||
+                    DataModel.PROP_TYPE_FLOAT.equals(rowData.getPropType()) ||
+                    DataModel.PROP_TYPE_STRING.equals(rowData.getPropType())) {
+                    
+                    if (rowData.getAttributeValue() != null)
+                        valueTextField.setText(
+                            rowData.getAttributeValue().toString());
+                    else
+                        valueTextField.setText("");
+                }
+                else if (DataModel.PROP_TYPE_TIME.equals(
+                         rowData.getPropType())) {
+                    System.out.println(
+                        "\n*** Write code to handle PROP_TYPE_TIME.\n");
+                }
+                else if (DataModel.PROP_TYPE_BOOLEAN.equals(
+                         rowData.getPropType())) {
+                    /**
+                     * No valueTextField is displayed in this case because
+                     * the operatorComboBox serves that function.
+                     * I.e.  "is true" and "is false" is both an operator
+                     * and a "value".
+                     */
+                }
+            }
     }
 
 
@@ -1470,5 +1469,20 @@ class RowPanel
             rowData.setAttributeValue(valueTextField.getText());
         else if (document == propNameTextField.getDocument())
             rowData.setPropName(propNameTextField.getText());
+    }
+
+
+    /**
+     * This is a quick and dirty way to put a line between rows.
+     * A more proper solution is to create a Border subclass that
+     * draws the line.
+     *
+     * All this method does is call our superclass's normal paint()
+     * method and then draws a line at the bottom of this panel.
+     */
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        g.drawLine(0, getHeight()-1, getWidth()-1, getHeight()-1);
     }
 }
