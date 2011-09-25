@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#
+# This is a quick and dirty script to checkout, build the test class,
+# and run it.
+#
+
+if [ -z $1 ]
+then
+    echo You must specify the relative or full path to the directory under
+    echo "which we will checkout the source tree 'trunk' directory."
+    echo For example, here are three example:
+    echo "    ./bandt /home/barry/test01"
+    echo "    ./bandt ../../test01"
+    echo "    ./bandt ."
+    echo ""
+    echo "To checkout a specific revision, add a revision number."
+    echo For example, to checkout revision 25, you would do this:
+    echo "    ./bandt /home/barry/test01 25"
+    exit
+fi
+
+export CLASSPATH="src:lib/datetimepicker3.3.jar"
+echo CLASSPATH=${CLASSPATH}
+
+# Checkout or update the source tree.
+./checkout $1 $2
+
+# Build the source tree.
+cd $1/trunk
+echo pwd=`pwd`
+javac src/com/physion/ovation/gui/ebuilder/*.java
+
+# Run the test program.
+java com.physion.ovation.gui.ebuilder.TestEBuilder
