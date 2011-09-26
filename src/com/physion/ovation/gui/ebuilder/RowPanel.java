@@ -390,7 +390,7 @@ class RowPanel
                                   ClassDescription classDescription,
                                   boolean prependSelectAttribute,
                                   boolean appendNulls,
-                                  boolean appendMyAnyProperty,
+                                  //boolean appendMyAnyProperty,
                                   Object selectedItem) {
 
         ArrayList<Attribute> attributes;
@@ -434,10 +434,10 @@ class RowPanel
             copy.add(Attribute.IS_NOT_NULL);
         }
 
-        if (appendMyAnyProperty) {
+        //if (appendMyAnyProperty) {
             copy.add(Attribute.MY_PROPERTY);
             copy.add(Attribute.ANY_PROPERTY);
-        }
+        //}
 
         /**
          * All the monkey business with the list of Attributes is
@@ -1021,7 +1021,7 @@ class RowPanel
                     " to be "+parentClass);
                 */
                 setComboBoxModel(comboBoxes[comboBoxIndex], parentClass,
-                                 true, false, false,
+                                 true, false, //true,
                                  attributes.get(comboBoxIndex));
                 /*
                 System.out.println(
@@ -1042,7 +1042,7 @@ class RowPanel
                 //    " to be "+att.getClassDescription());
                 setComboBoxModel(comboBoxes[comboBoxIndex],
                                  att.getClassDescription(), true, true,
-                                 true, attributes.get(comboBoxIndex));
+                                 /*true,*/ attributes.get(comboBoxIndex));
             }
             comboBoxIndex++;
         }
@@ -1078,7 +1078,7 @@ class RowPanel
              */
             setComboBoxModel(comboBoxes[attributes.size()],
                              rightmostAttribute.getClassDescription(),
-                             true, true, true, Attribute.SELECT_ATTRIBUTE);
+                             true, true, /*true,*/ Attribute.SELECT_ATTRIBUTE);
         }
         else if (rightmostAttribute.isPrimitive()) {
 
