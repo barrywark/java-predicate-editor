@@ -554,7 +554,7 @@ class RowPanel
         if (inProcess)
             return;
 
-        System.out.println("Enter comboBoxChanged");
+        //System.out.println("Enter comboBoxChanged");
 
         /**
          * Change the appropriate value in this row's RowData
@@ -573,10 +573,12 @@ class RowPanel
                  */
                 ClassDescription classDescription =
                     (ClassDescription)comboBox.getSelectedItem();
+                /*
                 System.out.println("selected classDescription = "+
                     classDescription);
                 System.out.println("selected classDescription = "+
                     classDescription.hashCode());
+                */
                 if (!rowData.getClassUnderQualification().equals(
                     classDescription)) {
                     rowData.setClassUnderQualification(classDescription);
@@ -588,10 +590,12 @@ class RowPanel
                  */
                 CollectionOperator collectionOperator =
                     (CollectionOperator)comboBox.getSelectedItem();
+                /*
                 System.out.println("selected collectionOperator = "+
                     collectionOperator);
                 System.out.println("selected collectionOperator = "+
                     collectionOperator.hashCode());
+                */
                 if (!rowData.getCollectionOperator().equals(
                     collectionOperator)) {
                     rowData.setCollectionOperator(collectionOperator);
@@ -604,13 +608,15 @@ class RowPanel
             /**
              * User is editing a row other than the first row.
              */
+            /*
             System.out.println("A row other than the first row being changed.");
+            */
 
             /**
              * TODO:  Put this in its own method?
              */
             if (comboBox == propTypeComboBox) {
-                System.out.println("Property Type is being changed.");
+                //System.out.println("Property Type is being changed.");
                 /**
                  * User has changed the type of a custom property
                  * in a "My/Any Property" row.
@@ -622,7 +628,7 @@ class RowPanel
                 /**
                  * User has changed the operator for a custom property.
                  */
-                System.out.println("Operator is being changed.");
+                //System.out.println("Operator is being changed.");
                 rowData.setAttributeOperator(
                     operatorComboBox.getSelectedItem().toString());
             }
@@ -641,7 +647,7 @@ class RowPanel
                  */
 
                 Attribute selectedAttribute = (Attribute)selectedObject;
-                System.out.println("selectedAttribute = "+selectedAttribute);
+                //System.out.println("selectedAttribute = "+selectedAttribute);
                 /*
                 System.out.println("Attribute.IS_NULL = "+Attribute.IS_NULL);
                 System.out.println(
@@ -668,14 +674,14 @@ class RowPanel
 
                 if (selectedAttribute.equals(Attribute.IS_NULL) ||
                     selectedAttribute.equals(Attribute.IS_NOT_NULL)) {
-                    System.out.println("Setting attributeOperator to: "+
-                        selectedAttribute.getName());
+                    //System.out.println("Setting attributeOperator to: "+
+                    //    selectedAttribute.getName());
                     rowData.setAttributeOperator(selectedAttribute.getName());
                 }
                 else if (selectedAttribute.equals(Attribute.MY_PROPERTY) ||
                          selectedAttribute.equals(Attribute.ANY_PROPERTY) ||
                          (selectedAttribute.getType() == Type.PARAMETERS_MAP)) {
-                    System.out.println("My/Any Property selected.");
+                    //System.out.println("My/Any Property selected.");
                     rowData.setPropType(DataModel.PROP_TYPE_INT);
                     rowData.setAttributeOperator(
                         DataModel.OPERATORS_ARITHMATIC[0]);
@@ -686,7 +692,9 @@ class RowPanel
                     rowData.setAttributeOperator(DataModel.OPERATOR_TRUE);
                 }
 
+                /*
                 System.out.println("After op rowData: "+rowData.getRowString());
+                */
 
                 /**
                  * Figure out which comboBox was changed.
@@ -704,7 +712,7 @@ class RowPanel
                         ".  This should never happen.");
                     //return;
                 }
-                System.out.println("comboBoxIndex = "+comboBoxIndex);
+                //System.out.println("comboBoxIndex = "+comboBoxIndex);
 
                 if (attributes.size() > comboBoxIndex) {
                     /**
@@ -731,7 +739,9 @@ class RowPanel
                         "Too many comboBoxes "+
                         "or too few Attributes in the class's attributePath.");
                 }
+                /*
                 System.out.println("After at rowData: "+rowData.getRowString());
+                */
 
                 /**
                  * Remove Attributes that are "after" the one being changed.
@@ -791,8 +801,8 @@ class RowPanel
             else if ((selectedObject instanceof String) &&
                      rowData.getChildmostAttribute().isPrimitive()) {
 
-                System.out.println("User selected primitive operator "+
-                                   selectedObject);
+                //System.out.println("User selected primitive operator "+
+                //                   selectedObject);
                 /**
                  * The user has selected a value in primitive operator
                  * comboBox.  E.g. ==, !=, >.
@@ -807,15 +817,15 @@ class RowPanel
                  */
                 CollectionOperator collectionOperator =
                     (CollectionOperator)selectedObject;
-                System.out.println("selected collectionOperator = "+
-                    collectionOperator);
+                //System.out.println("selected collectionOperator = "+
+                //    collectionOperator);
                 if (!rowData.getCollectionOperator().equals(
                     collectionOperator)) {
                     rowData.setCollectionOperator(collectionOperator);
                 }
             }
             else {
-                System.out.println("selectedObject = "+selectedObject);
+                //System.out.println("selectedObject = "+selectedObject);
             }
 
             System.out.println("rowData's new value: "+rowData.getRowString());
@@ -973,7 +983,7 @@ class RowPanel
         GridBagConstraints gc;
 
         ArrayList<Attribute> attributes = rowData.getAttributePath();
-        System.out.println("Add comboboxes for: "+rowData.getRowString());
+        //System.out.println("Add comboBoxes for: "+rowData.getRowString());
 
         /**
          * We are an Attribute Row, so the widgets we contain
@@ -1003,11 +1013,13 @@ class RowPanel
                  * Also set the selected item in the comboBox.
                  */
                 ClassDescription parentClass = rowData.getParentClass();
+                /*
                 System.out.println("Set model for comboBox "+comboBoxIndex+
                     " to be "+parentClass+", and set the selected item "+
                     "to be "+attributes.get(comboBoxIndex));
                 System.out.println("Set model for comboBox "+comboBoxIndex+
                     " to be "+parentClass);
+                */
                 setComboBoxModel(comboBoxes[comboBoxIndex], parentClass,
                                  true, false, false,
                                  attributes.get(comboBoxIndex));
@@ -1026,8 +1038,8 @@ class RowPanel
                  * Also set the selected item in the comboBox.
                  */
                 Attribute att = attributes.get(comboBoxIndex-1);
-                System.out.println("Set model for comboBox "+comboBoxIndex+
-                    " to be "+att.getClassDescription());
+                //System.out.println("Set model for comboBox "+comboBoxIndex+
+                //    " to be "+att.getClassDescription());
                 setComboBoxModel(comboBoxes[comboBoxIndex],
                                  att.getClassDescription(), true, true,
                                  true, attributes.get(comboBoxIndex));
@@ -1055,8 +1067,6 @@ class RowPanel
              * that class or choose a special item such as "is null",
              * "is not null", "Any Property", "My Property".
              */
-            System.out.println("Adding Select Attribute comboBox at gridx "+
-                gridx);
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
@@ -1072,14 +1082,14 @@ class RowPanel
         }
         else if (rightmostAttribute.isPrimitive()) {
 
-            System.out.println("Rightmost attribute is a primitive type.");
+            //System.out.println("Rightmost attribute is a primitive type.");
             /**
              * The rightmost Attribute is a primitive Attribute
              * such as an int, float, string, date/time, so now place the
              * comboBox that will hold operators such
              * as ==, !=, >, is true.
              */
-            System.out.println("Adding operator comboBox at gridx "+gridx);
+            //System.out.println("Adding operator comboBox at gridx "+gridx);
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
@@ -1116,7 +1126,7 @@ class RowPanel
                  * Place a text field into which the user can enter an
                  * attribute value of some sort.
                  */
-                System.out.println("Adding text field at gridx "+gridx);
+                //System.out.println("Adding text field at gridx "+gridx);
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
                 gc.weightx = 1;
@@ -1147,10 +1157,12 @@ class RowPanel
                         DataModel.OPERATORS_ARITHMATIC));
             }
 
+            /*
             System.out.println("rightmostAttribute.getType() = "+
                                rightmostAttribute.getType());
             System.out.println("rowData.getAttributeValue() = "+
                                rowData.getAttributeValue());
+            */
 
             /**
              * Set the selected value.
@@ -1211,8 +1223,8 @@ class RowPanel
                  rightmostAttribute.equals(Attribute.ANY_PROPERTY) ||
                  (rightmostAttribute.getType() == Type.PARAMETERS_MAP)) {
 
-            System.out.println("Rightmost attribute is "+
-                "\"My/Any Property\" or PARAMETERS_MAP");
+            //System.out.println("Rightmost attribute is "+
+            //    "\"My/Any Property\" or PARAMETERS_MAP");
 
             /**
              * The rightmost attribute is either "My Property" or
@@ -1358,8 +1370,10 @@ class RowPanel
             }
             else if (DataModel.PROP_TYPE_TIME.equals(
                      rowData.getPropType())) {
-                System.out.println(
-                    "\n*** Write code to handle PROP_TYPE_TIME.\n");
+                Date attributeValue = (Date)rowData.getAttributeValue();
+                if (attributeValue == null)
+                    attributeValue = new Date();
+                dateTimePicker.setDate(attributeValue);
             }
             else if (DataModel.PROP_TYPE_BOOLEAN.equals(
                      rowData.getPropType())) {

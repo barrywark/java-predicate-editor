@@ -14,6 +14,35 @@ import javax.swing.JButton;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 
+
+/**
+ * This is the class that engineers who want to display the
+ * Expression Builder GUI should use.
+ *
+ * The static method:
+ *
+ *      ExpressionBuilder.editExpression() 
+ *
+ * is the only method you will need to use.  For example the
+ * code below will display an "empty" GUI for the user to
+ * create an expression.  Once the user clicks Ok or Cancel,
+ * the code prints the status and the expression tree the user
+ * created.
+ *
+ *      RowData rootRow = RowData.createRootRow();
+ *      int status = ExpressionBuilder.editExpression(rootRow);
+ *      System.out.println("status = "+status);
+ *      System.out.println("rootRow:\n"+rootRow);
+ *
+ * The code below will create an expression tree that has
+ * some rows already in it and display that in the GUI.
+ *
+ *      RowData rootRow = RowData.createTestRowData();
+ *      int status = ExpressionBuilder.editExpression(rootRow);
+ * 
+ * The returned status value tells the caller whether the
+ * user pressed the Ok button or canceled out of the window.
+ */
 public class ExpressionBuilder
     extends JDialog 
     implements ActionListener {
@@ -28,13 +57,20 @@ public class ExpressionBuilder
     private JButton cancelButton;
 
 
-    ExpressionBuilder() {
+    /**
+     * Create an ExpressionBuilder dialog that will let
+     * the user edit the passed in expression tree.
+     *
+     * @param rootRow - The rootRow of the expression tree
+     * you want to edit.
+     */
+    ExpressionBuilder(RowData rootRow) {
+
         super((Frame)null);
         setTitle("Physion ooExpression Builder");
         setModal(true);
-        //setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        panel = new EBuilderPanel();
+        panel = new EBuilderPanel(rootRow);
         getContentPane().add(panel);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -98,14 +134,19 @@ public class ExpressionBuilder
 
 
     /**
-     * This is the method you should use to edit/create
-     * an expression.
+     * This is the method you should use to display the GUI
+     * to edit/create an expression.
      *
-     * 
      * @param rootRow - This is the "root" RowData of the
      * expression you want the GUI to display and edit.
      * Pass an "empty" RowData if you want to create a new
      * expression from scratch.
+     *
+     * @return Returns ExpressionBuilder.RETURN_STATUS_OK if the user
+     * pressed the Ok button.  Returns ExpressionBuilder.RETURN_STATUS_CANCEL
+     * if the user pressed the Cancel button or closed the window another
+     * way.  It also returns ExpressionBuilder.RETURN_STATUS_CANCEL if
+     * a null rootRow parameter was passed to the editExpression() method.
      */
     public static int editExpression(RowData rootRow) {
 
@@ -113,28 +154,40 @@ public class ExpressionBuilder
             System.err.println("rootRow = null");
             return(RETURN_STATUS_CANCEL);
         }
+        else if (rootRow.getRootRow() == null) {
+            System.err.println("rootRow.getRootRow() = null");
+            return(RETURN_STATUS_CANCEL);
+        }
 
-        ExpressionBuilder dialog = new ExpressionBuilder();
+        ExpressionBuilder dialog = new ExpressionBuilder(rootRow);
 
         /**
          * Make the dialog visible.  It is modal, so
          * execution along this path stops at this point.
          * Only when the user hits Ok or Cancel will this
-         * method return.
+         * call to the setVisible() method return.
          */
         dialog.setVisible(true);
 
         int returnStatus = dialog.getReturnStatus();
-
         return(returnStatus);
     }
 
 
+    /**
+     * A simple test program to test this class.
+     */
     public static void main(String[] args) {
 
-        RowData rootRow = new RowData();
+        RowData rootRow = RowData.createRootRow();
         int status = ExpressionBuilder.editExpression(rootRow);
-        System.out.println("status = "+status);
+        System.out.println("\nstatus = "+status);
+        System.out.println("rootRow:\n"+rootRow);
+
+        rootRow = RowData.createTestRowData();
+        status = ExpressionBuilder.editExpression(rootRow);
+        System.out.println("\nstatus = "+status);
+        System.out.println("rootRow:\n"+rootRow);
         System.exit(status);
     }
 }

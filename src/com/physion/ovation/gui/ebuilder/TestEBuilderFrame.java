@@ -10,6 +10,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 
+import com.physion.ovation.gui.ebuilder.datamodel.RowData;
+
 public class TestEBuilderFrame
     extends JFrame 
     implements ActionListener {
@@ -24,7 +26,8 @@ public class TestEBuilderFrame
         super("Test EBuilder Frame");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        panel = new EBuilderPanel();
+        RowData rootRow = RowData.createTestRowData();
+        panel = new EBuilderPanel(rootRow);
         getContentPane().add(panel);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());

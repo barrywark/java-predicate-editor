@@ -20,12 +20,12 @@ public class EBuilderPanel
     private ExpressionPanel expressionPanel;
 
 
-    EBuilderPanel() {
+    EBuilderPanel(RowData rootRow) {
 
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
 
-        RowData rootRow = RowData.createTestRowData();
+        //RowData rootRow = RowData.createTestRowData();
         expressionPanel = new ExpressionPanel(rootRow);
 
         JPanel panel = new JPanel(new BorderLayout());

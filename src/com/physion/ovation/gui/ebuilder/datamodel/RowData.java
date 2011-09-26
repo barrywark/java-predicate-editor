@@ -236,10 +236,8 @@ public class RowData {
      * Remove this RowData object from its parent's list of direct children.
      */
     public void removeFromParent() {
-
-        System.out.println("Removing rowData: "+this.getRowString());
-        System.out.println("from parent: "+getParentRow().getRowString());
-
+        //System.out.println("Removing rowData: "+this.getRowString());
+        //System.out.println("from parent: "+getParentRow().getRowString());
         getParentRow().getChildRows().remove(this);
     }
 
@@ -249,19 +247,11 @@ public class RowData {
      */
     public void createCompoundRow() {
 
-        System.out.println("createCompoundRow rowData: "+this.getRowString());
-
-        /*
-        Attribute attribute = Attribute.SELECT_ATTRIBUTE;
-        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
-        attributePath.add(attribute);
-        */
+        //System.out.println("createCompoundRow rowData: "+this.getRowString());
 
         RowData compoundRow = new RowData();
         compoundRow.setParentRow(this);
-        //compoundRow.setAttributePath(attributePath);
         compoundRow.setCollectionOperator(CollectionOperator.ANY);
-
         addChildRow(compoundRow);
     }
 
@@ -271,7 +261,7 @@ public class RowData {
      */
     public void createAttributeRow() {
 
-        System.out.println("createAttributeRow rowData: "+this.getRowString());
+        //System.out.println("createAttributeRow rowData: "+this.getRowString());
 
         ClassDescription classDescription = null;
 
@@ -299,14 +289,14 @@ public class RowData {
 
 
         if (classDescription == null) {
-            System.out.println("ERROR: In createAttributeRow "+
+            System.err.println("ERROR: In createAttributeRow "+
                 "classDescription == null.  This should never happen.");
             return;
         }
 
         ArrayList<Attribute> attributes = classDescription.getAllAttributes();
         if (attributes.isEmpty()) {
-            System.out.println("ERROR: In createAttributeRow "+
+            System.err.println("ERROR: In createAttributeRow "+
                 "attributes.isEmpty == true.  This should never happen.");
             return;
         }
@@ -377,7 +367,7 @@ public class RowData {
         RowData.classUnderQualification = classUnderQualification;
 
         if (parentRow != null) {
-            System.out.println(
+            System.err.println(
                 "WARNING:  parentRow != null.  Are you confused?");
             parentRow = null;
         }
@@ -394,7 +384,26 @@ public class RowData {
     }
 
 
+    /**
+     * Get the current rootRow.
+     */
     public static RowData getRootRow() {
+        return(rootRow);
+    }
+
+
+    /**
+     * Create a default rootRow that has no children.  Return the
+     * rootRow we created AND set the RowData.rootRow static member
+     * data to the rootRow we just created.
+     */
+    public static RowData createRootRow() {
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+        setRootRow(rootRow);
         return(rootRow);
     }
 
@@ -467,7 +476,7 @@ public class RowData {
      */
     public void setAttributeOperator(String attributeOperator) {
 
-        System.out.println("Setting attributeOperator to "+attributeOperator);
+        //System.out.println("Setting attributeOperator to "+attributeOperator);
         this.attributeOperator = attributeOperator;
 
         /**
@@ -485,7 +494,7 @@ public class RowData {
             DataModel.OPERATOR_FALSE.equals(attributeOperator) ||
             DataModel.OPERATOR_IS_NULL.equals(attributeOperator) ||
             DataModel.OPERATOR_IS_NOT_NULL.equals(attributeOperator)) {
-            System.out.println("Setting attributeValue to null");
+            //System.out.println("Setting attributeValue to null");
             setAttributeValue(null);
         }
     }
@@ -507,17 +516,7 @@ public class RowData {
 
 
     public void setAttributeValue(Object attributeValue) {
-
-        System.out.println("setAttributeValue("+attributeValue+")");
-        /*
-        if (attributeValue != null) {
-            System.out.println(" class("+attributeValue.getClass()+")");
-            if (attributeValue.toString().contains("NZDT") &&
-                !(attributeValue instanceof Date)) {
-                int x = 1/0;
-            }
-        }
-        */
+        //System.out.println("setAttributeValue("+attributeValue+")");
         this.attributeValue = attributeValue;
     }
 
@@ -543,6 +542,14 @@ public class RowData {
         if (DataModel.PROP_TYPE_BOOLEAN.equals(propType)) {
             setAttributeOperator(DataModel.OPERATOR_TRUE);
             setAttributeValue(null);
+        }
+        else if (DataModel.PROP_TYPE_TIME.equals(propType)) {
+            setAttributeOperator("==");
+            setAttributeValue(null);
+        }
+        else {
+            setAttributeOperator("==");
+            setAttributeValue("");
         }
     }
 
@@ -732,7 +739,7 @@ public class RowData {
             return(null);
         }
         else if (attributePath.isEmpty()) {
-            System.out.println("attributePath.isEmpty()");
+            //System.out.println("attributePath.isEmpty()");
             return(null);
         }
         else
@@ -807,9 +814,7 @@ public class RowData {
          * Create the "root" RowData object.  All of the other
          * rows are children of this row.
          */
-        RowData rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ANY);
+        RowData rootRow = RowData.createRootRow();
         RowData.setRootRow(rootRow);
 
         Attribute attribute;
