@@ -171,9 +171,22 @@ public class DataModel {
         allClassDescriptions.add(derivedResponseCD);
 
         /**
+         * Initialize values of the KeywordTag class.
+         */
+        Attribute attribute = new Attribute("tag", Type.UTF_8_STRING);
+        keywordTagCD.addAttribute(attribute);
+
+        /**
+         * Initialize values of the TaggableEntityBase class.
+         */
+        attribute = new Attribute("keywords", Type.PER_USER,
+                                  keywordTagCD, Cardinality.TO_MANY);
+        taggableEntityBaseCD.addAttribute(attribute);
+
+        /**
          * Initialize values of the ResponseBase class.
          */
-        Attribute attribute = new Attribute("dateType", Type.INT_16);
+        attribute = new Attribute("dateType", Type.INT_16);
         responseBaseCD.addAttribute(attribute);
 
         attribute = new Attribute("byteOrder", Type.INT_16);
