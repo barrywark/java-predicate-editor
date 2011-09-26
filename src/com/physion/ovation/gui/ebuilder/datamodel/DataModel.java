@@ -162,14 +162,43 @@ public class DataModel {
             new ClassDescription("ResponseBase", iOBaseCD);
         allClassDescriptions.add(responseBaseCD);
 
+        ClassDescription responseCD =
+            new ClassDescription("Response", responseBaseCD);
+        allClassDescriptions.add(responseCD);
+
         ClassDescription derivedResponseCD =
             new ClassDescription("DerivedResponse", responseBaseCD);
         allClassDescriptions.add(derivedResponseCD);
 
         /**
+         * Initialize values of the ResponseBase class.
+         */
+        Attribute attribute = new Attribute("dateType", Type.INT_16);
+        responseBaseCD.addAttribute(attribute);
+
+        attribute = new Attribute("byteOrder", Type.INT_16);
+        responseBaseCD.addAttribute(attribute);
+
+        attribute = new Attribute("sampleBytes", Type.INT_16);
+        responseBaseCD.addAttribute(attribute);
+
+        /**
+         * Initialize values of the Response class.
+         */
+        attribute = new Attribute("epoch", Type.REFERENCE,
+                                  epochCD, Cardinality.TO_ONE);
+        responseCD.addAttribute(attribute);
+
+        attribute = new Attribute("samplingRate", Type.FLOAT_64);
+        responseCD.addAttribute(attribute);
+
+        attribute = new Attribute("samplingUnits", Type.UTF_8_STRING);
+        responseCD.addAttribute(attribute);
+
+        /**
          * Initialize values of the EntityBase class.
          */
-        Attribute attribute = new Attribute("owner", Type.REFERENCE,
+        attribute = new Attribute("owner", Type.REFERENCE,
                                             userCD, Cardinality.TO_ONE);
         entityBaseCD.addAttribute(attribute);
 
@@ -206,6 +235,10 @@ public class DataModel {
 
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
+        epochCD.addAttribute(attribute);
+
+        attribute = new Attribute("responses", Type.REFERENCE,
+                                  responseCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 
         /**

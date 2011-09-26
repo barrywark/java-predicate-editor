@@ -434,11 +434,19 @@ public class RowData {
         /**
          * Blank out the attribute operator if the user
          * is selecting Any, All, or None.
+         *
+         * Set the attribute operator and attribute value
+         * to legal values if the user is selecting Count.
          */
         if ((collectionOperator != null) &&
             collectionOperator.isCompoundOperator()) {
             setAttributeOperator(null);
             setAttributeValue(null);
+        }
+        else if ((collectionOperator != null) &&
+                 !collectionOperator.isCompoundOperator()) {
+            setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+            setAttributeValue("");
         }
     }
 
@@ -500,7 +508,7 @@ public class RowData {
 
     public void setAttributeValue(Object attributeValue) {
 
-        System.out.print("setAttributeValue("+attributeValue+")");
+        System.out.println("setAttributeValue("+attributeValue+")");
         /*
         if (attributeValue != null) {
             System.out.println(" class("+attributeValue.getClass()+")");
@@ -534,7 +542,7 @@ public class RowData {
         this.propType = propType;
         if (DataModel.PROP_TYPE_BOOLEAN.equals(propType)) {
             setAttributeOperator(DataModel.OPERATOR_TRUE);
-            //setAttributeValue(null);
+            setAttributeValue(null);
         }
     }
 
@@ -818,7 +826,6 @@ public class RowData {
          *
          *      epochGroup.source is null
          */
-
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
@@ -867,16 +874,16 @@ public class RowData {
         attributePath.add(Attribute.MY_PROPERTY);
 
         rowData.setPropName("animalID");
-        rowData.setPropType(DataModel.PROP_TYPE_STRING);
-        rowData.setAttributeOperator("==");
-        rowData.setAttributeValue("x123");
+        rowData.setPropType(DataModel.PROP_TYPE_INT);
+        rowData.setAttributeOperator("<=");
+        rowData.setAttributeValue("123");
         rowData.setAttributePath(attributePath);
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
 
         /**
-         * Create a "Parameters Map" row.
+         * Create a "Parameters Map" row of type int.
          */
         rowData = new RowData();
         attributePath = new ArrayList<Attribute>();
@@ -887,7 +894,25 @@ public class RowData {
         rowData.setPropName("stimulusFrequency");
         rowData.setPropType(DataModel.PROP_TYPE_INT);
         rowData.setAttributeOperator("==");
-        rowData.setAttributeValue("5");
+        rowData.setAttributeValue("27");
+        rowData.setAttributePath(attributePath);
+
+        childRows.add(rowData);
+        rootRow.setChildRows(childRows);
+
+        /**
+         * Create a "Parameters Map" row of type string.
+         */
+        rowData = new RowData();
+        attributePath = new ArrayList<Attribute>();
+        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
+                                  null, Cardinality.N_A);
+        attributePath.add(attribute);
+
+        rowData.setPropName("stimulusName");
+        rowData.setPropType(DataModel.PROP_TYPE_STRING);
+        rowData.setAttributeOperator("~~=");
+        rowData.setAttributeValue("caffeine");
         rowData.setAttributePath(attributePath);
 
         childRows.add(rowData);
