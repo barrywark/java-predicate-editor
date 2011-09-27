@@ -647,9 +647,27 @@ public class RowData {
         for (Attribute attribute : attributePath) {
 
             if (attribute != null) {
-                if (!attribute.equals(Attribute.SELECT_ATTRIBUTE) &&
-                    !attribute.equals(Attribute.IS_NULL) &&
-                    !attribute.equals(Attribute.IS_NOT_NULL)) {
+                if (attribute.equals(Attribute.MY_PROPERTY)) {
+                    if (first) {
+                        string += " ";
+                        first = false;
+                    }
+                    else {
+                        string += ".properties(My)";
+                    }
+                }
+                else if (attribute.equals(Attribute.ANY_PROPERTY)) {
+                    if (first) {
+                        string += " ";
+                        first = false;
+                    }
+                    else {
+                        string += ".properties(Any)";
+                    }
+                }
+                else if (!attribute.equals(Attribute.SELECT_ATTRIBUTE) &&
+                         !attribute.equals(Attribute.IS_NULL) &&
+                         !attribute.equals(Attribute.IS_NOT_NULL)) {
                     /**
                      * Put a dot between each attribute on the path.
                      */
@@ -662,6 +680,11 @@ public class RowData {
                     }
 
                     string += attribute.getName();
+                }
+                else {
+                    /**
+                     * We don't display a string for this type of attribute.
+                     */
                 }
             }
             else {
