@@ -647,7 +647,9 @@ public class RowData {
         for (Attribute attribute : attributePath) {
 
             if (attribute != null) {
-                if (!attribute.isSpecial()) {
+                if (!attribute.equals(Attribute.SELECT_ATTRIBUTE) &&
+                    !attribute.equals(Attribute.IS_NULL) &&
+                    !attribute.equals(Attribute.IS_NOT_NULL)) {
                     /**
                      * Put a dot between each attribute on the path.
                      */
