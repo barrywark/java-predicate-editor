@@ -64,7 +64,7 @@ class RowPanel
      * number.
      */
     private static final int MAX_NUM_COMBOBOXES = 20;
-    private static final int MAX_ROWS_IN_COMBOBOX_DROPDOWN = 20;
+    private static final int MAX_ROWS_IN_COMBOBOX_DROPDOWN = 25;
     private static final int MIN_TEXT_COLUMNS = 8;
     private static final int MIN_SPINNER_COLUMNS = 8;
 
