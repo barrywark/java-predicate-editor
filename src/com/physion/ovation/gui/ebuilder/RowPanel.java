@@ -66,7 +66,7 @@ class RowPanel
     private static final int MAX_NUM_COMBOBOXES = 20;
     private static final int MAX_ROWS_IN_COMBOBOX_DROPDOWN = 20;
     private static final int MIN_TEXT_COLUMNS = 8;
-    private static final int MIN_SPINNER_COLUMNS = 6;
+    private static final int MIN_SPINNER_COLUMNS = 8;
 
     private static final int INSET = 7;
     private static final Insets LEFT_INSETS = new Insets(0,INSET,0,0);
@@ -95,6 +95,12 @@ class RowPanel
      * in a TO_MANY relationship.
      */
     private JSpinner valueSpinnerInt32;
+
+    /**
+     * This spinner is used to enter a Count value.
+     * It only holds numbers >= 0.
+     */
+    private JSpinner countSpinnerInt32;
 
     /**
      * This text field is used to enter the name of the "custom"
@@ -194,12 +200,18 @@ class RowPanel
         valueTextField.getDocument().addDocumentListener(this);
 
         valueSpinnerInt16 = new JSpinner(new SpinnerNumberModel(
-            0, 0, Short.MAX_VALUE, 1));
+            0, Short.MIN_VALUE, Short.MAX_VALUE, 1));
         valueSpinnerInt16.addChangeListener(this);
         ((JSpinner.NumberEditor)valueSpinnerInt16.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
 
         valueSpinnerInt32 = new JSpinner(new SpinnerNumberModel(
+            0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
+        valueSpinnerInt32.addChangeListener(this);
+        ((JSpinner.NumberEditor)valueSpinnerInt32.getEditor()).getTextField().
+            setColumns(MIN_SPINNER_COLUMNS);
+
+        countSpinnerInt32 = new JSpinner(new SpinnerNumberModel(
             0, 0, Integer.MAX_VALUE, 1));
         valueSpinnerInt32.addChangeListener(this);
         ((JSpinner.NumberEditor)valueSpinnerInt32.getEditor()).getTextField().
@@ -230,6 +242,7 @@ class RowPanel
         operatorComboBox.addItemListener(this);
 
         buttonPanel = new JPanel(new GridBagLayout());
+        buttonPanel.setOpaque(false);
         GridBagConstraints gc;
         gc = new GridBagConstraints();
         gc.gridx = 0;
@@ -1110,6 +1123,7 @@ class RowPanel
             else if (rightmostAttribute.getType() == Type.INT_16) {
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
+                gc.weightx = 0.1;
                 gc.fill = GridBagConstraints.BOTH;
                 gc.insets = LEFT_INSETS;
                 add(valueSpinnerInt16, gc);
@@ -1117,6 +1131,7 @@ class RowPanel
             else if (rightmostAttribute.getType() == Type.INT_32) {
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
+                gc.weightx = 0.1;
                 gc.fill = GridBagConstraints.BOTH;
                 gc.insets = LEFT_INSETS;
                 add(valueSpinnerInt32, gc);
@@ -1314,8 +1329,8 @@ class RowPanel
                  */
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
-                gc.weightx = 1;
-                //gc.fill = GridBagConstraints.BOTH;
+                //gc.weightx = 1;
+                gc.fill = GridBagConstraints.BOTH;
                 gc.insets = LEFT_INSETS;
                 add(dateTimePicker, gc);
             }
@@ -1323,7 +1338,7 @@ class RowPanel
                      rowData.getPropType())) {
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
-                //gc.weightx = 1;
+                gc.weightx = 0.1;
                 gc.fill = GridBagConstraints.BOTH;
                 gc.insets = LEFT_INSETS;
                 add(valueSpinnerInt32, gc);
@@ -1431,7 +1446,7 @@ class RowPanel
             //someWidgetFillingEmptySpace = true;
             gc.fill = GridBagConstraints.BOTH;
             gc.insets = LEFT_INSETS;
-            add(valueSpinnerInt32, gc);
+            add(countSpinnerInt32, gc);
         }
         else if (rowData.getCollectionOperator() != null) {
 
@@ -1557,25 +1572,7 @@ class RowPanel
     @Override
     public void stateChanged(ChangeEvent event) {
 
-        /*
-        Object value;
-        if (event.getSource() == valueSpinnerInt16) {
-            value = valueSpinnerInt16.getValue();
-        }
-        else {
-            value = valueSpinnerInt32.getValue();
-        }
-        */
         Object value = ((JSpinner)event.getSource()).getValue();
-
-        /*
-        if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
-            rowData.setAttributeValue(value.toString());
-        }
-        else {
-            rowData.setAttributeValue(value.toString());
-        }
-        */
         rowData.setAttributeValue(value.toString());
     }
 

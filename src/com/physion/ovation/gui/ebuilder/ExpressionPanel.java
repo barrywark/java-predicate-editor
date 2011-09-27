@@ -31,8 +31,15 @@ public class ExpressionPanel
         GridLayout layout = (GridLayout)getLayout();
         layout.setRows(rootRow.getNumDescendents()+1);
 
+        int count = 0;
         for (RowData rowData : rootRow.getRows()) {
-            add(new RowPanel(rowData));
+            RowPanel rowPanel = new RowPanel(rowData);
+            add(rowPanel);
+            /*
+            if ((count % 2) == 0)
+                rowPanel.setBackground(rowPanel.getBackground().darker());
+            count++;
+            */
         }
 
         /**
