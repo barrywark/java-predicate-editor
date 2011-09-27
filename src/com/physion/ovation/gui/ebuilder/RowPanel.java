@@ -213,8 +213,8 @@ class RowPanel
 
         countSpinnerInt32 = new JSpinner(new SpinnerNumberModel(
             0, 0, Integer.MAX_VALUE, 1));
-        valueSpinnerInt32.addChangeListener(this);
-        ((JSpinner.NumberEditor)valueSpinnerInt32.getEditor()).getTextField().
+        countSpinnerInt32.addChangeListener(this);
+        ((JSpinner.NumberEditor)countSpinnerInt32.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
 
         propNameTextField = new JTextField();
@@ -1569,6 +1569,10 @@ class RowPanel
     public void changedUpdate(DocumentEvent event) {
     }
 
+
+    /**
+     * This is called when the value in any of our JSpinners change.
+     */
     @Override
     public void stateChanged(ChangeEvent event) {
 
