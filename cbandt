@@ -10,13 +10,13 @@ then
     echo You must specify the relative or full path to the directory under
     echo "which we will checkout the source tree 'trunk' directory."
     echo For example, here are three example:
-    echo "    ./bandt /home/barry/test01"
-    echo "    ./bandt ../../test01"
-    echo "    ./bandt ."
+    echo "    ./cbandt /home/barry/test01"
+    echo "    ./cbandt ../../test01"
+    echo "    ./cbandt ."
     echo ""
     echo "To checkout a specific revision, add a revision number."
     echo For example, to checkout revision 25, you would do this:
-    echo "    ./bandt /home/barry/test01 25"
+    echo "    ./cbandt /home/barry/test01 25"
     exit
 fi
 
