@@ -56,6 +56,7 @@ public class ExpressionPanel
 
 
     public void print() {
-        System.out.println("\nCurrent Value:\n"+rootRow.toString());
+        System.out.println("\nCurrent Value:\n"+rootRow.toString(false, ""));
+        System.out.println("\nDebug Version:\n"+rootRow.toString());
     }
 }

@@ -301,12 +301,16 @@ public class RowData {
             return;
         }
 
+        /*
         Attribute attribute = Attribute.SELECT_ATTRIBUTE;
         ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
         attributePath.add(attribute);
 
         RowData attributeRow = new RowData();
         attributeRow.setAttributePath(attributePath);
+        */
+        RowData attributeRow = new RowData();
+        attributeRow.addAttribute(Attribute.SELECT_ATTRIBUTE);
 
         addChildRow(attributeRow);
     }
@@ -494,7 +498,6 @@ public class RowData {
             DataModel.OPERATOR_FALSE.equals(attributeOperator) ||
             DataModel.OPERATOR_IS_NULL.equals(attributeOperator) ||
             DataModel.OPERATOR_IS_NOT_NULL.equals(attributeOperator)) {
-            //System.out.println("Setting attributeValue to null");
             setAttributeValue(null);
         }
     }
@@ -505,13 +508,142 @@ public class RowData {
     }
 
 
+    /* Remove this method.
     public void setAttributePath(ArrayList<Attribute> attributePath) {
         this.attributePath = attributePath;
     }
+    */
 
 
+    public int getAttributeCount() {
+        return(getAttributePath().size());
+    }
+
+
+    /**
+     * Add an Attribute to the end of this RowData's attributePath.
+     *
+     * In addition to simply adding the Attribute to the attributePath,
+     * this method also makes any other necessary changes to the
+     * other member data associated with this RowData object.
+     * For example, if the user adds the Attribute.IS_NULL to the
+     * attributePath, this method also sets the attributeOperator
+     * to "is null".
+     */
+    public void addAttribute(Attribute attribute) {
+
+        if (attributePath == null)
+            attributePath = new ArrayList<Attribute>();
+
+        attributePath.add(attribute);
+
+        if (attribute.equals(Attribute.IS_NULL)) {
+            setAttributeOperator(DataModel.OPERATOR_IS_NULL);
+        }
+        else if (attribute.equals(Attribute.IS_NOT_NULL)) {
+            setAttributeOperator(DataModel.OPERATOR_IS_NOT_NULL);
+        }
+    }
+
+
+    /**
+     * This returns a COPY of the Attribute at the specified index.
+     */
+    public Attribute getAttribute(int index) {
+        //return(getAttributePath().get(index));
+        return(new Attribute(getAttributePath().get(index)));
+    }
+
+
+    /**
+     * This returns this RowData's ArrayList of Attribute objects.
+     *
+     * Please note, it is returning this RowData's member data.
+     * It is NOT returning a copy, so if you make changes to
+     * it, you are affecting this RowData object.
+     *
+     * TODO:  Make the RowData.getAttributePath() method private and
+     * force engineers to use the setAttribute(), addAttribute(), and
+     * removeAttribute() methods to access the attributePath.  This
+     * will let the RowData object impose whatever rules it needs to
+     * on the manipulation of the attributePath.  I have written
+     * the addAttribute() method, but that is just a start.
+     */
     public ArrayList<Attribute> getAttributePath() {
+
+        if (attributePath == null)
+            attributePath = new ArrayList<Attribute>();
+
         return(attributePath);
+    }
+
+
+    /**
+     * This is simply a convenience method that calls the
+     * other version of this method with the debugVersion
+     * flag set to false.
+     */
+    public String getAttributePathString() {
+        return(getAttributePathString(false));
+    }
+
+
+    /**
+     * Get a string that represents this RowData's attributePath
+     * that can be used in a query string.
+     * The returned value is in the format that the Objectivity
+     * software would like.
+     *
+     * TODO: Make changes to this if necessary.
+     *
+     * @param debugVersion - Set this to true if you want a 
+     * "debug" version of the attribute path that has the
+     * isMine flag shown in it.  Set this to false if you
+     * want a version of this string that can be used for
+     * a query.
+     */
+    public String getAttributePathString(boolean debugVersion) {
+
+        String string = "";
+
+
+        boolean first = true;
+        for (Attribute attribute : attributePath) {
+
+            if (attribute != null) {
+                if (!attribute.equals(Attribute.SELECT_ATTRIBUTE) &&
+                    !attribute.equals(Attribute.IS_NULL) &&
+                    !attribute.equals(Attribute.IS_NOT_NULL)) {
+                    /**
+                     * Put a dot between each attribute on the path.
+                     */
+                    if (first) {
+                        string += " ";
+                        first = false;
+                    }
+                    else {
+                        string += ".";
+                    }
+
+                    if (debugVersion)
+                        string += attribute.getDisplayName();
+                    else
+                        string += attribute.getQueryName();
+
+                }
+                else {
+                    /**
+                     * We don't display a string for this type of attribute.
+                     */
+                }
+            }
+            else {
+                System.err.println("ERROR:  null Attribute in attributePath.");
+                string += "ERROR: attribute == null";
+            }
+        }
+
+        return(string);
     }
 
 
@@ -609,13 +741,37 @@ public class RowData {
     }
 
 
+    /**
+     * Get a string version of this whole tree usefull for debugging.
+     * I.e. a string version of this RowData and all its descendents.
+     */
     public String toString() {
-        return(toString(""));
+        return(toString(true, ""));
     }
 
 
-    public String getRowString() {
-        return(getRowString(""));
+    /**
+     * Get a string version of this whole tree usefull for debugging.
+     * I.e. a string version of this RowData and all its descendents.
+     *
+     * All rows should have the indent string prepended to the row.
+     * This method calls itself recursively, increasing the indent
+     * amount for each level deeper a row is nested in the tree.
+     *
+     * @param debubVersion - Pass true if you want the string to
+     * be more useful to a human.  Pass false if you want it to
+     * look more like what will be passed to query software.
+     *
+     * @param indent - The amount to indent this row.  E.g. "    "
+     */
+    public String toString(boolean debugVersion, String indent) {
+
+        String string = getRowString(debugVersion, indent);
+
+        for (RowData childRow : childRows)
+            string += "\n"+childRow.toString(debugVersion, indent+"  ");
+
+        return(string);
     }
 
 
@@ -623,13 +779,39 @@ public class RowData {
      * Get the String representation of JUST THIS row.  I.e. not this
      * row and its children.
      */
-    public String getRowString(String indent) {
+    public String getRowString() {
+        return(getRowString(true, ""));
+    }
+
+
+    /**
+     * Get the String representation of JUST THIS row.  I.e. not this
+     * row and its children.
+     */
+    /*
+    public String getRowString(boolean debugVersion) {
+        return(getRowString(debugVersion, ""));
+    }
+    */
+
+
+    /**
+     * Get the String representation of JUST THIS row.  I.e. not this
+     * row and its children.  The row will have the passed in indent
+     * string prepended to it.
+     *
+     * @param indent - The amount to indent this row.  E.g. "    "
+     */
+    public String getRowString(boolean debugVersion, String indent) {
         
-        String string;
-        if (getParentClass() != null) 
-            string = indent+getParentClass().getName()+" |";
-        else 
-            string = indent+"ERROR: No Parent Class"+" |";
+        String string = indent;
+
+        if ((debugVersion) || (this.isRootRow())) {
+            if (getParentClass() != null) 
+                string += getParentClass().getName()+" |";
+            else 
+                string += "ERROR: No Parent Class"+" |";
+        }
 
         /**
          * Do a quick sanity check.
@@ -643,60 +825,10 @@ public class RowData {
             return(string);
         }
 
-        boolean first = true;
-        for (Attribute attribute : attributePath) {
-
-            if (attribute != null) {
-                if (attribute.equals(Attribute.MY_PROPERTY)) {
-                    if (first) {
-                        string += " ";
-                        first = false;
-                    }
-                    else {
-                        string += ".properties(My)";
-                    }
-                }
-                else if (attribute.equals(Attribute.ANY_PROPERTY)) {
-                    if (first) {
-                        string += " ";
-                        first = false;
-                    }
-                    else {
-                        string += ".properties(Any)";
-                    }
-                }
-                else if (!attribute.equals(Attribute.SELECT_ATTRIBUTE) &&
-                         !attribute.equals(Attribute.IS_NULL) &&
-                         !attribute.equals(Attribute.IS_NOT_NULL)) {
-                    /**
-                     * Put a dot between each attribute on the path.
-                     */
-                    if (first) {
-                        string += " ";
-                        first = false;
-                    }
-                    else {
-                        string += ".";
-                    }
-
-                    string += attribute.getName();
-                }
-                else {
-                    /**
-                     * We don't display a string for this type of attribute.
-                     */
-                }
-            }
-            else {
-                System.err.println("ERROR:  null Attribute in attributePath.");
-                string += "ERROR: attribute == null";
-            }
-        }
+        string += getAttributePathString(debugVersion);
 
         if (collectionOperator != null) {
             string += " "+collectionOperator;
-            //if (!collectionOperator.equals(CollectionOperator.COUNT))
-            //    string += " of the following";
         }
 
         if (propName != null) {
@@ -708,24 +840,6 @@ public class RowData {
 
         if (attributeOperator != null)
             string += " "+attributeOperator;
-
-        /**
-         * Another quick sanity check.
-         * If the user specified an attributeOperator other than
-         * the "is null" and "is not null" values, then s/he also
-         * must also specify an attributeValue.
-         */
-        /*
-        if ((attributeOperator != null) &&
-            (!attributeOperator.equals(Attribute.IS_NULL.toString()) &&
-             !attributeOperator.equals(Attribute.IS_NOT_NULL.toString())) &&
-            (attributeValue == null)) {
-            string += "ERROR: RowData is in an inconsistent state.";
-            string += "\nattributeOperator = "+attributeOperator;
-            string += "\nattributeValue = "+attributeValue;
-            return(string);
-        }
-        */
 
         /**
          * If the user specified the "is null" or "is not null" operator,
@@ -752,6 +866,8 @@ public class RowData {
     /**
      * Get the "childmost" or "leaf" Attribute that is specified
      * by this row.
+     *
+     * TODO:  Change this to return a COPY of the Attribute.
      */
     public Attribute getChildmostAttribute() {
 
@@ -790,17 +906,6 @@ public class RowData {
                 return(parentRow.getChildmostAttribute().getClassDescription());
             }
         }
-    }
-
-
-    public String toString(String indent) {
-
-        String string = getRowString(indent);
-
-        for (RowData childRow : childRows)
-            string += "\n"+childRow.toString(indent+"  ");
-
-        return(string);
     }
 
 
@@ -843,7 +948,6 @@ public class RowData {
         RowData.setRootRow(rootRow);
 
         Attribute attribute;
-        ArrayList<Attribute> attributePath;
         RowData rowData;
         ArrayList<RowData> childRows = new ArrayList<RowData>();
 
@@ -857,15 +961,13 @@ public class RowData {
          *      epochGroup.source is null
          */
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
-        attributePath.add(attribute);
+        rowData.addAttribute(attribute);
         attribute = new Attribute("source", Type.REFERENCE,
                                   sourceCD, Cardinality.TO_ONE);
-        attributePath.add(attribute);
-        attributePath.add(Attribute.IS_NULL);
-        rowData.setAttributePath(attributePath);
+        rowData.addAttribute(attribute);
+        rowData.addAttribute(Attribute.IS_NULL);
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
 
@@ -874,21 +976,17 @@ public class RowData {
          * Create a couple "Date/Time" rows.
          */
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("startTime", Type.DATE_TIME);
-        attributePath.add(attribute);
+        rowData.addAttribute(attribute);
         rowData.setAttributeOperator(">=");
         rowData.setAttributeValue(new GregorianCalendar(2011, 0, 1).getTime());
-        rowData.setAttributePath(attributePath);
         childRows.add(rowData);
 
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("endTime", Type.DATE_TIME);
-        attributePath.add(attribute);
+        rowData.addAttribute(attribute);
         rowData.setAttributeOperator("<=");
         rowData.setAttributeValue(new Date());
-        rowData.setAttributePath(attributePath);
         childRows.add(rowData);
 
         rootRow.setChildRows(childRows);
@@ -897,17 +995,18 @@ public class RowData {
          * Create a "My Property" row.
          */
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("nextEpoch", Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
-        attributePath.add(attribute);
-        attributePath.add(Attribute.MY_PROPERTY);
+        rowData.addAttribute(attribute);
+        attribute = new Attribute("properties", "Property",
+                                  Type.PER_USER_PARAMETERS_MAP,
+                                  null, Cardinality.TO_MANY, true);
+        rowData.addAttribute(attribute);
 
         rowData.setPropName("animalID");
         rowData.setPropType(DataModel.PROP_TYPE_INT);
         rowData.setAttributeOperator("<=");
         rowData.setAttributeValue("123");
-        rowData.setAttributePath(attributePath);
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
@@ -916,16 +1015,14 @@ public class RowData {
          * Create a "Parameters Map" row of type int.
          */
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
                                   null, Cardinality.N_A);
-        attributePath.add(attribute);
+        rowData.addAttribute(attribute);
 
         rowData.setPropName("stimulusFrequency");
         rowData.setPropType(DataModel.PROP_TYPE_INT);
         rowData.setAttributeOperator("==");
         rowData.setAttributeValue("27");
-        rowData.setAttributePath(attributePath);
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
@@ -934,46 +1031,43 @@ public class RowData {
          * Create a "Parameters Map" row of type string.
          */
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
                                   null, Cardinality.N_A);
-        attributePath.add(attribute);
+        rowData.addAttribute(attribute);
 
         rowData.setPropName("stimulusName");
         rowData.setPropType(DataModel.PROP_TYPE_STRING);
         rowData.setAttributeOperator("~~=");
         rowData.setAttributeValue("caffeine");
-        rowData.setAttributePath(attributePath);
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
 
         /**
-         * Create a "Per User" row.
+         * Create a "Per User" derivedResponse row.
          */
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
-        attribute = new Attribute("All derivedResponses", Type.PER_USER,
-                                  derivedResponseCD, Cardinality.TO_MANY);
-        attributePath.add(attribute);
+        attribute = new Attribute("derivedResponses", null, Type.PER_USER,
+                                  derivedResponseCD, Cardinality.TO_MANY, true);
+        rowData.addAttribute(attribute);
 
         rowData.setCollectionOperator(CollectionOperator.ALL);
-        rowData.setAttributePath(attributePath);
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
 
+        /**
+         * Create a row that ends with a string value.
+         */
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
-        attributePath.add(attribute);
+        rowData.addAttribute(attribute);
         attribute = new Attribute("source", Type.REFERENCE,
                                   sourceCD, Cardinality.TO_ONE);
-        attributePath.add(attribute);
+        rowData.addAttribute(attribute);
         attribute = new Attribute("label", Type.UTF_8_STRING);
-        attributePath.add(attribute);
-        rowData.setAttributePath(attributePath);
+        rowData.addAttribute(attribute);
 
         rowData.setAttributeOperator("==");
         rowData.setAttributeValue("Test 27");
@@ -985,11 +1079,9 @@ public class RowData {
          * Create another child row.
          */
         rowData = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("resources", Type.REFERENCE,
                                   resourceCD, Cardinality.TO_MANY);
-        attributePath.add(attribute);
-        rowData.setAttributePath(attributePath);
+        rowData.addAttribute(attribute);
         rowData.setCollectionOperator(CollectionOperator.NONE);
 
         childRows.add(rowData);
@@ -1001,64 +1093,26 @@ public class RowData {
         rowData = new RowData();
         rowData.setCollectionOperator(CollectionOperator.ALL);
 
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
-        attributePath.add(attribute);
+        rowData.addAttribute(attribute);
         attribute = new Attribute("epochs", Type.REFERENCE,
                                   epochCD, Cardinality.TO_MANY);
-        attributePath.add(attribute);
-
-        rowData.setAttributePath(attributePath);
+        rowData.addAttribute(attribute);
 
         childRows.add(rowData);
         rootRow.setChildRows(childRows);
 
         RowData rowData2 = new RowData();
-        attributePath = new ArrayList<Attribute>();
         attribute = new Attribute("startTime", Type.DATE_TIME);
-        attributePath.add(attribute);
+        rowData2.addAttribute(attribute);
 
         rowData2.setAttributeOperator(">=");
         rowData2.setAttributeValue(new GregorianCalendar(2010, 0, 1).getTime());
 
-        rowData2.setAttributePath(attributePath);
         ArrayList<RowData> childRows2 = new ArrayList<RowData>();
         childRows2.add(rowData2);
         rowData.setChildRows(childRows2);
-
-        /**
-         * Create another child row.
-         */
-/*
-        attributePath = new ArrayList<Attribute>();
-        attribute = new Attribute("epochGroup", Type.REFERENCE,
-                                  epochGroupCD, Cardinality.TO_ONE);
-        attributePath.add(attribute);
-
-        attribute = new Attribute("epochs", Type.REFERENCE,
-                                  sourceCD, Cardinality.TO_MANY);
-        attributePath.add(attribute);
-
-        RowData rowData3 = new RowData();
-        rowData3.setAttributePath(attributePath);
-        rowData3.setCollectionOperator(CollectionOperator.NONE);
-
-        RowData rowData4 = new RowData();
-        attribute = new Attribute("label", Type.UTF_8_STRING);
-        attributePath = new ArrayList<Attribute>();
-        attributePath.add(attribute);
-        rowData4.setAttributePath(attributePath);
-        rowData4.setAttributeOperator("==");
-        rowData4.setAttributeValue("Test 50");
-
-        ArrayList<RowData> childRows3 = new ArrayList<RowData>();
-        childRows3.add(rowData4);
-        rowData3.setChildRows(childRows3);
-
-        childRows.add(rowData3);
-        rootRow.setChildRows(childRows);
-*/
 
         System.out.println("rootRow:\n"+rootRow.toString());
 

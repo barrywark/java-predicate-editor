@@ -30,9 +30,10 @@ public class DataModel {
         ">", ">="};
     public static final String[] OPERATORS_STRING = {"==", "!=", "<", "<=",
         ">", ">=", "~=", "~~="};
-    public static final String OPERATOR_IS_NULL = Attribute.IS_NULL.getName();
+    public static final String OPERATOR_IS_NULL =
+        Attribute.IS_NULL.getDisplayName();
     public static final String OPERATOR_IS_NOT_NULL =
-        Attribute.IS_NOT_NULL.getName();
+        Attribute.IS_NOT_NULL.getDisplayName();
 
     /**
      * TODO: What are the possible types?
@@ -211,11 +212,15 @@ public class DataModel {
         attribute = new Attribute("incomplete", Type.BOOLEAN);
         entityBaseCD.addAttribute(attribute);
 
-        /*
         attribute = new Attribute("properties", Type.PER_USER_PARAMETERS_MAP,
                                   null, Cardinality.TO_MANY);
+
+        /**
+         * This is the only Attribute that has a displayName
+         * different from its queryName.
+         */
+        attribute.setDisplayName("Property");
         entityBaseCD.addAttribute(attribute);
-        */
 
         attribute = new Attribute("resources", Type.REFERENCE,
                                   resourceCD, Cardinality.TO_MANY);

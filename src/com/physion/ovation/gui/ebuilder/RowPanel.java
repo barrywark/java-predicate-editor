@@ -163,7 +163,7 @@ class RowPanel
 
         this.rowData = rowData;
 
-        setBorder(BorderFactory.createEmptyBorder(3,10,3,10));
+        setBorder(BorderFactory.createEmptyBorder(4,10,4,10));
 
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -391,10 +391,6 @@ class RowPanel
      * special Attribute.IS_NULL and IS_NOT_NULL to the end of the
      * list of the choices.
      *
-     * @param appendMyAnyProperty - If this is true, we will also append
-     * the special Attributes.MY_PROPERTY and Attribute.ANY_PROPERTY to
-     * the end of the list of items in the comboBox's model.
-     *
      * @param selectedItem - After setting the model, this method sets
      * the selected item to this value.  Pass null if you do not want to
      * set the selected item.
@@ -424,21 +420,37 @@ class RowPanel
         /**
          * Go through the list of attributes adding them to our
          * copy of the ArrayList.  But, if an attribute is of type
-         * Type.PER_USER, insert two entries into our copy, one
-         * entry is prefaced with "My " and the other with "All ".
+         * Type.PER_USER or Type.PER_USER_PARAMETERS_MAP,
+         * insert two entries into our copy, one entry has its
+         * isMine flag set to true, and the other false.
+         *
+         * This messing around is needed because we want the
+         * user to have two versions of these attributes that
+         * s/he can choose.  E.g. EntityBase.properties becomes
+         * "My Property" and "Any Property" as comboBox choices.
+         * E.g. Epoch.derivedResponses becomes "My derivedResponses"
+         * and "All derivedResponses".
          */
         for (Attribute attribute : attributes) {
 
-            if (attribute.getType() != Type.PER_USER) {
-                copy.add(attribute);
+            if (attribute.getType() == Type.PER_USER) {
+                Attribute newAttribute = new Attribute(attribute);
+                newAttribute.setIsMine(true);
+                copy.add(newAttribute);
+                newAttribute = new Attribute(attribute);
+                newAttribute.setIsMine(false);
+                copy.add(newAttribute);
+            }
+            else if (attribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
+                Attribute newAttribute = new Attribute(attribute);
+                newAttribute.setIsMine(true);
+                copy.add(newAttribute);
+                newAttribute = new Attribute(attribute);
+                newAttribute.setIsMine(false);
+                copy.add(newAttribute);
             }
             else {
-                Attribute myAllAttribute = new Attribute(attribute);
-                myAllAttribute.setName("My "+myAllAttribute.getName());
-                copy.add(myAllAttribute);
-                myAllAttribute = new Attribute(attribute);
-                myAllAttribute.setName("All "+myAllAttribute.getName());
-                copy.add(myAllAttribute);
+                copy.add(attribute);
             }
         }
 
@@ -446,11 +458,6 @@ class RowPanel
             copy.add(Attribute.IS_NULL);
             copy.add(Attribute.IS_NOT_NULL);
         }
-
-        //if (appendMyAnyProperty) {
-            copy.add(Attribute.MY_PROPERTY);
-            copy.add(Attribute.ANY_PROPERTY);
-        //}
 
         /**
          * All the monkey business with the list of Attributes is
@@ -660,22 +667,25 @@ class RowPanel
                  */
 
                 Attribute selectedAttribute = (Attribute)selectedObject;
-                //System.out.println("selectedAttribute = "+selectedAttribute);
-                /*
-                System.out.println("Attribute.IS_NULL = "+Attribute.IS_NULL);
-                System.out.println(
-                    "selectedAttribute.equals(Attribute.IS_NULL) = "+
-                    selectedAttribute.equals(Attribute.IS_NULL));
-                */
+                System.out.println("selectedAttribute = "+selectedAttribute);
 
-                if (!selectedAttribute.equals(Attribute.MY_PROPERTY) &&
-                    !selectedAttribute.equals(Attribute.ANY_PROPERTY) &&
+                if ((selectedAttribute.getType() !=
+                     Type.PER_USER_PARAMETERS_MAP) &&
                     (selectedAttribute.getType() != Type.PARAMETERS_MAP)) {
                     rowData.setPropType(null);
                     rowData.setPropName(null);
                 }
 
-                if (selectedAttribute.getCardinality() != Cardinality.TO_MANY) {
+                /**
+                 * Set the collection operator (Count/Any/All/None) to
+                 * be null if the selectedAttribute does not use
+                 * a collection operator, or set it to Count if it does
+                 * use a collection operator.
+                 */
+                if ((selectedAttribute.getCardinality() !=
+                     Cardinality.TO_MANY) ||
+                     (selectedAttribute.getType() ==
+                      Type.PER_USER_PARAMETERS_MAP)) {
                     rowData.setCollectionOperator(null);
                 }
                 else {
@@ -685,16 +695,24 @@ class RowPanel
                     rowData.setAttributeValue("0");
                 }
 
+                /**
+                 * Set the attribute operator to "is null" or "is not null"
+                 * if the selectedAttribute is one of our special
+                 * Attribute.IS_NULL or Attribute.IS_NOT_NULL values.
+                 *
+                 * Otherwise, set the attribute operator and other settings
+                 * appropriately for the selectedAttribute's type.
+                 */
                 if (selectedAttribute.equals(Attribute.IS_NULL) ||
                     selectedAttribute.equals(Attribute.IS_NOT_NULL)) {
                     //System.out.println("Setting attributeOperator to: "+
                     //    selectedAttribute.getName());
-                    rowData.setAttributeOperator(selectedAttribute.getName());
+                    rowData.setAttributeOperator(
+                        selectedAttribute.getDisplayName());
                 }
-                else if (selectedAttribute.equals(Attribute.MY_PROPERTY) ||
-                         selectedAttribute.equals(Attribute.ANY_PROPERTY) ||
+                else if ((selectedAttribute.getType() ==
+                          Type.PER_USER_PARAMETERS_MAP) ||
                          (selectedAttribute.getType() == Type.PARAMETERS_MAP)) {
-                    //System.out.println("My/Any Property selected.");
                     rowData.setPropType(DataModel.PROP_TYPE_INT);
                     rowData.setAttributeOperator(
                         DataModel.OPERATORS_ARITHMATIC[0]);
@@ -742,7 +760,8 @@ class RowPanel
                      * to say "Select Attribute" before the user selected
                      * a value for the first time.
                      */
-                    attributes.add(selectedAttribute);
+                    //attributes.add(selectedAttribute);
+                    rowData.addAttribute(selectedAttribute);
                 }
                 else if (attributes.size() < comboBoxIndex) {
                     /**
@@ -841,12 +860,16 @@ class RowPanel
                 //System.out.println("selectedObject = "+selectedObject);
             }
 
-            System.out.println("rowData's new value: "+rowData.getRowString());
+            System.out.println("rowData's new value: "+
+                               rowData.getRowString(false, ""));
+            System.out.println("Debug Version: "+rowData.getRowString());
 
             initializeComponents();
         }
 
-        System.out.println("rootRow:\n"+RowData.getRootRow());
+        System.out.println("\nrootRow:\n"+
+                           RowData.getRootRow().toString(false, ""));
+        System.out.println("\nrootRow:\n"+RowData.getRootRow());
     }
 
 
@@ -995,7 +1018,7 @@ class RowPanel
 
         GridBagConstraints gc;
 
-        ArrayList<Attribute> attributes = rowData.getAttributePath();
+        //ArrayList<Attribute> attributes = rowData.getAttributePath();
         //System.out.println("Add comboBoxes for: "+rowData.getRowString());
 
         /**
@@ -1008,16 +1031,18 @@ class RowPanel
          *
          *      epochGroup.source isNull
          */
-        int comboBoxIndex = 0;
-        for (Attribute attribute : attributes) {
+        //int comboBoxIndex = 0;
+        //for (Attribute attribute : attributes) {
+        int index;
+        for (index = 0; index < rowData.getAttributeCount(); index++) {
 
             //System.out.println("Adding comboBox at gridx "+gridx);
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[comboBoxIndex], gc);
+            add(comboBoxes[index], gc);
 
-            if (comboBoxIndex == 0) {
+            if (index == 0) {
                 /**
                  * Set the model and selected item of the leftmost
                  * comboBox.  The leftmost comboBox is filled with
@@ -1026,22 +1051,8 @@ class RowPanel
                  * Also set the selected item in the comboBox.
                  */
                 ClassDescription parentClass = rowData.getParentClass();
-                /*
-                System.out.println("Set model for comboBox "+comboBoxIndex+
-                    " to be "+parentClass+", and set the selected item "+
-                    "to be "+attributes.get(comboBoxIndex));
-                System.out.println("Set model for comboBox "+comboBoxIndex+
-                    " to be "+parentClass);
-                */
-                setComboBoxModel(comboBoxes[comboBoxIndex], parentClass,
-                                 true, false, //true,
-                                 attributes.get(comboBoxIndex));
-                /*
-                System.out.println(
-                    ((DefaultComboBoxModel)(comboBoxes[comboBoxIndex].
-                                            getModel())).
-                    getIndexOf(attributes.get(comboBoxIndex)));
-                */
+                setComboBoxModel(comboBoxes[index], parentClass,
+                                 true, false, rowData.getAttribute(index));
             }
             else {
                 /**
@@ -1050,14 +1061,11 @@ class RowPanel
                  * the class of the comboBox to its left.
                  * Also set the selected item in the comboBox.
                  */
-                Attribute att = attributes.get(comboBoxIndex-1);
-                //System.out.println("Set model for comboBox "+comboBoxIndex+
-                //    " to be "+att.getClassDescription());
-                setComboBoxModel(comboBoxes[comboBoxIndex],
+                Attribute att = rowData.getAttribute(index-1);
+                setComboBoxModel(comboBoxes[index],
                                  att.getClassDescription(), true, true,
-                                 /*true,*/ attributes.get(comboBoxIndex));
+                                 rowData.getAttribute(index));
             }
-            comboBoxIndex++;
         }
 
         /**
@@ -1068,8 +1076,11 @@ class RowPanel
          */
 
         Attribute rightmostAttribute = rowData.getChildmostAttribute();
+        //System.out.println("rightmostAttribute = "+
+        //    rightmostAttribute.toStringDebug());
         if (!rightmostAttribute.isPrimitive() &&
             !rightmostAttribute.isSpecial() &&
+            (rightmostAttribute.getType() != Type.PER_USER_PARAMETERS_MAP) &&
             (rightmostAttribute.getType() != Type.PARAMETERS_MAP) &&
             (rowData.getCollectionOperator() == null)) {
             /**
@@ -1083,15 +1094,15 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[comboBoxIndex++], gc);
+            add(comboBoxes[index++], gc);
 
             /**
              * Set the comboBox model to hold attributes of
              * the class that is selected in the comboBox to our left.
              */
-            setComboBoxModel(comboBoxes[attributes.size()],
+            setComboBoxModel(comboBoxes[rowData.getAttributeCount()],
                              rightmostAttribute.getClassDescription(),
-                             true, true, /*true,*/ Attribute.SELECT_ATTRIBUTE);
+                             true, true, Attribute.SELECT_ATTRIBUTE);
         }
         else if (rightmostAttribute.isPrimitive()) {
 
@@ -1106,7 +1117,7 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[comboBoxIndex++], gc);
+            add(comboBoxes[index++], gc);
 
             /**
              * Now add the widget the user can use to edit the
@@ -1156,7 +1167,7 @@ class RowPanel
              * for the Type (int, string, float, boolean) of the
              * Attribute.
              */
-            int widgetIndex = attributes.size();
+            int widgetIndex = rowData.getAttributeCount();//attributes.size();
             if (rightmostAttribute.getType() == Type.BOOLEAN) {
                 comboBoxes[widgetIndex].setModel(
                     new DefaultComboBoxModel(DataModel.OPERATORS_BOOLEAN));
@@ -1234,8 +1245,8 @@ class RowPanel
             }
             //widgetIndex++;
         }
-        else if (rightmostAttribute.equals(Attribute.MY_PROPERTY) ||
-                 rightmostAttribute.equals(Attribute.ANY_PROPERTY) ||
+        else if ((rightmostAttribute.getType() ==
+                  Type.PER_USER_PARAMETERS_MAP) ||
                  (rightmostAttribute.getType() == Type.PARAMETERS_MAP)) {
 
             //System.out.println("Rightmost attribute is "+
@@ -1415,7 +1426,7 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[comboBoxIndex++], gc);
+            add(comboBoxes[index++], gc);
 
             /** 
              * Add comboBox for the Attribute Operator.
@@ -1423,27 +1434,13 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[comboBoxIndex++], gc);
+            add(comboBoxes[index++], gc);
 
             /** 
-             * Add count text field.
-             *
-             * TODO: This should be a clicker of some sort so
-             * the user cannot enter an illegal value?
+             * Add count spinner.
              */
-            /*
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
-            gc.weightx = 1;
-            someWidgetFillingEmptySpace = true;
-            gc.fill = GridBagConstraints.BOTH;
-            gc.insets = LEFT_INSETS;
-            add(valueTextField, gc);
-            */
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            //gc.weightx = 1;
-            //someWidgetFillingEmptySpace = true;
             gc.fill = GridBagConstraints.BOTH;
             gc.insets = LEFT_INSETS;
             add(countSpinnerInt32, gc);
@@ -1462,7 +1459,7 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[comboBoxIndex++], gc);
+            add(comboBoxes[index++], gc);
         }
         else {
             /**
@@ -1514,7 +1511,7 @@ class RowPanel
              * Set that comboBox's model to the list of all the
              * Collection Operators: Any, All, None, Count.
              */
-            int widgetIndex = attributes.size();
+            int widgetIndex = rowData.getAttributeCount();
             DefaultComboBoxModel model = new DefaultComboBoxModel(
                 CollectionOperator.values());
             comboBoxes[widgetIndex].setModel(model);

@@ -26,7 +26,14 @@ public enum Type {
     /**
      * This is "per-user" reference type.
      */
-    PER_USER;
+    PER_USER,
+
+    /**
+     * This is "per-user parameters map" reference type.
+     * As of September 2011, the only attribute of this
+     * type is the EntityBase.properties attribute.
+     */
+    PER_USER_PARAMETERS_MAP;
 
 
     /**
@@ -34,9 +41,12 @@ public enum Type {
      * E.g. an int, float, boolean, etc.
      */
     public boolean isPrimitive() {
-        return((this != REFERENCE) &&
-               (this != PARAMETERS_MAP) &&
-               (this != PER_USER));
+        return((this == BOOLEAN) ||
+               (this == UTF_8_STRING) ||
+               (this == INT_16) ||
+               (this == INT_32) ||
+               (this == FLOAT_64) ||
+               (this == DATE_TIME));
     }
 
 
