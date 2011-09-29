@@ -29,19 +29,22 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowData;
  * the code prints the status and the expression tree the user
  * created.
  *
- *      RowData rootRow = RowData.createRootRow();
- *      int status = ExpressionBuilder.editExpression(rootRow);
- *      System.out.println("status = "+status);
- *      System.out.println("rootRow:\n"+rootRow);
+ *      ExpressionBuilder.ReturnValue returnValue;
+ *      returnValue = ExpressionBuilder.editExpression(null);
  *
  * The code below will create an expression tree that has
  * some rows already in it and display that in the GUI.
  *
  *      RowData rootRow = RowData.createTestRowData();
- *      int status = ExpressionBuilder.editExpression(rootRow);
+ *      returnValue = ExpressionBuilder.editExpression(rootRow);
  * 
- * The returned status value tells the caller whether the
+ * The returned returnValue.status value tells the caller whether the
  * user pressed the Ok button or canceled out of the window.
+ * If returnValue.status is RETURN_STATUS_CANCEL, then
+ * returnValue.rootRow is null.
+ *
+ * Please see the class's main() method to see example code
+ * you can use to create and display the GUI.
  */
 public class ExpressionBuilder
     extends JDialog 
@@ -61,11 +64,11 @@ public class ExpressionBuilder
     /**
      * Create an ExpressionBuilder dialog with its expression
      * tree initialized to a copy of the passed in expression.
-     * Pass null if you want to create a tree from scratch.
      *
      * @param originalRootRow - The rootRow of the expression tree
      * you want to edit.  (Please note, the GUI edits a copy
      * of the passed in rootRow.)
+     * Do NOT pass null.
      */
     ExpressionBuilder(RowData originalRootRow) {
 
@@ -116,6 +119,9 @@ public class ExpressionBuilder
 
     /**
      * This returns the reason the window closed.
+     * Engineers using the ExpressionBuilder.editExpression() method
+     * should not be calling this method.  They should be using the
+     * returned ReturnValue object to get this information.
      *
      * @return Returns ExpressionBuilder.RETURN_STATUS_OK if the user
      * pressed the Ok button.  Returns ExpressionBuilder.RETURN_STATUS_CANCEL
@@ -128,11 +134,20 @@ public class ExpressionBuilder
     }
 
 
+    /**
+     * This returns the new, (possibly modified), expression tree.
+     * Engineers using the ExpressionBuilder.editExpression() method
+     * should not be calling this method.  They should be using the
+     * returned ReturnValue object to get this information.
+     */
     private RowData getRootRow() {
         return(rootRow);
     }
 
 
+    /**
+     * This is called when the user clicks the Ok or Cancel button.
+     */
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == cancelButton) {
@@ -149,9 +164,9 @@ public class ExpressionBuilder
 
 
     /**
-     * Call this method to create a new expression tree
-     * from scratch.  I.e. you are not editing an
-     * already existing expression tree.
+     * Engineers should call this method to create a new
+     * expression tree from scratch.
+     * I.e. you are not editing an already existing expression tree.
      *
      * This is simply a convenience function to call
      * editExpression(null).  See that method for more
@@ -240,19 +255,25 @@ public class ExpressionBuilder
      */
     public static void main(String[] args) {
 
-        ReturnValue returnValue;
+        ExpressionBuilder.ReturnValue returnValue;
 
 
         /**
          * Create a new expression from scratch.
          */
         returnValue = ExpressionBuilder.editExpression();
-        System.out.println("\nstatus = "+returnValue.status);
-        System.out.println("rootRow:\n"+returnValue.rootRow);
+        if (returnValue.status == ExpressionBuilder.RETURN_STATUS_OK) {
+            System.out.println("User pressed OK.");
+            System.out.println("rootRow:\n"+returnValue.rootRow);
+        }
+        else {
+            System.out.println("User pressed Cancel or closed the window.");
+        }
 
         /**
          * After the user Oks or Cancels out of the window
          * created above, create another window. 
+         *
          * This time though, create an expression tree filled with
          * some values and have the window initialized to that
          * tree's value.
