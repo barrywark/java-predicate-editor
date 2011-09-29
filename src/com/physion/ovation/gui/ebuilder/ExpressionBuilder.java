@@ -76,6 +76,13 @@ public class ExpressionBuilder
         setTitle("Physion ooExpression Builder");
         setModal(true);
 
+        if (originalRootRow == null) {
+            System.out.println("ExpressionBuilder constructor was passed\n"+
+                "a null value for the originalRootRow parameter.\n"+
+                "That is not allowed.");
+            return;
+        }
+
         /**
          * Make a copy of the passed in expression tree so that
          * way the GUI will not affect it.
