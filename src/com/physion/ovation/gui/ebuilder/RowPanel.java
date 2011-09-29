@@ -103,24 +103,29 @@ class RowPanel
     private JSpinner countSpinnerInt32;
 
     /**
-     * This text field is used to enter the name of the "custom"
-     * MY/ANY_PROPERTY.
+     * This text field is used to enter the user created "key" for the 
+     * "properties" attribute.
      */
     private JTextField propNameTextField;
 
     /**
      * This comboBox allows the user to select what the type of the
-     * "custom" MY/ANY_PROPERTY will be.  E.g. int, string, boolean, time.
+     * "keyed" "properties" attribute will be.
+     * E.g. int, string, boolean, time.
      */
     private JComboBox propTypeComboBox;
 
     /**
      * This comboBox allows the user to select the operator that
-     * will be used for a row that contains a "custom" MY/ANY_PROPERTY
+     * will be used for a row that contains a "keyed" "properties"
      * definition.
      */
     private JComboBox operatorComboBox;
 
+    /**
+     * This is the widget that is displayed to let a user select
+     * a date and time.
+     */
     private DateTimePicker dateTimePicker;
 
     /**
@@ -638,15 +643,15 @@ class RowPanel
             if (comboBox == propTypeComboBox) {
                 //System.out.println("Property Type is being changed.");
                 /**
-                 * User has changed the type of a custom property
-                 * in a "My/Any Property" row.
+                 * User has changed the type of a "keyed" "properties"
+                 * attribute in a "My/Any Property" row.
                  */
                 rowData.setPropType(propTypeComboBox.getSelectedItem().
                                     toString());
             }
             else if (comboBox == operatorComboBox) {
                 /**
-                 * User has changed the operator for a custom property.
+                 * User has changed the operator for a "keyed" property.
                  */
                 //System.out.println("Operator is being changed.");
                 rowData.setAttributeOperator(
@@ -1286,7 +1291,7 @@ class RowPanel
 
             /** 
              * Add the propNameTextField where the user can enter
-             * the custom property name.  "animalID" in the example
+             * the "keyed" property name.  "animalID" in the example
              * in the comments above.
              */
             gc = new GridBagConstraints();
@@ -1299,7 +1304,7 @@ class RowPanel
             
             /** 
              * Add the propTypeComboBox where the user can select the
-             * the type of the custom property.  "string" or "int" in
+             * the type of the "keyed" property.  "string" or "int" in
              * the example in the comments above.
              */
             gc = new GridBagConstraints();
@@ -1309,7 +1314,7 @@ class RowPanel
 
             /** 
              * Add the attributeOperatorComboBox where the user can
-             * select the operator for the custom property.  "==" in the
+             * select the operator for the "keyed" property.  "==" in the
              * example in the comments above.
              *
              * Later, other code will set the model of this comboBox
@@ -1345,7 +1350,7 @@ class RowPanel
                 
                 /** 
                  * Add the dateTimePicker where the user can enter the
-                 * the value of the custom property. 
+                 * the value of the "keyed" property. 
                  */
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
@@ -1368,7 +1373,7 @@ class RowPanel
 
                 /** 
                  * Add the valueTextField where the user can enter the
-                 * the value of the custom property.  "x123" in the
+                 * the value of the "keyed" property.  "x123" in the
                  * example in the comments above.
                  */
                 gc = new GridBagConstraints();
