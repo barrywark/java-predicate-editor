@@ -711,6 +711,11 @@ public class RowData {
 
         Object value;
 
+        if (type == null) {
+            (new Exception("test")).printStackTrace();
+            return(null);
+        }
+
         switch (type) {
             case BOOLEAN:
                 value = new Boolean(stringValue);
@@ -738,6 +743,7 @@ public class RowData {
                  */
                 value = null;
             break;
+            case PER_USER:
             case PARAMETERS_MAP:
             case PER_USER_PARAMETERS_MAP:
                 value = convertStringToAttributeValue(stringValue,

@@ -522,11 +522,6 @@ class RowPanel
             rowData.removeFromParent();
             getExpressionPanel().createRowPanels();
         }
-        /*
-        else if (e.getSource() instanceof JComboBox) {
-            comboBoxChanged((JComboBox)e.getSource());
-        }
-        */
         else if (e.getSource() instanceof DateTimePicker) {
             dateTimeChanged();
         }
@@ -912,6 +907,16 @@ class RowPanel
                 if (!rowData.getCollectionOperator().equals(
                     collectionOperator)) {
                     rowData.setCollectionOperator(collectionOperator);
+                    /**
+                     * Collection operator has been set to Count, so set
+                     * the attribute value to 0.
+                     * Move this code to RowData object because this
+                     * is business logic that the GUI should not know
+                     * about.
+                     */
+                    if (collectionOperator == CollectionOperator.COUNT) {
+                        rowData.setAttributeValue(new Integer(0));
+                    }
                 }
             }
             else {
@@ -1604,10 +1609,14 @@ class RowPanel
                     rowData.getAttributeOperator());
                 widgetIndex++;
 
-                String attributeValue = (String)rowData.getAttributeValue();
-                if (attributeValue == null)
-                    attributeValue = "";
-                valueTextField.setText(attributeValue);
+                Object attributeValue = rowData.getAttributeValue();
+                int intValue = 0;
+                if ((attributeValue != null) &&
+                    (attributeValue instanceof Integer)) {
+                    intValue = ((Integer)attributeValue).intValue();
+                }
+                //valueTextField.setText(attributeValue.toString());
+                countSpinnerInt32.setValue(intValue);
             }
         }
     }
@@ -1635,8 +1644,8 @@ class RowPanel
     public void stateChanged(ChangeEvent event) {
 
         Object value = ((JSpinner)event.getSource()).getValue();
-        //rowData.setAttributeValue(value.toString());
-        rowData.setAttributeValueUsingString(value.toString());
+        rowData.setAttributeValue(value);
+        //rowData.setAttributeValueUsingString(value.toString());
     }
 
     private void textFieldChanged(Document document) {

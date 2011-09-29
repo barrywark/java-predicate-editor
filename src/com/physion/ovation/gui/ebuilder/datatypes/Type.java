@@ -67,6 +67,8 @@ public enum Type {
                 return("time");
             case REFERENCE:
                 return("reference");
+            case PER_USER:
+                return("per-user");
             case PARAMETERS_MAP:
                 return("parameters map");
             case PER_USER_PARAMETERS_MAP:
