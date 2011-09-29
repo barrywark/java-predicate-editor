@@ -29,7 +29,7 @@ public class ExpressionPanel
         removeAll();
 
         GridLayout layout = (GridLayout)getLayout();
-        layout.setRows(rootRow.getNumDescendents()+1);
+        layout.setRows(rootRow.getDescendentCount()+1);
 
         int count = 0;
         for (RowData rowData : rootRow.getRows()) {

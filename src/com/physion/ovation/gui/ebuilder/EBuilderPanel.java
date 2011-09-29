@@ -20,12 +20,17 @@ public class EBuilderPanel
     private ExpressionPanel expressionPanel;
 
 
+    /**
+     * Construct an EBuilderPanel that is intialized to
+     * the passed in expression tree.  Please note, the
+     * passed in rootRow will be modified by this
+     * panel.
+     */
     EBuilderPanel(RowData rootRow) {
 
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
 
-        //RowData rootRow = RowData.createTestRowData();
         expressionPanel = new ExpressionPanel(rootRow);
 
         JPanel panel = new JPanel(new BorderLayout());

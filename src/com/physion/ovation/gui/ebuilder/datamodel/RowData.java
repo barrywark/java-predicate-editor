@@ -47,18 +47,6 @@ public class RowData {
      *
      * For example, this might be Epoch or User or Source.
      *
-     * TODO: Perhaps come up with a better name?  cuq, entity?
-     */
-    //private ClassDescription parentClass;
-
-    /**
-     * This is the class from whose attributes the user
-     * will select to create a "path" to this row's childmost attribute.
-     * You might also think of this as the "Class Under Qualification"
-     * as far as this row is concerned.
-     *
-     * For example, this might be Epoch or User or Source.
-     *
      * If our parentRow member data is null, then this RowData instance
      * is the "root" row for the whole tree.  I.e. it is the
      * "Class Under Qualification".
@@ -142,16 +130,88 @@ public class RowData {
 
 
     /**
+     * Create a RowData that has no values set.
+     */
+    public RowData() {
+        init();
+    }
+
+
+    /**
+     * Initialize values for this RowData object.
+     */
+    private void init() {
+
+        /**
+         * If no rootRow has been set yet, set it to this
+         * RowData object.
+         */
+        if (getRootRow() == null) {
+            setRootRow(this);
+        }
+    }
+
+
+    /**
+     * Create a RowData that is a "deep" copy of another RowData.
+     * By "deep" copy, I mean a copy whose attributePath contains
+     * copies of the other's Attributes.
+     *
+     * @param other - The other RowData object of which we will be
+     * a copy.  If this is null, then this method is equivalent
+     * to calling the empty RowData constructor.
+     */
+    public RowData(RowData other) {
+
+        if (other == null) {
+            init();
+            return;
+        }
+
+        this.parentRow = other.parentRow;
+        this.attributeOperator = other.attributeOperator;
+        this.attributeValue = other.attributeValue;
+        this.propName = other.propName;
+        this.propType = other.propType;
+        this.collectionOperator = other.collectionOperator;
+
+        for (Attribute attribute : other.getAttributePath()) {
+            this.addAttribute(new Attribute(attribute));
+        }
+
+        for (RowData childRow : other.getChildRows()) {
+            this.addChildRow(new RowData(childRow));
+        }
+    }
+
+
+    /**
+     * Create a default rootRow that has no children.  Return the
+     * rootRow we created AND set the RowData.rootRow static member
+     * data to the rootRow we just created.
+     */
+    public static RowData createRootRow() {
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+        setRootRow(rootRow);
+        return(rootRow);
+    }
+
+
+    /**
      * Get the number of descendents from this node.  I.e. this is returns
      * the count of our direct children, plus all their children, and all
      * our childrens' children, and so on.
      * This is NOT the same thing as getting the number of this node's children.
      */
-    public int getNumDescendents() {
+    public int getDescendentCount() {
 
         int count = childRows.size();
         for (RowData childRow : childRows) {
-            count += childRow.getNumDescendents();
+            count += childRow.getDescendentCount();
         }
         return(count);
     }
@@ -197,7 +257,7 @@ public class RowData {
             if (rd != null)
                 return(rd);
 
-            index -= childRow.getNumDescendents();
+            index -= childRow.getDescendentCount();
 
             if (index == 0)
                 return(childRow);
@@ -213,7 +273,7 @@ public class RowData {
      */
     public ArrayList<RowData> getRows() {
 
-        int count = getNumDescendents()+1;
+        int count = getDescendentCount()+1;
 
         ArrayList<RowData> rows = new ArrayList<RowData>();
         for (int index = 0; index < count; index++)
@@ -345,21 +405,6 @@ public class RowData {
         return(false);
     }
 
-    /**
-     * Returns true if the user can create child rows under this row.
-     */
-/*
-    public boolean rowCanHaveChildren() {
-
-        if (this == rootRow)
-            return(true);
-
-        if (collectionOperator == null)
-            return(false);
-
-        return(collectionOperator != CollectionOperator.COUNT);
-    }
-*/
 
     /**
      * TODO:  Decide whether I should make this a static method
@@ -396,22 +441,6 @@ public class RowData {
     }
 
 
-    /**
-     * Create a default rootRow that has no children.  Return the
-     * rootRow we created AND set the RowData.rootRow static member
-     * data to the rootRow we just created.
-     */
-    public static RowData createRootRow() {
-
-        RowData rootRow = new RowData();
-        rootRow.setClassUnderQualification(
-            DataModel.getClassDescription("Epoch"));
-        rootRow.setCollectionOperator(CollectionOperator.ANY);
-        setRootRow(rootRow);
-        return(rootRow);
-    }
-
-
     public static void setRootRow(RowData rowData) {
         rootRow = rowData;
     }
@@ -422,14 +451,10 @@ public class RowData {
     }
 
 
-    /*
-    public void setParentClass(ClassDescription parentClass) {
-        this.parentClass = parentClass;
-    }
-    */
     public void setParentRow(RowData parentRow) {
         this.parentRow = parentRow;
     }
+
 
     private RowData getParentRow() {
         return(parentRow);
@@ -945,7 +970,7 @@ public class RowData {
          * rows are children of this row.
          */
         RowData rootRow = RowData.createRootRow();
-        RowData.setRootRow(rootRow);
+        //RowData.setRootRow(rootRow);
 
         Attribute attribute;
         RowData rowData;

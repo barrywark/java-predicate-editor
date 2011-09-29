@@ -1076,6 +1076,15 @@ class RowPanel
          */
 
         Attribute rightmostAttribute = rowData.getChildmostAttribute();
+        if (rightmostAttribute == null) {
+            System.err.println("ERROR: rightmostAttribute == null\n"+
+                "This probably means the rowData for this row was not\n"+
+                "properly set up or initialized.  If this is the very\n"+
+                "first row in the tree, you probably should be calling\n"+
+                "RowData.createRootRow() to create it.");
+            return;
+        }
+
         //System.out.println("rightmostAttribute = "+
         //    rightmostAttribute.toStringDebug());
         if (!rightmostAttribute.isPrimitive() &&
