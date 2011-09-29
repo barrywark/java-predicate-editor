@@ -868,8 +868,8 @@ class RowPanel
         }
 
         System.out.println("\nrootRow:\n"+
-                           RowData.getRootRow().toString(false, ""));
-        System.out.println("\nrootRow:\n"+RowData.getRootRow());
+                           rowData.getRootRow().toString(false, ""));
+        System.out.println("\nrootRow:\n"+rowData.getRootRow());
     }
 
 
@@ -960,7 +960,7 @@ class RowPanel
             toArray(new ClassDescription[0]);
 
         setComboBoxModel(comboBoxes[0], values,
-                         RowData.getClassUnderQualification());
+                         rowData.getClassUnderQualification());
 
         /**
          * Now set the model and selected value of the 
@@ -968,7 +968,7 @@ class RowPanel
          */
         setComboBoxModel(comboBoxes[1], CollectionOperator.
                          getCompoundCollectionOperators(),
-                         RowData.getRootRow().getCollectionOperator());
+                         rowData.getRootRow().getCollectionOperator());
     }
 
 

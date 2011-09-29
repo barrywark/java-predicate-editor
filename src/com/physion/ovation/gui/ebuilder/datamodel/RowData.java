@@ -24,36 +24,24 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 public class RowData {
 
     /**
-     * This is the "root" row for the whole tree.
-     *
-     * TODO: I'm not sure if I want to keep this value here.
-     */
-    private static RowData rootRow;
-
-    /**
      * This is the "topmost", or "root" class that is the ancestor
      * of ALL other rows.
      *
-     * Please note this is a static member data that applies to ALL
-     * the RowData objects that exist.
+     * Please note this value only makes sense on the root RowData object
+     * in the expression tree.
      */
-    private static ClassDescription classUnderQualification;
+    private ClassDescription classUnderQualification;
 
     /**
-     * This is the class from whose attributes the user
-     * will select to create a "path" to this row's childmost attribute.
-     * You might also think of this as the "Class Under Qualification"
-     * as far as this row is concerned.
-     *
-     * For example, this might be Epoch or User or Source.
+     * This RowData object is a child row of the parentRow.
      *
      * If our parentRow member data is null, then this RowData instance
-     * is the "root" row for the whole tree.  I.e. it is the
+     * is the "root" row for the whole tree.  I.e. it defines the
      * "Class Under Qualification".
      *
      * All rows except the root row have a non-null parentRow.
-     * The class of the root row is stored in our static member
-     * data classUnderQualification.
+     * The class of the root row is stored in the root row's member
+     * data "classUnderQualification".
      */
     private RowData parentRow;
 
@@ -61,17 +49,16 @@ public class RowData {
      * This is the path to the childmost attribute that
      * this row is specifying.
      *
-     * For example, parentClass might be Epoch, and then
+     * For example, if this row's starting class, (i.e. the rightmost
+     * class of its parentRow), might be the class "Epoch", and then
      * attributePath could be a list containing the Attributes:
      *
      *      epochGroup  (is of type EpochGroup)
      *      source      (is of type Source)
      *      label       (is of type string)
      *
-     * So the above would be specifying the label of the source of
-     * the epochGroup of the parentClass.
-     *
-     * TODO:  Do we want a list of Attribute objects or just Strings.
+     * So the above would be specifying the "label" attribute of the
+     * "source" attribute of the "epochGroup" of the "Epoch" class.
      */
     private ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
 
@@ -141,14 +128,7 @@ public class RowData {
      * Initialize values for this RowData object.
      */
     private void init() {
-
-        /**
-         * If no rootRow has been set yet, set it to this
-         * RowData object.
-         */
-        if (getRootRow() == null) {
-            setRootRow(this);
-        }
+        parentRow = null;
     }
 
 
@@ -168,6 +148,7 @@ public class RowData {
             return;
         }
 
+        this.classUnderQualification = other.classUnderQualification;
         this.parentRow = other.parentRow;
         this.attributeOperator = other.attributeOperator;
         this.attributeValue = other.attributeValue;
@@ -196,7 +177,6 @@ public class RowData {
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
         rootRow.setCollectionOperator(CollectionOperator.ANY);
-        setRootRow(rootRow);
         return(rootRow);
     }
 
@@ -407,47 +387,55 @@ public class RowData {
 
 
     /**
-     * TODO:  Decide whether I should make this a static method
-     * that operates on the "rootRow" member data.
      */
-    public /*static*/ void setClassUnderQualification(
+    public void setClassUnderQualification(
         ClassDescription classUnderQualification) {
 
-        RowData.classUnderQualification = classUnderQualification;
-
-        if (parentRow != null) {
+        if (this != getRootRow()) {
             System.err.println(
-                "WARNING:  parentRow != null.  Are you confused?");
-            parentRow = null;
+                "WARNING:  This RowData object is not the \"root\"\n"+
+                "RowData object.  Are you confused?\n"+
+                "Setting the Class Under Qualification really only makes\n"+
+                "sense on the root RowData object.\n"+
+                "I will assume that is what you meant to do, and do that.");
         }
 
-        if (!childRows.isEmpty()) {
+        getRootRow().classUnderQualification = classUnderQualification;
+
+        if (!getRootRow().getChildRows().isEmpty()) {
             System.out.println("INFO:  Clearing all childRows.");
-            childRows.clear();
+            getRootRow().getChildRows().clear();
         }
     }
 
 
-    public static ClassDescription getClassUnderQualification() {
-        return(classUnderQualification);
+    public ClassDescription getClassUnderQualification() {
+        //return(classUnderQualification);
+        return(getRootRow().classUnderQualification);
     }
 
 
     /**
      * Get the current rootRow.
      */
-    public static RowData getRootRow() {
+    public RowData getRootRow() {
+
+        RowData rootRow = this;
+        while (rootRow.getParentRow() != null)
+            rootRow = rootRow.getParentRow();
         return(rootRow);
     }
 
 
+    /*
     public static void setRootRow(RowData rowData) {
         rootRow = rowData;
     }
+    */
 
 
     public boolean isRootRow() {
-        return(this == rootRow);
+        return(this == getRootRow());
     }
 
 
@@ -462,8 +450,12 @@ public class RowData {
 
 
     private ArrayList<RowData> getChildRows() {
+
+        if (childRows == null)
+            childRows = new ArrayList<RowData>();
         return(childRows);
     }
+
 
     public void setCollectionOperator(CollectionOperator collectionOperator) {
 
@@ -922,7 +914,7 @@ public class RowData {
         else {
             if (parentRow.getChildmostAttribute() == null) {
                 //System.out.println("parentRow.getChildmostAttribute == null");
-                return(classUnderQualification);
+                return(getClassUnderQualification());
             }
             else {
                 //System.out.println("parentRow.getChildmostAttribute != null");

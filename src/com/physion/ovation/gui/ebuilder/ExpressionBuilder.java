@@ -73,8 +73,11 @@ public class ExpressionBuilder
         setTitle("Physion ooExpression Builder");
         setModal(true);
 
-        //this.rootRow = new RowData(originalRootRow);
-        this.rootRow = originalRootRow;
+        /**
+         * Make a copy of the passed in expression tree so that
+         * way the GUI will not affect it.
+         */
+        this.rootRow = new RowData(originalRootRow);
 
         panel = new EBuilderPanel(rootRow);
         getContentPane().add(panel);
@@ -188,8 +191,6 @@ public class ExpressionBuilder
          * to the values used if a user cancels out of the window.
          */
         ReturnValue returnValue = new ReturnValue();
-        returnValue.status = RETURN_STATUS_CANCEL;
-        returnValue.rootRow = null;
 
         if (rootRow == null) {
             rootRow = RowData.createRootRow();
@@ -223,10 +224,13 @@ public class ExpressionBuilder
      * pressed the Ok button.  It is set to
      * ExpressionBuilder.RETURN_STATUS_CANCEL if the user pressed the
      * Cancel button or closed the window another way.
+     *
+     * rootRow - Is set to the new expression tree that was created
+     * and edited by the GUI.
      */
     public static class ReturnValue {
-        public int status;
-        public RowData rootRow;
+        public int status = RETURN_STATUS_CANCEL;
+        public RowData rootRow = null;
     }
 
 
@@ -236,10 +240,13 @@ public class ExpressionBuilder
      */
     public static void main(String[] args) {
 
+        ReturnValue returnValue;
+
+
         /**
          * Create a new expression from scratch.
          */
-        ReturnValue returnValue = ExpressionBuilder.editExpression();
+        returnValue = ExpressionBuilder.editExpression();
         System.out.println("\nstatus = "+returnValue.status);
         System.out.println("rootRow:\n"+returnValue.rootRow);
 
