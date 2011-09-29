@@ -66,7 +66,6 @@ public class RowData {
      * The operator the user selected for this attribute.
      * For example, ==, !=, >=, <=, <, >.
      * Note that "is null" and "is not null" are also considered operators.
-     * TODO: Change above comments to be consistent with how I implemented it.
      *
      * Please note, this might be null if this row is a "compound" row
      * that ends with Any, All, or None.
@@ -85,20 +84,27 @@ public class RowData {
      * set to "is null" or "is not null", then this value is the
      * value that the user entered as the desired value for the
      * attribute.
-     * TODO: Change above comments to be consistent with how I implemented it.
+     *
+     * This member data can be a:  Boolean, String, Integer, Short,
+     * Double, Date, or null.
+     * Note, as of September 2011, there is no Float (int32) value.
+     *
+     * If this is being used to hold the value of a row's Count, it
+     * is of type Integer.  If the row does not have a value, this
+     * should be set to null.
      *
      * For example, if the attributePath is:  epochGroup.source.label
-     * then attributeValue might be something like "Test 27".
+     * then attributeValue might be the String object "Test 21".
      */
     private Object attributeValue;
 
     /**
-     * If the user is specifying a custom "My Property" or "Any Property"
-     * attribute, the propName member data will be set to the custom
-     * property name that the user entered in the row.
+     * If the user is specifying a "keyed" "My Property" or "Any Property"
+     * attribute, the propName member data will be set to the "key"
+     * that the user entered in the row.
      */
     private String propName;
-    private String propType;
+    private Type propType;
     
     /**
      * If this row is a "compound" row, this will be set to
@@ -113,11 +119,14 @@ public class RowData {
      */
     private CollectionOperator collectionOperator;
 
+    /**
+     * This is the list of this row's direct children.
+     */
     private ArrayList<RowData> childRows = new ArrayList<RowData>();
 
 
     /**
-     * Create a RowData that has no values set.
+     * Create a RowData object that has no values set.
      */
     public RowData() {
         init();
@@ -126,6 +135,8 @@ public class RowData {
 
     /**
      * Initialize values for this RowData object.
+     * At the moment, this method is really just a placeholder
+     * for when we want to do more.
      */
     private void init() {
         parentRow = null;
@@ -670,6 +681,83 @@ public class RowData {
     }
 
 
+    public void setAttributeValueUsingString(String stringValue) {
+
+        Object value = null;
+
+        Attribute attribute = getChildmostAttribute();
+        if (attribute == null) {
+            setAttributeValue(null);
+        }
+        else {
+            try {
+                value = convertStringToAttributeValue(stringValue, 
+                                                      attribute.getType());
+                setAttributeValue(value);
+            }
+            catch (NumberFormatException e) {
+                System.out.println("Field does not contain a legal number.");
+            }
+            catch (Exception e) {
+                System.out.println("Field does not contain a legal value.");
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    private Object convertStringToAttributeValue(String stringValue,
+                                                 Type type) {
+
+        Object value;
+
+        switch (type) {
+            case BOOLEAN:
+                value = new Boolean(stringValue);
+            break;
+            case UTF_8_STRING:
+                value = stringValue;
+            break;
+            case INT_16:
+                value = new Short(stringValue);
+            break;
+            case INT_32:
+                value = new Integer(stringValue);
+            break;
+            case FLOAT_64:
+                value = new Double(stringValue);
+            break;
+            case DATE_TIME:
+                /**
+                 * We don't really need to bother with this
+                 * one because it won't happen.
+                 * But if this does become necessary, using
+                 * SimpleDateFormat.parse() would probably be
+                 * involved.  For now, just ignore the passed
+                 * in value and set it to null.
+                 */
+                value = null;
+            break;
+            case PARAMETERS_MAP:
+            case PER_USER_PARAMETERS_MAP:
+                value = convertStringToAttributeValue(stringValue,
+                                                      getPropType());
+            break;
+            default:
+                if (stringValue.isEmpty()) {
+                    value = stringValue;
+                }
+                else {
+                    System.err.println("ERROR: Unhandled attribute type.");
+                    System.err.println("stringValue = "+stringValue);
+                    System.err.println("type = "+type);
+                    value = new String("ERROR");
+                }
+        }
+        return(value);
+    }
+
+
     public Object getAttributeValue() {
         return(attributeValue);
     }
@@ -685,14 +773,14 @@ public class RowData {
     }
 
 
-    public void setPropType(String propType) {
+    public void setPropType(Type propType) {
 
         this.propType = propType;
-        if (DataModel.PROP_TYPE_BOOLEAN.equals(propType)) {
+        if (propType == Type.BOOLEAN) {
             setAttributeOperator(DataModel.OPERATOR_TRUE);
             setAttributeValue(null);
         }
-        else if (DataModel.PROP_TYPE_TIME.equals(propType)) {
+        else if (propType == Type.DATE_TIME) {
             setAttributeOperator("==");
             setAttributeValue(null);
         }
@@ -703,7 +791,7 @@ public class RowData {
     }
 
 
-    public String getPropType() {
+    public Type getPropType() {
         return(propType);
     }
 
@@ -1021,7 +1109,7 @@ public class RowData {
         rowData.addAttribute(attribute);
 
         rowData.setPropName("animalID");
-        rowData.setPropType(DataModel.PROP_TYPE_INT);
+        rowData.setPropType(Type.INT_32);
         rowData.setAttributeOperator("<=");
         rowData.setAttributeValue("123");
 
@@ -1037,7 +1125,7 @@ public class RowData {
         rowData.addAttribute(attribute);
 
         rowData.setPropName("stimulusFrequency");
-        rowData.setPropType(DataModel.PROP_TYPE_INT);
+        rowData.setPropType(Type.INT_32);
         rowData.setAttributeOperator("==");
         rowData.setAttributeValue("27");
 
@@ -1053,7 +1141,7 @@ public class RowData {
         rowData.addAttribute(attribute);
 
         rowData.setPropName("stimulusName");
-        rowData.setPropType(DataModel.PROP_TYPE_STRING);
+        rowData.setPropType(Type.UTF_8_STRING);
         rowData.setAttributeOperator("~~=");
         rowData.setAttributeValue("caffeine");
 

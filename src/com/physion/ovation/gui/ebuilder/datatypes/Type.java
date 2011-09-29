@@ -50,6 +50,46 @@ public enum Type {
     }
 
 
+    public String toString() {
+
+        switch (this) {
+            case BOOLEAN:
+                return("boolean");
+            case UTF_8_STRING:
+                return("string");
+            case INT_16:
+                return("short");
+            case INT_32:
+                return("int");
+            case FLOAT_64:
+                return("float");
+            case DATE_TIME:
+                return("time");
+            case REFERENCE:
+                return("reference");
+            case PARAMETERS_MAP:
+                return("parameters map");
+            case PER_USER_PARAMETERS_MAP:
+                return("per-user parameters map");
+            default:
+                return("ERROR");
+        }
+    }
+
+
+    /*
+    public Type parse(String stringValue) {
+
+        if (Type.INT_32.toString().equals(stringType)) {
+            return(Type.INT_32);
+        }
+
+        System.err.println("ERROR: Unhandled stringValue = "+stringValue);
+        return(Type.INT_32);
+    }
+    */
+
+
     /**
      * This is a simple test program for this class.
      */

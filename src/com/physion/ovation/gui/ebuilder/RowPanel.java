@@ -537,6 +537,11 @@ class RowPanel
     }
 
 
+    /**
+     * Get the ExpressionPanel that contains this RowPanel.
+     * The ExpressionPanel is the panel that arranges all the
+     * RowPanels in a list.
+     */
     private ExpressionPanel getExpressionPanel() {
 
         Container parent = getParent();
@@ -548,6 +553,10 @@ class RowPanel
     }
 
 
+    /**
+     * This method is called when the user picks a new date or time
+     * value in the dateTimePicker.
+     */
     private void dateTimeChanged() {
 
         Date date = dateTimePicker.getDate();
@@ -646,8 +655,7 @@ class RowPanel
                  * User has changed the type of a "keyed" "properties"
                  * attribute in a "My/Any Property" row.
                  */
-                rowData.setPropType(propTypeComboBox.getSelectedItem().
-                                    toString());
+                rowData.setPropType((Type)propTypeComboBox.getSelectedItem());
             }
             else if (comboBox == operatorComboBox) {
                 /**
@@ -664,6 +672,10 @@ class RowPanel
             if (selectedObject instanceof Attribute) {
 
                 /**
+                 * User selected an Attribute in a comboBox dropdown.
+                 * Set the values "to the right" of the comboBox to
+                 * appropriate values.
+                 *
                  * TODO:  Put all this business logic stuff into
                  * the RowData object so all the code that worries about
                  * keeping a RowData object "internally" consistent is
@@ -697,7 +709,7 @@ class RowPanel
                     rowData.setCollectionOperator(CollectionOperator.COUNT);
                     rowData.setAttributeOperator(
                         DataModel.OPERATORS_ARITHMATIC[0]);
-                    rowData.setAttributeValue("0");
+                    rowData.setAttributeValue(new Integer(0));
                 }
 
                 /**
@@ -718,7 +730,7 @@ class RowPanel
                 else if ((selectedAttribute.getType() ==
                           Type.PER_USER_PARAMETERS_MAP) ||
                          (selectedAttribute.getType() == Type.PARAMETERS_MAP)) {
-                    rowData.setPropType(DataModel.PROP_TYPE_INT);
+                    rowData.setPropType(Type.INT_32);
                     rowData.setAttributeOperator(
                         DataModel.OPERATORS_ARITHMATIC[0]);
                     rowData.setPropName(null);
@@ -733,8 +745,11 @@ class RowPanel
                 */
 
                 /**
-                 * Figure out which comboBox was changed.
+                 * Figure out which comboBox was changed and then
+                 * set the corresponding Attribute in the row's
+                 * attributePath.
                  */
+
                 int comboBoxIndex = -1;
                 for (int index = 0; index < comboBoxes.length; index++) {
                     if (comboBox == comboBoxes[index]) {
@@ -746,7 +761,6 @@ class RowPanel
                     System.err.println("ERROR:  In comboBoxChanged.  "+
                         "comboBoxIndex = "+comboBoxIndex+
                         ".  This should never happen.");
-                    //return;
                 }
                 //System.out.println("comboBoxIndex = "+comboBoxIndex);
 
@@ -792,6 +806,9 @@ class RowPanel
                  * type.  E.g. "==" for an int or string, "is true" for
                  * a boolean.
                  *
+                 * Also make sure the attributeValue contains a value of
+                 * the appropriate type.
+                 *
                  * TODO:  Add methods to the RowData class that are
                  * used to access the attributePath that automatically
                  * handle this sort of business logic.
@@ -802,30 +819,66 @@ class RowPanel
                     String attributeOperator = rowData.getAttributeOperator();
                     switch (childmostAttribute.getType()) {
                         case BOOLEAN:
-                            if (!DataModel.isOperatorBoolean(attributeOperator))
+                            if (!DataModel.isOperatorBoolean(
+                                attributeOperator)) {
+                                /**
+                                 * Operator is not currently a legal
+                                 * boolean operator, so set it to
+                                 * a boolean operator.
+                                 */
                                 attributeOperator =
-                                DataModel.OPERATORS_BOOLEAN[0];
+                                    DataModel.OPERATORS_BOOLEAN[0];
+                            }
                         break;
                         case UTF_8_STRING:
-                            if (!DataModel.isOperatorString(attributeOperator))
+                            if (!DataModel.isOperatorString(
+                                attributeOperator)) {
+                                /**
+                                 * Operator is not currently a legal
+                                 * string operator, so set it to
+                                 * a string operator.
+                                 */
                                 attributeOperator =
-                                DataModel.OPERATORS_STRING[0];
-                            //rowData.setAttributeValue(""); Blank out value?
+                                    DataModel.OPERATORS_STRING[0];
+                            }
+                            //rowData.setAttributeValue(new String(""));
                         break;
                         case INT_16:
+                            if (!DataModel.isOperatorArithmatic(
+                                attributeOperator)) {
+                                /**
+                                 * Operator is not currently a legal
+                                 * numeric operator, so set it to
+                                 * a numeric operator.
+                                 */
+                                attributeOperator =
+                                    DataModel.OPERATORS_ARITHMATIC[0];
+                            }
+                            rowData.setAttributeValue(new Short((short)0));
+                        break;    
                         case INT_32:
-                        //case FLOAT_32:
+                            if (!DataModel.isOperatorArithmatic(
+                                attributeOperator)) {
+                                attributeOperator =
+                                    DataModel.OPERATORS_ARITHMATIC[0];
+                            }
+                            rowData.setAttributeValue(new Integer(0));
+                        break;
                         case FLOAT_64:
+                            if (!DataModel.isOperatorArithmatic(
+                                attributeOperator)) {
+                                attributeOperator =
+                                    DataModel.OPERATORS_ARITHMATIC[0];
+                            }
+                            rowData.setAttributeValue(new Long((long)0.0));
+                        break;
                         case DATE_TIME:
                             if (!DataModel.isOperatorArithmatic(
-                                attributeOperator))
+                                attributeOperator)) {
                                 attributeOperator =
-                                DataModel.OPERATORS_ARITHMATIC[0];
-
-                            if (childmostAttribute.getType() != Type.DATE_TIME) 
-                                rowData.setAttributeValue("");
-                            else
-                                rowData.setAttributeValue(new Date());
+                                    DataModel.OPERATORS_ARITHMATIC[0];
+                            }
+                            rowData.setAttributeValue(new Date());
                         break;
                         default:
                             System.err.println("ERROR: Unhandled operator.");
@@ -1329,24 +1382,22 @@ class RowPanel
              * Set the model of the operatorComboBox depending on the
              * selected value in the propTypeComboBox.
              */
-            if (DataModel.PROP_TYPE_INT.equals(rowData.getPropType()) ||
-                DataModel.PROP_TYPE_FLOAT.equals(rowData.getPropType()) ||
-                DataModel.PROP_TYPE_TIME.equals(rowData.getPropType())) {
+            if ((rowData.getPropType() == Type.INT_32) ||
+                (rowData.getPropType() == Type.FLOAT_64) ||
+                (rowData.getPropType() == Type.DATE_TIME)) {
                 operatorComboBox.setModel(new DefaultComboBoxModel(
                     DataModel.OPERATORS_ARITHMATIC));
             }
-            else if (DataModel.PROP_TYPE_STRING.equals(
-                     rowData.getPropType())) {
+            else if (rowData.getPropType() == Type.UTF_8_STRING) {
                 operatorComboBox.setModel(new DefaultComboBoxModel(
                     DataModel.OPERATORS_STRING));
             }
-            else if (DataModel.PROP_TYPE_BOOLEAN.equals(
-                     rowData.getPropType())) {
+            else if (rowData.getPropType() == Type.BOOLEAN) {
                 operatorComboBox.setModel(new DefaultComboBoxModel(
                     DataModel.OPERATORS_BOOLEAN));
             }
 
-            if (DataModel.PROP_TYPE_TIME.equals(rowData.getPropType())) {
+            if (rowData.getPropType() == Type.DATE_TIME) {
                 
                 /** 
                  * Add the dateTimePicker where the user can enter the
@@ -1359,8 +1410,7 @@ class RowPanel
                 gc.insets = LEFT_INSETS;
                 add(dateTimePicker, gc);
             }
-            else if (DataModel.PROP_TYPE_INT.equals(
-                     rowData.getPropType())) {
+            else if (rowData.getPropType() == Type.INT_32) {
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
                 gc.weightx = 0.1;
@@ -1368,8 +1418,7 @@ class RowPanel
                 gc.insets = LEFT_INSETS;
                 add(valueSpinnerInt32, gc);
             }
-            else if (!DataModel.PROP_TYPE_BOOLEAN.equals(
-                     rowData.getPropType())) {
+            else if (rowData.getPropType() != Type.BOOLEAN) {
 
                 /** 
                  * Add the valueTextField where the user can enter the
@@ -1388,7 +1437,7 @@ class RowPanel
             propTypeComboBox.setSelectedItem(rowData.getPropType());
             operatorComboBox.setSelectedItem(
                 rowData.getAttributeOperator());
-            if (DataModel.PROP_TYPE_INT.equals(rowData.getPropType())) {
+            if (rowData.getPropType() == Type.INT_32) {
 
                 int value = 0;
                 try {
@@ -1399,8 +1448,8 @@ class RowPanel
                 }
                 valueSpinnerInt32.setValue(value);
             }
-            else if (DataModel.PROP_TYPE_FLOAT.equals(rowData.getPropType()) ||
-                     DataModel.PROP_TYPE_STRING.equals(rowData.getPropType())) {
+            else if ((rowData.getPropType() == Type.FLOAT_64) ||
+                     (rowData.getPropType() == Type.UTF_8_STRING)) {
                 
                 if (rowData.getAttributeValue() != null)
                     valueTextField.setText(
@@ -1408,15 +1457,13 @@ class RowPanel
                 else
                     valueTextField.setText("");
             }
-            else if (DataModel.PROP_TYPE_TIME.equals(
-                     rowData.getPropType())) {
+            else if (rowData.getPropType() == Type.DATE_TIME) {
                 Date attributeValue = (Date)rowData.getAttributeValue();
                 if (attributeValue == null)
                     attributeValue = new Date();
                 dateTimePicker.setDate(attributeValue);
             }
-            else if (DataModel.PROP_TYPE_BOOLEAN.equals(
-                     rowData.getPropType())) {
+            else if (rowData.getPropType() == Type.BOOLEAN) {
                 /**
                  * No valueTextField is displayed in this case because
                  * the operatorComboBox serves that function.
@@ -1588,13 +1635,15 @@ class RowPanel
     public void stateChanged(ChangeEvent event) {
 
         Object value = ((JSpinner)event.getSource()).getValue();
-        rowData.setAttributeValue(value.toString());
+        //rowData.setAttributeValue(value.toString());
+        rowData.setAttributeValueUsingString(value.toString());
     }
 
     private void textFieldChanged(Document document) {
 
         if (document == valueTextField.getDocument())
-            rowData.setAttributeValue(valueTextField.getText());
+            //rowData.setAttributeValue(valueTextField.getText());
+            rowData.setAttributeValueUsingString(valueTextField.getText());
         else if (document == propNameTextField.getDocument())
             rowData.setPropName(propNameTextField.getText());
     }

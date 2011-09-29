@@ -36,18 +36,13 @@ public class DataModel {
         Attribute.IS_NOT_NULL.getDisplayName();
 
     /**
-     * TODO: What are the possible types?
+     * Possible types for a "properties" keyed value.
      */
-    public static final String PROP_TYPE_INT = "int";
-    public static final String PROP_TYPE_FLOAT = "float";
-    public static final String PROP_TYPE_STRING = "string";
-    public static final String PROP_TYPE_TIME = "time";
-    public static final String PROP_TYPE_BOOLEAN = "boolean";
-    public static final String[] PROP_TYPES = {PROP_TYPE_INT,
-                                               PROP_TYPE_FLOAT,
-                                               PROP_TYPE_STRING,
-                                               PROP_TYPE_TIME,
-                                               PROP_TYPE_BOOLEAN};
+    public static final Type[] PROP_TYPES = {Type.INT_32,
+                                             Type.FLOAT_64,
+                                             Type.UTF_8_STRING,
+                                             Type.DATE_TIME,
+                                             Type.BOOLEAN};
 
     /**
      * The one an only instance of this DataModel.
