@@ -58,21 +58,41 @@ class RowPanel
     implements ActionListener, DocumentListener, ChangeListener {
 
     /**
-     * TODO: Change to an ArrayList of these to allow an infinite
-     * number.
+     * A comboBox dropdown list will dispaly at least this many
+     * items before it starts to use a scrollbar.
      */
-    private static final int MAX_NUM_COMBOBOXES = 20;
     private static final int MAX_ROWS_IN_COMBOBOX_DROPDOWN = 30;
+
+    /**
+     * Minimum width of a text field.  Please note, the actual
+     * number of characters that will fit depend on the font
+     * used and the characters in the field.  E.g. 'W' is wider
+     * than 'l' in most fonts.
+     */
     private static final int MIN_TEXT_COLUMNS = 8;
     private static final int MIN_SPINNER_COLUMNS = 8;
 
+    /**
+     * Inset in pixels between Components in a row.
+     * We typically use this on the left side of a component.
+     */
     private static final int INSET = 7;
     private static final Insets LEFT_INSETS = new Insets(0,INSET,0,0);
 
     private InvisibleButton deleteButton;
     private InvisibleButton createCompoundRowButton;
     private InvisibleButton createAttributeRowButton;
-    private JComboBox[] comboBoxes = new JComboBox[MAX_NUM_COMBOBOXES];
+
+    /**
+     * This holds all the JComboBoxes we use in this row.
+     * Note that a user can, theoretically, have an infinitely
+     * long path of attributes.  For example,
+     *
+     *      nextEpoch.prevEpoch.nextEpoch.prevEpoch...
+     *
+     * Because of this, we generate the JComboBoxes as we need them.
+     */
+    private ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
 
     /**
      * This text field is used to enter the value of a "primitive"
@@ -172,7 +192,14 @@ class RowPanel
         setLayout(layout);
 
         /**
-         * TODO:  Perhaps change this to a JPanel that has a minimum size?
+         * Create a component we will use on the left side of this
+         * RowPanel to indent all the other widgets to the right
+         * by some amount.  Currently, I am simply using a JLabel
+         * filled with an adustible number of spaces to do this.
+         * Simple, and it works.  There are many other ways to do
+         * this though:  A JPanel with a minimum size, A JLabel or
+         * JPanel that is empty, but has an EmptyBorder whose size
+         * you change.
          */
         indentWidget = new JLabel();
 
@@ -184,10 +211,6 @@ class RowPanel
 
         createCompoundRowButton = new InvisibleButton("++");
         createCompoundRowButton.addActionListener(this);
-
-        for (int count = 0; count < MAX_NUM_COMBOBOXES; count++) {
-            comboBoxes[count] = createComboBox(null);
-        }
 
         valueTextField = new JTextField();
         valueTextField.setColumns(MIN_TEXT_COLUMNS);
@@ -205,12 +228,20 @@ class RowPanel
         ((JSpinner.NumberEditor)valueSpinnerInt32.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
 
+        /**
+         * This spinner is used when we are setting the Count for
+         * an attribute that has a to-many relationship.
+         */
         countSpinnerInt32 = new JSpinner(new SpinnerNumberModel(
             0, 0, Integer.MAX_VALUE, 1));
         countSpinnerInt32.addChangeListener(this);
         ((JSpinner.NumberEditor)countSpinnerInt32.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
 
+        /**
+         * This text field is used to display/edit the name of
+         * a "keyed" property.
+         */
         propNameTextField = new JTextField();
         propNameTextField.setColumns(MIN_TEXT_COLUMNS);
         propNameTextField.getDocument().addDocumentListener(this);
@@ -268,6 +299,24 @@ class RowPanel
     }
 
 
+    /**
+     * Get the comboBox at the specified index.  Create it if it
+     * does not already exist.
+     */
+    private JComboBox getComboBox(int index) {
+
+        while (index >= comboBoxes.size())
+            comboBoxes.add(createComboBox(null));
+
+        return(comboBoxes.get(index));
+    }
+
+
+    /**
+     * Create a JComboBox that uses the passed in model.
+     * Pass null if you just want a default model that you
+     * later change to something else.
+     */
     private JComboBox createComboBox(ComboBoxModel model) {
 
         JComboBox comboBox;
@@ -636,7 +685,7 @@ class RowPanel
              * adjust the value of the "root" row.  Also known as the
              * Class Under Qualification.
              */
-            if (comboBox == comboBoxes[0]) {
+            if (comboBox == comboBoxes.get(0)) {
                 /**
                  * User is changing the value of the Class Under Qualification.
                  */
@@ -653,7 +702,7 @@ class RowPanel
                     rowData.setClassUnderQualification(classDescription);
                 }
             }
-            else if (comboBox == comboBoxes[1]) {
+            else if (comboBox == comboBoxes.get(1)) {
                 /**
                  * User is changing the value of the Collection Operator.
                  */
@@ -787,12 +836,7 @@ class RowPanel
                  * attributePath.
                  */
 
-                int comboBoxIndex = -1;
-                for (int index = 0; index < comboBoxes.length; index++) {
-                    if (comboBox == comboBoxes[index]) {
-                        comboBoxIndex = index;
-                    }
-                }
+                int comboBoxIndex = comboBoxes.indexOf(comboBox);
 
                 if (comboBoxIndex < 0) {
                     System.err.println("ERROR:  In comboBoxChanged.  "+
@@ -1046,12 +1090,12 @@ class RowPanel
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
         gc.insets = LEFT_INSETS;
-        add(comboBoxes[0], gc);
+        add(getComboBox(0), gc);
 
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
         gc.insets = LEFT_INSETS;
-        add(comboBoxes[1], gc);
+        add(getComboBox(1), gc);
 
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
@@ -1074,14 +1118,14 @@ class RowPanel
             DataModel.getInstance().getPossibleCUQs().
             toArray(new ClassDescription[0]);
 
-        setComboBoxModel(comboBoxes[0], values,
+        setComboBoxModel(getComboBox(0), values,
                          rowData.getClassUnderQualification());
 
         /**
          * Now set the model and selected value of the 
          * Collection Operator combobox.
          */
-        setComboBoxModel(comboBoxes[1], CollectionOperator.
+        setComboBoxModel(getComboBox(1), CollectionOperator.
                          getCompoundCollectionOperators(),
                          rowData.getRootRow().getCollectionOperator());
     }
@@ -1110,7 +1154,7 @@ class RowPanel
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
         gc.insets = LEFT_INSETS;
-        add(comboBoxes[0], gc);
+        add(getComboBox(0), gc);
 
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
@@ -1124,7 +1168,7 @@ class RowPanel
          * the Collection Operator comboBox in it.
          * Set the comboBox model.
          */
-        setComboBoxModel(comboBoxes[0], CollectionOperator.
+        setComboBoxModel(getComboBox(0), CollectionOperator.
                          getCompoundCollectionOperators(),
                          rowData.getCollectionOperator());
     }
@@ -1165,7 +1209,7 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[index], gc);
+            add(getComboBox(index), gc);
 
             if (index == 0) {
                 /**
@@ -1176,7 +1220,7 @@ class RowPanel
                  * Also set the selected item in the comboBox.
                  */
                 ClassDescription parentClass = rowData.getParentClass();
-                setComboBoxModel(comboBoxes[index], parentClass,
+                setComboBoxModel(getComboBox(index), parentClass,
                                  false, rowData.getAttribute(index));
             }
             else {
@@ -1187,7 +1231,7 @@ class RowPanel
                  * Also set the selected item in the comboBox.
                  */
                 Attribute att = rowData.getAttribute(index-1);
-                setComboBoxModel(comboBoxes[index],
+                setComboBoxModel(getComboBox(index),
                                  att.getClassDescription(), true,
                                  rowData.getAttribute(index));
             }
@@ -1228,13 +1272,13 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[index++], gc);
+            add(getComboBox(index++), gc);
 
             /**
              * Set the comboBox model to hold attributes of
              * the class that is selected in the comboBox to our left.
              */
-            setComboBoxModel(comboBoxes[rowData.getAttributeCount()],
+            setComboBoxModel(getComboBox(rowData.getAttributeCount()),
                              rightmostAttribute.getClassDescription(),
                              true, Attribute.SELECT_ATTRIBUTE);
         }
@@ -1251,7 +1295,7 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[index++], gc);
+            add(getComboBox(index++), gc);
 
             /**
              * Now add the widget the user can use to edit the
@@ -1303,16 +1347,16 @@ class RowPanel
              */
             int widgetIndex = rowData.getAttributeCount();
             if (rightmostAttribute.getType() == Type.BOOLEAN) {
-                comboBoxes[widgetIndex].setModel(
+                getComboBox(widgetIndex).setModel(
                     new DefaultComboBoxModel(DataModel.OPERATORS_BOOLEAN));
             }
             else if (rightmostAttribute.getType() == Type.UTF_8_STRING) {
-                comboBoxes[widgetIndex].setModel(
+                getComboBox(widgetIndex).setModel(
                     new DefaultComboBoxModel(
                         DataModel.OPERATORS_STRING));
             }
             else {
-                comboBoxes[widgetIndex].setModel(
+                getComboBox(widgetIndex).setModel(
                     new DefaultComboBoxModel(
                         DataModel.OPERATORS_ARITHMATIC));
             }
@@ -1330,17 +1374,17 @@ class RowPanel
             if (rightmostAttribute.getType() == Type.BOOLEAN) {
                 if (DataModel.OPERATOR_TRUE.equals(
                     rowData.getAttributeOperator())) {
-                    comboBoxes[widgetIndex].setSelectedItem(
+                    getComboBox(widgetIndex).setSelectedItem(
                         DataModel.OPERATOR_TRUE);
                 }
                 else {
-                    comboBoxes[widgetIndex].setSelectedItem(
+                    getComboBox(widgetIndex).setSelectedItem(
                         DataModel.OPERATOR_FALSE);
                 }
             }
             else if (rightmostAttribute.getType() == Type.DATE_TIME) {
 
-                comboBoxes[widgetIndex].setSelectedItem(
+                getComboBox(widgetIndex).setSelectedItem(
                     rowData.getAttributeOperator());
                 Date attributeValue = (Date)rowData.getAttributeValue();
                 if (attributeValue == null)
@@ -1348,7 +1392,7 @@ class RowPanel
                 dateTimePicker.setDate(attributeValue);
             }
             else if (rightmostAttribute.getType() == Type.INT_16) {
-                comboBoxes[widgetIndex].setSelectedItem(
+                getComboBox(widgetIndex).setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
                 if ((attributeValue == null) ||
@@ -1359,7 +1403,7 @@ class RowPanel
                 valueSpinnerInt16.setValue(attributeValue);
             }
             else if (rightmostAttribute.getType() == Type.INT_32) {
-                comboBoxes[widgetIndex].setSelectedItem(
+                getComboBox(widgetIndex).setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
                 if ((attributeValue == null) ||
@@ -1370,7 +1414,7 @@ class RowPanel
                 valueSpinnerInt16.setValue(attributeValue);
             }
             else {
-                comboBoxes[widgetIndex].setSelectedItem(
+                getComboBox(widgetIndex).setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
                 if (attributeValue == null)
@@ -1553,7 +1597,7 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[index++], gc);
+            add(getComboBox(index++), gc);
 
             /** 
              * Add comboBox for the Attribute Operator which
@@ -1562,8 +1606,6 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            //TODO: delete this
-            //add(comboBoxes[index++], gc);
             add(operatorComboBox, gc);
 
             /** 
@@ -1589,7 +1631,7 @@ class RowPanel
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[index++], gc);
+            add(getComboBox(index++), gc);
         }
         else {
             /**
@@ -1653,13 +1695,13 @@ class RowPanel
             int widgetIndex = rowData.getAttributeCount();
             DefaultComboBoxModel model = new DefaultComboBoxModel(
                 CollectionOperator.values());
-            comboBoxes[widgetIndex].setModel(model);
+            getComboBox(widgetIndex).setModel(model);
 
             /**
              * Set the value of the Collection Operator comboBox
              * to be this row's value.
              */
-            comboBoxes[widgetIndex].setSelectedItem(
+            getComboBox(widgetIndex).setSelectedItem(
                 rowData.getCollectionOperator());
             widgetIndex++;
 
@@ -1708,16 +1750,30 @@ class RowPanel
     }
 
 
+    /**
+     * We are required to implement this method because we are
+     * a DocumentListener.
+     */
     @Override
     public void insertUpdate(DocumentEvent event) {
         textFieldChanged(event.getDocument());
     }
 
+
+    /**
+     * We are required to implement this method because we are
+     * a DocumentListener.
+     */
     @Override
     public void removeUpdate(DocumentEvent event) {
         textFieldChanged(event.getDocument());
     }
 
+
+    /**
+     * We are required to implement this method because we are
+     * a DocumentListener.
+     */
     @Override
     public void changedUpdate(DocumentEvent event) {
     }
@@ -1734,6 +1790,11 @@ class RowPanel
         //rowData.setAttributeValueUsingString(value.toString());
     }
 
+
+    /**
+     * This is called when the text field changes.  E.g. as the user
+     * types into it.
+     */
     private void textFieldChanged(Document document) {
 
         if (document == valueTextField.getDocument())
@@ -1751,6 +1812,10 @@ class RowPanel
      *
      * All this method does is call our superclass's normal paint()
      * method and then draws a line at the bottom of this panel.
+     *
+     * If/when we decide whether we want to have lines between rows
+     * and/or do "zebra" striping of rows, cleanup or remove this
+     * code.
      */
     @Override
     public void paint(Graphics g) {
