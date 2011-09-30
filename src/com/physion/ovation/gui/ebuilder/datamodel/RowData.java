@@ -287,8 +287,14 @@ public class RowData {
      * Remove this RowData object from its parent's list of direct children.
      */
     public void removeFromParent() {
-        //System.out.println("Removing rowData: "+this.getRowString());
-        //System.out.println("from parent: "+getParentRow().getRowString());
+
+        if ((getParentRow() == null) ||
+            (getParentRow().getChildRows() == null)) {
+            System.err.println("ERROR:  removeFromParent called on a row\n"+
+                "without a parent, or whose parent doesn't have children.\n"+
+                "This is a coding error of some sort.");
+            return;
+        }
         getParentRow().getChildRows().remove(this);
     }
 

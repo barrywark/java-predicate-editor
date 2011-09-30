@@ -22,6 +22,7 @@ import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JTextField;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.event.DocumentListener;
@@ -43,11 +44,8 @@ import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 
 
 /**
- * This class creates all the widgets that are used to render (draw)
- * a row and edit a row.  A JTable uses the same row renderer like a
- * "rubber stamp" to draw each row.  In a similar way, the same
- * row editor is reused to edit whichever row the user is currently
- * editing.
+ * This class creates all the widgets that are used to display and
+ * end a row.
  *
  * We create all the widgets we will need in our constructor, and
  * thereafter we simply add or remove them from the JPanel based on
@@ -57,14 +55,14 @@ import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
  */
 class RowPanel
     extends JPanel
-    implements ActionListener, ItemListener, DocumentListener, ChangeListener {
+    implements ActionListener, DocumentListener, ChangeListener {
 
     /**
      * TODO: Change to an ArrayList of these to allow an infinite
      * number.
      */
     private static final int MAX_NUM_COMBOBOXES = 20;
-    private static final int MAX_ROWS_IN_COMBOBOX_DROPDOWN = 25;
+    private static final int MAX_ROWS_IN_COMBOBOX_DROPDOWN = 30;
     private static final int MIN_TEXT_COLUMNS = 8;
     private static final int MIN_SPINNER_COLUMNS = 8;
 
@@ -188,16 +186,7 @@ class RowPanel
         createCompoundRowButton.addActionListener(this);
 
         for (int count = 0; count < MAX_NUM_COMBOBOXES; count++) {
-            JComboBox comboBox = new JComboBox();
-            comboBoxes[count] = comboBox;
-            comboBox.setEditable(false);
-
-            /**
-             * Set the number of items that the dropdown will
-             * display before it adds a scrollbar.
-             */
-            comboBox.setMaximumRowCount(MAX_ROWS_IN_COMBOBOX_DROPDOWN);
-            comboBox.addItemListener(this);
+            comboBoxes[count] = createComboBox(null);
         }
 
         valueTextField = new JTextField();
@@ -232,19 +221,26 @@ class RowPanel
         dateTimePicker.addActionListener(this);
 
         /**
+         * Create the comboBox used to choose the type of a "keyed"
+         * property.  For example, an attribute like one of these:
+         *
+         *      nextEpoch.properties.animalID(int) <= 123
+         *      protocolParameters.stimulusName(string) == "caffeine"
+         *
          * The model, (i.e. the selectable items), for this comboBox
          * never changes, so we can set the value of the model now.
          */
-        propTypeComboBox = new JComboBox(
-            new DefaultComboBoxModel(DataModel.PROP_TYPES));
-        propTypeComboBox.setEditable(false);
-        propTypeComboBox.setMaximumRowCount(MAX_ROWS_IN_COMBOBOX_DROPDOWN);
-        propTypeComboBox.addItemListener(this);
+        propTypeComboBox = createComboBox(new DefaultComboBoxModel(
+            DataModel.PROP_TYPES));
 
-        operatorComboBox = new JComboBox();
-        operatorComboBox.setEditable(false);
-        operatorComboBox.setMaximumRowCount(20);
-        operatorComboBox.addItemListener(this);
+        /**
+         * Create the comboBox used to choose the operator for
+         * a "keyed" property value.  The operator changes depending
+         * on the type of the property.  For example, an int/float
+         * value has operators like ==,!=,<,>,<=,>=, while a string
+         * value has those operators plus ~==, and ~~==.
+         */
+        operatorComboBox = createComboBox(null);
 
         buttonPanel = new JPanel(new GridBagLayout());
         buttonPanel.setOpaque(false);
@@ -272,6 +268,44 @@ class RowPanel
     }
 
 
+    private JComboBox createComboBox(ComboBoxModel model) {
+
+        JComboBox comboBox;
+        if (model == null)
+            comboBox = new JComboBox();
+        else
+            comboBox = new JComboBox(model);
+
+        comboBox.setEditable(false);
+
+        /**
+         * Set the number of items that the dropdown will
+         * display before it adds a scrollbar.
+         */
+        comboBox.setMaximumRowCount(MAX_ROWS_IN_COMBOBOX_DROPDOWN);
+        comboBox.addActionListener(this);
+
+        /**
+         * Change default keyboard behavior of the comboBox so
+         * it does NOT select the value when using the keyboard
+         * to travers values in the list.
+         * Details about this behavior can be googled.
+         * For example:  http://tinyurl.com/cbkeyboardtrav
+         */
+        comboBox.putClientProperty("JComboBox.isTableCellEditor",
+                                   Boolean.TRUE);
+        return(comboBox);
+    }
+
+
+    /**
+     * This method lays out the components, (e.g. comboBoxes),
+     * that will be needed to display this RowPanel's current
+     * rowData value.
+     * It also sets the data models the comboBoxes will use
+     * and sets the selected value in the comboBoxes to the
+     * corresponding values in this RowPanel's rowData value.
+     */
     private void initializeComponents() {
 
         if (inProcess)
@@ -287,10 +321,6 @@ class RowPanel
      * Layout whatever components the RowData for this row needs.
      * This method places the assorted comboBoxes, text fields, labels,
      * and buttons in a panel using the GridBagLayout layout manager.
-     *
-     * TODO:  Remove code dealing with null RowData.
-     *
-     * @param rowData - The RowData object this row will display and edit.
      */
     private void initializeComponentsProtected() {
 
@@ -304,6 +334,9 @@ class RowPanel
         removeAll();
 
         /**
+         * Now start adding the components that are needed to
+         * display and edit our current rowData value.
+         *
          * Start our "gridx" counter that is incremented every time
          * we add another widget to this row.  This counter is always
          * set to the gridx location of the next widget to be placed
@@ -320,7 +353,7 @@ class RowPanel
          * holds the buttons on the right side of the
          * row use the empty space.
          *
-         * This gets set to true if some other widget
+         * This flag gets set to true if some other widget
          * uses the extra space.  E.g. the valueTextField
          * will use the extra space if it exists in this row.
          */
@@ -342,15 +375,20 @@ class RowPanel
             layoutRootRow();
         }
         else if (rowData.isSimpleCompoundRow()) {
-
             /**
              * A "simple" compound row is a row that
              * only contains a Collection Operator comboBox,
-             * and the -, +, ++ buttons on the right side.
+             * (i.e. Any/All/None), and the -, +, ++ buttons
+             * on the right side.
              */
             layoutSimpleCompoundRow();
         }
         else {
+            /**
+             * An attribute row.  For example:
+             *
+             *      epochGroup.epochs.label == "Test 21"
+             */
             layoutAttributeRow();
         }
 
@@ -388,10 +426,6 @@ class RowPanel
      * be the list of attributes of this ClassDescription.  (We also
      * might add a few more special values to the list.)
      * 
-     * @param prependSelectAttribute - If this is true, we will prepend
-     * the special Attribute.SELECT_ATTRIBUTE to the list of items
-     * in the comboBox's model.
-     *
      * @param appendNulls - If this is true, we will append the
      * special Attribute.IS_NULL and IS_NOT_NULL to the end of the
      * list of the choices.
@@ -402,9 +436,7 @@ class RowPanel
      */
     private void setComboBoxModel(JComboBox comboBox,
                                   ClassDescription classDescription,
-                                  boolean prependSelectAttribute,
                                   boolean appendNulls,
-                                  //boolean appendMyAnyProperty,
                                   Object selectedItem) {
 
         ArrayList<Attribute> attributes;
@@ -419,8 +451,9 @@ class RowPanel
          * First, prepend the special "Select Attribute" attribute
          * if requested.
          */
-        if (prependSelectAttribute)
-            copy.add(Attribute.SELECT_ATTRIBUTE);
+        //if (prependSelectAttribute)
+        //    copy.add(Attribute.SELECT_ATTRIBUTE);
+        copy.add(Attribute.SELECT_ATTRIBUTE);
 
         /**
          * Go through the list of attributes adding them to our
@@ -509,7 +542,9 @@ class RowPanel
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        //System.out.println("Enter actionPerformed = "+e);
+        //System.out.println("Enter actionPerformed on: "+
+        //                   e.getSource().getClass());
+
         if (e.getSource() == createCompoundRowButton) {
             rowData.createCompoundRow();
             getExpressionPanel().createRowPanels();
@@ -524,6 +559,9 @@ class RowPanel
         }
         else if (e.getSource() instanceof DateTimePicker) {
             dateTimeChanged();
+        }
+        else if (e.getSource() instanceof JComboBox) {
+            comboBoxChanged((JComboBox)e.getSource());
         }
         else {
             System.err.println("ERROR: actionPerformed() does not handle "+
@@ -563,13 +601,15 @@ class RowPanel
      * This is called when a value in a comboBox is changed by the
      * user OR programmatically.
      */
+    /*
     @Override
     public void itemStateChanged(ItemEvent e) {
-        //System.out.println("Enter itemStateChanged = "+e);
+        System.out.println("Enter itemStateChanged = "+e);
         if (e.getStateChange() != ItemEvent.SELECTED)
             return;
         comboBoxChanged((JComboBox)e.getSource());
     }
+    */
 
 
     /**
@@ -637,9 +677,7 @@ class RowPanel
             /**
              * User is editing a row other than the first row.
              */
-            /*
-            System.out.println("A row other than the first row being changed.");
-            */
+            //System.out.println("A row other than first row being changed.");
 
             /**
              * TODO:  Put this in its own method?
@@ -660,6 +698,10 @@ class RowPanel
                 rowData.setAttributeOperator(
                     operatorComboBox.getSelectedItem().toString());
             }
+            else {
+                //System.out.println("comboBox.getSelectedItem() = "+
+                //    comboBox.getSelectedItem());
+            }
 
             ArrayList<Attribute> attributes = rowData.getAttributePath();
 
@@ -679,7 +721,7 @@ class RowPanel
                  */
 
                 Attribute selectedAttribute = (Attribute)selectedObject;
-                System.out.println("selectedAttribute = "+selectedAttribute);
+                //System.out.println("selectedAttribute = "+selectedAttribute);
 
                 if ((selectedAttribute.getType() !=
                      Type.PER_USER_PARAMETERS_MAP) &&
@@ -930,6 +972,18 @@ class RowPanel
             initializeComponents();
         }
 
+        /**
+         * Because we remove all widgets and then add them back in
+         * again every time we update the value of a row, we need
+         * to request the focus back again.
+         *
+         * We might want to change the code to be more "clever" and
+         * have it make the minimal set of changes to the widgets
+         * in a row, but that will require more code and have a
+         * greater chance of introducing bugs.
+         */
+        comboBox.requestFocus();
+
         System.out.println("\nrootRow:\n"+
                            rowData.getRootRow().toString(false, ""));
         System.out.println("\nrootRow:\n"+rowData.getRootRow());
@@ -944,11 +998,9 @@ class RowPanel
          */
         if (rowData.isRootRow()) {
             deleteButton.setDraw(false);
-            //deleteButton.setVisible(false);
         }
         else {
             deleteButton.setDraw(true);
-            //deleteButton.setVisible(true);
         }
 
         /**
@@ -1035,6 +1087,16 @@ class RowPanel
     }
 
 
+    /*
+    private void removeComboBoxesAfterIndex(int index) {
+
+        for (index++; index < comboBoxes.length; index++) {
+            remove(comboBoxes[index]);
+        }
+    }
+    */
+
+
     /**
      * A "simple" compound row is a row that
      * only contains a Collection Operator comboBox,
@@ -1115,7 +1177,7 @@ class RowPanel
                  */
                 ClassDescription parentClass = rowData.getParentClass();
                 setComboBoxModel(comboBoxes[index], parentClass,
-                                 true, false, rowData.getAttribute(index));
+                                 false, rowData.getAttribute(index));
             }
             else {
                 /**
@@ -1126,7 +1188,7 @@ class RowPanel
                  */
                 Attribute att = rowData.getAttribute(index-1);
                 setComboBoxModel(comboBoxes[index],
-                                 att.getClassDescription(), true, true,
+                                 att.getClassDescription(), true,
                                  rowData.getAttribute(index));
             }
         }
@@ -1174,7 +1236,7 @@ class RowPanel
              */
             setComboBoxModel(comboBoxes[rowData.getAttributeCount()],
                              rightmostAttribute.getClassDescription(),
-                             true, true, Attribute.SELECT_ATTRIBUTE);
+                             true, Attribute.SELECT_ATTRIBUTE);
         }
         else if (rightmostAttribute.isPrimitive()) {
 
@@ -1239,7 +1301,7 @@ class RowPanel
              * for the Type (int, string, float, boolean) of the
              * Attribute.
              */
-            int widgetIndex = rowData.getAttributeCount();//attributes.size();
+            int widgetIndex = rowData.getAttributeCount();
             if (rightmostAttribute.getType() == Type.BOOLEAN) {
                 comboBoxes[widgetIndex].setModel(
                     new DefaultComboBoxModel(DataModel.OPERATORS_BOOLEAN));
@@ -1315,7 +1377,6 @@ class RowPanel
                     attributeValue = "";
                 valueTextField.setText(attributeValue.toString());
             }
-            //widgetIndex++;
         }
         else if ((rightmostAttribute.getType() ==
                   Type.PER_USER_PARAMETERS_MAP) ||
@@ -1410,7 +1471,6 @@ class RowPanel
                  */
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
-                //gc.weightx = 1;
                 gc.fill = GridBagConstraints.BOTH;
                 gc.insets = LEFT_INSETS;
                 add(dateTimePicker, gc);
@@ -1487,7 +1547,8 @@ class RowPanel
              */
 
             /** 
-             * Add comboBox for the Collection Operator.
+             * Add comboBox for the Collection Operator which
+             * will display the value "Count".
              */
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
@@ -1495,12 +1556,15 @@ class RowPanel
             add(comboBoxes[index++], gc);
 
             /** 
-             * Add comboBox for the Attribute Operator.
+             * Add comboBox for the Attribute Operator which
+             * will display a value like ==,!=, <, etc.
              */
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(comboBoxes[index++], gc);
+            //TODO: delete this
+            //add(comboBoxes[index++], gc);
+            add(operatorComboBox, gc);
 
             /** 
              * Add count spinner.
@@ -1570,9 +1634,18 @@ class RowPanel
              * The item selected in the "childmost" (i.e. last)
              * Attribute in this RowData's attributePath is an
              * Attribute that has a to-many relationship with the
-             * class that contains it.  So, there is a comboBox
-             * to the right of it that the user can use to select
-             * the Collection Operator to use:  Any, All, None, Count.
+             * class that contains it.  For example, a row like
+             * one of these:
+             *
+             *      epochGroup.epochs Count == 5
+             *      resources Count == 27
+             *      resources Any
+             *      resources None
+             *
+             * So, there is at least a comboBox
+             * to the right of the attribute comboBox that the user
+             * can use to select the Collection Operator to use:
+             * Any, All, None, Count.
              *
              * Set that comboBox's model to the list of all the
              * Collection Operators: Any, All, None, Count.
@@ -1590,6 +1663,10 @@ class RowPanel
                 rowData.getCollectionOperator());
             widgetIndex++;
 
+            /**
+             * Now set the value of the operatorComboBox and spinner if the
+             * collection operator is currently set to Count.
+             */
             if (rowData.getCollectionOperator() ==
                 CollectionOperator.COUNT) {
 
@@ -1601,6 +1678,12 @@ class RowPanel
                  * Set the operator that is used for the Count.
                  * E.g. ==, >, <=
                  */
+                operatorComboBox.setModel(
+                    new DefaultComboBoxModel(
+                        DataModel.OPERATORS_ARITHMATIC));
+                operatorComboBox.setSelectedItem(
+                    rowData.getAttributeOperator());
+                /*TODO: delete this
                 comboBoxes[widgetIndex].setModel(
                     new DefaultComboBoxModel(
                         DataModel.OPERATORS_ARITHMATIC));
@@ -1608,14 +1691,17 @@ class RowPanel
                 comboBoxes[widgetIndex].setSelectedItem(
                     rowData.getAttributeOperator());
                 widgetIndex++;
+                */
 
+                /**
+                 * Set the value in the spinner.
+                 */
                 Object attributeValue = rowData.getAttributeValue();
                 int intValue = 0;
                 if ((attributeValue != null) &&
                     (attributeValue instanceof Integer)) {
                     intValue = ((Integer)attributeValue).intValue();
                 }
-                //valueTextField.setText(attributeValue.toString());
                 countSpinnerInt32.setValue(intValue);
             }
         }
