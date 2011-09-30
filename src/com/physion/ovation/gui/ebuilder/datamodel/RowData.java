@@ -3,6 +3,7 @@ package com.physion.ovation.gui.ebuilder.datamodel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import javax.swing.event.EventListenerList;
 
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
@@ -123,6 +124,10 @@ public class RowData {
      * This is the list of this row's direct children.
      */
     private ArrayList<RowData> childRows = new ArrayList<RowData>();
+
+    /**
+     */
+    private EventListenerList rowDataListenerList = new EventListenerList();
 
 
     /**
@@ -273,6 +278,35 @@ public class RowData {
         return(rows);
     }
 
+
+    public void addRowDataListener(RowDataListener listener) {
+        rowDataListenerList.add(RowDataListener.class, listener);
+    }
+
+
+    // Notify all listeners that have registered interest for
+    // notification on this event type.  The event instance 
+    // is lazily created using the parameters passed into 
+    // the fire method.
+    protected void fireRowDataEvent() {
+
+        /**
+         * Guaranteed to return a non-null array
+         */
+        Object[] listeners = rowDataListenerList.getListenerList();
+
+        RowDataEvent rowDataEvent = new RowDataEvent(this);
+
+        /**
+         * Process the listeners last to first, notifying
+         * those that are interested in this event.
+         */
+        for (int i = listeners.length-2; i>=0; i-=2) {
+            if (listeners[i] == RowDataListener.class) {
+                ((RowDataListener)listeners[i+1]).changed(rowDataEvent);
+            }
+        }
+    }
 
     /**
      * Remove the specified child RowData object from this RowData object's
