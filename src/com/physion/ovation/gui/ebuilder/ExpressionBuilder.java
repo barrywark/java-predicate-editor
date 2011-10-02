@@ -91,13 +91,6 @@ public class ExpressionBuilder
          */
         rootRow = new RowData(originalRootRow);
 
-        /**
-         * Add ourselves as a listener to the RowData expression tree
-         * so we can enable/disable the Ok button depending on whether
-         * the expression tree is currently legal.
-         */
-        rootRow.addRowDataListener(this);
-
         panel = new EBuilderPanel(rootRow);
         getContentPane().add(panel);
 
@@ -138,6 +131,14 @@ public class ExpressionBuilder
         if (height < 600)
             height += 200;
         setSize(width, height);
+
+
+        /**
+         * Add ourselves as a listener to the RowData expression tree
+         * so we can enable/disable the Ok button depending on whether
+         * the expression tree is currently legal.
+         */
+        rootRow.addRowDataListener(this);
 
         /**
          * Enable/disable the buttons for the first time.
@@ -243,6 +244,7 @@ public class ExpressionBuilder
         }
 
         if (rootRow.getRootRow() == null) {
+            // This should never happen.
             System.err.println("ERROR: rootRow.getRootRow() = null");
             return(returnValue);
         }
@@ -285,7 +287,13 @@ public class ExpressionBuilder
      * the expression tree is currently a legal value.
      */
     private void enableButtons() {
-        okButton.setEnabled(rootRow.containsLegalValue());
+
+        if (getRootRow() == null) {
+            okButton.setEnabled(false);
+            return;
+        }
+
+        okButton.setEnabled(getRootRow().containsLegalValue());
     }
 
 

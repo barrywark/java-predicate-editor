@@ -41,7 +41,8 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
  * So, maybe we should not also store that information in the attributeOperator
  * member data?
  */
-public class RowData {
+public class RowData
+    implements RowDataListener {
 
     /**
      * This is the "topmost", or "root" class that is the ancestor
@@ -311,12 +312,20 @@ public class RowData {
 
 
     /**
+     * Remove a listener from this RowData.
+     */
+    public void removeRowDataListener(RowDataListener listener) {
+        rowDataListenerList.remove(RowDataListener.class, listener);
+    }
+
+
+    /**
      * Notify all listeners that have registered interest for
      * notification on this event type.
      */
     private void fireRowDataEvent() {
 
-        System.out.println("Enter fireRowDataEvent for row:"+getRowString());
+        //System.out.println("Enter fireRowDataEvent for row:"+getRowString());
 
         /**
          * Create a RowDataEvent that will tell the listener
@@ -335,12 +344,32 @@ public class RowData {
 
 
     /**
+     * This method is called when one of our direct children RowData
+     * objects is changed.  Please note, because each row listens
+     * to its children, the message eventually gets passed up to
+     * the root row that the GUI is listening to.
+     *
+     * If, at some point in the future, the GUI will need to keep
+     * track of individual rows, we might want to restructure the
+     * way RowDataEvents are passed up the listener "tree" in order
+     * to tell the root listener which row actually changed.
+     * Perhaps "chain" the RowDataEvents together as a list.
+     * No need for this sort of granularity/complication at the
+     * present time.
+     */
+    public void rowDataChanged(RowDataEvent rowData) {
+        fireRowDataEvent();
+    }
+
+
+    /**
      * Remove the specified child RowData object from this RowData object's
      * list of direct children.
      */
-    public void removeChildRow(RowData rowData) {
+    public void removeChildRow(RowData childRow) {
 
-        childRows.remove(rowData);
+        childRows.remove(childRow);
+        childRow.removeRowDataListener(this);
         fireRowDataEvent();
     }
 
@@ -950,6 +979,8 @@ public class RowData {
 
         childRow.setParentRow(this);
         childRows.add(childRow);
+
+        childRow.addRowDataListener(this);
         fireRowDataEvent();
     }
 
