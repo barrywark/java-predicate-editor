@@ -3,6 +3,7 @@ package com.physion.ovation.gui.ebuilder.datamodel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.EventListener;
 import javax.swing.event.EventListenerList;
 
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
@@ -199,8 +200,8 @@ public class RowData {
 
     /**
      * Get the number of descendents from this node.  I.e. this is returns
-     * the count of our direct children, plus all their children, and all
-     * our childrens' children, and so on.
+     * the count of our direct children, PLUS all their children, and all
+     * our their children, and so on.
      * This is NOT the same thing as getting the number of this node's children.
      */
     public int getDescendentCount() {
@@ -279,46 +280,60 @@ public class RowData {
     }
 
 
+    /**
+     * Add a listener to this RowData.
+     * The listener will be modified when anything in this RowData
+     * or any of its descendents changes.  So, you only need to
+     * listen to the root RowData of an expression tree to be notified
+     * if anything anywhere in the tree changes.
+     */
     public void addRowDataListener(RowDataListener listener) {
         rowDataListenerList.add(RowDataListener.class, listener);
     }
 
 
-    // Notify all listeners that have registered interest for
-    // notification on this event type.  The event instance 
-    // is lazily created using the parameters passed into 
-    // the fire method.
+    /**
+     * Notify all listeners that have registered interest for
+     * notification on this event type.
+     */
     protected void fireRowDataEvent() {
 
         /**
-         * Guaranteed to return a non-null array
+         * Create a RowDataEvent that will tell the listener
+         * about this event.  Currently, there is only one
+         * type of event and all we give the listener is
+         * a reference to this RowData object.
          */
-        Object[] listeners = rowDataListenerList.getListenerList();
-
         RowDataEvent rowDataEvent = new RowDataEvent(this);
 
-        /**
-         * Process the listeners last to first, notifying
-         * those that are interested in this event.
-         */
-        for (int i = listeners.length-2; i>=0; i-=2) {
-            if (listeners[i] == RowDataListener.class) {
-                ((RowDataListener)listeners[i+1]).changed(rowDataEvent);
-            }
+        RowDataListener listenerList[] =
+            rowDataListenerList.getListeners(RowDataListener.class);
+        for (RowDataListener listener : listenerList) {
+            listener.rowDataChanged(rowDataEvent);
         }
     }
+
 
     /**
      * Remove the specified child RowData object from this RowData object's
      * list of direct children.
      */
-    public void removeChild(RowData rowData) {
+    public void removeChildRow(RowData rowData) {
+
         childRows.remove(rowData);
+        fireRowDataEvent();
     }
 
 
     /**
      * Remove this RowData object from its parent's list of direct children.
+     * This is functionally equivalent to calling:
+     *
+     *      getParentRow().removeChildRow(this);
+     * 
+     * Please note, removing row "A" from its parent row "B" is NOT considered
+     * a change to row "A", (as far as notifying listeners is concerned),
+     * but is considered a change to the parent row "B".
      */
     public void removeFromParent() {
 
@@ -329,7 +344,8 @@ public class RowData {
                 "This is a coding error of some sort.");
             return;
         }
-        getParentRow().getChildRows().remove(this);
+
+        getParentRow().removeChildRow(this);
     }
 
 
@@ -392,17 +408,8 @@ public class RowData {
             return;
         }
 
-        /*
-        Attribute attribute = Attribute.SELECT_ATTRIBUTE;
-        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
-        attributePath.add(attribute);
-
-        RowData attributeRow = new RowData();
-        attributeRow.setAttributePath(attributePath);
-        */
         RowData attributeRow = new RowData();
         attributeRow.addAttribute(Attribute.SELECT_ATTRIBUTE);
-
         addChildRow(attributeRow);
     }
 
@@ -410,7 +417,14 @@ public class RowData {
     /**
      * Returns true if this row is a Compound Row, (simple or not).
      * I.e. this means the row ends with a "compound" Collection Operator
-     * Any, All, or None.
+     * Any, All, or None.  A row that ends with Count is not a Compound Row.
+     *
+     * For example, a row like one of these:
+     *
+     *      epochGroups.epochs Any of the following
+     *      resources None of the following
+     *      Any of the following
+     *      None of the following
      */
     public boolean isCompoundRow() {
 
@@ -423,7 +437,13 @@ public class RowData {
 
     /**
      * Returns true if this is a "simple" Compound Row.
-     * I.e. a row that only contains a Collection Operator comboBox.
+     * I.e. a row that contains ONLY a Collection Operator comboBox.
+     *
+     * For example, a row like one of these:
+     *
+     *      Any of the following
+     *      All of the following
+     *      None of the following
      */
     public boolean isSimpleCompoundRow() {
 
@@ -497,14 +517,6 @@ public class RowData {
 
     private RowData getParentRow() {
         return(parentRow);
-    }
-
-
-    private ArrayList<RowData> getChildRows() {
-
-        if (childRows == null)
-            childRows = new ArrayList<RowData>();
-        return(childRows);
     }
 
 
@@ -843,15 +855,24 @@ public class RowData {
 
 
     /**
-     * TODO: Do we want to set the parentRow of every child to
-     * be this RowData instance?  If so, then we probably want
-     * to have an addChildRow() method.
+     * TODO: Do we want to make this method private so engineers
+     * are forced to use addChildRow() and removeChildRow()?
      */
-    public void setChildRows(ArrayList<RowData> childRows) {
+    /*
+    private void setChildRows(ArrayList<RowData> childRows) {
 
         this.childRows = childRows;
         for (RowData childRow : childRows)
             childRow.setParentRow(this);
+    }
+    */
+
+
+    private ArrayList<RowData> getChildRows() {
+
+        if (childRows == null)
+            childRows = new ArrayList<RowData>();
+        return(childRows);
     }
 
 
@@ -859,6 +880,7 @@ public class RowData {
 
         childRow.setParentRow(this);
         childRows.add(childRow);
+        fireRowDataEvent();
     }
 
 
@@ -1096,11 +1118,10 @@ public class RowData {
          * rows are children of this row.
          */
         RowData rootRow = RowData.createRootRow();
-        //RowData.setRootRow(rootRow);
 
         Attribute attribute;
         RowData rowData;
-        ArrayList<RowData> childRows = new ArrayList<RowData>();
+        //ArrayList<RowData> childRows = new ArrayList<RowData>();
 
         /**
          * Start creating child rows of the rootRow.
@@ -1119,8 +1140,8 @@ public class RowData {
                                   sourceCD, Cardinality.TO_ONE);
         rowData.addAttribute(attribute);
         rowData.addAttribute(Attribute.IS_NULL);
-        childRows.add(rowData);
-        rootRow.setChildRows(childRows);
+        rootRow.addChildRow(rowData);
+        //rootRow.setChildRows(childRows);
 
 
         /**
@@ -1131,16 +1152,17 @@ public class RowData {
         rowData.addAttribute(attribute);
         rowData.setAttributeOperator(">=");
         rowData.setAttributeValue(new GregorianCalendar(2011, 0, 1).getTime());
-        childRows.add(rowData);
+        //childRows.add(rowData);
+        rootRow.addChildRow(rowData);
 
         rowData = new RowData();
         attribute = new Attribute("endTime", Type.DATE_TIME);
         rowData.addAttribute(attribute);
         rowData.setAttributeOperator("<=");
         rowData.setAttributeValue(new Date());
-        childRows.add(rowData);
+        rootRow.addChildRow(rowData);
 
-        rootRow.setChildRows(childRows);
+        //rootRow.setChildRows(childRows);
 
         /**
          * Create a "My Property" row.
@@ -1159,8 +1181,9 @@ public class RowData {
         rowData.setAttributeOperator("<=");
         rowData.setAttributeValue("123");
 
-        childRows.add(rowData);
-        rootRow.setChildRows(childRows);
+        //childRows.add(rowData);
+        rootRow.addChildRow(rowData);
+        //rootRow.setChildRows(childRows);
 
         /**
          * Create a "Parameters Map" row of type int.
@@ -1175,8 +1198,9 @@ public class RowData {
         rowData.setAttributeOperator("==");
         rowData.setAttributeValue("27");
 
-        childRows.add(rowData);
-        rootRow.setChildRows(childRows);
+        //childRows.add(rowData);
+        rootRow.addChildRow(rowData);
+        //rootRow.setChildRows(childRows);
 
         /**
          * Create a "Parameters Map" row of type string.
@@ -1191,8 +1215,9 @@ public class RowData {
         rowData.setAttributeOperator("~~=");
         rowData.setAttributeValue("caffeine");
 
-        childRows.add(rowData);
-        rootRow.setChildRows(childRows);
+        rootRow.addChildRow(rowData);
+        //childRows.add(rowData);
+        //rootRow.setChildRows(childRows);
 
         /**
          * Create a "Per User" derivedResponse row.
@@ -1204,8 +1229,9 @@ public class RowData {
 
         rowData.setCollectionOperator(CollectionOperator.ALL);
 
-        childRows.add(rowData);
-        rootRow.setChildRows(childRows);
+        //childRows.add(rowData);
+        rootRow.addChildRow(rowData);
+        //rootRow.setChildRows(childRows);
 
         /**
          * Create a row that ends with a string value.
@@ -1223,8 +1249,9 @@ public class RowData {
         rowData.setAttributeOperator("==");
         rowData.setAttributeValue("Test 27");
 
-        childRows.add(rowData);
-        rootRow.setChildRows(childRows);
+        //childRows.add(rowData);
+        rootRow.addChildRow(rowData);
+        //rootRow.setChildRows(childRows);
 
         /**
          * Create another child row.
@@ -1235,8 +1262,9 @@ public class RowData {
         rowData.addAttribute(attribute);
         rowData.setCollectionOperator(CollectionOperator.NONE);
 
-        childRows.add(rowData);
-        rootRow.setChildRows(childRows);
+        //childRows.add(rowData);
+        rootRow.addChildRow(rowData);
+        //rootRow.setChildRows(childRows);
 
         /**
          * Create another child row.
@@ -1251,8 +1279,9 @@ public class RowData {
                                   epochCD, Cardinality.TO_MANY);
         rowData.addAttribute(attribute);
 
-        childRows.add(rowData);
-        rootRow.setChildRows(childRows);
+        //childRows.add(rowData);
+        rootRow.addChildRow(rowData);
+        //rootRow.setChildRows(childRows);
 
         RowData rowData2 = new RowData();
         attribute = new Attribute("startTime", Type.DATE_TIME);
@@ -1261,16 +1290,68 @@ public class RowData {
         rowData2.setAttributeOperator(">=");
         rowData2.setAttributeValue(new GregorianCalendar(2010, 0, 1).getTime());
 
-        ArrayList<RowData> childRows2 = new ArrayList<RowData>();
-        childRows2.add(rowData2);
-        rowData.setChildRows(childRows2);
+        //ArrayList<RowData> childRows2 = new ArrayList<RowData>();
+        //childRows2.add(rowData2);
+        //rowData.setChildRows(childRows2);
+        rowData.addChildRow(rowData2);
 
         System.out.println("rootRow:\n"+rootRow.toString());
 
         return(rootRow);
     }
 
-    
+
+    /**
+     * This method returns true if the current value of this RowData
+     * expression tree is valid.  I.e. this RowData object and all
+     * its children are valid.
+     *
+     * A few notes on what is valid and not valid:
+     *
+     *      A tree that has no rows in it, not even a root row,
+     *      is considered valid.  (This case should never actually
+     *      occur in the present GUI.)
+     *
+     *      A root row that has no children is considered not valid.
+     *      For example, the user has selected Epoch as the Class
+     *      Under Qualification, but has not set any children for it.
+     *
+     *      A compound row that has no children is considered not valid.
+     *      For example, the user has created a compound row as a
+     *      child of another row, and has selected Any/All/None
+     *      as the collection operator, but has not created any child
+     *      rows that are in that collection.
+     *
+     * TODO: Do we want to change what is considerd valid?
+     */
+    public boolean containsLegalValue() {
+
+        if (getRootRow() == null)
+            return(true);
+
+        /**
+         * First check that the values in this row are valid.
+         *
+         * If we are a compound row, then we should have at least
+         * one child row.
+         */
+        if ((isCompoundRow()) && (getChildRows().size() < 1))
+            return(false);
+
+        /**
+         * If we get here, this row is legal.  Now recursively
+         * check all of our descendent rows.
+         * If any are illegal, immediately return false.
+         */
+        for (RowData childRow : getChildRows()) {
+            if (childRow.containsLegalValue() == false)
+                return(false);
+        }
+
+        return(true);
+    }
+
+
     /**
      * This is a simple test program for this class.
      */

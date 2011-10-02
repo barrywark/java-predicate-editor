@@ -2,30 +2,37 @@ package com.physion.ovation.gui.ebuilder.datamodel;
 
 
 /**
- * TODO:  Many member data and values in here should be statics.
+ * There are four collection operators:  Count, Any, All, None.
+ *
+ * Count is kind of special, because it does not really apply to
+ * a collection, but instead is a count of the number of references
+ * to an attribute that has a to-many relationship.
+ * For example, the epochGroup attribute has a to-many relationship
+ * with a collection of Epoch objects.
+ *
+ * The other operators, Any/All/None, are used to specify whether
+ * an expression is true if any, all, or none of the expressions
+ * in the collection are true.
  */
 public enum CollectionOperator {
 
     /**
-     * 
+     * These are the four values we can have:
+     *
+     *      CollectionOperator.COUNT
+     *      CollectionOperator.ANY
+     *      CollectionOperator.ALL
+     *      CollectionOperator.NONE
      */
     COUNT, ANY, ALL, NONE;
 
 
-    private static CollectionOperator[] compoundCollectionOperators;
-
-
-    static {
-
-        compoundCollectionOperators = new CollectionOperator[
-            CollectionOperator.values().length-1];
-
-        int index = 0;
-        for (CollectionOperator collectionOperator :
-             CollectionOperator.values())
-            if (collectionOperator != CollectionOperator.COUNT)
-                compoundCollectionOperators[index++] = collectionOperator;
-    }
+    /**
+     * An array of all the CollectionOperator values that is
+     * useful when creating a ComboBoxModel to be used for a
+     * JComboBox.
+     */
+    private static CollectionOperator[] compoundCollectionOperators = null;
 
 
     /**
@@ -38,7 +45,12 @@ public enum CollectionOperator {
     }
 
 
+    /**
+     * Get this CollectionOperator value as a user friendly string
+     * suitable for displaying in the GUI.
+     */
     public String toString() {
+
         switch(this) {
             case COUNT:
                 return("Count");
@@ -62,6 +74,23 @@ public enum CollectionOperator {
      * The array returned can be used to create a ComboBoxModel.
      */
     public static CollectionOperator[] getCompoundCollectionOperators() {
+
+        /**
+         * Initialize the values in the compoundCollectionOperators array
+         * if they have not been created before.
+         */
+        if (compoundCollectionOperators == null) {
+
+            compoundCollectionOperators = new CollectionOperator[
+                CollectionOperator.values().length-1];
+
+            int index = 0;
+            for (CollectionOperator collectionOperator :
+                 CollectionOperator.values())
+                if (collectionOperator != CollectionOperator.COUNT)
+                    compoundCollectionOperators[index++] = collectionOperator;
+        }
+
         return(compoundCollectionOperators);
     }
 

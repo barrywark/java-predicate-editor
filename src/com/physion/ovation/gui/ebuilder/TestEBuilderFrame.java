@@ -11,13 +11,17 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
+import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
+import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
 
 public class TestEBuilderFrame
     extends JFrame 
-    implements ActionListener {
+    implements ActionListener, RowDataListener {
 
+    private RowData rootRow;
     private EBuilderPanel panel;
     private JButton okButton;
+    private JButton printButton;
     private JButton cancelButton;
 
 
@@ -26,7 +30,8 @@ public class TestEBuilderFrame
         super("Test EBuilder Frame");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        RowData rootRow = RowData.createTestRowData();
+        rootRow = RowData.createTestRowData();
+        rootRow.addRowDataListener(this);
         panel = new EBuilderPanel(rootRow);
         getContentPane().add(panel);
 
@@ -36,7 +41,7 @@ public class TestEBuilderFrame
 
         GridBagConstraints gc;
 
-        okButton = new JButton("Print");
+        okButton = new JButton("Ok");
         okButton.addActionListener(this);
         gc = new GridBagConstraints();
         gc.gridx = 0;
@@ -44,16 +49,37 @@ public class TestEBuilderFrame
         gc.anchor = GridBagConstraints.CENTER;
         buttonPanel.add(okButton, gc);
 
-        cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(this);
+        printButton = new JButton("Print");
+        printButton.addActionListener(this);
         gc = new GridBagConstraints();
         gc.gridx = 1;
         gc.weightx = 1;
         gc.anchor = GridBagConstraints.CENTER;
+        buttonPanel.add(printButton, gc);
+
+        cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(this);
+        gc = new GridBagConstraints();
+        gc.gridx = 2;
+        gc.weightx = 1;
+        gc.anchor = GridBagConstraints.CENTER;
         buttonPanel.add(cancelButton, gc);
 
+        enableButtons();
         pack();
         //setSize(800, getSize().height+300);
+    }
+
+
+    public void rowDataChanged(RowDataEvent e) {
+
+        System.out.println("Enter rowDataChanged");
+        enableButtons();
+    }
+
+
+    private void enableButtons() {
+        okButton.setEnabled(rootRow.containsLegalValue());
     }
 
 
@@ -62,7 +88,12 @@ public class TestEBuilderFrame
         if (e.getSource() == cancelButton)
             System.exit(0);
 
-        if (e.getSource() == okButton)
+        if (e.getSource() == printButton)
             panel.print();
+
+        if (e.getSource() == okButton) {
+            panel.print();
+            System.exit(0);
+        }
     }
 }

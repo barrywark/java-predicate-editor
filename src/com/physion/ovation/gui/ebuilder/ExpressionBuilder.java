@@ -13,6 +13,8 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
+import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
+import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
 
 
 /**
@@ -48,7 +50,7 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowData;
  */
 public class ExpressionBuilder
     extends JDialog 
-    implements ActionListener {
+    implements ActionListener, RowDataListener {
 
 
     public static final int RETURN_STATUS_OK = 0;
@@ -87,7 +89,14 @@ public class ExpressionBuilder
          * Make a copy of the passed in expression tree so that
          * way the GUI will not affect it.
          */
-        this.rootRow = new RowData(originalRootRow);
+        rootRow = new RowData(originalRootRow);
+
+        /**
+         * Add ourselves as a listener to the RowData expression tree
+         * so we can enable/disable the Ok button depending on whether
+         * the expression tree is currently legal.
+         */
+        rootRow.addRowDataListener(this);
 
         panel = new EBuilderPanel(rootRow);
         getContentPane().add(panel);
@@ -114,13 +123,28 @@ public class ExpressionBuilder
         gc.anchor = GridBagConstraints.CENTER;
         buttonPanel.add(cancelButton, gc);
 
+        /**
+         * Set the size of the window.
+         * This is just some crude logic to make sure
+         * the window is a reasonable width and is
+         * a little taller than the tree it currently
+         * contains.
+         */
         pack();
         int width = getSize().width;
         int height = getSize().height;
         if (width < 800)
             width = 800;
-        height += 200;
+        if (height < 600)
+            height += 200;
         setSize(width, height);
+
+        /**
+         * Enable/disable the buttons for the first time.
+         * Later, buttons will be enabled/disabled when the
+         * user changes the expression tree.
+         */
+        enableButtons();
     }
 
 
@@ -236,6 +260,32 @@ public class ExpressionBuilder
         returnValue.status = dialog.getReturnStatus();
         returnValue.rootRow = dialog.getRootRow();
         return(returnValue);
+    }
+
+
+    /**
+     * This method is called when the expression tree we are
+     * displaying/editing changes.
+     * When the tree changes we enable/disable the Ok button
+     * depending on whether the expression tree currently
+     * contains a legal value.  I.e. we will force the user
+     * to make the tree legal before we let him/her Ok out
+     * of the window.
+     */
+    @Override
+    public void rowDataChanged(RowDataEvent e) {
+
+        System.out.println("Enter rowDataChanged");
+        enableButtons();
+    }
+
+
+    /**
+     * Enable/disable the Ok button depending on whether
+     * the expression tree is currently a legal value.
+     */
+    private void enableButtons() {
+        okButton.setEnabled(rootRow.containsLegalValue());
     }
 
 

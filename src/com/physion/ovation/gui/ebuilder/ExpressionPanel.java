@@ -31,10 +31,14 @@ public class ExpressionPanel
         GridLayout layout = (GridLayout)getLayout();
         layout.setRows(rootRow.getDescendentCount()+1);
 
-        int count = 0;
+        //int count = 0;
         for (RowData rowData : rootRow.getRows()) {
             RowPanel rowPanel = new RowPanel(rowData);
             add(rowPanel);
+
+            /**
+             * Zebra stripe the rows.
+             */
             /*
             if ((count % 2) == 0)
                 rowPanel.setBackground(rowPanel.getBackground().darker());
@@ -50,13 +54,34 @@ public class ExpressionPanel
     }
 
 
+    /**
+     * Get the RowPanel at the passed in index.
+     * The root RowPanel, which is the one that is used
+     * to select the Class Under Qualification, is at index 0.
+     */
     private RowPanel getRowPanel(int index) {
         return((RowPanel)getComponent(index));
+    }
+
+
+    /**
+     * This method simply returns the value of the root row's
+     * containsLegalValue() method if there is a root RowData object.
+     * If there is no root RowData object, i.e. we are empty, this
+     * method returns true.
+     */
+    public boolean containsLegalValue() {
+
+        if (rootRow == null)
+            return(true);
+
+        return(rootRow.containsLegalValue());
     }
 
 
     public void print() {
         System.out.println("\nCurrent Value:\n"+rootRow.toString(false, ""));
         System.out.println("\nDebug Version:\n"+rootRow.toString());
+        System.out.println("containsLegalValue() = "+containsLegalValue());
     }
 }
