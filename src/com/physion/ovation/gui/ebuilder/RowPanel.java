@@ -752,7 +752,7 @@ class RowPanel
                 //    comboBox.getSelectedItem());
             }
 
-            ArrayList<Attribute> attributes = rowData.getAttributePath();
+            //ArrayList<Attribute> attributes = rowData.getAttributePath();
 
             Object selectedObject = comboBox.getSelectedItem();
             if (selectedObject instanceof Attribute) {
@@ -845,14 +845,17 @@ class RowPanel
                 }
                 //System.out.println("comboBoxIndex = "+comboBoxIndex);
 
-                if (attributes.size() > comboBoxIndex) {
+                //if (attributes.size() > comboBoxIndex) {
+                if (rowData.getAttributeCount() > comboBoxIndex) {
                     /**
                      * The user is setting the value of an Attribute
                      * that is already in this RowData's attributePath.
                      */
-                    attributes.set(comboBoxIndex, selectedAttribute);
+                    //attributes.set(comboBoxIndex, selectedAttribute);
+                    rowData.setAttribute(comboBoxIndex, selectedAttribute);
                 }
-                else if (attributes.size() == comboBoxIndex) {
+                //else if (attributes.size() == comboBoxIndex) {
+                else if (rowData.getAttributeCount() == comboBoxIndex) {
                     /**
                      * This is the rightmost comboBox and this RowData
                      * is having this entry in its attributePath set
@@ -860,10 +863,10 @@ class RowPanel
                      * to say "Select Attribute" before the user selected
                      * a value for the first time.
                      */
-                    //attributes.add(selectedAttribute);
                     rowData.addAttribute(selectedAttribute);
                 }
-                else if (attributes.size() < comboBoxIndex) {
+                //else if (attributes.size() < comboBoxIndex) {
+                else if (rowData.getAttributeCount() < comboBoxIndex) {
                     /**
                      * This should never happen.
                      */
@@ -878,7 +881,8 @@ class RowPanel
                 /**
                  * Remove Attributes that are "after" the one being changed.
                  */
-                attributes.subList(comboBoxIndex+1, attributes.size()).clear();
+                //attributes.subList(comboBoxIndex+1, attributes.size()).clear();
+                rowData.trimAttributePath(comboBoxIndex);
 
                 /**
                  * If the user set the value of a primitive type,

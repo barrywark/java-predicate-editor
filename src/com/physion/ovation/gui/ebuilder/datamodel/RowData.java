@@ -13,7 +13,25 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 
 
 /**
+ * A RowData object is one row in the GUI.  The very first row in the
+ * GUI is the "root" row.  Each row can have 0 or more child rows.
+ * A row has an "attributePath", which is how a RowData object defines
+ * the attribute that it is describing.  For example:
+ *
+ *      epochGroups.epoch.label == "Test 21"
+ *
+ * is describing an attributePath to the label attribute, and says
+ * that we are looking for Epochs whose label attribute is "Test 21".
+ *
+ * You can ask a RowData object whether it contains a legal value
+ * by calling the containsLegalValue() method.  As of October 2011,
+ * this method is pretty simple, and rows that don't make sense
+ * are "legal".  We can make this code more clever in the future.
  * 
+ * TODO: Perhaps change the structure a bit so the root row is NOT a
+ * RowData object?  It really is a bit of a different thing given that
+ * it is used to set the Class Under Qualification.
+ *
  * TODO: Perhaps change how the "is null" and "is not null" values are
  * handled.  Right now, I set the attributeOperator to be "is null" or
  * "is not null".  But, I also have to have the last Attribute on the
@@ -296,7 +314,9 @@ public class RowData {
      * Notify all listeners that have registered interest for
      * notification on this event type.
      */
-    protected void fireRowDataEvent() {
+    private void fireRowDataEvent() {
+
+        System.out.println("Enter fireRowDataEvent for row:"+getRowString());
 
         /**
          * Create a RowDataEvent that will tell the listener
@@ -573,6 +593,7 @@ public class RowData {
          * "is null" or "is not null" operator using an Attribute comboBox,
          * but we save the operator in the RowData's attributeOperator member
          * data.  That is the way the user sees it in the GUI though.
+         * I need to disentangle the data model from the GUI's view.
          */
         if (DataModel.OPERATOR_TRUE.equals(attributeOperator) ||
             DataModel.OPERATOR_FALSE.equals(attributeOperator) ||
@@ -580,6 +601,8 @@ public class RowData {
             DataModel.OPERATOR_IS_NOT_NULL.equals(attributeOperator)) {
             setAttributeValue(null);
         }
+
+        fireRowDataEvent();
     }
 
 
@@ -588,13 +611,50 @@ public class RowData {
     }
 
 
-    /* Remove this method.
-    public void setAttributePath(ArrayList<Attribute> attributePath) {
-        this.attributePath = attributePath;
+    public void setAttribute(int index, Attribute attribute) {
+
+        System.out.println("Enter setAttribute("+index+", "+attribute+")");
+        /**
+         * Make sure the attributePath is long enough.
+         */
+        while (index >= getAttributeCount())
+            addAttribute(null);
+
+        getAttributePath().set(index, attribute);
+        fireRowDataEvent();
     }
-    */
 
 
+    /**
+     * Remove Attributes from the attributePath that are
+     * after the passed in index.  So, the index you
+     * pass in is the index of the last attribute you
+     * want in the list.  Attributes after that index are
+     * removed from the list.  For example, if you
+     * pass 3 for the lastAttributeIndex parameter,
+     * this method will remove, (if they exist), the
+     * Attributes at index 4, 5, 6...
+     */
+    public void trimAttributePath(int lastAttributeIndex) {
+
+        /**
+         * If the attributePath isn't even as long as the
+         * caller thinks it is, just return.
+         */
+        if (getAttributeCount() <= (lastAttributeIndex+1))
+            return;
+
+        getAttributePath().subList(lastAttributeIndex+1,
+                                   getAttributeCount()).clear();
+        fireRowDataEvent();
+    }
+
+
+    /**
+     * Returns the number of Attribute objects in the attributePath.
+     * Please note, a "special" Attribute such as the "is null" Attribute
+     * is part of this count.
+     */
     public int getAttributeCount() {
         return(getAttributePath().size());
     }
@@ -612,6 +672,8 @@ public class RowData {
      */
     public void addAttribute(Attribute attribute) {
 
+        System.out.println("Enter addAttribute("+attribute+")");
+
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
 
@@ -623,20 +685,24 @@ public class RowData {
         else if (attribute.equals(Attribute.IS_NOT_NULL)) {
             setAttributeOperator(DataModel.OPERATOR_IS_NOT_NULL);
         }
+        fireRowDataEvent();
     }
 
 
     /**
      * This returns a COPY of the Attribute at the specified index.
+     * So, any changes you make to it will have no effect on this
+     * RowData's attributePath.
      */
     public Attribute getAttribute(int index) {
-        //return(getAttributePath().get(index));
         return(new Attribute(getAttributePath().get(index)));
     }
 
 
     /**
      * This returns this RowData's ArrayList of Attribute objects.
+     * This method creates an empty ArrayList if the attributePath
+     * is currently null.
      *
      * Please note, it is returning this RowData's member data.
      * It is NOT returning a copy, so if you make changes to
@@ -649,7 +715,7 @@ public class RowData {
      * on the manipulation of the attributePath.  I have written
      * the addAttribute() method, but that is just a start.
      */
-    public ArrayList<Attribute> getAttributePath() {
+    private ArrayList<Attribute> getAttributePath() {
 
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
@@ -728,8 +794,10 @@ public class RowData {
 
 
     public void setAttributeValue(Object attributeValue) {
+
         //System.out.println("setAttributeValue("+attributeValue+")");
         this.attributeValue = attributeValue;
+        fireRowDataEvent();
     }
 
 
@@ -823,6 +891,7 @@ public class RowData {
 
     public void setPropName(String propName) {
         this.propName = propName;
+        fireRowDataEvent();
     }
 
 
@@ -846,6 +915,7 @@ public class RowData {
             setAttributeOperator("==");
             setAttributeValue("");
         }
+        fireRowDataEvent();
     }
 
 
@@ -1309,7 +1379,7 @@ public class RowData {
      * A few notes on what is valid and not valid:
      *
      *      A tree that has no rows in it, not even a root row,
-     *      is considered valid.  (This case should never actually
+     *      is considered not valid.  (This case should never actually
      *      occur in the present GUI.)
      *
      *      A root row that has no children is considered not valid.
@@ -1323,6 +1393,8 @@ public class RowData {
      *      rows that are in that collection.
      *
      * TODO: Do we want to change what is considerd valid?
+     * We probably want to make this code more clever at catching
+     * settings that don't make sense.
      */
     public boolean containsLegalValue() {
 
@@ -1331,11 +1403,20 @@ public class RowData {
 
         /**
          * First check that the values in this row are valid.
-         *
+         */
+
+        /**
          * If we are a compound row, then we should have at least
          * one child row.
          */
         if ((isCompoundRow()) && (getChildRows().size() < 1))
+            return(false);
+
+        /**
+         * Make sure all of the attributes on our attributePath
+         * are legal.
+         */ 
+        if (attributePathIsLegal() == false)
             return(false);
 
         /**
@@ -1345,6 +1426,23 @@ public class RowData {
          */
         for (RowData childRow : getChildRows()) {
             if (childRow.containsLegalValue() == false)
+                return(false);
+        }
+
+        return(true);
+    }
+
+
+    /**
+     * This returns true if the attributePath is legal.
+     * Please note, as of October 2011, all we are doing
+     * is making sure that there are no "Select Attribute"
+     * attributes in the path.
+     */
+    private boolean attributePathIsLegal() {
+
+        for (Attribute attribute : getAttributePath()) {
+            if (attribute.equals(Attribute.SELECT_ATTRIBUTE))
                 return(false);
         }
 
