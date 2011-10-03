@@ -81,7 +81,8 @@ public class ExpressionBuilder
         if (originalRootRow == null) {
             System.out.println("ExpressionBuilder constructor was passed\n"+
                 "a null value for the originalRootRow parameter.\n"+
-                "That is not allowed.");
+                "That is not allowed.  Please see ExpressionBuilder.main() "+
+                "for some example code showing you how to use it.");
             return;
         }
 
@@ -276,8 +277,6 @@ public class ExpressionBuilder
      */
     @Override
     public void rowDataChanged(RowDataEvent e) {
-
-        System.out.println("Enter rowDataChanged");
         enableButtons();
     }
 

@@ -20,18 +20,32 @@ public enum Type {
 
     /**
      * This is a "parameters map" type.
+     * For example, the attributes:
+     *
+     *      IOBase.externalDeviceParameters
+     *      Epoch.protocolParameters
+     *      Stimulus.stimulusParameters
+     *      DerivedResponse.derivationParameters
+     *      AnalysisRecord.analysisParameters
      */
     PARAMETERS_MAP,
 
     /**
      * This is "per-user" reference type.
+     * For example, the attributes:
+     *
+     *      TaggableEntityBase.keywords
+     *      Project.analysisRecords
+     *      Epoch.derivedResponses
      */
     PER_USER,
 
     /**
      * This is "per-user parameters map" reference type.
      * As of September 2011, the only attribute of this
-     * type is the EntityBase.properties attribute.
+     * type is the attribute:
+     *
+     *      EntityBase.properties
      */
     PER_USER_PARAMETERS_MAP;
 

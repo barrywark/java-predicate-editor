@@ -50,8 +50,6 @@ import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
  * We create all the widgets we will need in our constructor, and
  * thereafter we simply add or remove them from the JPanel based on
  * the RowData value for that row.
- *
- * TODO:  Pull parts of this code out into utility methods.
  */
 class RowPanel
     extends JPanel
@@ -647,28 +645,16 @@ class RowPanel
 
 
     /**
-     * This is called when a value in a comboBox is changed by the
-     * user OR programmatically.
-     */
-    /*
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-        System.out.println("Enter itemStateChanged = "+e);
-        if (e.getStateChange() != ItemEvent.SELECTED)
-            return;
-        comboBoxChanged((JComboBox)e.getSource());
-    }
-    */
-
-
-    /**
      * This method is called when the user changes the selected
-     * item in a comboBox.
-     *
-     * TODO: Clean up and comment this.
+     * item in a comboBox.  For example, the user changes the
+     * selected attribute or collection operator.
      */
     private void comboBoxChanged(JComboBox comboBox) {
 
+        /**
+         * If we are in the process of updating the RowData due
+         * to a comboBox change, ignore this change.
+         */
         if (inProcess)
             return;
 
@@ -681,360 +667,183 @@ class RowPanel
 
         if (rowData.isRootRow()) {
             /**
-             * The first/topmost row is being edited.  So we need to
-             * adjust the value of the "root" row.  Also known as the
-             * Class Under Qualification.
+             * The root row is being changed.
              */
-            if (comboBox == comboBoxes.get(0)) {
-                /**
-                 * User is changing the value of the Class Under Qualification.
-                 */
-                ClassDescription classDescription =
-                    (ClassDescription)comboBox.getSelectedItem();
-                /*
-                System.out.println("selected classDescription = "+
-                    classDescription);
-                System.out.println("selected classDescription = "+
-                    classDescription.hashCode());
-                */
-                if (!rowData.getClassUnderQualification().equals(
-                    classDescription)) {
-                    rowData.setClassUnderQualification(classDescription);
-                }
-            }
-            else if (comboBox == comboBoxes.get(1)) {
-                /**
-                 * User is changing the value of the Collection Operator.
-                 */
-                CollectionOperator collectionOperator =
-                    (CollectionOperator)comboBox.getSelectedItem();
-                /*
-                System.out.println("selected collectionOperator = "+
-                    collectionOperator);
-                System.out.println("selected collectionOperator = "+
-                    collectionOperator.hashCode());
-                */
-                if (!rowData.getCollectionOperator().equals(
-                    collectionOperator)) {
-                    rowData.setCollectionOperator(collectionOperator);
-                }
-            }
-
-            getExpressionPanel().createRowPanels();
+            handleRootRowChange(comboBox);
         }
         else {
             /**
              * User is editing a row other than the first row.
              */
-            //System.out.println("A row other than first row being changed.");
+            handleChildRowChange(comboBox);
+        }
+    }
+
+
+    /**
+     * This method is called when the user changes a comboBox
+     * in a row other than the first, (i.e. root), row.
+     */
+    private void handleChildRowChange(JComboBox comboBox) {
+
+        /**
+         * TODO:  Put this in its own method?
+         */
+        if (comboBox == propTypeComboBox) {
+            //System.out.println("Property Type is being changed.");
+            /**
+             * User has changed the type of a "keyed" "properties"
+             * attribute in a "My/Any Property" row.
+             */
+            rowData.setPropType((Type)propTypeComboBox.getSelectedItem());
+        }
+        else if (comboBox == operatorComboBox) {
+            /**
+             * User has changed the operator for a "keyed" property.
+             */
+            //System.out.println("Operator is being changed.");
+            rowData.setAttributeOperator(
+                operatorComboBox.getSelectedItem().toString());
+        }
+        else {
+            //System.out.println("comboBox.getSelectedItem() = "+
+            //    comboBox.getSelectedItem());
+        }
+
+        //ArrayList<Attribute> attributes = rowData.getAttributePath();
+
+        Object selectedObject = comboBox.getSelectedItem();
+        if (selectedObject instanceof Attribute) {
 
             /**
-             * TODO:  Put this in its own method?
+             * User selected an Attribute in a comboBox dropdown.
+             * Set the values "to the right" of the comboBox to
+             * appropriate values.
              */
-            if (comboBox == propTypeComboBox) {
-                //System.out.println("Property Type is being changed.");
+            handleAttributeSelected(comboBox, (Attribute)selectedObject);
+        }
+        else if ((selectedObject instanceof String) &&
+                 rowData.getChildmostAttribute().isPrimitive()) {
+
+            //System.out.println("User selected primitive operator "+
+            //                   selectedObject);
+            /**
+             * The user has selected a value in primitive operator
+             * comboBox.  E.g. ==, !=, >.
+             */
+            rowData.setAttributeOperator((String)selectedObject);
+        }
+        else if (selectedObject instanceof CollectionOperator) {
+            /**
+             * User is changing the value of the Collection Operator.
+             * E.g. the user is changing the value of Count, Any, All,
+             * None.
+             */
+            CollectionOperator collectionOperator =
+                (CollectionOperator)selectedObject;
+            //System.out.println("selected collectionOperator = "+
+            //    collectionOperator);
+            if (!rowData.getCollectionOperator().equals(
+                collectionOperator)) {
+                rowData.setCollectionOperator(collectionOperator);
                 /**
-                 * User has changed the type of a "keyed" "properties"
-                 * attribute in a "My/Any Property" row.
+                 * Collection operator has been set to Count, so set
+                 * the attribute value to 0.
+                 * Move this code to RowData object because this
+                 * is business logic that the GUI should not know
+                 * about.
                  */
-                rowData.setPropType((Type)propTypeComboBox.getSelectedItem());
-            }
-            else if (comboBox == operatorComboBox) {
-                /**
-                 * User has changed the operator for a "keyed" property.
-                 */
-                //System.out.println("Operator is being changed.");
-                rowData.setAttributeOperator(
-                    operatorComboBox.getSelectedItem().toString());
-            }
-            else {
-                //System.out.println("comboBox.getSelectedItem() = "+
-                //    comboBox.getSelectedItem());
-            }
-
-            //ArrayList<Attribute> attributes = rowData.getAttributePath();
-
-            Object selectedObject = comboBox.getSelectedItem();
-            if (selectedObject instanceof Attribute) {
-
-                /**
-                 * User selected an Attribute in a comboBox dropdown.
-                 * Set the values "to the right" of the comboBox to
-                 * appropriate values.
-                 *
-                 * TODO:  Put all this business logic stuff into
-                 * the RowData object so all the code that worries about
-                 * keeping a RowData object "internally" consistent is
-                 * in the RowData object itself and not scattered throughout
-                 * this "view" code.
-                 */
-
-                Attribute selectedAttribute = (Attribute)selectedObject;
-                //System.out.println("selectedAttribute = "+selectedAttribute);
-
-                if ((selectedAttribute.getType() !=
-                     Type.PER_USER_PARAMETERS_MAP) &&
-                    (selectedAttribute.getType() != Type.PARAMETERS_MAP)) {
-                    rowData.setPropType(null);
-                    rowData.setPropName(null);
-                }
-
-                /**
-                 * Set the collection operator (Count/Any/All/None) to
-                 * be null if the selectedAttribute does not use
-                 * a collection operator, or set it to Count if it does
-                 * use a collection operator.
-                 */
-                if ((selectedAttribute.getCardinality() !=
-                     Cardinality.TO_MANY) ||
-                     (selectedAttribute.getType() ==
-                      Type.PER_USER_PARAMETERS_MAP)) {
-                    rowData.setCollectionOperator(null);
-                }
-                else {
-                    rowData.setCollectionOperator(CollectionOperator.COUNT);
-                    rowData.setAttributeOperator(
-                        DataModel.OPERATORS_ARITHMATIC[0]);
+                if (collectionOperator == CollectionOperator.COUNT) {
                     rowData.setAttributeValue(new Integer(0));
                 }
-
-                /**
-                 * Set the attribute operator to "is null" or "is not null"
-                 * if the selectedAttribute is one of our special
-                 * Attribute.IS_NULL or Attribute.IS_NOT_NULL values.
-                 *
-                 * Otherwise, set the attribute operator and other settings
-                 * appropriately for the selectedAttribute's type.
-                 */
-                if (selectedAttribute.equals(Attribute.IS_NULL) ||
-                    selectedAttribute.equals(Attribute.IS_NOT_NULL)) {
-                    //System.out.println("Setting attributeOperator to: "+
-                    //    selectedAttribute.getName());
-                    rowData.setAttributeOperator(
-                        selectedAttribute.getDisplayName());
-                }
-                else if ((selectedAttribute.getType() ==
-                          Type.PER_USER_PARAMETERS_MAP) ||
-                         (selectedAttribute.getType() == Type.PARAMETERS_MAP)) {
-                    rowData.setPropType(Type.INT_32);
-                    rowData.setAttributeOperator(
-                        DataModel.OPERATORS_ARITHMATIC[0]);
-                    rowData.setPropName(null);
-                    rowData.setAttributeValue(null);
-                }
-                else if (selectedAttribute.getType() == Type.BOOLEAN) {
-                    rowData.setAttributeOperator(DataModel.OPERATOR_TRUE);
-                }
-
-                /*
-                System.out.println("After op rowData: "+rowData.getRowString());
-                */
-
-                /**
-                 * Figure out which comboBox was changed and then
-                 * set the corresponding Attribute in the row's
-                 * attributePath.
-                 */
-
-                int comboBoxIndex = comboBoxes.indexOf(comboBox);
-
-                if (comboBoxIndex < 0) {
-                    System.err.println("ERROR:  In comboBoxChanged.  "+
-                        "comboBoxIndex = "+comboBoxIndex+
-                        ".  This should never happen.");
-                }
-                //System.out.println("comboBoxIndex = "+comboBoxIndex);
-
-                //if (attributes.size() > comboBoxIndex) {
-                if (rowData.getAttributeCount() > comboBoxIndex) {
-                    /**
-                     * The user is setting the value of an Attribute
-                     * that is already in this RowData's attributePath.
-                     */
-                    //attributes.set(comboBoxIndex, selectedAttribute);
-                    rowData.setAttribute(comboBoxIndex, selectedAttribute);
-                }
-                //else if (attributes.size() == comboBoxIndex) {
-                else if (rowData.getAttributeCount() == comboBoxIndex) {
-                    /**
-                     * This is the rightmost comboBox and this RowData
-                     * is having this entry in its attributePath set
-                     * to an "initial" value.  I.e. the comboBox used
-                     * to say "Select Attribute" before the user selected
-                     * a value for the first time.
-                     */
-                    rowData.addAttribute(selectedAttribute);
-                }
-                //else if (attributes.size() < comboBoxIndex) {
-                else if (rowData.getAttributeCount() < comboBoxIndex) {
-                    /**
-                     * This should never happen.
-                     */
-                    System.err.println("ERROR: Coding error.  "+
-                        "Too many comboBoxes "+
-                        "or too few Attributes in the class's attributePath.");
-                }
-                /*
-                System.out.println("After at rowData: "+rowData.getRowString());
-                */
-
-                /**
-                 * Remove Attributes that are "after" the one being changed.
-                 */
-                //attributes.subList(comboBoxIndex+1, attributes.size()).clear();
-                rowData.trimAttributePath(comboBoxIndex);
-
-                /**
-                 * If the user set the value of a primitive type,
-                 * that means we need to be sure the operator is
-                 * initialized to an appropriate value for that
-                 * type.  E.g. "==" for an int or string, "is true" for
-                 * a boolean.
-                 *
-                 * Also make sure the attributeValue contains a value of
-                 * the appropriate type.
-                 *
-                 * TODO:  Add methods to the RowData class that are
-                 * used to access the attributePath that automatically
-                 * handle this sort of business logic.
-                 */
-                Attribute childmostAttribute = rowData.getChildmostAttribute();
-                if (childmostAttribute.isPrimitive()) {
-
-                    String attributeOperator = rowData.getAttributeOperator();
-                    switch (childmostAttribute.getType()) {
-                        case BOOLEAN:
-                            if (!DataModel.isOperatorBoolean(
-                                attributeOperator)) {
-                                /**
-                                 * Operator is not currently a legal
-                                 * boolean operator, so set it to
-                                 * a boolean operator.
-                                 */
-                                attributeOperator =
-                                    DataModel.OPERATORS_BOOLEAN[0];
-                            }
-                        break;
-                        case UTF_8_STRING:
-                            if (!DataModel.isOperatorString(
-                                attributeOperator)) {
-                                /**
-                                 * Operator is not currently a legal
-                                 * string operator, so set it to
-                                 * a string operator.
-                                 */
-                                attributeOperator =
-                                    DataModel.OPERATORS_STRING[0];
-                            }
-                            //rowData.setAttributeValue(new String(""));
-                        break;
-                        case INT_16:
-                            if (!DataModel.isOperatorArithmatic(
-                                attributeOperator)) {
-                                /**
-                                 * Operator is not currently a legal
-                                 * numeric operator, so set it to
-                                 * a numeric operator.
-                                 */
-                                attributeOperator =
-                                    DataModel.OPERATORS_ARITHMATIC[0];
-                            }
-                            rowData.setAttributeValue(new Short((short)0));
-                        break;    
-                        case INT_32:
-                            if (!DataModel.isOperatorArithmatic(
-                                attributeOperator)) {
-                                attributeOperator =
-                                    DataModel.OPERATORS_ARITHMATIC[0];
-                            }
-                            rowData.setAttributeValue(new Integer(0));
-                        break;
-                        case FLOAT_64:
-                            if (!DataModel.isOperatorArithmatic(
-                                attributeOperator)) {
-                                attributeOperator =
-                                    DataModel.OPERATORS_ARITHMATIC[0];
-                            }
-                            rowData.setAttributeValue(new Long((long)0.0));
-                        break;
-                        case DATE_TIME:
-                            if (!DataModel.isOperatorArithmatic(
-                                attributeOperator)) {
-                                attributeOperator =
-                                    DataModel.OPERATORS_ARITHMATIC[0];
-                            }
-                            rowData.setAttributeValue(new Date());
-                        break;
-                        default:
-                            System.err.println("ERROR: Unhandled operator.");
-                            attributeOperator = "ERROR";
-                    }
-
-                    rowData.setAttributeOperator(attributeOperator);
-                }
             }
-            else if ((selectedObject instanceof String) &&
-                     rowData.getChildmostAttribute().isPrimitive()) {
+        }
+        else {
+            //System.out.println("selectedObject = "+selectedObject);
+        }
 
-                //System.out.println("User selected primitive operator "+
-                //                   selectedObject);
-                /**
-                 * The user has selected a value in primitive operator
-                 * comboBox.  E.g. ==, !=, >.
-                 */
-                rowData.setAttributeOperator((String)selectedObject);
-            }
-            else if (selectedObject instanceof CollectionOperator) {
-                /**
-                 * User is changing the value of the Collection Operator.
-                 * E.g. the user is changing the value of Count, Any, All,
-                 * None.
-                 */
-                CollectionOperator collectionOperator =
-                    (CollectionOperator)selectedObject;
-                //System.out.println("selected collectionOperator = "+
-                //    collectionOperator);
-                if (!rowData.getCollectionOperator().equals(
-                    collectionOperator)) {
-                    rowData.setCollectionOperator(collectionOperator);
-                    /**
-                     * Collection operator has been set to Count, so set
-                     * the attribute value to 0.
-                     * Move this code to RowData object because this
-                     * is business logic that the GUI should not know
-                     * about.
-                     */
-                    if (collectionOperator == CollectionOperator.COUNT) {
-                        rowData.setAttributeValue(new Integer(0));
-                    }
-                }
-            }
-            else {
-                //System.out.println("selectedObject = "+selectedObject);
-            }
+        /*
+        System.out.println("rowData's new value: "+
+                           rowData.getRowString(false, ""));
+        System.out.println("Debug Version: "+rowData.getRowString());
+        */
 
-            System.out.println("rowData's new value: "+
-                               rowData.getRowString(false, ""));
-            System.out.println("Debug Version: "+rowData.getRowString());
+        initializeComponents();
+    }
 
-            initializeComponents();
+
+    /**
+     * This method is called when the user selected an
+     * Attribute in a comboBox dropdown.
+     * Figure out which comboBox was changed and then
+     * set the corresponding Attribute in the row's
+     * attributePath.
+     *
+     * @param comboBox - The comboBox in which the Attribute was selected.
+     *
+     * @param comboBox - The selected Attribute.
+     */
+    private void handleAttributeSelected(JComboBox comboBox,
+                                         Attribute selectedAttribute) {
+
+        int comboBoxIndex = comboBoxes.indexOf(comboBox);
+        if (comboBoxIndex < 0) {
+            System.err.println("ERROR:  In comboBoxChanged.  "+
+                "comboBoxIndex = "+comboBoxIndex+
+                ".  This should never happen.");
         }
 
         /**
-         * Because we remove all widgets and then add them back in
-         * again every time we update the value of a row, we need
-         * to request the focus back again.
-         *
-         * We might want to change the code to be more "clever" and
-         * have it make the minimal set of changes to the widgets
-         * in a row, but that will require more code and have a
-         * greater chance of introducing bugs.
+         * Remove Attributes that are "after" the one being changed.
+         * This logic probably should somehow be in the RowData class
+         * and not in this RowPanel GUI code.
          */
-        comboBox.requestFocus();
+        rowData.trimAttributePath(comboBoxIndex);
 
-        System.out.println("\nrootRow:\n"+
-                           rowData.getRootRow().toString(false, ""));
-        System.out.println("\nrootRow:\n"+rowData.getRootRow());
+        rowData.setAttribute(comboBoxIndex, selectedAttribute);
+    }
+
+
+    /**
+     * This is called when the first/topmost row is being edited.
+     * So we need to adjust the value of the "root" row, (also known
+     * as the Class Under Qualification.)
+     *
+     * The first row has only two comboBoxes:
+     *
+     *      comboBox 0 - Used to select the Class Under Qualification.
+     *      comboBox 1 - Used to select the Collection Operator.
+     */
+    private void handleRootRowChange(JComboBox comboBox) {
+
+        if (comboBox == comboBoxes.get(0)) {
+            /**
+             * User is changing the value of the Class Under Qualification.
+             */
+            ClassDescription classDescription =
+                (ClassDescription)comboBox.getSelectedItem();
+            if (!rowData.getClassUnderQualification().equals(
+                classDescription)) {
+                /**
+                 * The user changed the Class Under Qualification,
+                 * so set the new value.
+                 */
+                rowData.setClassUnderQualification(classDescription);
+            }
+        }
+        else if (comboBox == comboBoxes.get(1)) {
+            /**
+             * User is changing the value of the Collection Operator.
+             */
+            CollectionOperator collectionOperator =
+                (CollectionOperator)comboBox.getSelectedItem();
+            if (!rowData.getCollectionOperator().equals(
+                collectionOperator)) {
+                rowData.setCollectionOperator(collectionOperator);
+            }
+        }
+
+        getExpressionPanel().createRowPanels();
     }
 
 
@@ -1080,16 +889,21 @@ class RowPanel
     }
 
 
+    /**
+     * Layout, and set the values of, the components in the first
+     * row.  I.e. the "root" row of the expression tree.
+     *
+     * The first/topmost row always has the
+     * Class Under Qualification comboBox and the
+     * Collection Operator comboBox, (and only those comboBoxes).
+     *
+     * The leftmost comboBox contains the list of possible choices
+     * for the Class Under Qualification.  The comboBox on the
+     * right contains the Any/All/None CollectionOperator.
+     */
     private void layoutRootRow() {
 
         GridBagConstraints gc;
-
-
-        /**
-         * The first/topmost row always has the
-         * Class Under Qualification comboBox and the
-         * Collection Operator comboBox, (and only those comboBoxes).
-         */
 
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
@@ -1109,15 +923,10 @@ class RowPanel
         add(ofTheFollowingLabel, gc);
 
         /**
-         * This is the first row, so it has two comboBoxes.
-         * The leftmost comboBox contains the list of possible choices
-         * for the Class Under Qualification.  The comboBox on the
-         * right contains the Any/All/None CollectionOperator.
-         *
-         * TODO:  Create the comboBox models only once and reuse them?
-         * Create a cache of them?
+         * Get the list of possible classes that can be used
+         * as a "Class Under Qualification" and put that list
+         * into the first comboBox.
          */
-        
         ClassDescription[] values =
             DataModel.getInstance().getPossibleCUQs().
             toArray(new ClassDescription[0]);
@@ -1133,16 +942,6 @@ class RowPanel
                          getCompoundCollectionOperators(),
                          rowData.getRootRow().getCollectionOperator());
     }
-
-
-    /*
-    private void removeComboBoxesAfterIndex(int index) {
-
-        for (index++; index < comboBoxes.length; index++) {
-            remove(comboBoxes[index]);
-        }
-    }
-    */
 
 
     /**
@@ -1204,8 +1003,6 @@ class RowPanel
          *
          *      epochGroup.source isNull
          */
-        //int comboBoxIndex = 0;
-        //for (Attribute attribute : attributes) {
         int index;
         for (index = 0; index < rowData.getAttributeCount(); index++) {
 
@@ -1258,8 +1055,10 @@ class RowPanel
             return;
         }
 
-        //System.out.println("rightmostAttribute = "+
-        //    rightmostAttribute.toStringDebug());
+/*
+This code is "mostly" data model code, so I moved it to the RowData
+class.  It could be argued the other way though.
+
         if (!rightmostAttribute.isPrimitive() &&
             !rightmostAttribute.isSpecial() &&
             (rightmostAttribute.getType() != Type.PER_USER_PARAMETERS_MAP) &&
@@ -1273,6 +1072,7 @@ class RowPanel
              * that class or choose a special item such as "is null",
              * "is not null", "Any Property", "My Property".
              */
+/*
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
@@ -1282,11 +1082,14 @@ class RowPanel
              * Set the comboBox model to hold attributes of
              * the class that is selected in the comboBox to our left.
              */
+/*
             setComboBoxModel(getComboBox(rowData.getAttributeCount()),
                              rightmostAttribute.getClassDescription(),
                              true, Attribute.SELECT_ATTRIBUTE);
         }
         else if (rightmostAttribute.isPrimitive()) {
+*/
+        if (rightmostAttribute.isPrimitive()) {
 
             //System.out.println("Rightmost attribute is a primitive type.");
             /**
@@ -1365,13 +1168,6 @@ class RowPanel
                         DataModel.OPERATORS_ARITHMATIC));
             }
 
-            /*
-            System.out.println("rightmostAttribute.getType() = "+
-                               rightmostAttribute.getType());
-            System.out.println("rowData.getAttributeValue() = "+
-                               rowData.getAttributeValue());
-            */
-
             /**
              * Set the selected value.
              */
@@ -1429,9 +1225,6 @@ class RowPanel
         else if ((rightmostAttribute.getType() ==
                   Type.PER_USER_PARAMETERS_MAP) ||
                  (rightmostAttribute.getType() == Type.PARAMETERS_MAP)) {
-
-            //System.out.println("Rightmost attribute is "+
-            //    "\"My/Any Property\" or PARAMETERS_MAP");
 
             /**
              * The rightmost attribute is either "My Property" or
@@ -1729,15 +1522,6 @@ class RowPanel
                         DataModel.OPERATORS_ARITHMATIC));
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
-                /*TODO: delete this
-                comboBoxes[widgetIndex].setModel(
-                    new DefaultComboBoxModel(
-                        DataModel.OPERATORS_ARITHMATIC));
-
-                comboBoxes[widgetIndex].setSelectedItem(
-                    rowData.getAttributeOperator());
-                widgetIndex++;
-                */
 
                 /**
                  * Set the value in the spinner.

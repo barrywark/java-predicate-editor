@@ -403,8 +403,6 @@ public class RowData
      */
     public void createCompoundRow() {
 
-        //System.out.println("createCompoundRow rowData: "+this.getRowString());
-
         RowData compoundRow = new RowData();
         compoundRow.setParentRow(this);
         compoundRow.setCollectionOperator(CollectionOperator.ANY);
@@ -416,8 +414,6 @@ public class RowData
      * Create a child row for this row that is of type Attribute Row.
      */
     public void createAttributeRow() {
-
-        //System.out.println("createAttributeRow rowData: "+this.getRowString());
 
         ClassDescription classDescription = null;
 
@@ -466,7 +462,7 @@ public class RowData
     /**
      * Returns true if this row is a Compound Row, (simple or not).
      * I.e. this means the row ends with a "compound" Collection Operator
-     * Any, All, or None.  A row that ends with Count is not a Compound Row.
+     * Any, All, or None.  A row that ends with Count is NOT a Compound Row.
      *
      * For example, a row like one of these:
      *
@@ -642,7 +638,6 @@ public class RowData
 
     public void setAttribute(int index, Attribute attribute) {
 
-        System.out.println("Enter setAttribute("+index+", "+attribute+")");
         /**
          * Make sure the attributePath is long enough.
          */
@@ -650,7 +645,188 @@ public class RowData
             addAttribute(null);
 
         getAttributePath().set(index, attribute);
+
+        if (index == (getAttributeCount()-1)) {
+            /**
+             * This is the rightmost attribute in the attributePath.
+             * Make sure the operator and other values are
+             * appropriate for whatever type of attribute this is.
+             */
+            setRowDataValuesAppropriately();
+        }
+
         fireRowDataEvent();
+    }
+
+
+    /**
+     * This method is called after a user has selected an Attribute
+     * in the rightmost attribute comboBox.
+     *
+     * Make sure the operator and other values are
+     * appropriate for whatever the currently selected
+     * childmost/rightmost attribute is.
+     */
+    private void setRowDataValuesAppropriately() {
+
+        Attribute childmostAttribute = getChildmostAttribute();
+
+        if ((childmostAttribute.getType() != Type.PER_USER_PARAMETERS_MAP) &&
+            (childmostAttribute.getType() != Type.PARAMETERS_MAP)) {
+            setPropType(null);
+            setPropName(null);
+        }
+
+        /**
+         * Set the collection operator (Count/Any/All/None) to
+         * be null if the selectedAttribute does not use
+         * a collection operator, or set it to Count if it does
+         * use a collection operator.
+         */
+        if ((childmostAttribute.getCardinality() != Cardinality.TO_MANY) ||
+            (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
+            setCollectionOperator(null);
+        }
+        else {
+            setCollectionOperator(CollectionOperator.COUNT);
+            setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+            setAttributeValue(new Integer(0));
+        }
+
+        /**
+         * If the user set the value of a primitive type,
+         * that means we need to be sure the operator is
+         * initialized to an appropriate value for that
+         * type.  E.g. "==" for an int or string, "is true" for
+         * a boolean.
+         *
+         * Also make sure the attributeValue contains a value of
+         * the appropriate type.
+         */
+        if (childmostAttribute.equals(Attribute.SELECT_ATTRIBUTE)) {
+            setCollectionOperator(null);
+            setAttributeOperator(null);
+            setAttributeValue(null);
+        }
+        else if (childmostAttribute.equals(Attribute.IS_NULL) ||
+                 childmostAttribute.equals(Attribute.IS_NOT_NULL)) {
+
+            /**
+             * The selectedAttribute is one of our special
+             * Attribute.IS_NULL or Attribute.IS_NOT_NULL values,
+             * so set the attribute operator to "is null" or "is not null".
+             */
+            setAttributeOperator(childmostAttribute.getDisplayName());
+        }
+        else if ((childmostAttribute.getType() ==
+                  Type.PER_USER_PARAMETERS_MAP) ||
+                 (childmostAttribute.getType() ==
+                  Type.PARAMETERS_MAP)) {
+
+            setPropType(Type.INT_32);
+            setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+            setPropName(null);
+            setAttributeValue(null);
+        }
+        else if (childmostAttribute.getType() == Type.BOOLEAN) {
+            setAttributeOperator(DataModel.OPERATOR_TRUE);
+        }
+        else if (childmostAttribute.isPrimitive()) {
+
+            /**
+             * The user set the value of a primitive type,
+             * so we need to be sure the operator is
+             * initialized to an appropriate value for that
+             * type.  E.g. "==" for an int or string, "is true" for
+             * a boolean.
+             *
+             * Also make sure the attributeValue contains a value of
+             * the appropriate type.
+             */
+
+            String attributeOperator = getAttributeOperator();
+            switch (childmostAttribute.getType()) {
+                case BOOLEAN:
+                    if (!DataModel.isOperatorBoolean(
+                        attributeOperator)) {
+                        /**
+                         * Operator is not currently a legal
+                         * boolean operator, so set it to
+                         * a boolean operator.
+                         */
+                        setAttributeOperator(DataModel.OPERATORS_BOOLEAN[0]);
+                    }
+                break;
+                case UTF_8_STRING:
+                    if (!DataModel.isOperatorString(
+                        attributeOperator)) {
+                        /**
+                         * Operator is not currently a legal
+                         * string operator, so set it to
+                         * a string operator.
+                         */
+                        setAttributeOperator(DataModel.OPERATORS_STRING[0]);
+                    }
+                    //setAttributeValue(new String(""));
+                break;
+                case INT_16:
+                    if (!DataModel.isOperatorArithmatic(
+                        attributeOperator)) {
+                        /**
+                         * Operator is not currently a legal
+                         * numeric operator, so set it to
+                         * a numeric operator.
+                         */
+                        setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                    }
+                    setAttributeValue(new Short((short)0));
+                break;    
+                case INT_32:
+                    if (!DataModel.isOperatorArithmatic(
+                        attributeOperator)) {
+                        setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                    }
+                    setAttributeValue(new Integer(0));
+                break;
+                case FLOAT_64:
+                    if (!DataModel.isOperatorArithmatic(
+                        attributeOperator)) {
+                        setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                    }
+                    setAttributeValue(new Long((long)0.0));
+                break;
+                case DATE_TIME:
+                    if (!DataModel.isOperatorArithmatic(
+                        attributeOperator)) {
+                        setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                    }
+                    setAttributeValue(new Date());
+                break;
+                default:
+                    System.err.println("ERROR: Unhandled operator.");
+                    setAttributeOperator("ERROR");
+            }
+        }
+
+        if (!childmostAttribute.isPrimitive() &&
+            !childmostAttribute.isSpecial() &&
+            (childmostAttribute.getType() != Type.PER_USER_PARAMETERS_MAP) &&
+            (childmostAttribute.getType() != Type.PARAMETERS_MAP) &&
+            (getCollectionOperator() == null)) {
+
+            /**
+             * The rightmost Attribute is a class, as opposed
+             * to a "primitive" type such as int, float, string,
+             * so the GUI will need to display another comboBox
+             * to its right that the user can use to choose an Attribute of
+             * that class or choose a special item such as "is null",
+             * "is not null", "Any Property", "My Property".
+             * We force the GUI to do this by adding the special
+             * Attribute.SELECT_ATTRIBUTE value to the end of
+             * our attributePath.
+             */
+            addAttribute(Attribute.SELECT_ATTRIBUTE);
+        }
     }
 
 
@@ -701,7 +877,7 @@ public class RowData
      */
     public void addAttribute(Attribute attribute) {
 
-        System.out.println("Enter addAttribute("+attribute+")");
+        //System.out.println("Enter addAttribute("+attribute+")");
 
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
@@ -786,9 +962,10 @@ public class RowData
         for (Attribute attribute : attributePath) {
 
             if (attribute != null) {
-                if (!attribute.equals(Attribute.SELECT_ATTRIBUTE) &&
-                    !attribute.equals(Attribute.IS_NULL) &&
-                    !attribute.equals(Attribute.IS_NOT_NULL)) {
+                if ((!attribute.equals(Attribute.SELECT_ATTRIBUTE) &&
+                     !attribute.equals(Attribute.IS_NULL) &&
+                     !attribute.equals(Attribute.IS_NOT_NULL)) ||
+                    (debugVersion == true)) {
                     /**
                      * Put a dot between each attribute on the path.
                      */
@@ -839,6 +1016,17 @@ public class RowData
             setAttributeValue(null);
         }
         else {
+            /**
+             * Strip off leading/trailing whitespace.
+             */
+            if (stringValue != null)
+                stringValue = stringValue.trim();
+
+            /**
+             * The call to convertStringToAttributeValue might try to
+             * convert the string to a number, (if the type is a number),
+             * so guard against exceptions during that procedure call.
+             */
             try {
                 value = convertStringToAttributeValue(stringValue, 
                                                       attribute.getType());
@@ -1060,19 +1248,12 @@ public class RowData
 
     /**
      * Get the String representation of JUST THIS row.  I.e. not this
-     * row and its children.
-     */
-    /*
-    public String getRowString(boolean debugVersion) {
-        return(getRowString(debugVersion, ""));
-    }
-    */
-
-
-    /**
-     * Get the String representation of JUST THIS row.  I.e. not this
      * row and its children.  The row will have the passed in indent
      * string prepended to it.
+     *
+     * @param debugVersion - If this is true, the string will give
+     * more information useful to a programmer but it will also be
+     * more cluttered.
      *
      * @param indent - The amount to indent this row.  E.g. "    "
      */
@@ -1440,15 +1621,34 @@ public class RowData
          * If we are a compound row, then we should have at least
          * one child row.
          */
-        if ((isCompoundRow()) && (getChildRows().size() < 1))
+        if ((isCompoundRow()) && (getChildRows().size() < 1)) {
+            System.out.println("Illegal: a compound row with no children.  "+
+                               "rowData: "+getRowString());
             return(false);
+        }
 
         /**
          * Make sure all of the attributes on our attributePath
          * are legal.
          */ 
-        if (attributePathIsLegal() == false)
+        if (attributePathIsLegal() == false) {
             return(false);
+        }
+
+        /**
+         * If the user needs to specify a "key" (property name)
+         * in this row, make sure the value is not null/blank.
+         */
+        Attribute attribute = getChildmostAttribute();
+        if ((attribute != null) &&
+            ((attribute.getType() == Type.PARAMETERS_MAP) ||
+             (attribute.getType() == Type.PER_USER_PARAMETERS_MAP))) {
+            if ((getPropName() == null) ||
+                (getPropName().toString().trim().isEmpty())) {
+                System.out.println("Illegal:  key is blank.");
+                return(false);
+            }
+        }
 
         /**
          * If we get here, this row is legal.  Now recursively
@@ -1473,8 +1673,12 @@ public class RowData
     private boolean attributePathIsLegal() {
 
         for (Attribute attribute : getAttributePath()) {
-            if (attribute.equals(Attribute.SELECT_ATTRIBUTE))
+            if (attribute.equals(Attribute.SELECT_ATTRIBUTE)) {
+                System.out.println("Illegal:  attributePath ends with "+
+                                   "\"Select Attribute\".  "+
+                                   "rowData: "+getRowString());
                 return(false);
+            }
         }
 
         return(true);
