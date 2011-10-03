@@ -166,12 +166,37 @@ class RowPanel
      */
     private ExpressionPanel expressionPanel;
 
-
+    /**
+     * This is the RowData object that this RowPanel is displaying/editing.
+     */
     private RowData rowData;
 
+    /**
+     * This flag is used to signal that I am programmatically making
+     * changes to things and I do NOT want the GUI to notify anyone
+     * or make change to the RowData object that this RowPanel is
+     * manipulating.  For example, if the user makes a selection in
+     * a comboBox that will require many changes to the associated
+     * RowData object and GUI, we don't want that to happen until we
+     * are done making all the necessary changes to the RowData object.
+     * Please note, I think the code should be restructured
+     * so this flag is not needed.
+     */
     private boolean inProcess = false;
 
+    /**
+     * This index incremented as the assorted layout code in this
+     * class lays out from left to right the components that this
+     * RowPanel contains.
+     */
     private int gridx;
+
+    /**
+     * This is set to true when we are doing our layout if there
+     * is a widget that will use up the empty space on the right
+     * side of a row.  If there isn't such a widget in the RowPanel,
+     * then the panel holding the buttons will do that.
+     */
     private boolean someWidgetFillingEmptySpace;
 
 
@@ -545,7 +570,7 @@ class RowPanel
         }
 
         /**
-         * All the monkey business with the list of Attributes is
+         * All the work with the list of Attributes is
          * finished, so create a DefaultComboBoxModel out of the list
          * Attributes and install it in the comboBox.
          */
@@ -639,6 +664,13 @@ class RowPanel
      */
     private void dateTimeChanged() {
 
+        /**
+         * If we are in the process of updating the RowData due
+         * to a programmatic change, ignore this.
+         */
+        if (inProcess)
+            return;
+
         Date date = dateTimePicker.getDate();
         rowData.setAttributeValue(date);
     }
@@ -657,8 +689,6 @@ class RowPanel
          */
         if (inProcess)
             return;
-
-        //System.out.println("Enter comboBoxChanged");
 
         /**
          * Change the appropriate value in this row's RowData
@@ -686,11 +716,7 @@ class RowPanel
      */
     private void handleChildRowChange(JComboBox comboBox) {
 
-        /**
-         * TODO:  Put this in its own method?
-         */
         if (comboBox == propTypeComboBox) {
-            //System.out.println("Property Type is being changed.");
             /**
              * User has changed the type of a "keyed" "properties"
              * attribute in a "My/Any Property" row.
@@ -701,20 +727,18 @@ class RowPanel
             /**
              * User has changed the operator for a "keyed" property.
              */
-            //System.out.println("Operator is being changed.");
             rowData.setAttributeOperator(
                 operatorComboBox.getSelectedItem().toString());
         }
         else {
-            //System.out.println("comboBox.getSelectedItem() = "+
-            //    comboBox.getSelectedItem());
+            /**
+             * One of the comboBoxes in our list of comboBoxes we
+             * use for attributes was changed.
+             */
         }
-
-        //ArrayList<Attribute> attributes = rowData.getAttributePath();
 
         Object selectedObject = comboBox.getSelectedItem();
         if (selectedObject instanceof Attribute) {
-
             /**
              * User selected an Attribute in a comboBox dropdown.
              * Set the values "to the right" of the comboBox to
@@ -724,9 +748,6 @@ class RowPanel
         }
         else if ((selectedObject instanceof String) &&
                  rowData.getChildmostAttribute().isPrimitive()) {
-
-            //System.out.println("User selected primitive operator "+
-            //                   selectedObject);
             /**
              * The user has selected a value in primitive operator
              * comboBox.  E.g. ==, !=, >.
@@ -741,8 +762,6 @@ class RowPanel
              */
             CollectionOperator collectionOperator =
                 (CollectionOperator)selectedObject;
-            //System.out.println("selected collectionOperator = "+
-            //    collectionOperator);
             if (!rowData.getCollectionOperator().equals(
                 collectionOperator)) {
                 rowData.setCollectionOperator(collectionOperator);
@@ -757,9 +776,6 @@ class RowPanel
                     rowData.setAttributeValue(new Integer(0));
                 }
             }
-        }
-        else {
-            //System.out.println("selectedObject = "+selectedObject);
         }
 
         /*
@@ -1055,40 +1071,6 @@ class RowPanel
             return;
         }
 
-/*
-This code is "mostly" data model code, so I moved it to the RowData
-class.  It could be argued the other way though.
-
-        if (!rightmostAttribute.isPrimitive() &&
-            !rightmostAttribute.isSpecial() &&
-            (rightmostAttribute.getType() != Type.PER_USER_PARAMETERS_MAP) &&
-            (rightmostAttribute.getType() != Type.PARAMETERS_MAP) &&
-            (rowData.getCollectionOperator() == null)) {
-            /**
-             * The rightmost Attribute is a class, as opposed
-             * to a "primitive" type such as int, float, string,
-             * so we need to display another comboBox to its right
-             * that the user can use to choose an Attribute of
-             * that class or choose a special item such as "is null",
-             * "is not null", "Any Property", "My Property".
-             */
-/*
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.insets = LEFT_INSETS;
-            add(getComboBox(index++), gc);
-
-            /**
-             * Set the comboBox model to hold attributes of
-             * the class that is selected in the comboBox to our left.
-             */
-/*
-            setComboBoxModel(getComboBox(rowData.getAttributeCount()),
-                             rightmostAttribute.getClassDescription(),
-                             true, Attribute.SELECT_ATTRIBUTE);
-        }
-        else if (rightmostAttribute.isPrimitive()) {
-*/
         if (rightmostAttribute.isPrimitive()) {
 
             //System.out.println("Rightmost attribute is a primitive type.");
@@ -1573,9 +1555,15 @@ class.  It could be argued the other way though.
     @Override
     public void stateChanged(ChangeEvent event) {
 
+        /**
+         * If we are in the process of updating the RowData due
+         * to a programmatic change, ignore this.
+         */
+        if (inProcess)
+            return;
+
         Object value = ((JSpinner)event.getSource()).getValue();
         rowData.setAttributeValue(value);
-        //rowData.setAttributeValueUsingString(value.toString());
     }
 
 
@@ -1584,6 +1572,13 @@ class.  It could be argued the other way though.
      * types into it.
      */
     private void textFieldChanged(Document document) {
+
+        /**
+         * If we are in the process of updating the RowData due
+         * to a programmatic change, ignore this.
+         */
+        if (inProcess)
+            return;
 
         if (document == valueTextField.getDocument())
             //rowData.setAttributeValue(valueTextField.getText());

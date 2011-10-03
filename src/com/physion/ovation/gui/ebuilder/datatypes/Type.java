@@ -2,6 +2,8 @@ package com.physion.ovation.gui.ebuilder.datatypes;
 
 
 /**
+ * These are the types an attribute can be.
+ *
  * Please note, "REFERENCE" is not a primitive type.  That value is
  * used to denote types that are a reference to a class of some sort.
  */
@@ -64,6 +66,10 @@ public enum Type {
     }
 
 
+    /**
+     * Get a string version of this type that can be used
+     * in the GUI.
+     */
     public String toString() {
 
         switch (this) {
@@ -91,19 +97,6 @@ public enum Type {
                 return("ERROR");
         }
     }
-
-
-    /*
-    public Type parse(String stringValue) {
-
-        if (Type.INT_32.toString().equals(stringType)) {
-            return(Type.INT_32);
-        }
-
-        System.err.println("ERROR: Unhandled stringValue = "+stringValue);
-        return(Type.INT_32);
-    }
-    */
 
 
     /**

@@ -11,7 +11,11 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 
 /**
  * This class manages all the data types/classes that are part
- * of the system.
+ * of the system.  It is a singleton.  (I.e. only one instance
+ * of this class should exist.)
+ *
+ * TODO:  Write an interface that this class implements in order
+ * to be able to replace this class more easily.
  *
  * TODO:  Have this class read values from a configuration file.
  */

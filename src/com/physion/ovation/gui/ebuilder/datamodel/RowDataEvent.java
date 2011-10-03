@@ -1,7 +1,5 @@
 package com.physion.ovation.gui.ebuilder.datamodel;
 
-//import com.physion.ovation.gui.ebuilder.datamodel.RowData;
-
 
 /**
  * This event is sent to RowDataListeners that are listening

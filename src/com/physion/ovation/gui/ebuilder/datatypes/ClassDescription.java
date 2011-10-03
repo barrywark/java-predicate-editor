@@ -3,14 +3,28 @@ package com.physion.ovation.gui.ebuilder.datatypes;
 import java.util.ArrayList;
 
 /**
- * TODO: Provide method to get an Attribute of a class via its name.
+ * This is the description of a class.  The DataModel object creates
+ * all of these for the system.
+ *
+ * TODO: Would it be useful to engineers to have a method to get an
+ * Attribute of a class via its name?
  */
 public class ClassDescription {
 
     /**
+     * The name of this class.  E.g. "Epoch", "Response".
      */
     private String name = "ERROR: name not set.";
+
+    /**
+     * The list of Attributes this class has.
+     */
     private ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+
+    /**
+     * The parent class of this class, if it has one.
+     * Please note that the EntityBase class does not have a parent class.
+     */
     private ClassDescription parentClass = null;
 
 
@@ -24,6 +38,9 @@ public class ClassDescription {
     }
 
 
+    /**
+     * Override the equals() method so we can do some extra checking.
+     */
     @Override
     public boolean equals(Object rhs) {
 
@@ -106,11 +123,20 @@ public class ClassDescription {
     }
 
 
+    /**
+     * Get a String version of this class useful for debugging.
+     */
     public String toStringDebug() {
         return(toStringDebug(""));
     }
 
 
+    /**
+     * Get a string version of this class useful for debugging and
+     * indent the string using the passed in indent string.
+     * We do this to show a nested hierarchy of a class and its
+     * child classes and their attributes.
+     */
     public String toStringDebug(String indent) {
 
         String string;

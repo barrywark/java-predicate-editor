@@ -1,5 +1,6 @@
 package com.physion.ovation.gui.ebuilder;
 
+import java.util.ArrayList;
 import java.awt.Frame;
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
@@ -52,15 +53,21 @@ public class ExpressionBuilder
     extends JDialog 
     implements ActionListener, RowDataListener {
 
+    private int MAX_NUM_STATES_SAVED = 50;
 
     public static final int RETURN_STATUS_OK = 0;
     public static final int RETURN_STATUS_CANCEL = 1;
 
-    private RowData rootRow = null;
     private int returnStatus = RETURN_STATUS_CANCEL;
-    private EBuilderPanel panel;
+    private ExpressionPanelScrolling expressionPanelScrolling;
     private JButton okButton;
+    private JButton prevButton;
+    private JButton nextButton;
     private JButton cancelButton;
+
+    private ArrayList<RowData> stateList = new ArrayList<RowData>();
+    private int currentStateIndex = -1;
+    //private int prevDescendentCount = -1;
 
 
     /**
@@ -90,10 +97,10 @@ public class ExpressionBuilder
          * Make a copy of the passed in expression tree so that
          * way the GUI will not affect it.
          */
-        rootRow = new RowData(originalRootRow);
+        RowData rootRow = new RowData(originalRootRow);
 
-        panel = new EBuilderPanel(rootRow);
-        getContentPane().add(panel);
+        expressionPanelScrolling = new ExpressionPanelScrolling(rootRow);
+        getContentPane().add(expressionPanelScrolling);
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
@@ -109,10 +116,26 @@ public class ExpressionBuilder
         gc.anchor = GridBagConstraints.CENTER;
         buttonPanel.add(okButton, gc);
 
+        prevButton = new JButton("Prev");
+        prevButton.addActionListener(this);
+        gc = new GridBagConstraints();
+        gc.gridx = 1;
+        gc.weightx = 1;
+        gc.anchor = GridBagConstraints.CENTER;
+        buttonPanel.add(prevButton, gc);
+
+        nextButton = new JButton("Next");
+        nextButton.addActionListener(this);
+        gc = new GridBagConstraints();
+        gc.gridx = 3;
+        gc.weightx = 1;
+        gc.anchor = GridBagConstraints.CENTER;
+        buttonPanel.add(nextButton, gc);
+
         cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(this);
         gc = new GridBagConstraints();
-        gc.gridx = 1;
+        gc.gridx = 4;
         gc.weightx = 1;
         gc.anchor = GridBagConstraints.CENTER;
         buttonPanel.add(cancelButton, gc);
@@ -133,6 +156,12 @@ public class ExpressionBuilder
             height += 200;
         setSize(width, height);
 
+        /*
+        stateList.add(rootRow);
+        currentStateIndex = 0;
+        prevDescendentCount = 0;
+        */
+        possiblySaveState();
 
         /**
          * Add ourselves as a listener to the RowData expression tree
@@ -145,6 +174,31 @@ public class ExpressionBuilder
          * Enable/disable the buttons for the first time.
          * Later, buttons will be enabled/disabled when the
          * user changes the expression tree.
+         */
+        enableButtons();
+    }
+
+
+    /**
+     * Change the expression tree we are displaying.
+     */
+    private void setRootRow(RowData rowData) {
+
+        /**
+         * Stop listening to the old tree if there was an old tree.
+         */
+        if (getRootRow() != null)
+            getRootRow().removeRowDataListener(this);
+
+        expressionPanelScrolling.setRootRow(rowData);
+
+        /**
+         * Start listening to the new tree.
+         */
+        getRootRow().addRowDataListener(this);
+
+        /**
+         * Enable/disable buttons as appropriate for the new tree.
          */
         enableButtons();
     }
@@ -174,7 +228,7 @@ public class ExpressionBuilder
      * returned ReturnValue object to get this information.
      */
     private RowData getRootRow() {
-        return(rootRow);
+        return(expressionPanelScrolling.getRootRow());
     }
 
 
@@ -185,14 +239,55 @@ public class ExpressionBuilder
 
         if (e.getSource() == cancelButton) {
             returnStatus = RETURN_STATUS_CANCEL;
-            rootRow = null;
             setVisible(false);
         }
         else if (e.getSource() == okButton) {
             returnStatus = RETURN_STATUS_OK;
-            panel.print();
+            expressionPanelScrolling.print();
             setVisible(false);
         }
+        else if (e.getSource() == prevButton) {
+            handlePrevButton();
+        }
+        else if (e.getSource() == nextButton) {
+            handleNextButton();
+        }
+    }
+
+
+    private void handlePrevButton() {
+
+        if (currentStateIndex < 1) {
+            System.err.println("ERROR: handlePrevButton() called when we "+
+                               "are already at the first state in the "+
+                               "stateList.  This is a programming error.");
+            return;
+        }
+
+        /**
+         * Go back to the previous version of the expression tree.
+         */
+        currentStateIndex--;
+        RowData rootRow = stateList.get(currentStateIndex);
+        setRootRow(rootRow);
+    }
+
+
+    private void handleNextButton() {
+
+        if (currentStateIndex >= stateList.size()) {
+            System.err.println("ERROR: handleNextButton() called when we "+
+                               "are already at the last state in the "+
+                               "stateList.  This is a programming error.");
+            return;
+        }
+
+        /**
+         * Go to the next version of the expression tree.
+         */
+        currentStateIndex++;
+        RowData rootRow = stateList.get(currentStateIndex);
+        setRootRow(rootRow);
     }
 
 
@@ -261,7 +356,11 @@ public class ExpressionBuilder
         dialog.setVisible(true);
 
         returnValue.status = dialog.getReturnStatus();
-        returnValue.rootRow = dialog.getRootRow();
+        if (returnValue.status == RETURN_STATUS_OK)
+            returnValue.rootRow = dialog.getRootRow();
+        else
+            returnValue.rootRow = null;
+
         return(returnValue);
     }
 
@@ -277,15 +376,88 @@ public class ExpressionBuilder
      */
     @Override
     public void rowDataChanged(RowDataEvent e) {
+
+        possiblySaveState();
+        currentStateIndex = stateList.size()-1;
         enableButtons();
     }
 
 
     /**
+     * This method will (possibly) save the state of the current
+     * expression tree.  Currently we are saving almost every
+     * change.  That is overkill, but was the most simple thing
+     * to implement.
+     *
+     * TODO: Only save the state if the user has changed the number
+     * of rows in the tree.  (We don't save the changes the user
+     * makes to the attributePath, for example.)
+     *
+     * Saving at this "granularity" should prevent the user from
+     * shooting his/herself in the foot and loosing many changes
+     * s/he has made to the expression tree if s/he accidentally
+     * changes a "top level" comboBox.
+     */
+    private void possiblySaveState() {
+
+        if (getRootRow() == null)
+            return;
+
+        /**
+         * If the user is in the process of clicking the Next and Prev
+         * buttons, don't save those states.
+         */
+        if (currentStateIndex != stateList.size()-1)
+            return;
+
+        /*
+        if (getRootRow().getDescendentCount() != prevDescendentCount) {
+            prevDescendentCount = getRootRow().getDescendentCount();
+            stateList.add(new RowData(getRootRow()));
+            currentStateIndex = stateList.size()-1;
+            enableButtons();
+        }
+        */
+        /**
+         * There has been a user initiated change, so
+         * save the state of the expression tree and
+         * possibly "roll off" the oldest state that
+         * we had saved.
+         */
+        stateList.add(new RowData(getRootRow()));
+        if (stateList.size() > MAX_NUM_STATES_SAVED) {
+            stateList.remove(0);
+        }
+
+        /**
+         * Set the currentStateIndex to be pointing to
+         * the current, (i.e. last), state.
+         */
+        currentStateIndex = stateList.size()-1;
+        enableButtons();
+    }
+
+
+    /**
+     * Enable/disable buttons.
+     *
      * Enable/disable the Ok button depending on whether
      * the expression tree is currently a legal value.
+     *
+     * Enable/disable the Prev and Next buttons depending
+     * on whether there are states previous to or after the
+     * currentStateIndex in the stateList.
+     * For example, if the stateList has two items in it,
+     * and the currentStateIndex is 1, then the Prev button
+     * is enabled because there is a previous state we can
+     * go to.  The Next button is not enabled because there
+     * is now state "after" the one currentStateIndex is
+     * currently pointing to.
      */
     private void enableButtons() {
+
+        //System.out.println("stateList.size() = "+stateList.size());
+        //System.out.println("currentStateIndex = "+currentStateIndex);
 
         if (getRootRow() == null) {
             okButton.setEnabled(false);
@@ -293,6 +465,16 @@ public class ExpressionBuilder
         }
 
         okButton.setEnabled(getRootRow().containsLegalValue());
+
+        if (currentStateIndex > 0)
+            prevButton.setEnabled(true);
+        else
+            prevButton.setEnabled(false);
+
+        if (currentStateIndex < (stateList.size()-1))
+            nextButton.setEnabled(true);
+        else
+            nextButton.setEnabled(false);
     }
 
 
@@ -306,6 +488,9 @@ public class ExpressionBuilder
      *
      * rootRow - Is set to the new expression tree that was created
      * and edited by the GUI.
+     *
+     * Please see ExpressionBuilder.main() for some examples of how
+     * this class is used.
      */
     public static class ReturnValue {
         public int status = RETURN_STATUS_CANCEL;

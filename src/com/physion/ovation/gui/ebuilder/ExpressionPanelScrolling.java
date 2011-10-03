@@ -5,28 +5,32 @@ import java.awt.GridBagConstraints;
 import java.awt.BorderLayout;
 import java.awt.Insets;
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-//import javax.swing.DefaultListModel;
 import java.util.Iterator;
 import java.util.Arrays;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 
-public class EBuilderPanel
+/**
+ * This panel contains a scrollPane that contains the
+ * ExpressionPanel.  It really doesn't do anything besides
+ * pass the set/getRootRow() calls on to the ExpressionPanel
+ * that is in our scrollPane.
+ */
+public class ExpressionPanelScrolling
     extends JPanel {
 
     private ExpressionPanel expressionPanel;
 
 
     /**
-     * Construct an EBuilderPanel that is intialized to
+     * Construct an ExpressionPanelScrolling that is intialized to
      * the passed in expression tree.  Please note, the
      * passed in rootRow will be modified by this
      * panel.
      */
-    EBuilderPanel(RowData rootRow) {
+    ExpressionPanelScrolling(RowData rootRow) {
 
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -49,6 +53,19 @@ public class EBuilderPanel
     }
 
 
+    public void setRootRow(RowData rowData) {
+        expressionPanel.setRootRow(rowData);
+    }
+
+
+    public RowData getRootRow() {
+        return(expressionPanel.getRootRow());
+    }
+
+
+    /**
+     * This is just for debugging.
+     */
     public void print() {
         expressionPanel.print();
     }

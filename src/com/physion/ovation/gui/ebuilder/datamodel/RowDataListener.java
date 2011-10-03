@@ -13,7 +13,8 @@ public interface RowDataListener
 
     /**
      * This method is called when the RowData expression
-     * tree changes.
+     * tree changes.  Look in the rowDataEvent to get which
+     * row was actually changed.
      */
     public void rowDataChanged(RowDataEvent rowDataEvent);
 }

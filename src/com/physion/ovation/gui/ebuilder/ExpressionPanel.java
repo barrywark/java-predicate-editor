@@ -7,20 +7,44 @@ import java.util.Arrays;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 
+
+/**
+ * This is the panel that contains a list of RowPanels.
+ * Each RowPanel handles one row in the expression tree.
+ * Each RowPanel displays/edits one RowData object.
+ *
+ * TODO: Remove the commented out "zebra striping" code if
+ * Physion decides it does not want to do something like that.
+ */
 public class ExpressionPanel
     extends JPanel {
 
     private RowData rootRow;
 
 
+    /**
+     * Create an ExpressionPanel that will display and edit the passed
+     * in expression tree.
+     */
     ExpressionPanel(RowData rootRow) {
 
+        super(new GridLayout(1,1));
+        setRootRow(rootRow);
+    }
+
+
+    /**
+     * Set the expression tree this ExpressionPanel will display.
+     */
+    public void setRootRow(RowData rootRow) {
+
         this.rootRow = rootRow;
-
-        GridLayout layout = new GridLayout(1,1);
-        setLayout(layout);
-
         createRowPanels();
+    }
+
+
+    public RowData getRootRow() {
+        return(rootRow);
     }
 
 
@@ -50,9 +74,9 @@ public class ExpressionPanel
          * Make the scrollpane layout things again.
          */
         if ((getParent() != null) && (getParent().getParent() != null))
-            getParent().getParent().validate();  // Temp hack
+            getParent().getParent().validate();
     }
-
+    
 
     /**
      * Get the RowPanel at the passed in index.
@@ -79,6 +103,9 @@ public class ExpressionPanel
     }
 
 
+    /**
+     * This is just for debugging purposes.
+     */
     public void print() {
         System.out.println("\nCurrent Value:\n"+rootRow.toString(false, ""));
         System.out.println("\nDebug Version:\n"+rootRow.toString());

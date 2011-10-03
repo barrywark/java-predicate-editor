@@ -2,15 +2,19 @@ package com.physion.ovation.gui.ebuilder.datatypes;
 
 
 /**
- * 
+ * This class describes an attribute of a class.
+ *
+ * TODO: I'm not happy with the fact that the Attribute class
+ * is used to hold "special" values that aren't really attributes,
+ * such as SELECT_ATTRIBUTE, IS_NULL.
+ * But, I don't see a cleaner way that doesn't create more code.
  */
 public class Attribute {
 
     /**
-     * TODO: I'm not happy with the fact that the Attribute class
-     * is uased to hold "special" values that aren't really attributes,
-     * such as SELECT_ATTRIBUTE, IS_NULL.
-     * But, I don't see a cleaner way that doesn't create more code.
+     * These are special values that appear in comboBoxes that
+     * display a list of attributes.  They are not really attributes
+     * though.  See notes at the start of this class.
      */
     public static final Attribute SELECT_ATTRIBUTE =
         new Attribute("Select Attribute", Type.REFERENCE);
@@ -363,6 +367,10 @@ public class Attribute {
     }
 
 
+    /**
+     * Get a String version of this Attribute that is useful for
+     * debugging.
+     */
     public String toStringDebug() {
 
         String string;
@@ -389,10 +397,11 @@ public class Attribute {
     /**
      * This is a simple test program for this class.
      */
+    /*
     public static void main(String[] args) {
 
         System.out.println("Attribute test is starting...");
-
         System.out.println("Attribute test is ending.");
     }
+    */
 }
