@@ -5,6 +5,7 @@ import java.awt.Frame;
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.SwingUtilities;
@@ -53,6 +54,7 @@ public class ExpressionBuilder
     extends JDialog 
     implements ActionListener, RowDataListener {
 
+    private int INSET = 6;
     private int MAX_NUM_STATES_SAVED = 50;
 
     public static final int RETURN_STATUS_OK = 0;
@@ -102,43 +104,48 @@ public class ExpressionBuilder
         expressionPanelScrolling = new ExpressionPanelScrolling(rootRow);
         getContentPane().add(expressionPanelScrolling);
 
+        /**
+         * Layout the buttons at the bottom of the panel
+         * with Prev and Next grouped on the left and
+         * Ok Cancel grouped on the right.
+         *
+         *  Prev Next           Ok Cancel
+         */
         JPanel buttonPanel = new JPanel(new GridBagLayout());
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0,0,7,0));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(
+            0, INSET, INSET, INSET));
 
         GridBagConstraints gc;
-
-        okButton = new JButton("Ok");
-        okButton.addActionListener(this);
+        
+        JPanel leftButtonPanel = new JPanel(new GridLayout(1, 2, INSET*2, 0));
         gc = new GridBagConstraints();
         gc.gridx = 0;
         gc.weightx = 1;
-        gc.anchor = GridBagConstraints.CENTER;
-        buttonPanel.add(okButton, gc);
+        gc.anchor = GridBagConstraints.WEST;
+        buttonPanel.add(leftButtonPanel, gc);
+
+        JPanel rightButtonPanel = new JPanel(new GridLayout(1, 2, INSET*2, 0));
+        gc.gridx = 1;
+        gc.weightx = 1;
+        gc.anchor = GridBagConstraints.EAST;
+        buttonPanel.add(rightButtonPanel, gc);
 
         prevButton = new JButton("Prev");
         prevButton.addActionListener(this);
-        gc = new GridBagConstraints();
-        gc.gridx = 1;
-        gc.weightx = 1;
-        gc.anchor = GridBagConstraints.CENTER;
-        buttonPanel.add(prevButton, gc);
+        leftButtonPanel.add(prevButton);
 
         nextButton = new JButton("Next");
         nextButton.addActionListener(this);
-        gc = new GridBagConstraints();
-        gc.gridx = 3;
-        gc.weightx = 1;
-        gc.anchor = GridBagConstraints.CENTER;
-        buttonPanel.add(nextButton, gc);
+        leftButtonPanel.add(nextButton);
+
+        okButton = new JButton("Ok");
+        okButton.addActionListener(this);
+        rightButtonPanel.add(okButton, gc);
 
         cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(this);
-        gc = new GridBagConstraints();
-        gc.gridx = 4;
-        gc.weightx = 1;
-        gc.anchor = GridBagConstraints.CENTER;
-        buttonPanel.add(cancelButton, gc);
+        rightButtonPanel.add(cancelButton);
 
         /**
          * Set the size of the window.
@@ -156,11 +163,9 @@ public class ExpressionBuilder
             height += 200;
         setSize(width, height);
 
-        /*
-        stateList.add(rootRow);
-        currentStateIndex = 0;
-        prevDescendentCount = 0;
-        */
+        /**
+         * Save the current state of the tree.
+         */
         possiblySaveState();
 
         /**
@@ -501,6 +506,10 @@ public class ExpressionBuilder
     /**
      * A simple example test program to test this class and show
      * how the editExpression() methods are used.
+     *
+     * This example first displays a GUI that is empty.  After
+     * the user Oks or Cancels out of that GUI, we display a
+     * GUI filled with an existing expression tree.
      */
     public static void main(String[] args) {
 
@@ -508,7 +517,8 @@ public class ExpressionBuilder
 
 
         /**
-         * Create a new expression from scratch.
+         * Display a GUI that is empty.  I.e. the user must
+         * create a new expression from scratch.
          */
         returnValue = ExpressionBuilder.editExpression();
         if (returnValue.status == ExpressionBuilder.RETURN_STATUS_OK) {
@@ -521,9 +531,8 @@ public class ExpressionBuilder
 
         /**
          * After the user Oks or Cancels out of the window
-         * created above, create another window. 
-         *
-         * This time though, create an expression tree filled with
+         * created above, create another window.  This time
+         * though, create an expression tree filled with
          * some values and have the window initialized to that
          * tree's value.
          */
