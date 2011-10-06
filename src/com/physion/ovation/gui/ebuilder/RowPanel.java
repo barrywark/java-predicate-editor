@@ -1094,6 +1094,8 @@ class RowPanel
 
             if ((rightmostAttribute.getType() == Type.DATE_TIME) &&
                 (!DataModel.OPERATOR_IS_NULL.equals(
+                 rowData.getAttributeOperator())) &&
+                (!DataModel.OPERATOR_IS_NOT_NULL.equals(
                  rowData.getAttributeOperator()))) {
                 /**
                  * We only display the dateTimePicker if the
@@ -1189,8 +1191,10 @@ class RowPanel
 
                 getComboBox(widgetIndex).setSelectedItem(
                     rowData.getAttributeOperator());
-                if (!DataModel.OPERATOR_IS_NULL.equals(
-                    rowData.getAttributeOperator())) {
+                if ((!DataModel.OPERATOR_IS_NULL.equals(
+                     rowData.getAttributeOperator())) &&
+                    (!DataModel.OPERATOR_IS_NOT_NULL.equals(
+                     rowData.getAttributeOperator()))) {
                     dateTimePicker.setDate((Date)rowData.getAttributeValue());
                 }
             }
@@ -1315,10 +1319,14 @@ class RowPanel
                 
                 /** 
                  * Add the dateTimePicker where the user can enter the
-                 * the value of the "keyed" property. 
+                 * the value of the "keyed" property.   But, only if
+                 * the operator is not "is null" or "is not null".
                  */
-                if (!DataModel.OPERATOR_IS_NULL.equals(
-                    rowData.getAttributeOperator())) {
+                if ((!DataModel.OPERATOR_IS_NULL.equals(
+                     rowData.getAttributeOperator())) &&
+                    (!DataModel.OPERATOR_IS_NOT_NULL.equals(
+                     rowData.getAttributeOperator()))) {
+
                     gc = new GridBagConstraints();
                     gc.gridx = gridx++;
                     gc.fill = GridBagConstraints.BOTH;
@@ -1374,8 +1382,11 @@ class RowPanel
                     valueTextField.setText("");
             }
             else if (rowData.getPropType() == Type.DATE_TIME) {
-                if (!DataModel.OPERATOR_IS_NULL.equals(
-                    rowData.getAttributeOperator())) {
+                if ((!DataModel.OPERATOR_IS_NULL.equals(
+                     rowData.getAttributeOperator())) &&
+                    (!DataModel.OPERATOR_IS_NOT_NULL.equals(
+                    rowData.getAttributeOperator()))) {
+
                     if (rowData.getAttributeValue() instanceof Date) {
                         dateTimePicker.setDate(
                             (Date)rowData.getAttributeValue());

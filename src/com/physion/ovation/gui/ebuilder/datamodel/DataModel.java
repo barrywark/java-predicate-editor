@@ -50,7 +50,7 @@ public class DataModel {
      */
     public static final String[] OPERATORS_DATE_TIME =
         {"==", "!=", "<", "<=", ">", ">=",
-        OPERATOR_IS_NULL};
+        OPERATOR_IS_NULL, OPERATOR_IS_NOT_NULL};
 
     /**
      * Possible types for a "properties" keyed value.
