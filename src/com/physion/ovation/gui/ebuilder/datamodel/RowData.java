@@ -1460,9 +1460,58 @@ public class RowData
 
 
     /**
-     * This method returns true if the current value of this RowData
-     * expression tree is valid.  I.e. this RowData object and all
-     * its children are valid.
+     * This method returns a list of RowData objects that contain
+     * illegal values.  It checks this RowData object and all its
+     * descedents.  This means that the list of illegal RowData
+     * objects could contain this RowData object and all its
+     * descendents.
+     *
+     * This public getIllegalRows() method is simply a wrapper
+     * to create the initial empty ArrayList and then call
+     * the private getIllegalRows() method that will add values
+     * to the list.  The other getIllegalRows() method does the
+     * real work.
+     *
+     * This method never returns null, but will return an
+     * empty list if there are no illegal rows.
+     */
+    public ArrayList<RowData> getIllegalRows() {
+
+        ArrayList<RowData> illegalRows = new ArrayList<RowData>();
+        getIllegalRows(illegalRows);
+        return(illegalRows);
+    }
+
+
+    /**
+     * This method adds this RowData object to the pass in list
+     * of illegalRows if this RowData object is illegal.
+     * Then this method calls itself recursively to possibly
+     * have its descendents add themselves to the list.
+     *
+     * Please see the containsLegalValue() method for information
+     * about what constitutes an illegal RowData.
+     */
+    private void getIllegalRows(ArrayList<RowData> illegalRows) {
+
+        /**
+         * First check that the values in this row are valid.
+         */
+        if (containsLegalValue() == false)
+            illegalRows.add(this);
+
+        /**
+         * Now recursively check all of our descendent rows.
+         */
+        for (RowData childRow : getChildRows())
+            childRow.getIllegalRows(illegalRows);
+    }
+
+
+    /**
+     * This method returns true if the current value of this
+     * RowData object is legal.  It does NOT check the values
+     * of its child RowData objects.
      *
      * A few notes on what is valid and not valid:
      *
@@ -1491,11 +1540,11 @@ public class RowData
      */
     public boolean containsLegalValue() {
 
-        if (getRootRow() == null)
-            return(true);
-
         /**
-         * First check that the values in this row are valid.
+         * If the user is supposed to have entered a number
+         * as the attributeValue, (e.g. the text field in
+         * the GUI contains "22.3", "2E3"), test whether
+         * attributeValue is "Not A Number".
          */
 
         if ((attributeValue instanceof Double) &&
@@ -1544,10 +1593,12 @@ public class RowData
          * check all of our descendent rows.
          * If any are illegal, immediately return false.
          */
+        /*
         for (RowData childRow : getChildRows()) {
             if (childRow.containsLegalValue() == false)
                 return(false);
         }
+        */
 
         return(true);
     }

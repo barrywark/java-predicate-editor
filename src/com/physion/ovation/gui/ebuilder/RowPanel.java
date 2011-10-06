@@ -35,6 +35,8 @@ import com.lavantech.gui.comp.DateTimePicker;
 import com.lavantech.gui.comp.TimePanel;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
+import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
+import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datamodel.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
@@ -53,7 +55,8 @@ import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
  */
 class RowPanel
     extends JPanel
-    implements ActionListener, DocumentListener, ChangeListener {
+    implements ActionListener, DocumentListener, ChangeListener,
+        RowDataListener {
 
     /**
      * A comboBox dropdown list will dispaly at least this many
@@ -76,6 +79,25 @@ class RowPanel
      */
     private static final int INSET = 7;
     private static final Insets LEFT_INSETS = new Insets(0,INSET,0,0);
+
+    /**
+     * We set the background color of a RowPanel to this color.
+     * When it contains an illegal value, we make the panel "opaque"
+     * so the background color is shown.  If the row is legal, we
+     * set opaque to false, so it is not drawn.
+     *
+     * Please note, I've just hardcoded a subtle color.
+     * (The user will have to look at this often, so we don't
+     * want a fire engine red.)
+     * If you want to choose a different color, use one of
+     * the many online color choosers such as:  www.colorpicker.com
+     * We could get more clever and dynamically create the
+     * color based on the default background color.
+     */
+    private static final Color ILLEGAL_BACKGROUND_COLOR = 
+        new Color(224, 206, 224);  // light purple
+        //new Color(204, 143, 204);  // med purple
+        //new Color(186, 222, 222);  // light blue
 
     private InvisibleButton deleteRowButton;
     private InvisibleButton createCompoundRowButton;
@@ -209,7 +231,16 @@ class RowPanel
 
         this.rowData = rowData;
 
+        rowData.addRowDataListener(this);
+
         setBorder(BorderFactory.createEmptyBorder(4,10,4,10));
+
+        /**
+         * We will make this panel opaque, (showing this
+         * background color), if this row contains an
+         * illegal value.
+         */
+        setBackground(ILLEGAL_BACKGROUND_COLOR);
 
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -469,7 +500,12 @@ class RowPanel
          */
         layoutButtons();
 
-        repaint();  // Might actually have to call validate() here.
+        /**
+         * Set the color of the row based on whether it
+         * currently contains legal values.
+         * Note that this also makes a call to repaint().
+         */
+        adjustBackgroundColor();
     }
 
 
@@ -603,6 +639,41 @@ class RowPanel
                 System.out.println("  "+item);
             }
         }
+    }
+
+
+    /**
+     * This method is called when the RowData we are displaying
+     * changes.  Make the row a different color when it contains
+     * an illegal value.
+     */
+    @Override
+    public void rowDataChanged(RowDataEvent event) {
+        adjustBackgroundColor();
+    }
+
+
+    /**
+     * Make the row a different color when it contains
+     * an illegal value.
+     */
+    private void adjustBackgroundColor() {
+
+        if (rowData.containsLegalValue()) {
+            /**
+             * Row is legal.  Don't draw background color.
+             */
+            setOpaque(false);
+        }
+        else {
+            /**
+             * Row is not legal.  Draw the background color, which
+             * is a color different from the default JPanel background
+             * color.
+             */
+            setOpaque(true);
+        }
+        repaint();
     }
 
 

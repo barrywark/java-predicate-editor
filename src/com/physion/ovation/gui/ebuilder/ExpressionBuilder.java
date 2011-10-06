@@ -461,15 +461,22 @@ public class ExpressionBuilder
      */
     private void enableButtons() {
 
-        //System.out.println("stateList.size() = "+stateList.size());
-        //System.out.println("currentStateIndex = "+currentStateIndex);
+        /*
+        System.out.println("stateList.size() = "+stateList.size());
+        System.out.println("currentStateIndex = "+currentStateIndex);
+        System.out.println("getRootRow().getIllegalRows().size() = "+
+            getRootRow().getIllegalRows().size());
+        */
 
         if (getRootRow() == null) {
             okButton.setEnabled(false);
             return;
         }
 
-        okButton.setEnabled(getRootRow().containsLegalValue());
+        /**
+         * If any rows are illegal, disable the Ok button.
+         */
+        okButton.setEnabled(getRootRow().getIllegalRows().size() == 0);
 
         if (currentStateIndex > 0)
             prevButton.setEnabled(true);

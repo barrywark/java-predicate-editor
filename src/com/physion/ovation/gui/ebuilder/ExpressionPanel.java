@@ -89,26 +89,10 @@ public class ExpressionPanel
 
 
     /**
-     * This method simply returns the value of the root row's
-     * containsLegalValue() method if there is a root RowData object.
-     * If there is no root RowData object, i.e. we are empty, this
-     * method returns true.
-     */
-    public boolean containsLegalValue() {
-
-        if (rootRow == null)
-            return(true);
-
-        return(rootRow.containsLegalValue());
-    }
-
-
-    /**
      * This is just for debugging purposes.
      */
     public void print() {
         System.out.println("\nCurrent Value:\n"+rootRow.toString(false, ""));
         System.out.println("\nDebug Version:\n"+rootRow.toString());
-        System.out.println("containsLegalValue() = "+containsLegalValue());
     }
 }
