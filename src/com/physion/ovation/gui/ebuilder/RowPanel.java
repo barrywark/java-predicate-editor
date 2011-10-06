@@ -45,7 +45,7 @@ import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 
 /**
  * This class creates all the widgets that are used to display and
- * end a row.
+ * edit one row.
  *
  * We create all the widgets we will need in our constructor, and
  * thereafter we simply add or remove them from the JPanel based on
@@ -77,7 +77,7 @@ class RowPanel
     private static final int INSET = 7;
     private static final Insets LEFT_INSETS = new Insets(0,INSET,0,0);
 
-    private InvisibleButton deleteButton;
+    private InvisibleButton deleteRowButton;
     private InvisibleButton createCompoundRowButton;
     private InvisibleButton createAttributeRowButton;
 
@@ -226,8 +226,8 @@ class RowPanel
          */
         indentWidget = new JLabel();
 
-        deleteButton = new InvisibleButton("-");
-        deleteButton.addActionListener(this);
+        deleteRowButton = new InvisibleButton("-");
+        deleteRowButton.addActionListener(this);
 
         createAttributeRowButton = new InvisibleButton("+");
         createAttributeRowButton.addActionListener(this);
@@ -316,7 +316,7 @@ class RowPanel
         gc.gridx = 2;
         gc.fill = GridBagConstraints.VERTICAL;
         gc.insets = LEFT_INSETS;
-        buttonPanel.add(deleteButton, gc);
+        buttonPanel.add(deleteRowButton, gc);
 
         initializeComponents();
     }
@@ -625,7 +625,7 @@ class RowPanel
             rowData.createAttributeRow();
             getExpressionPanel().createRowPanels();
         }
-        else if (e.getSource() == deleteButton) {
+        else if (e.getSource() == deleteRowButton) {
             rowData.removeFromParent();
             getExpressionPanel().createRowPanels();
         }
@@ -870,10 +870,10 @@ class RowPanel
          * All other rows can always be deleted.
          */
         if (rowData.isRootRow()) {
-            deleteButton.setDraw(false);
+            deleteRowButton.setDraw(false);
         }
         else {
-            deleteButton.setDraw(true);
+            deleteRowButton.setDraw(true);
         }
 
         /**
@@ -1088,10 +1088,17 @@ class RowPanel
 
             /**
              * Now add the widget the user can use to edit the
-             * value.  E.g. a text field or a time/date picker.
+             * value.  E.g. a text field, integer spinner, or
+             * a time/date picker.
              */
 
-            if (rightmostAttribute.getType() == Type.DATE_TIME) {
+            if ((rightmostAttribute.getType() == Type.DATE_TIME) &&
+                (!DataModel.OPERATOR_IS_NULL.equals(
+                 rowData.getAttributeOperator()))) {
+                /**
+                 * We only display the dateTimePicker if the
+                 * operator is not "is null".
+                 */
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
                 gc.fill = GridBagConstraints.BOTH;
@@ -1114,10 +1121,11 @@ class RowPanel
                 gc.insets = LEFT_INSETS;
                 add(valueSpinnerInt32, gc);
             }
-            else if (rightmostAttribute.getType() != Type.BOOLEAN) {
+            else if ((rightmostAttribute.getType() == Type.UTF_8_STRING) ||
+                     (rightmostAttribute.getType() == Type.FLOAT_64)) {
                 /**
                  * Place a text field into which the user can enter an
-                 * attribute value of some sort.
+                 * attribute value using a string.
                  */
                 //System.out.println("Adding text field at gridx "+gridx);
                 gc = new GridBagConstraints();
@@ -1127,6 +1135,13 @@ class RowPanel
                 gc.fill = GridBagConstraints.BOTH;
                 gc.insets = LEFT_INSETS;
                 add(valueTextField, gc);
+            }
+            else if (rightmostAttribute.getType() == Type.BOOLEAN) {
+                /**
+                 * There is no "value" field to add because the
+                 * operator comboBox values of "is true" and "is false"
+                 * specify all that needs to be specified.
+                 */
             }
 
             /**
@@ -1144,6 +1159,11 @@ class RowPanel
                     new DefaultComboBoxModel(
                         DataModel.OPERATORS_STRING));
             }
+            else if (rightmostAttribute.getType() == Type.DATE_TIME) {
+                getComboBox(widgetIndex).setModel(
+                    new DefaultComboBoxModel(
+                        DataModel.OPERATORS_DATE_TIME));
+            }
             else {
                 getComboBox(widgetIndex).setModel(
                     new DefaultComboBoxModel(
@@ -1153,6 +1173,7 @@ class RowPanel
             /**
              * Set the selected value.
              */
+
             if (rightmostAttribute.getType() == Type.BOOLEAN) {
                 if (DataModel.OPERATOR_TRUE.equals(
                     rowData.getAttributeOperator())) {
@@ -1168,18 +1189,19 @@ class RowPanel
 
                 getComboBox(widgetIndex).setSelectedItem(
                     rowData.getAttributeOperator());
-                Date attributeValue = (Date)rowData.getAttributeValue();
-                if (attributeValue == null)
-                    attributeValue = new Date();
-                dateTimePicker.setDate(attributeValue);
+                if (!DataModel.OPERATOR_IS_NULL.equals(
+                    rowData.getAttributeOperator())) {
+                    dateTimePicker.setDate((Date)rowData.getAttributeValue());
+                }
             }
             else if (rightmostAttribute.getType() == Type.INT_16) {
                 getComboBox(widgetIndex).setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
                 if ((attributeValue == null) ||
-                    attributeValue.toString().isEmpty())
+                    attributeValue.toString().isEmpty()) {
                     attributeValue = new Short((short)0);
+                }
                 else
                     attributeValue = new Short(attributeValue.toString());
                 valueSpinnerInt16.setValue(attributeValue);
@@ -1272,8 +1294,7 @@ class RowPanel
              * selected value in the propTypeComboBox.
              */
             if ((rowData.getPropType() == Type.INT_32) ||
-                (rowData.getPropType() == Type.FLOAT_64) ||
-                (rowData.getPropType() == Type.DATE_TIME)) {
+                (rowData.getPropType() == Type.FLOAT_64)) {
                 operatorComboBox.setModel(new DefaultComboBoxModel(
                     DataModel.OPERATORS_ARITHMATIC));
             }
@@ -1285,6 +1306,10 @@ class RowPanel
                 operatorComboBox.setModel(new DefaultComboBoxModel(
                     DataModel.OPERATORS_BOOLEAN));
             }
+            else if (rowData.getPropType() == Type.DATE_TIME) {
+                operatorComboBox.setModel(new DefaultComboBoxModel(
+                    DataModel.OPERATORS_DATE_TIME));
+            }
 
             if (rowData.getPropType() == Type.DATE_TIME) {
                 
@@ -1292,11 +1317,14 @@ class RowPanel
                  * Add the dateTimePicker where the user can enter the
                  * the value of the "keyed" property. 
                  */
-                gc = new GridBagConstraints();
-                gc.gridx = gridx++;
-                gc.fill = GridBagConstraints.BOTH;
-                gc.insets = LEFT_INSETS;
-                add(dateTimePicker, gc);
+                if (!DataModel.OPERATOR_IS_NULL.equals(
+                    rowData.getAttributeOperator())) {
+                    gc = new GridBagConstraints();
+                    gc.gridx = gridx++;
+                    gc.fill = GridBagConstraints.BOTH;
+                    gc.insets = LEFT_INSETS;
+                    add(dateTimePicker, gc);
+                }
             }
             else if (rowData.getPropType() == Type.INT_32) {
                 gc = new GridBagConstraints();
@@ -1346,10 +1374,17 @@ class RowPanel
                     valueTextField.setText("");
             }
             else if (rowData.getPropType() == Type.DATE_TIME) {
-                Date attributeValue = (Date)rowData.getAttributeValue();
-                if (attributeValue == null)
-                    attributeValue = new Date();
-                dateTimePicker.setDate(attributeValue);
+                if (!DataModel.OPERATOR_IS_NULL.equals(
+                    rowData.getAttributeOperator())) {
+                    if (rowData.getAttributeValue() instanceof Date) {
+                        dateTimePicker.setDate(
+                            (Date)rowData.getAttributeValue());
+                    }
+                    else {
+                        System.err.println("attributeValue not an instance "+
+                            "of a Date.  This should never happen.");
+                    }
+                }
             }
             else if (rowData.getPropType() == Type.BOOLEAN) {
                 /**

@@ -13,31 +13,44 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
  * This class manages all the data types/classes that are part
  * of the system.  It is a singleton.  (I.e. only one instance
  * of this class should exist.)
- *
- * TODO:  Write an interface that this class implements in order
- * to be able to replace this class more easily.
- *
- * TODO:  Have this class read values from a configuration file.
  */
 public class DataModel {
 
-    /**
-     * Please note, we are using Attribute.IS_NULL and
-     * IS_NOT_NULL for the OPERATOR_IS_NULL
-     * and OPERATOR_IS_NOT_NULL operators.
-     */
     public static final String OPERATOR_TRUE = "is true";
     public static final String OPERATOR_FALSE = "is false";
-    public static final String[] OPERATORS_BOOLEAN = {OPERATOR_TRUE,
-                                                       OPERATOR_FALSE};
-    public static final String[] OPERATORS_ARITHMATIC = {"==", "!=", "<", "<=",
-        ">", ">="};
-    public static final String[] OPERATORS_STRING = {"==", "!=", "<", "<=",
-        ">", ">=", "~=", "~~="};
+
+    /**
+     * Please note, we are using the String version of
+     * Attribute.IS_NULL and IS_NOT_NULL for the
+     * OPERATOR_IS_NULL and OPERATOR_IS_NOT_NULL operators.
+     */
     public static final String OPERATOR_IS_NULL =
         Attribute.IS_NULL.getDisplayName();
+
     public static final String OPERATOR_IS_NOT_NULL =
         Attribute.IS_NOT_NULL.getDisplayName();
+
+    public static final String[] OPERATORS_BOOLEAN =
+        {OPERATOR_TRUE, OPERATOR_FALSE};
+
+    public static final String[] OPERATORS_ARITHMATIC =
+        {"==", "!=", "<", "<=", ">", ">="};
+
+    /**
+     * The string operators are the arithmetic operators
+     * plus some extra operators.
+     */
+    public static final String[] OPERATORS_STRING =
+        {"==", "!=", "<", "<=", ">", ">=",
+        "~=", "~~="};
+
+    /**
+     * The time operators are the arithmetic operators
+     * plus the "is null" operator.
+     */
+    public static final String[] OPERATORS_DATE_TIME =
+        {"==", "!=", "<", "<=", ">", ">=",
+        OPERATOR_IS_NULL};
 
     /**
      * Possible types for a "properties" keyed value.
@@ -67,6 +80,9 @@ public class DataModel {
     private static ArrayList<ClassDescription> possibleCUQs;
 
 
+    /**
+     * Get the one and only instance of the DataModel object.
+     */
     public static DataModel getInstance() {
 
         if (instance == null) {
@@ -76,6 +92,10 @@ public class DataModel {
     }
 
 
+    /**
+     * Create the one and only DataModel object.
+     * We are a singleton, so this constructor is private.
+     */
     private DataModel() {
 
         allClassDescriptions = new ArrayList<ClassDescription>();
@@ -85,6 +105,10 @@ public class DataModel {
     }
 
 
+    /**
+     * Returns true if the passed in operator is a legal boolean
+     * operator.  E.g. it is "true" or "false".
+     */
     public static boolean isOperatorBoolean(String operator) {
 
         ArrayList<String> operators = new ArrayList<String>(
@@ -93,6 +117,10 @@ public class DataModel {
     }
 
 
+    /**
+     * Returns true if the passed in operator is a legal arithmatic
+     * operator.  E.g. it is "==", "!=", ">=", etc.
+     */
     public static boolean isOperatorArithmatic(String operator) {
 
         ArrayList<String> operators = new ArrayList<String>(
@@ -101,6 +129,22 @@ public class DataModel {
     }
 
 
+    /**
+     * Returns true if the passed in operator is a legal date/time
+     * operator.  E.g. it is "==", "!=", "is null", etc.
+     */
+    public static boolean isOperatorDateTime(String operator) {
+
+        ArrayList<String> operators = new ArrayList<String>(
+            Arrays.asList(OPERATORS_DATE_TIME));
+        return(operators.contains(operator));
+    }
+
+
+    /**
+     * Returns true if the passed in operator is a legal string
+     * operator.  E.g. it is "==", "!=", ">=", "~~==", etc.
+     */
     public static boolean isOperatorString(String operator) {
 
         ArrayList<String> operators = new ArrayList<String>(

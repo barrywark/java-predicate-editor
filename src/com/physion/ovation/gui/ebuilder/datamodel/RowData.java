@@ -647,7 +647,6 @@ public class RowData
      */
     public void setAttributeOperator(String attributeOperator) {
 
-        //System.out.println("Setting attributeOperator to "+attributeOperator);
         makingChanges++;
         this.attributeOperator = attributeOperator;
 
@@ -661,13 +660,28 @@ public class RowData
          * "is null" or "is not null" operator using an Attribute comboBox,
          * but we save the operator in the RowData's attributeOperator member
          * data.  That is the way the user sees it in the GUI though.
-         * I need to disentangle the data model from the GUI's view.
+         * It would be better to detangle the data model from the GUI's view.
          */
         if (DataModel.OPERATOR_TRUE.equals(attributeOperator) ||
             DataModel.OPERATOR_FALSE.equals(attributeOperator) ||
             DataModel.OPERATOR_IS_NULL.equals(attributeOperator) ||
             DataModel.OPERATOR_IS_NOT_NULL.equals(attributeOperator)) {
             setAttributeValue(null);
+        }
+
+        /**
+         * If we are a time value, and the operator is being set
+         * to something other than "is null" or "is not null",
+         * make sure the attributeValue is a Date.
+         */
+        if ((getChildmostAttribute() != null) &&
+            (Type.DATE_TIME.equals(getChildmostAttribute().getType()) ||
+             Type.DATE_TIME.equals(getPropType())) &&
+            (!DataModel.OPERATOR_IS_NULL.equals(attributeOperator)) &&
+            (!DataModel.OPERATOR_IS_NOT_NULL.equals(attributeOperator)) &&
+            ((getAttributeValue() == null) ||
+             !(getAttributeValue() instanceof Date))) {
+            setAttributeValue(new Date());
         }
 
         makingChanges--;
@@ -718,6 +732,11 @@ public class RowData
         makingChanges++;
         Attribute childmostAttribute = getChildmostAttribute();
 
+        /**
+         * If the row is not a per-user parameters map or a parameters map,
+         * the propType and propName values have no meaning for this row.
+         * So, set them to null.
+         */
         if ((childmostAttribute.getType() != Type.PER_USER_PARAMETERS_MAP) &&
             (childmostAttribute.getType() != Type.PARAMETERS_MAP)) {
             setPropType(null);
@@ -761,7 +780,8 @@ public class RowData
             /**
              * The selectedAttribute is one of our special
              * Attribute.IS_NULL or Attribute.IS_NOT_NULL values,
-             * so set the attribute operator to "is null" or "is not null".
+             * so set the attributeOperator to "is null" or
+             * "is not null".
              */
             setAttributeOperator(childmostAttribute.getDisplayName());
         }
@@ -775,9 +795,6 @@ public class RowData
             setPropName(null);
             setAttributeValue(null);
         }
-        else if (childmostAttribute.getType() == Type.BOOLEAN) {
-            setAttributeOperator(DataModel.OPERATOR_TRUE);
-        }
         else if (childmostAttribute.isPrimitive()) {
 
             /**
@@ -790,69 +807,7 @@ public class RowData
              * Also make sure the attributeValue contains a value of
              * the appropriate type.
              */
-
-            String attributeOperator = getAttributeOperator();
-            switch (childmostAttribute.getType()) {
-                case BOOLEAN:
-                    if (!DataModel.isOperatorBoolean(
-                        attributeOperator)) {
-                        /**
-                         * Operator is not currently a legal
-                         * boolean operator, so set it to
-                         * a boolean operator.
-                         */
-                        setAttributeOperator(DataModel.OPERATORS_BOOLEAN[0]);
-                    }
-                break;
-                case UTF_8_STRING:
-                    if (!DataModel.isOperatorString(
-                        attributeOperator)) {
-                        /**
-                         * Operator is not currently a legal
-                         * string operator, so set it to
-                         * a string operator.
-                         */
-                        setAttributeOperator(DataModel.OPERATORS_STRING[0]);
-                    }
-                    //setAttributeValue(new String(""));
-                break;
-                case INT_16:
-                    if (!DataModel.isOperatorArithmatic(
-                        attributeOperator)) {
-                        /**
-                         * Operator is not currently a legal
-                         * numeric operator, so set it to
-                         * a numeric operator.
-                         */
-                        setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
-                    }
-                    setAttributeValue(new Short((short)0));
-                break;    
-                case INT_32:
-                    if (!DataModel.isOperatorArithmatic(
-                        attributeOperator)) {
-                        setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
-                    }
-                    setAttributeValue(new Integer(0));
-                break;
-                case FLOAT_64:
-                    if (!DataModel.isOperatorArithmatic(
-                        attributeOperator)) {
-                        setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
-                    }
-                    setAttributeValue(new Long((long)0.0));
-                break;
-                case DATE_TIME:
-                    if (!DataModel.isOperatorArithmatic(
-                        attributeOperator)) {
-                        setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
-                    }
-                    setAttributeValue(new Date());
-                break;
-                default:
-                    System.err.println("ERROR: Unhandled operator.");
-                    setAttributeOperator("ERROR");
-            }
+            possiblyAdjustOperatorAndValue(childmostAttribute.getType());
         }
 
         if (!childmostAttribute.isPrimitive() &&
@@ -1165,6 +1120,9 @@ public class RowData
 
     public void setPropName(String propName) {
 
+        if (this.propName == propName)
+            return;
+
         makingChanges++;
         this.propName = propName;
         makingChanges--;
@@ -1179,20 +1137,12 @@ public class RowData
 
     public void setPropType(Type propType) {
 
+        if (this.propType == propType)
+            return;
+
         makingChanges++;
         this.propType = propType;
-        if (propType == Type.BOOLEAN) {
-            setAttributeOperator(DataModel.OPERATOR_TRUE);
-            setAttributeValue(null);
-        }
-        else if (propType == Type.DATE_TIME) {
-            setAttributeOperator("==");
-            setAttributeValue(null);
-        }
-        else {
-            setAttributeOperator("==");
-            setAttributeValue("");
-        }
+        possiblyAdjustOperatorAndValue(propType);
         makingChanges--;
         fireRowDataEvent();
     }
@@ -1200,6 +1150,88 @@ public class RowData
 
     public Type getPropType() {
         return(propType);
+    }
+
+
+    /**
+     * This method will possibly adjust the attributeOperator 
+     * and/or attributeValue of this row if the current
+     * attributeOperator is not a legal operator for the
+     * passed in type, or the attributeValue is not legal for
+     * the passed in type.
+     *
+     * This method is called, for example, when the user changes
+     * the property type of a "keyed" property from string to int.
+     * If the current operator is "==", then we can leave it alone
+     * because the "==" operator is legal for an int also.
+     * But, if the current operator is "~~=", we cannot leave that
+     * operator value in place because it is not legal for an int.
+     */
+    private void possiblyAdjustOperatorAndValue(Type type) {
+
+        String attributeOperator = getAttributeOperator();
+        switch (type) {
+            case BOOLEAN:
+                if (!DataModel.isOperatorBoolean(attributeOperator)) {
+                    /**
+                     * Operator is not currently a legal
+                     * boolean operator, so set it to
+                     * a boolean operator.
+                     */
+                    setAttributeOperator(DataModel.OPERATORS_BOOLEAN[0]);
+                }
+                setAttributeValue(null);
+            break;
+            case UTF_8_STRING:
+                if (!DataModel.isOperatorString(attributeOperator)) {
+                    /**
+                     * Operator is not currently a legal
+                     * string operator, so set it to
+                     * a string operator.
+                     */
+                    setAttributeOperator(DataModel.OPERATORS_STRING[0]);
+                }
+                if (!(getAttributeValue() instanceof String))
+                    setAttributeValue(new String(""));
+            break;
+            case INT_16:
+                if (!DataModel.isOperatorArithmatic(attributeOperator)) {
+                    /**
+                     * Operator is not currently a legal
+                     * numeric operator, so set it to
+                     * a numeric operator.
+                     */
+                    setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                }
+                if (!(getAttributeValue() instanceof Short))
+                    setAttributeValue(new Short((short)0));
+            break;    
+            case INT_32:
+                if (!DataModel.isOperatorArithmatic(attributeOperator)) {
+                    setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                }
+                if (!(getAttributeValue() instanceof Integer))
+                    setAttributeValue(new Integer(0));
+            break;
+            case FLOAT_64:
+                if (!DataModel.isOperatorArithmatic(attributeOperator)) {
+                    setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                }
+                if (!(getAttributeValue() instanceof Double))
+                    setAttributeValue(new Double((double)0.0));
+            break;
+            case DATE_TIME:
+                if (!DataModel.isOperatorDateTime(attributeOperator)) {
+                    setAttributeOperator(DataModel.OPERATORS_DATE_TIME[0]);
+                }
+                if (!(getAttributeValue() instanceof Date))
+                    setAttributeValue(new Date());
+            break;
+            default:
+                System.err.println("ERROR:  Unhandled type.\n"+
+                    "In RowData.possiblyAdjustOperatorAndValue().\n"+
+                    "type = "+type);
+        }
     }
 
 
