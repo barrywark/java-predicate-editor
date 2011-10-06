@@ -1043,7 +1043,18 @@ public class RowData
                 setAttributeValue(value);
             }
             catch (NumberFormatException e) {
-                System.out.println("Field does not contain a legal number.");
+                //System.out.println("Field does not contain a legal number.");
+                /**
+                 * The user entered a string which cannot be
+                 * converted into a number, so set the attributeValue
+                 * to Double.NaN (Not A Number).
+                 * This allows our containsLegalValue() method to
+                 * see that we do not currently contain a legal value.
+                 */
+                if ((attribute.getType() == Type.FLOAT_64) ||
+                    (propType == Type.FLOAT_64)) {
+                    setAttributeValue(Double.NaN);
+                }
             }
             catch (Exception e) {
                 System.out.println("Field does not contain a legal value.");
@@ -1472,9 +1483,11 @@ public class RowData
      *      If a row has a "keyed" property field, the name of the key
      *      cannot be blank.
      *
-     * TODO: Do we want to change what is considerd valid?
-     * We probably want to make this code more clever at catching
-     * settings that don't make sense.
+     *      If a row's attributeValue is supposed to be a floating
+     *      point number, but the value is currently Double.NaN,
+     *      then we are not valid.  (The GUI sets attributeValue to
+     *      Double.Nan when the user enters an illegal string into
+     *      the value text field.)
      */
     public boolean containsLegalValue() {
 
@@ -1484,6 +1497,14 @@ public class RowData
         /**
          * First check that the values in this row are valid.
          */
+
+        if ((attributeValue instanceof Double) &&
+            ((Double)attributeValue).isNaN())
+            return(false);
+
+        if ((attributeValue instanceof Float) &&
+            ((Float)attributeValue).isNaN())
+            return(false);
 
         /**
          * If we are a compound row, then we should have at least
