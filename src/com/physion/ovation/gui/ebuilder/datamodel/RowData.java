@@ -790,6 +790,18 @@ public class RowData
      * Make sure the operator and other values are
      * appropriate for whatever the currently selected
      * childmost/rightmost attribute is.
+     *
+     * TODO: This code could be more clever and try to use
+     * whatever the current attributeValue is even if the
+     * type changes.  For example, if the user changes the
+     * type from int to string, we could set the attributeValue
+     * to the string version of the int.  If the user changes
+     * the type from string to int, we could try to convert
+     * whatever the string is into an int using Integer.parseInt().
+     * If parseInt() throws an exception, we simply set the
+     * attributeValue to 0 like we already do.
+     * This sort of behavior might save a user a little bit
+     * of effort and make the GUI a little more friendly.
      */
     private void setRowDataValuesAppropriately() {
 

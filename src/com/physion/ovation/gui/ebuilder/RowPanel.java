@@ -155,9 +155,10 @@ class RowPanel
     private JComboBox propTypeComboBox;
 
     /**
-     * This comboBox allows the user to select the operator that
-     * will be used for a row that contains a "keyed" "properties"
-     * definition.
+     * This comboBox will be used for an Attribute Row that
+     * ends in a "primitive" value, and also for a row that
+     * contains a "keyed" "properties" definition.
+     * It will contain values like:  ==, !=, >, is null.
      */
     private JComboBox operatorComboBox;
 
@@ -1075,6 +1076,23 @@ class RowPanel
      * an Attribute Operator (==, !=, <, >, ...) comboBox,
      * or any number of other widgets.  It also contains
      * the +, ++, - buttons.
+     *
+     * A row like one of these, for example:
+     *
+     *      protocolID == "Test 27"
+     *      My Property.animalName string == "Spot"
+     *      epochGroup.source.My Property.animalID string == X123
+     *      protocolParameters.stimulusFrequency int == 5
+     *
+     * TODO: Perhaps we want to break this long method up into
+     * multiple methods where each method handles one "type" of
+     * attribute row?  I.e. make each if/else block that is
+     * part of the if-statement that begins with:
+     *
+     *   if (rightmostAttribute.isPrimitive()) {
+     *
+     * into a separate method.  It won't reduce the amount
+     * of code, but might make it a bit easier to understand.
      */
     private void layoutAttributeRow() {
 
@@ -1150,15 +1168,22 @@ class RowPanel
             //System.out.println("Rightmost attribute is a primitive type.");
             /**
              * The rightmost Attribute is a primitive Attribute
-             * such as an int, float, string, date/time, so now place the
-             * comboBox that will hold operators such
+             * such as an int, float, string, date/time, so now
+             * place the comboBox that will hold operators such
              * as ==, !=, >, is true.
              */
             //System.out.println("Adding operator comboBox at gridx "+gridx);
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(getComboBox(index++), gc);
+            add(operatorComboBox, gc);
+
+            /**
+             * Set the comboBox model to hold operators appropriate
+             * for the Type (int, string, float, boolean) of the
+             * Attribute.
+             */
+            setOperatorComboBoxModel(rightmostAttribute.getType());
 
             /**
              * Now add the widget the user can use to edit the
@@ -1221,49 +1246,24 @@ class RowPanel
             }
 
             /**
-             * Set the comboBox model to hold operators appropriate
-             * for the Type (int, string, float, boolean) of the
-             * Attribute.
-             */
-            int widgetIndex = rowData.getAttributeCount();
-            if (rightmostAttribute.getType() == Type.BOOLEAN) {
-                getComboBox(widgetIndex).setModel(
-                    new DefaultComboBoxModel(DataModel.OPERATORS_BOOLEAN));
-            }
-            else if (rightmostAttribute.getType() == Type.UTF_8_STRING) {
-                getComboBox(widgetIndex).setModel(
-                    new DefaultComboBoxModel(
-                        DataModel.OPERATORS_STRING));
-            }
-            else if (rightmostAttribute.getType() == Type.DATE_TIME) {
-                getComboBox(widgetIndex).setModel(
-                    new DefaultComboBoxModel(
-                        DataModel.OPERATORS_DATE_TIME));
-            }
-            else {
-                getComboBox(widgetIndex).setModel(
-                    new DefaultComboBoxModel(
-                        DataModel.OPERATORS_ARITHMATIC));
-            }
-
-            /**
-             * Set the selected value.
+             * Set the selected operator and (probably) the
+             * attribute value also.
              */
 
             if (rightmostAttribute.getType() == Type.BOOLEAN) {
                 if (DataModel.OPERATOR_TRUE.equals(
                     rowData.getAttributeOperator())) {
-                    getComboBox(widgetIndex).setSelectedItem(
+                    operatorComboBox.setSelectedItem(
                         DataModel.OPERATOR_TRUE);
                 }
                 else {
-                    getComboBox(widgetIndex).setSelectedItem(
+                    operatorComboBox.setSelectedItem(
                         DataModel.OPERATOR_FALSE);
                 }
             }
             else if (rightmostAttribute.getType() == Type.DATE_TIME) {
 
-                getComboBox(widgetIndex).setSelectedItem(
+                operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
                 if ((!DataModel.OPERATOR_IS_NULL.equals(
                      rowData.getAttributeOperator())) &&
@@ -1273,7 +1273,7 @@ class RowPanel
                 }
             }
             else if (rightmostAttribute.getType() == Type.INT_16) {
-                getComboBox(widgetIndex).setSelectedItem(
+                operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
                 if ((attributeValue == null) ||
@@ -1285,7 +1285,7 @@ class RowPanel
                 valueSpinnerInt16.setValue(attributeValue);
             }
             else if (rightmostAttribute.getType() == Type.INT_32) {
-                getComboBox(widgetIndex).setSelectedItem(
+                operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
                 if ((attributeValue == null) ||
@@ -1296,7 +1296,7 @@ class RowPanel
                 valueSpinnerInt16.setValue(attributeValue);
             }
             else {
-                getComboBox(widgetIndex).setSelectedItem(
+                operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
                 if (attributeValue == null)
@@ -1371,23 +1371,7 @@ class RowPanel
              * Set the model of the operatorComboBox depending on the
              * selected value in the propTypeComboBox.
              */
-            if ((rowData.getPropType() == Type.INT_32) ||
-                (rowData.getPropType() == Type.FLOAT_64)) {
-                operatorComboBox.setModel(new DefaultComboBoxModel(
-                    DataModel.OPERATORS_ARITHMATIC));
-            }
-            else if (rowData.getPropType() == Type.UTF_8_STRING) {
-                operatorComboBox.setModel(new DefaultComboBoxModel(
-                    DataModel.OPERATORS_STRING));
-            }
-            else if (rowData.getPropType() == Type.BOOLEAN) {
-                operatorComboBox.setModel(new DefaultComboBoxModel(
-                    DataModel.OPERATORS_BOOLEAN));
-            }
-            else if (rowData.getPropType() == Type.DATE_TIME) {
-                operatorComboBox.setModel(new DefaultComboBoxModel(
-                    DataModel.OPERATORS_DATE_TIME));
-            }
+            setOperatorComboBoxModel(rowData.getPropType());
 
             if (rowData.getPropType() == Type.DATE_TIME) {
                 
@@ -1436,15 +1420,7 @@ class RowPanel
             operatorComboBox.setSelectedItem(
                 rowData.getAttributeOperator());
             if (rowData.getPropType() == Type.INT_32) {
-
-                int value = 0;
-                try {
-                    value = Integer.parseInt(rowData.getAttributeValue().
-                        toString());
-                }
-                catch(Exception e) {
-                }
-                valueSpinnerInt32.setValue(value);
+                valueSpinnerInt32.setValue(0);
             }
             else if ((rowData.getPropType() == Type.FLOAT_64) ||
                      (rowData.getPropType() == Type.UTF_8_STRING)) {
@@ -1636,6 +1612,39 @@ class RowPanel
                 }
                 countSpinnerInt32.setValue(intValue);
             }
+        }
+    }
+
+
+    /**
+     * Set the operatorComboBox's model based on the passed
+     * in type.  For example, if the type is Type.BOOLEAN,
+     * then the operators are: "is true", "is false".
+     * If the type is Type.UTF_8_STRING, then the operators
+     * are: ==, !=, >, <, ~~=, etc.
+     */
+    private void setOperatorComboBoxModel(Type type) {
+
+        switch(type) {
+
+            case BOOLEAN:
+                operatorComboBox.setModel(
+                    new DefaultComboBoxModel(DataModel.OPERATORS_BOOLEAN));
+            break;
+
+            case UTF_8_STRING:
+            operatorComboBox.setModel(new DefaultComboBoxModel(
+                DataModel.OPERATORS_STRING));
+            break;
+
+            case DATE_TIME:
+                operatorComboBox.setModel(new DefaultComboBoxModel(
+                    DataModel.OPERATORS_DATE_TIME));
+            break;
+
+            default:  // INT_16, INT_32, FLOAT_64
+                operatorComboBox.setModel(new DefaultComboBoxModel(
+                    DataModel.OPERATORS_ARITHMATIC));
         }
     }
 
