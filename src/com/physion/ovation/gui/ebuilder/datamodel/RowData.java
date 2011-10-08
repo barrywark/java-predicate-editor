@@ -155,8 +155,8 @@ public class RowData
     private EventListenerList rowDataListenerList;
 
     /**
-     * This flag is used to avoid sending multiple change
-     * events due to one method calling making multiple
+     * This counter is used to avoid sending multiple change
+     * events due to one method call making or causing multiple
      * changes to this RowData.  If it is non-zero, then
      * we are in the process of making changes to the RowData
      * and should NOT fire events.
@@ -197,10 +197,10 @@ public class RowData
     public RowData(RowData other) {
 
         init();
-        makingChanges++;
+        //makingChanges++;
 
         if (other == null) {
-            makingChanges--;
+            //makingChanges--;
             return;
         }
 
@@ -219,7 +219,7 @@ public class RowData
         for (RowData childRow : other.getChildRows()) {
             this.addChildRow(new RowData(childRow));
         }
-        makingChanges--;
+        //makingChanges--;
     }
 
 
@@ -347,28 +347,64 @@ public class RowData
      */
     private void fireRowDataEvent(int timing, int changeType) {
 
-        /**
-         * If we are in the process of making changes, don't
-         * send an event.  After we are done making changes,
-         * the code that set the makingChanges flag to true
-         * will set it to false and call us explicitly.
-         */
-        if (makingChanges > 0)
-            return;
+        if (timing == RowDataEvent.TIMING_AFTER)
+            makingChanges--;
 
-        /**
-         * Create a RowDataEvent that will tell the listener
-         * about this event.  Currently, there is only one
-         * type of event and all we give the listener is
-         * a reference to this RowData object.
-         */
-        RowDataEvent rowDataEvent = new RowDataEvent(this, timing, changeType);
-
-        RowDataListener listenerList[] =
-            rowDataListenerList.getListeners(RowDataListener.class);
-        for (RowDataListener listener : listenerList) {
-            listener.rowDataChanged(rowDataEvent);
+        if (makingChanges < 0) {
+            /**
+             * This might happen if someone changes the code
+             * and doesn't have properly matched TIMING_BEFORE
+             * and TIMING_AFTER calls to fireRowDataEvent.
+             */
+            System.err.println("ERROR:  makingChanges < 0\n"+
+                "If this happens, there is a bug in the code.\n"+
+                "Setting makingChanges to 0 as a temporay fix.");
+            makingChanges = 0;
         }
+
+        /**
+         * If we are in the process of making changes, 
+         * which is shown by, (makingChanges > 0), don't
+         * send an event.  After we are done making changes,
+         * and the assorted "nested" calls to fireRowDataEvent()
+         * have decremented makingChanges back to 0,
+         * will set it to false and call us explicitly.
+         *
+         * Please note, makingChanges should never be negative,
+         * but it doesn't hurt to check for "<= 0" instead of
+         * just checking for "== 0".
+         */
+        if (makingChanges <= 0) {
+
+            /**
+             * Create a RowDataEvent that will tell the listener
+             * about this event.
+             */
+            RowDataEvent rowDataEvent = new RowDataEvent(this, timing,
+                                                         changeType);
+
+            RowDataListener listenerList[] =
+                rowDataListenerList.getListeners(RowDataListener.class);
+            for (RowDataListener listener : listenerList) {
+
+                /**
+                 * Call the listener, but do it in a try/catch block
+                 * just in case the listener throws an exception.
+                 * We don't want to let our makingChanges counter
+                 * get out of whack.
+                 */
+                try {
+                    listener.rowDataChanged(rowDataEvent);
+                }
+                catch (Exception e) {
+                    System.err.println("RowDataListener threw an exception:");
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if (timing == RowDataEvent.TIMING_BEFORE)
+            makingChanges++;
     }
 
 
@@ -400,10 +436,10 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_CHILD_DELETE);
-        makingChanges++;
+        //makingChanges++;
         childRows.remove(childRow);
         childRow.removeRowDataListener(this);
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_CHILD_DELETE);
     }
@@ -431,9 +467,9 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_CHILD_DELETE);
-        makingChanges++;
+        //makingChanges++;
         getParentRow().removeChildRow(this);
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_CHILD_DELETE);
     }
@@ -446,12 +482,12 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_CHILD_ADD);
-        makingChanges++;
+        //makingChanges++;
         RowData compoundRow = new RowData();
         compoundRow.setParentRow(this);
         compoundRow.setCollectionOperator(CollectionOperator.ANY);
         addChildRow(compoundRow);
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_CHILD_ADD);
     }
@@ -517,11 +553,11 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_CHILD_ADD);
-        makingChanges++;
+        //makingChanges++;
         RowData attributeRow = new RowData();
         attributeRow.addAttribute(Attribute.SELECT_ATTRIBUTE);
         addChildRow(attributeRow);
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_CHILD_ADD);
     }
@@ -585,14 +621,14 @@ public class RowData
         }
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE, RowDataEvent.TYPE_CUQ);
-        makingChanges++;
+        //makingChanges++;
         getRootRow().classUnderQualification = classUnderQualification;
 
         if (!getRootRow().getChildRows().isEmpty()) {
             System.out.println("INFO:  Clearing all childRows.");
             getRootRow().getChildRows().clear();
         }
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER, RowDataEvent.TYPE_CUQ);
     }
 
@@ -625,9 +661,9 @@ public class RowData
             return;
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE, RowDataEvent.TYPE_PARENT);
-        makingChanges++;
+        //makingChanges++;
         this.parentRow = parentRow;
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER, RowDataEvent.TYPE_PARENT);
     }
 
@@ -641,7 +677,7 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_COLLECTION_OPERATOR);
-        makingChanges++;
+        //makingChanges++;
         this.collectionOperator = collectionOperator;
 
         /**
@@ -661,7 +697,7 @@ public class RowData
             setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
             setAttributeValue("");
         }
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_COLLECTION_OPERATOR);
     }
@@ -685,7 +721,7 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE_OPERATOR);
-        makingChanges++;
+        //makingChanges++;
         this.attributeOperator = attributeOperator;
 
         /**
@@ -722,7 +758,7 @@ public class RowData
             setAttributeValue(new Date());
         }
 
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_ATTRIBUTE_OPERATOR);
     }
@@ -737,7 +773,7 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE);
-        makingChanges++;
+        //makingChanges++;
         /**
          * Make sure the attributePath is long enough.
          */
@@ -755,7 +791,7 @@ public class RowData
             setRowDataValuesAppropriately();
         }
 
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_ATTRIBUTE);
     }
@@ -773,7 +809,7 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_UNDEFINED);
-        makingChanges++;
+        //makingChanges++;
         Attribute childmostAttribute = getChildmostAttribute();
 
         /**
@@ -873,7 +909,7 @@ public class RowData
              */
             addAttribute(Attribute.SELECT_ATTRIBUTE);
         }
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_UNDEFINED);
     }
@@ -900,10 +936,10 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE_PATH);
-        makingChanges++;
+        //makingChanges++;
         getAttributePath().subList(lastAttributeIndex+1,
                                    getAttributeCount()).clear();
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_ATTRIBUTE_PATH);
     }
@@ -935,7 +971,7 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE_PATH);
-        makingChanges++;
+        //makingChanges++;
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
 
@@ -947,7 +983,7 @@ public class RowData
         else if (attribute.equals(Attribute.IS_NOT_NULL)) {
             setAttributeOperator(DataModel.OPERATOR_IS_NOT_NULL);
         }
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_ATTRIBUTE_PATH);
     }
@@ -1060,9 +1096,9 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE_VALUE);
-        makingChanges++;
+        //makingChanges++;
         this.attributeValue = attributeValue;
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_ATTRIBUTE_VALUE);
     }
@@ -1074,7 +1110,7 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_UNDEFINED);
-        makingChanges++;
+        //makingChanges++;
         Attribute attribute = getChildmostAttribute();
         if (attribute == null) {
             setAttributeValue(null);
@@ -1115,7 +1151,7 @@ public class RowData
                 e.printStackTrace();
             }
         }
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_UNDEFINED);
     }
@@ -1191,9 +1227,9 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_PROP_NAME);
-        makingChanges++;
+        //makingChanges++;
         this.propName = propName;
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_PROP_NAME);
     }
@@ -1211,10 +1247,10 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_PROP_TYPE);
-        makingChanges++;
+        //makingChanges++;
         this.propType = propType;
         possiblyAdjustOperatorAndValue(propType);
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_PROP_TYPE);
     }
@@ -1319,12 +1355,12 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_CHILD_ADD);
-        makingChanges++;
+        //makingChanges++;
         childRow.setParentRow(this);
         childRows.add(childRow);
 
         childRow.addRowDataListener(this);
-        makingChanges--;
+        //makingChanges--;
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_CHILD_ADD);
     }
