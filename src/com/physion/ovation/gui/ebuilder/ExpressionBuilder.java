@@ -54,10 +54,29 @@ public class ExpressionBuilder
     extends JDialog 
     implements ActionListener, RowDataListener {
 
+    /**
+     * Number of pixels used as a spacer.
+     */
     private int INSET = 6;
+
+    /**
+     * Maximum number of expression tree "states" that are
+     * saved.  I.e. the user can "undo" up to this many
+     * prevsious states of the tree.
+     */
     private int MAX_NUM_STATES_SAVED = 50;
 
+    /**
+     * This is the return status if the user closed the
+     * the window by pressing the Ok button.
+     */
     public static final int RETURN_STATUS_OK = 0;
+
+    /**
+     * This is the return status if the user closed the
+     * window by pressing the Cancel button or closing
+     * the window in some other way besides pressing Ok.
+     */
     public static final int RETURN_STATUS_CANCEL = 1;
 
     private int returnStatus = RETURN_STATUS_CANCEL;
@@ -68,7 +87,19 @@ public class ExpressionBuilder
     private JButton cancelButton;
 
     private ArrayList<RowData> stateList = new ArrayList<RowData>();
-    private int currentStateIndex = -1;
+
+    /**
+     * This is the index into stateList that is used by the
+     * Prev and Next buttons to move backwards and forwards
+     * through the list of states.
+     *
+     * Think of this index always pointing to the entry in
+     * the stateList that should be displayed if the user
+     * hits the Prev button.  If the user hits the Next button,
+     * we need to increment this by one and display the state
+     * at that index.
+     */
+    private int stateIndex = -1;
     //private int prevDescendentCount = -1;
 
 
@@ -164,11 +195,6 @@ public class ExpressionBuilder
         setSize(width, height);
 
         /**
-         * Save the current state of the tree.
-         */
-        possiblySaveState();
-
-        /**
          * Add ourselves as a listener to the RowData expression tree
          * so we can enable/disable the Ok button depending on whether
          * the expression tree is currently legal.
@@ -260,39 +286,77 @@ public class ExpressionBuilder
     }
 
 
+    /**
+     * This method is called when the user presses the Next button.
+     * It displays the "previous" version of the expression tree.
+     */
     private void handlePrevButton() {
 
-        if (currentStateIndex < 1) {
+        /*
+        System.out.println("Enter handlePrevButton().");
+        System.out.println("stateIndex = "+stateIndex);
+        System.out.println("stateList.size() = "+stateList.size());
+        */
+
+        if (stateIndex < 0) {
             System.err.println("ERROR: handlePrevButton() called when we "+
                                "are already at the first state in the "+
                                "stateList.  This is a programming error.");
+            System.err.println("stateIndex = "+stateIndex);
+            System.err.println("stateList.size() = "+stateList.size());
             return;
         }
 
         /**
-         * Go back to the previous version of the expression tree.
+         * The user wants to view the expression tree "previous"
+         * to the one currently being displayed.
+         * Possibly save the current state of the expression
+         * tree before we display the previous version.
          */
-        currentStateIndex--;
-        RowData rootRow = stateList.get(currentStateIndex);
+        possiblySaveState(false);
+
+        /**
+         * Go back one version of the expression tree.
+         */
+        stateIndex--;
+        //System.out.println("Display version at stateIndex = "+stateIndex);
+        //System.out.println("stateList.size() = "+stateList.size());
+        RowData rootRow = stateList.get(stateIndex);
         setRootRow(rootRow);
+        //System.out.println("Exit handlePrevButton\n");
     }
 
 
+    /**
+     * This method is called when the user presses the Next button.
+     * It displays the "next" version of the expression tree.
+     */
     private void handleNextButton() {
 
-        if (currentStateIndex >= stateList.size()) {
+        /*
+        System.out.println("Enter handleNextButton().");
+        System.out.println("stateIndex = "+stateIndex);
+        System.out.println("stateList.size() = "+stateList.size());
+        */
+
+        if (stateIndex >= stateList.size()) {
             System.err.println("ERROR: handleNextButton() called when we "+
                                "are already at the last state in the "+
                                "stateList.  This is a programming error.");
+            System.err.println("stateIndex = "+stateIndex);
+            System.err.println("stateList.size() = "+stateList.size());
             return;
         }
 
         /**
          * Go to the next version of the expression tree.
          */
-        currentStateIndex++;
-        RowData rootRow = stateList.get(currentStateIndex);
+        stateIndex++;
+        //System.out.println("Display version at stateIndex = "+stateIndex);
+        //System.out.println("stateList.size() = "+stateList.size());
+        RowData rootRow = stateList.get(stateIndex);
         setRootRow(rootRow);
+        //System.out.println("Exit handleNextButton\n");
     }
 
 
@@ -372,74 +436,129 @@ public class ExpressionBuilder
 
     /**
      * This method is called when the expression tree we are
-     * displaying/editing changes.
-     * When the tree changes we enable/disable the Ok button
+     * displaying/editing changes.  Actually, it is called
+     * both BEFORE the tree changes and AFTER the tree
+     * changes.  We want to save the state of the tree
+     * BEFORE it changes.
+     *
+     * AFTER the tree changes we enable/disable the Ok button
      * depending on whether the expression tree currently
      * contains a legal value.  I.e. we will force the user
      * to make the tree legal before we let him/her Ok out
      * of the window.
      */
     @Override
-    public void rowDataChanged(RowDataEvent e) {
+    public void rowDataChanged(RowDataEvent event) {
 
-        possiblySaveState();
-        currentStateIndex = stateList.size()-1;
-        enableButtons();
+        if (event.getEventType() == RowDataEvent.BEFORE_CHANGE) {
+            //System.out.println("\nGot BEFORE_CHANGE event.");
+            possiblySaveState(true);
+            stateIndex = stateList.size()-1;
+        }
+        else if (event.getEventType() == RowDataEvent.AFTER_CHANGE) {
+            enableButtons();
+        }
+        else {
+            /**
+             * Currently, (Oct 2011), there is no other event type,
+             * so there is nothing to do here.  But in the future,
+             * we might want to know about "indirect" changes to
+             * a RowData object.  E.g. changes caused by changes
+             * to a child or parent row.
+             */
+        }
     }
 
 
     /**
      * This method will (possibly) save the state of the current
-     * expression tree.  Currently we are saving almost every
-     * change.  That is overkill, but was the most simple thing
-     * to implement.
+     * expression tree.
      *
-     * TODO: Only save the state if the user has changed the number
-     * of rows in the tree.  (We don't save the changes the user
-     * makes to the attributePath, for example.)
+     * Currently, this method is only called if the user is
+     * changing the number of rows in the tree or changing
+     * an attribute.  (We don't save the changes as the user
+     * is typing into a text field for example.)
      *
      * Saving at this "granularity" should prevent the user from
-     * shooting his/herself in the foot and loosing many changes
+     * shooting his/herself in the foot and losing many changes
      * s/he has made to the expression tree if s/he accidentally
      * changes a "top level" comboBox.
+     *
+     * @param calledDueToChangeEvent - Pass true for this parameter
+     * if you are calling it because of a change event.  (I.e. the
+     * user is editing the expression tree.)  Pass false for this
+     * parameter if you are calling it because you are navigating
+     * through the stateList because the user is pressing the
+     * Prev and Next buttons.
      */
-    private void possiblySaveState() {
+    private void possiblySaveState(boolean calledDueToChangeEvent) {
+
+        /*
+        System.out.println("Enter possiblySaveState().");
+        System.out.println("calledDueToChangeEvent = "+calledDueToChangeEvent);
+        System.out.println("stateIndex = "+stateIndex);
+        System.out.println("stateList.size() = "+stateList.size());
+        for (RowData state : stateList) {
+            System.out.println("---------");
+            System.out.println("state:\n"+state);
+            System.out.println("---------");
+        }
+        */
 
         if (getRootRow() == null)
             return;
 
         /**
-         * If the user is in the process of clicking the Next and Prev
-         * buttons, don't save those states.
+         * If the the GUI is displaying an expression tree that
+         * is in the stateList, don't save the state again.
          */
-        if (currentStateIndex != stateList.size()-1)
-            return;
+        if (stateList.contains(getRootRow())) {
+            //System.out.println("State already saved.  Don't save again.");
 
-        /*
-        if (getRootRow().getDescendentCount() != prevDescendentCount) {
-            prevDescendentCount = getRootRow().getDescendentCount();
-            stateList.add(new RowData(getRootRow()));
-            currentStateIndex = stateList.size()-1;
-            enableButtons();
+            if (calledDueToChangeEvent) {
+                /**
+                 * The GUI is displaying an expression tree that
+                 * is in the stateList, but the user is changing it,
+                 * so we need to replace the one in the stateList
+                 * with a copy.  That way we save the state of the
+                 * expression BEFORE the user's latest change.
+                 */
+                //System.out.println("Replace tree in stateList.");
+                stateList.set(stateIndex, new RowData(getRootRow()));
+            }
+
+            //System.out.println("Exit possiblySaveState.");
+            return;
         }
-        */
+
         /**
          * There has been a user initiated change, so
          * save the state of the expression tree and
          * possibly "roll off" the oldest state that
          * we had saved.
          */
+        //System.out.println("Add state to statelist.");
         stateList.add(new RowData(getRootRow()));
         if (stateList.size() > MAX_NUM_STATES_SAVED) {
             stateList.remove(0);
         }
 
         /**
-         * Set the currentStateIndex to be pointing to
-         * the current, (i.e. last), state.
+         * Set the stateIndex to be pointing to
+         * the last saved state.
          */
-        currentStateIndex = stateList.size()-1;
+        stateIndex = stateList.size()-1;
         enableButtons();
+        /*
+        System.out.println("Upon leaving...\nstateIndex = "+stateIndex);
+        System.out.println("stateList.size() = "+stateList.size());
+        for (RowData state : stateList) {
+            System.out.println("---------");
+            System.out.println("state:\n"+state);
+            System.out.println("---------");
+        }
+        System.out.println("Exit possiblySaveState.");
+        */
     }
 
 
@@ -451,19 +570,20 @@ public class ExpressionBuilder
      *
      * Enable/disable the Prev and Next buttons depending
      * on whether there are states previous to or after the
-     * currentStateIndex in the stateList.
+     * state in the stateList pointed to by stateIndex.
      * For example, if the stateList has two items in it,
-     * and the currentStateIndex is 1, then the Prev button
+     * and the stateIndex is 1, then the Prev button
      * is enabled because there is a previous state we can
      * go to.  The Next button is not enabled because there
-     * is now state "after" the one currentStateIndex is
+     * is no state "after" the one stateIndex is
      * currently pointing to.
      */
     private void enableButtons() {
 
         /*
+        System.out.println("Enter enableButtons().");
+        System.out.println("stateIndex = "+stateIndex);
         System.out.println("stateList.size() = "+stateList.size());
-        System.out.println("currentStateIndex = "+currentStateIndex);
         System.out.println("getRootRow().getIllegalRows().size() = "+
             getRootRow().getIllegalRows().size());
         */
@@ -478,12 +598,13 @@ public class ExpressionBuilder
          */
         okButton.setEnabled(getRootRow().getIllegalRows().size() == 0);
 
-        if (currentStateIndex > 0)
+        if ((stateIndex > 0) || (stateIndex == stateList.size()-1) &&
+            (stateList.size() > 0))
             prevButton.setEnabled(true);
         else
             prevButton.setEnabled(false);
 
-        if (currentStateIndex < (stateList.size()-1))
+        if (stateIndex < (stateList.size()-1))
             nextButton.setEnabled(true);
         else
             nextButton.setEnabled(false);

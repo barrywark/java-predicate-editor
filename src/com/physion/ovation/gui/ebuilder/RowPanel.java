@@ -649,7 +649,9 @@ class RowPanel
      */
     @Override
     public void rowDataChanged(RowDataEvent event) {
-        adjustBackgroundColor();
+
+        if (event.getEventType() == RowDataEvent.AFTER_CHANGE)
+            adjustBackgroundColor();
     }
 
 
