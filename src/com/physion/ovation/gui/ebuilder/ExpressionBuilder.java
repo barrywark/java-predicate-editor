@@ -100,7 +100,6 @@ public class ExpressionBuilder
      * at that index.
      */
     private int stateIndex = -1;
-    //private int prevDescendentCount = -1;
 
 
     /**
