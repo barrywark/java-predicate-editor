@@ -95,7 +95,8 @@ class RowPanel
      * color based on the default background color.
      */
     private static final Color ILLEGAL_BACKGROUND_COLOR = 
-        new Color(224, 206, 224);  // light purple
+        new Color(214, 203, 214);  // light gray-purple
+        //new Color(224, 206, 224);  // light Easter egg purple
         //new Color(204, 143, 204);  // med purple
         //new Color(186, 222, 222);  // light blue
 
@@ -527,18 +528,18 @@ class RowPanel
      * "analysisRecords" into the comboBox, we will insert two
      * entries:  "My analysisRecords" and "All analysisRecords".
      *
-     * @param comboBox - The JComboBox whose model and selectedItem
+     * @param comboBox The JComboBox whose model and selectedItem
      * we will set.
      *
-     * @param classDescription - We will set the comboBox's model to
+     * @param classDescription We will set the comboBox's model to
      * be the list of attributes of this ClassDescription.  (We also
      * might add a few more special values to the list.)
      * 
-     * @param appendNulls - If this is true, we will append the
+     * @param appendNulls If this is true, we will append the
      * special Attribute.IS_NULL and IS_NOT_NULL to the end of the
      * list of the choices.
      *
-     * @param selectedItem - After setting the model, this method sets
+     * @param selectedItem After setting the model, this method sets
      * the selected item to this value.  Pass null if you do not want to
      * set the selected item.
      */
@@ -617,7 +618,7 @@ class RowPanel
 
 
     /**
-     * @param selectedItem - After setting the model, this method sets
+     * @param selectedItem After setting the model, this method sets
      * the selected item to this value.  Pass null if you do not want to
      * set the selected item.
      */
@@ -650,7 +651,7 @@ class RowPanel
     @Override
     public void rowDataChanged(RowDataEvent event) {
 
-        if (event.getEventType() == RowDataEvent.AFTER_CHANGE)
+        if (event.getTiming() == RowDataEvent.TIMING_AFTER)
             adjustBackgroundColor();
     }
 
@@ -868,9 +869,9 @@ class RowPanel
      * set the corresponding Attribute in the row's
      * attributePath.
      *
-     * @param comboBox - The comboBox in which the Attribute was selected.
+     * @param comboBox The comboBox in which the Attribute was selected.
      *
-     * @param comboBox - The selected Attribute.
+     * @param selectedAttribute The selected Attribute.
      */
     private void handleAttributeSelected(JComboBox comboBox,
                                          Attribute selectedAttribute) {

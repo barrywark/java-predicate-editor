@@ -567,7 +567,7 @@ public class DataModel {
     /**
      * Get a ClassDescription object using its name member data.
      *
-     * @param name - The name of the ClassDescription.  For example,
+     * @param name The name of the ClassDescription.  For example,
      * "Epoch", "Source", "TaggableEntityBase".
      */
     public static ClassDescription getClassDescription(String name) {

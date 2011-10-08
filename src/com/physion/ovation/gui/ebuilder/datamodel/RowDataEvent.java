@@ -4,12 +4,6 @@ package com.physion.ovation.gui.ebuilder.datamodel;
 /**
  * This event is sent to RowDataListeners that are listening
  * to a RowData expression tree.
- *
- * Currently, October 2011, this event has no information about
- * what was changed.  At some point in the future, if the GUI
- * gets more complicated, we might want to have information
- * about what kind of change occurred.  E.g. row added/deleted,
- * attribute value changed, etc.
  */
 public class RowDataEvent {
 
@@ -19,7 +13,7 @@ public class RowDataEvent {
      * of events if it wants to save the state of this RowData
      * object before it is changed.
      */
-    public static final int BEFORE_CHANGE = 0;
+    public static final int TIMING_BEFORE = 0;
 
     /**
      * This event is being sent AFTER the RowData object is
@@ -27,7 +21,20 @@ public class RowDataEvent {
      * of events and update itself to reflect this RowData's
      * new value.
      */
-    public static final int AFTER_CHANGE = 1;
+    public static final int TIMING_AFTER = 1;
+
+    public static final int TYPE_UNDEFINED = 0; // Undefined change(s).
+    public static final int TYPE_CHILD_ADD = 1;
+    public static final int TYPE_CHILD_DELETE = 2;
+    public static final int TYPE_ATTRIBUTE_PATH = 3;
+    public static final int TYPE_ATTRIBUTE_VALUE = 4;
+    public static final int TYPE_PROP_NAME = 5;
+    public static final int TYPE_PROP_TYPE = 6;
+    public static final int TYPE_CUQ = 7; // Class Under Qualification
+    public static final int TYPE_PARENT = 8; // Parent is being set.
+    public static final int TYPE_COLLECTION_OPERATOR = 9;
+    public static final int TYPE_ATTRIBUTE_OPERATOR = 10;
+    public static final int TYPE_ATTRIBUTE = 11; // Single Attribute being set.
 
     /**
      * This is the RowData object that changed.
@@ -35,18 +42,31 @@ public class RowDataEvent {
     private RowData rowData;
 
     /**
-     * This tells you what type of event you are
-     * being sent.  For example:
+     * This tells you "when" the event is being sent.
+     * For example:
      *
-     *      RowDataEvent.BEFORE_CHANGE
-     *      RowDataEvent.AFTER_CHANGE
+     *      RowDataEvent.TIMING_BEFORE
+     *      RowDataEvent.TIMING_AFTER
      */
-    private int eventType;
+    private int timing;
+
+    /**
+     * This tells you what type of change will occur or has
+     * occured.  For example:
+     *
+     *      RowDataEvent.TYPE_CHILD_ADD
+     *      RowDataEvent.TYPE_CHILD_DELETE
+     *      RowDataEvent.TYPE_ATTRIBUTE_PATH
+     *      RowDataEvent.TYPE_ATTRIBUTE_VALUE
+     *      RowDataEvent.TYPE_PROP_NAME
+     */
+    private int changeType;
 
 
-    public RowDataEvent(RowData rowData, int eventType) {
+    public RowDataEvent(RowData rowData, int timing, int changeType) {
         this.rowData = rowData;
-        this.eventType = eventType;
+        this.timing = timing;
+        this.changeType = changeType;
     }
 
 
@@ -60,12 +80,43 @@ public class RowDataEvent {
     }
 
 
-    public int getEventType() {
-        return(eventType);
+    /**
+     * Get the timing of this event.
+     *
+     * @return Returns Either RowDataEvent.TIMING_BEFORE or
+     * RowDataEvent.TIMING_AFTER.
+     */
+    public int getTiming() {
+        return(timing);
     }
 
 
-    public void setEventType(int eventType) {
-        this.eventType = eventType;
+    /**
+     * Set the timing of this event.
+     *
+     * @param timing Either RowDataEvent.TIMING_BEFORE or
+     * RowDataEvent.TIMING_AFTER.
+     */
+    public void setTiming(int timing) {
+        this.timing = timing;
+    }
+
+
+    /**
+     * Returns the changeType of this event.
+     * For example: RowDataEvent.TYPE_CHILD_ADD
+     */
+    public int getChangeType() {
+        return(changeType);
+    }
+
+
+    /**
+     * Set the changeType of this event.
+     *
+     * @param changeType A RowDataEvent.TYPE_* value.
+     */
+    public void setChangeType(int changeType) {
+        this.changeType = changeType;
     }
 }

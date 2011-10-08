@@ -190,7 +190,7 @@ public class RowData
      * By "deep" copy, I mean a copy whose attributePath contains
      * copies of the other's Attributes.
      *
-     * @param other - The other RowData object of which we will be
+     * @param other The other RowData object of which we will be
      * a copy.  If this is null, then this method is equivalent
      * to calling the empty RowData constructor.
      */
@@ -345,7 +345,7 @@ public class RowData
      * Notify all listeners that have registered interest for
      * notification on this event type.
      */
-    private void fireRowDataEvent(int eventType) {
+    private void fireRowDataEvent(int timing, int changeType) {
 
         /**
          * If we are in the process of making changes, don't
@@ -362,7 +362,7 @@ public class RowData
          * type of event and all we give the listener is
          * a reference to this RowData object.
          */
-        RowDataEvent rowDataEvent = new RowDataEvent(this, eventType);
+        RowDataEvent rowDataEvent = new RowDataEvent(this, timing, changeType);
 
         RowDataListener listenerList[] =
             rowDataListenerList.getListeners(RowDataListener.class);
@@ -388,7 +388,7 @@ public class RowData
      */
     @Override
     public void rowDataChanged(RowDataEvent rowData) {
-        fireRowDataEvent(rowData.getEventType());
+        fireRowDataEvent(rowData.getTiming(), rowData.getChangeType());
     }
 
 
@@ -398,12 +398,14 @@ public class RowData
      */
     public void removeChildRow(RowData childRow) {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_CHILD_DELETE);
         makingChanges++;
         childRows.remove(childRow);
         childRow.removeRowDataListener(this);
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_CHILD_DELETE);
     }
 
 
@@ -427,11 +429,13 @@ public class RowData
             return;
         }
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_CHILD_DELETE);
         makingChanges++;
         getParentRow().removeChildRow(this);
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_CHILD_DELETE);
     }
 
 
@@ -440,14 +444,16 @@ public class RowData
      */
     public void createCompoundRow() {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_CHILD_ADD);
         makingChanges++;
         RowData compoundRow = new RowData();
         compoundRow.setParentRow(this);
         compoundRow.setCollectionOperator(CollectionOperator.ANY);
         addChildRow(compoundRow);
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_CHILD_ADD);
     }
 
 
@@ -458,9 +464,18 @@ public class RowData
 
         ClassDescription classDescription = null;
 
+        /**
+         * Figure out what the ClassDescription should be
+         * for this Attribute Row.  I.e. this is the class
+         * that will be used for the leftmost attribute comboBox
+         * in this row.
+         */
         if ((this != getRootRow()) && isSimpleCompoundRow()) {
             /**
-             * TODO:  Not sure I like this mucking around.
+             * This is a "simple" Compound Row that only has
+             * a collection operator in it.  E.g. Any/All/None.
+             * Look "upwards" in this row's hierarchy to figure
+             * out what class it should be.
              */
             RowData parent = getParentRow();
             while (classDescription == null) {
@@ -473,6 +488,12 @@ public class RowData
             }
         }
         else {
+            /**
+             * This is a row whose childmost attribute,
+             * (rightmost comboBox), is a reference to a class.
+             * So, whatever that class is will be the Class Description
+             * for the child row we will create.
+             */
             Attribute attribute = getChildmostAttribute();
             if (this == getRootRow())
                 classDescription = getClassUnderQualification();
@@ -494,13 +515,15 @@ public class RowData
             return;
         }
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_CHILD_ADD);
         makingChanges++;
         RowData attributeRow = new RowData();
         attributeRow.addAttribute(Attribute.SELECT_ATTRIBUTE);
         addChildRow(attributeRow);
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_CHILD_ADD);
     }
 
 
@@ -561,7 +584,7 @@ public class RowData
                 "I will assume that is what you meant to do, and do that.");
         }
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE, RowDataEvent.TYPE_CUQ);
         makingChanges++;
         getRootRow().classUnderQualification = classUnderQualification;
 
@@ -570,7 +593,7 @@ public class RowData
             getRootRow().getChildRows().clear();
         }
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER, RowDataEvent.TYPE_CUQ);
     }
 
 
@@ -598,11 +621,14 @@ public class RowData
 
     public void setParentRow(RowData parentRow) {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        if (this.parentRow == parentRow)
+            return;
+
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE, RowDataEvent.TYPE_PARENT);
         makingChanges++;
         this.parentRow = parentRow;
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER, RowDataEvent.TYPE_PARENT);
     }
 
 
@@ -613,7 +639,8 @@ public class RowData
 
     public void setCollectionOperator(CollectionOperator collectionOperator) {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_COLLECTION_OPERATOR);
         makingChanges++;
         this.collectionOperator = collectionOperator;
 
@@ -635,7 +662,8 @@ public class RowData
             setAttributeValue("");
         }
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_COLLECTION_OPERATOR);
     }
 
 
@@ -650,12 +678,13 @@ public class RowData
      * TODO: Cleanup/reorganize where these assorted operator strings
      * are stored.  Is creating enums overkill?
      *
-     * @param attributeOperator - A value such as, but not limited to:
+     * @param attributeOperator A value such as, but not limited to:
      * ==, !=, >, <, ~=, is null, is not null, is true, is false.
      */
     public void setAttributeOperator(String attributeOperator) {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_ATTRIBUTE_OPERATOR);
         makingChanges++;
         this.attributeOperator = attributeOperator;
 
@@ -694,7 +723,8 @@ public class RowData
         }
 
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_ATTRIBUTE_OPERATOR);
     }
 
 
@@ -705,7 +735,8 @@ public class RowData
 
     public void setAttribute(int index, Attribute attribute) {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_ATTRIBUTE);
         makingChanges++;
         /**
          * Make sure the attributePath is long enough.
@@ -725,7 +756,8 @@ public class RowData
         }
 
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_ATTRIBUTE);
     }
 
 
@@ -739,7 +771,8 @@ public class RowData
      */
     private void setRowDataValuesAppropriately() {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_UNDEFINED);
         makingChanges++;
         Attribute childmostAttribute = getChildmostAttribute();
 
@@ -841,7 +874,8 @@ public class RowData
             addAttribute(Attribute.SELECT_ATTRIBUTE);
         }
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_UNDEFINED);
     }
 
 
@@ -864,12 +898,14 @@ public class RowData
         if (getAttributeCount() <= (lastAttributeIndex+1))
             return;
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_ATTRIBUTE_PATH);
         makingChanges++;
         getAttributePath().subList(lastAttributeIndex+1,
                                    getAttributeCount()).clear();
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_ATTRIBUTE_PATH);
     }
 
 
@@ -897,7 +933,8 @@ public class RowData
 
         //System.out.println("Enter addAttribute("+attribute+")");
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_ATTRIBUTE_PATH);
         makingChanges++;
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
@@ -911,7 +948,8 @@ public class RowData
             setAttributeOperator(DataModel.OPERATOR_IS_NOT_NULL);
         }
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_ATTRIBUTE_PATH);
     }
 
 
@@ -966,9 +1004,7 @@ public class RowData
      * The returned value is in the format that the Objectivity
      * software would like.
      *
-     * TODO: Make changes to this if necessary.
-     *
-     * @param debugVersion - Set this to true if you want a 
+     * @param debugVersion Set this to true if you want a 
      * "debug" version of the attribute path that has the
      * isMine flag shown in it.  Set this to false if you
      * want a version of this string that can be used for
@@ -1022,11 +1058,13 @@ public class RowData
 
     public void setAttributeValue(Object attributeValue) {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_ATTRIBUTE_VALUE);
         makingChanges++;
         this.attributeValue = attributeValue;
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_ATTRIBUTE_VALUE);
     }
 
 
@@ -1034,7 +1072,8 @@ public class RowData
 
         Object value = null;
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_UNDEFINED);
         makingChanges++;
         Attribute attribute = getChildmostAttribute();
         if (attribute == null) {
@@ -1077,7 +1116,8 @@ public class RowData
             }
         }
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_UNDEFINED);
     }
 
 
@@ -1149,11 +1189,13 @@ public class RowData
         if (this.propName == propName)
             return;
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_PROP_NAME);
         makingChanges++;
         this.propName = propName;
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_PROP_NAME);
     }
 
 
@@ -1167,12 +1209,14 @@ public class RowData
         if (this.propType == propType)
             return;
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_PROP_TYPE);
         makingChanges++;
         this.propType = propType;
         possiblyAdjustOperatorAndValue(propType);
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_PROP_TYPE);
     }
 
 
@@ -1273,14 +1317,16 @@ public class RowData
 
     public void addChildRow(RowData childRow) {
 
-        fireRowDataEvent(RowDataEvent.BEFORE_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_CHILD_ADD);
         makingChanges++;
         childRow.setParentRow(this);
         childRows.add(childRow);
 
         childRow.addRowDataListener(this);
         makingChanges--;
-        fireRowDataEvent(RowDataEvent.AFTER_CHANGE);
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_CHILD_ADD);
     }
 
 
@@ -1331,11 +1377,11 @@ public class RowData
      * This method calls itself recursively, increasing the indent
      * amount for each level deeper a row is nested in the tree.
      *
-     * @param debubVersion - Pass true if you want the string to
+     * @param debubVersion Pass true if you want the string to
      * be more useful to a human.  Pass false if you want it to
      * look more like what will be passed to query software.
      *
-     * @param indent - The amount to indent this row.  E.g. "    "
+     * @param indent The amount to indent this row.  E.g. "    "
      */
     public String toString(boolean debugVersion, String indent) {
 
@@ -1362,11 +1408,11 @@ public class RowData
      * row and its children.  The row will have the passed in indent
      * string prepended to it.
      *
-     * @param debugVersion - If this is true, the string will give
+     * @param debugVersion If this is true, the string will give
      * more information useful to a programmer but it will also be
      * more cluttered.
      *
-     * @param indent - The amount to indent this row.  E.g. "    "
+     * @param indent The amount to indent this row.  E.g. "    "
      */
     public String getRowString(boolean debugVersion, String indent) {
         

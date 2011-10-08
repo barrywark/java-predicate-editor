@@ -107,7 +107,7 @@ public class ExpressionBuilder
      * Create an ExpressionBuilder dialog with its expression
      * tree initialized to a copy of the passed in expression.
      *
-     * @param originalRootRow - The rootRow of the expression tree
+     * @param originalRootRow The rootRow of the expression tree
      * you want to edit.  (Please note, the GUI edits a copy
      * of the passed in rootRow.)
      * Do NOT pass null.
@@ -384,7 +384,7 @@ public class ExpressionBuilder
      * An example of using this method is in this
      * class's main() method.
      *
-     * @param rootRow - This is the "root" RowData of the
+     * @param rootRow This is the "root" RowData of the
      * expression you want the GUI to display and edit.
      * Please note, the GUI edits a COPY of this expression tree, so
      * the rootRow parameter you passed in is not ever modified
@@ -450,12 +450,13 @@ public class ExpressionBuilder
     @Override
     public void rowDataChanged(RowDataEvent event) {
 
-        if (event.getEventType() == RowDataEvent.BEFORE_CHANGE) {
+        if ((event.getTiming() == RowDataEvent.TIMING_BEFORE) &&
+            changeIsSavable(event.getChangeType())) {
             //System.out.println("\nGot BEFORE_CHANGE event.");
             possiblySaveState(true);
             stateIndex = stateList.size()-1;
         }
-        else if (event.getEventType() == RowDataEvent.AFTER_CHANGE) {
+        else if (event.getTiming() == RowDataEvent.TIMING_AFTER) {
             enableButtons();
         }
         else {
@@ -466,6 +467,54 @@ public class ExpressionBuilder
              * a RowData object.  E.g. changes caused by changes
              * to a child or parent row.
              */
+        }
+    }
+
+
+    /**
+     * This method returns true if the passed in changeType is
+     * a change that should be saved.  Please note, we aren't
+     * really saving the change, but are instead saving a copy
+     * of the expression tree before the change is executed
+     * on it.
+     *
+     * For example, if the user adds or deletes a row from the
+     * expression tree, we want to save the state of the tree
+     * in our stateList so that the user can use the Prev button
+     * to go back to the state of the expression tree at that
+     * time.
+     *
+     * But, if the user is typing a string value into an
+     * attribute value text field, we don't want to save
+     * the state of the tree after each character change.
+     * So we would return false for that changeType.
+     *
+     * To alter what changeTypes are considered "save worthy",
+     * just alter what values are in the if-statement in
+     * this method.  As of October 2011, I have left a couple
+     * commented out entries in the if-statement that you
+     * might consider "save worthy".
+     *
+     * @param changeType One of the RowDataEvent.TYPE_* values.
+     */
+    private boolean changeIsSavable(int changeType) {
+
+        if ((changeType == RowDataEvent.TYPE_CHILD_ADD) ||
+            (changeType == RowDataEvent.TYPE_CHILD_DELETE) ||
+            (changeType == RowDataEvent.TYPE_CUQ) ||
+            //(changeType == RowDataEvent.TYPE_PROP_TYPE) ||
+            //(changeType == RowDataEvent.TYPE_ATTRIBUTE_OPERATOR) ||
+            (changeType == RowDataEvent.TYPE_COLLECTION_OPERATOR) ||
+            (changeType == RowDataEvent.TYPE_ATTRIBUTE) ||
+            (changeType == RowDataEvent.TYPE_ATTRIBUTE_PATH)) {
+            return(true);
+        }
+        else {
+            /**
+             * The change is a minor one, so we don't want to save
+             * a copy of the current state of the expression tree.
+             */
+            return(false);
         }
     }
 
@@ -484,7 +533,7 @@ public class ExpressionBuilder
      * s/he has made to the expression tree if s/he accidentally
      * changes a "top level" comboBox.
      *
-     * @param calledDueToChangeEvent - Pass true for this parameter
+     * @param calledDueToChangeEvent Pass true for this parameter
      * if you are calling it because of a change event.  (I.e. the
      * user is editing the expression tree.)  Pass false for this
      * parameter if you are calling it because you are navigating
