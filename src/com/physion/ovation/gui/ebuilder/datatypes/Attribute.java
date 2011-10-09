@@ -3,11 +3,24 @@ package com.physion.ovation.gui.ebuilder.datatypes;
 
 /**
  * This class describes an attribute of a class.
+ * Normally an attribute of a class is a "primitive"
+ * such as "owner = 'bwark'", or a "reference" to
+ * a class or a collection of classes.  (There are
+ * other, more complicated attributes also.)
  *
- * TODO: I'm not happy with the fact that the Attribute class
- * is used to hold "special" values that aren't really attributes,
- * such as SELECT_ATTRIBUTE, IS_NULL.
- * But, I don't see a cleaner way that doesn't create more code.
+ * The list of attributes are displayed in a comboBox
+ * that lets the user select a particular attribute.
+ * An attribute comboBox shows the value
+ * "Select Attribute" when it is first displayed.
+ * In addition, it often has other special values
+ * the user can select such as "is null" or
+ * "is not null".  In order to make the code more
+ * simple, I have made the Attribute class capable
+ * of holding these "special" values also.  This way
+ * can always treat the selected value in an attribute
+ * comboBox as an instance of an Attribute object.
+ * This makes the code a bit more simple, but does
+ * make the Attribute class a bit less "clean".
  */
 public class Attribute {
 
@@ -15,13 +28,24 @@ public class Attribute {
      * These are special values that appear in comboBoxes that
      * display a list of attributes.  They are not really attributes
      * though.  See notes at the start of this class.
+     *
+     * I have used the Operator.IS_NULL.toString() and
+     * Operator.IS_NOT_NULL.toString() methods to get
+     * the "is null" and "is not null" strings.  Doing it this
+     * way, as opposed to simply putting in the string makes
+     * sure these strings used in an attribute comboBox and
+     * an operator comboBox are consistent.  But, it really
+     * doesn't matter to the code if they are consistent, so
+     * change it if you think it is unweildy.
      */
     public static final Attribute SELECT_ATTRIBUTE =
         new Attribute("Select Attribute", Type.REFERENCE);
     public static final Attribute IS_NULL =
-        new Attribute("is null", Type.REFERENCE);
+        //new Attribute("is null", Type.REFERENCE);
+        new Attribute(Operator.IS_NULL.toString(), Type.REFERENCE);
     public static final Attribute IS_NOT_NULL =
-        new Attribute("is not null", Type.REFERENCE);
+        //new Attribute("is not null", Type.REFERENCE);
+        new Attribute(Operator.IS_NOT_NULL.toString(), Type.REFERENCE);
 
 
     /**

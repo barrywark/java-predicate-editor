@@ -8,6 +8,7 @@ import javax.swing.event.EventListenerList;
 
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
+import com.physion.ovation.gui.ebuilder.datatypes.Operator;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 
@@ -85,20 +86,13 @@ public class RowData
 
     /**
      * The operator the user selected for this attribute.
-     * For example, ==, !=, >=, <=, <, >.
-     * Note that "is null" and "is not null" are also considered operators.
+     * For example, Operator.EQUALS, Operator.LESS_THAN,
+     * Operator.IS_NULL.
      *
      * Please note, this might be null if this row is a "compound" row
      * that ends with Any, All, or None.
-     *
-     * We could create enum types to hold these operators, but I think that
-     * is a very heavy solution for not much gain.  The user won't be
-     * able to enter the values because GUI widgets will be used to
-     * select the values, so there isn't any user risk of invalid values
-     * being used.  But, there is programmer risk of that.
-     * We might change this.
      */
-    private String attributeOperator;
+    private Operator attributeOperator;
 
     /**
      * If the attributeOperator is set to something AND it is not
@@ -352,6 +346,8 @@ public class RowData
      */
     private void fireRowDataEvent(int timing, int changeType) {
 
+        //System.out.println("Enter fireRowDataEvent("+timing+", "+changeType+
+        //                   ")");
         if (timing == RowDataEvent.TIMING_AFTER)
             changeLevel--;
 
@@ -379,6 +375,8 @@ public class RowData
          * Please note, changeLevel should never be negative.
          */
         if (changeLevel == 0) {
+            //System.out.println("Send RowDataEvent("+timing+", "+changeType+
+            //    ") for this: "+this.getRowString());
 
             /**
              * Create a RowDataEvent that will tell the listener
@@ -467,11 +465,14 @@ public class RowData
             return;
         }
 
-        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
-                         RowDataEvent.TYPE_CHILD_DELETE);
+        /**
+         * Get our parent row and tell it to remove us.
+         *
+         * Note that we do NOT call fireRowDataEvent() before or
+         * after we call removeChildRow(this).  The call to
+         * removeChildRow(this) does that.
+         */
         getParentRow().removeChildRow(this);
-        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
-                         RowDataEvent.TYPE_CHILD_DELETE);
     }
 
 
@@ -685,7 +686,7 @@ public class RowData
         }
         else if ((collectionOperator != null) &&
                  !collectionOperator.isCompoundOperator()) {
-            setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+            setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
             setAttributeValue("");
         }
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
@@ -697,17 +698,14 @@ public class RowData
         return(collectionOperator);
     }
 
-
+    
     /**
      * Set the attributeOperator of this row.
      *
-     * TODO: Cleanup/reorganize where these assorted operator strings
-     * are stored.  Is creating enums overkill?
-     *
      * @param attributeOperator A value such as, but not limited to:
-     * ==, !=, >, <, ~=, is null, is not null, is true, is false.
+     * Operator.EQUALS, Operator.LESS_THAN, Operator.IS_NULL, Operator.IS_TRUE.
      */
-    public void setAttributeOperator(String attributeOperator) {
+    public void setAttributeOperator(Operator attributeOperator) {
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE_OPERATOR);
@@ -718,17 +716,11 @@ public class RowData
          * is being set to the operator "is true", "is false", "is null"
          * "is not null".  (If the operator is set to one of those
          * values, the attributeValue member data is meaningless.)
-         *
-         * TODO: I don't like the fact that the user *chooses* the
-         * "is null" or "is not null" operator using an Attribute comboBox,
-         * but we save the operator in the RowData's attributeOperator member
-         * data.  That is the way the user sees it in the GUI though.
-         * It would be better to detangle the data model from the GUI's view.
          */
-        if (DataModel.OPERATOR_TRUE.equals(attributeOperator) ||
-            DataModel.OPERATOR_FALSE.equals(attributeOperator) ||
-            DataModel.OPERATOR_IS_NULL.equals(attributeOperator) ||
-            DataModel.OPERATOR_IS_NOT_NULL.equals(attributeOperator)) {
+        if ((attributeOperator == Operator.IS_TRUE) ||
+            (attributeOperator == Operator.IS_FALSE) ||
+            (attributeOperator == Operator.IS_NULL) ||
+            (attributeOperator == Operator.IS_NOT_NULL)) {
             setAttributeValue(null);
         }
 
@@ -740,8 +732,8 @@ public class RowData
         if ((getChildmostAttribute() != null) &&
             (Type.DATE_TIME.equals(getChildmostAttribute().getType()) ||
              Type.DATE_TIME.equals(getPropType())) &&
-            (!DataModel.OPERATOR_IS_NULL.equals(attributeOperator)) &&
-            (!DataModel.OPERATOR_IS_NOT_NULL.equals(attributeOperator)) &&
+            (attributeOperator != Operator.IS_NULL) &&
+            (attributeOperator != Operator.IS_NOT_NULL) &&
             ((getAttributeValue() == null) ||
              !(getAttributeValue() instanceof Date))) {
             setAttributeValue(new Date());
@@ -752,7 +744,7 @@ public class RowData
     }
 
 
-    public String getAttributeOperator() {
+    public Operator getAttributeOperator() {
         return(attributeOperator);
     }
 
@@ -832,7 +824,7 @@ public class RowData
         }
         else {
             setCollectionOperator(CollectionOperator.COUNT);
-            setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+            setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
             setAttributeValue(new Integer(0));
         }
 
@@ -860,7 +852,9 @@ public class RowData
              * so set the attributeOperator to "is null" or
              * "is not null".
              */
-            setAttributeOperator(childmostAttribute.getDisplayName());
+            //setAttributeOperator(childmostAttribute.getDisplayName());
+            setAttributeOperator(Operator.fromString(
+                childmostAttribute.getDisplayName()));
         }
         else if ((childmostAttribute.getType() ==
                   Type.PER_USER_PARAMETERS_MAP) ||
@@ -868,7 +862,7 @@ public class RowData
                   Type.PARAMETERS_MAP)) {
 
             setPropType(Type.INT_32);
-            setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+            setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
             setPropName(null);
             setAttributeValue(null);
         }
@@ -971,10 +965,10 @@ public class RowData
         attributePath.add(attribute);
 
         if (attribute.equals(Attribute.IS_NULL)) {
-            setAttributeOperator(DataModel.OPERATOR_IS_NULL);
+            setAttributeOperator(Operator.IS_NULL);
         }
         else if (attribute.equals(Attribute.IS_NOT_NULL)) {
-            setAttributeOperator(DataModel.OPERATOR_IS_NOT_NULL);
+            setAttributeOperator(Operator.IS_NOT_NULL);
         }
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_ATTRIBUTE_PATH);
@@ -1261,60 +1255,60 @@ public class RowData
      */
     private void possiblyAdjustOperatorAndValue(Type type) {
 
-        String attributeOperator = getAttributeOperator();
+        Operator attributeOperator = getAttributeOperator();
         switch (type) {
             case BOOLEAN:
-                if (!DataModel.isOperatorBoolean(attributeOperator)) {
+                if (!Operator.isOperatorBoolean(attributeOperator)) {
                     /**
                      * Operator is not currently a legal
                      * boolean operator, so set it to
                      * a boolean operator.
                      */
-                    setAttributeOperator(DataModel.OPERATORS_BOOLEAN[0]);
+                    setAttributeOperator(Operator.OPERATORS_BOOLEAN[0]);
                 }
                 setAttributeValue(null);
             break;
             case UTF_8_STRING:
-                if (!DataModel.isOperatorString(attributeOperator)) {
+                if (!Operator.isOperatorString(attributeOperator)) {
                     /**
                      * Operator is not currently a legal
                      * string operator, so set it to
                      * a string operator.
                      */
-                    setAttributeOperator(DataModel.OPERATORS_STRING[0]);
+                    setAttributeOperator(Operator.OPERATORS_STRING[0]);
                 }
                 if (!(getAttributeValue() instanceof String))
                     setAttributeValue(new String(""));
             break;
             case INT_16:
-                if (!DataModel.isOperatorArithmatic(attributeOperator)) {
+                if (!Operator.isOperatorArithmatic(attributeOperator)) {
                     /**
                      * Operator is not currently a legal
                      * numeric operator, so set it to
                      * a numeric operator.
                      */
-                    setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                    setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
                 }
                 if (!(getAttributeValue() instanceof Short))
                     setAttributeValue(new Short((short)0));
             break;    
             case INT_32:
-                if (!DataModel.isOperatorArithmatic(attributeOperator)) {
-                    setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                if (!Operator.isOperatorArithmatic(attributeOperator)) {
+                    setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
                 }
                 if (!(getAttributeValue() instanceof Integer))
                     setAttributeValue(new Integer(0));
             break;
             case FLOAT_64:
-                if (!DataModel.isOperatorArithmatic(attributeOperator)) {
-                    setAttributeOperator(DataModel.OPERATORS_ARITHMATIC[0]);
+                if (!Operator.isOperatorArithmatic(attributeOperator)) {
+                    setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
                 }
                 if (!(getAttributeValue() instanceof Double))
                     setAttributeValue(new Double((double)0.0));
             break;
             case DATE_TIME:
-                if (!DataModel.isOperatorDateTime(attributeOperator)) {
-                    setAttributeOperator(DataModel.OPERATORS_DATE_TIME[0]);
+                if (!Operator.isOperatorDateTime(attributeOperator)) {
+                    setAttributeOperator(Operator.OPERATORS_DATE_TIME[0]);
                 }
                 if (!(getAttributeValue() instanceof Date))
                     setAttributeValue(new Date());
@@ -1579,8 +1573,11 @@ public class RowData
         /**
          * First check that the values in this row are valid.
          */
-        if (containsLegalValue() == false)
+        if (containsLegalValue() == false) {
+            //System.out.println("Adding this("+this.getRowString()+
+            //    " to illegalRows.");
             illegalRows.add(this);
+        }
 
         /**
          * Now recursively check all of our descendent rows.
@@ -1670,18 +1667,6 @@ public class RowData
             }
         }
 
-        /**
-         * If we get here, this row is legal.  Now recursively
-         * check all of our descendent rows.
-         * If any are illegal, immediately return false.
-         */
-        /*
-        for (RowData childRow : getChildRows()) {
-            if (childRow.containsLegalValue() == false)
-                return(false);
-        }
-        */
-
         return(true);
     }
 
@@ -1767,19 +1752,19 @@ public class RowData
         rootRow.addChildRow(rowData);
 
         /**
-         * Create a couple "Date/Time" rows.
+         * Create a startTime and endTime "Date/Time" row.
          */
         rowData = new RowData();
         attribute = new Attribute("startTime", Type.DATE_TIME);
         rowData.addAttribute(attribute);
-        rowData.setAttributeOperator(">=");
+        rowData.setAttributeOperator(Operator.GREATER_THAN_EQUALS);
         rowData.setAttributeValue(new GregorianCalendar(2011, 0, 1).getTime());
         rootRow.addChildRow(rowData);
 
         rowData = new RowData();
         attribute = new Attribute("endTime", Type.DATE_TIME);
         rowData.addAttribute(attribute);
-        rowData.setAttributeOperator("<=");
+        rowData.setAttributeOperator(Operator.LESS_THAN_EQUALS);
         rowData.setAttributeValue(new Date());
         rootRow.addChildRow(rowData);
 
@@ -1794,12 +1779,10 @@ public class RowData
                                   Type.PER_USER_PARAMETERS_MAP,
                                   null, Cardinality.TO_MANY, true);
         rowData.addAttribute(attribute);
-
         rowData.setPropName("animalID");
         rowData.setPropType(Type.INT_32);
-        rowData.setAttributeOperator("<=");
+        rowData.setAttributeOperator(Operator.LESS_THAN_EQUALS);
         rowData.setAttributeValue("123");
-
         rootRow.addChildRow(rowData);
 
         /**
@@ -1809,12 +1792,10 @@ public class RowData
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
                                   null, Cardinality.N_A);
         rowData.addAttribute(attribute);
-
         rowData.setPropName("stimulusFrequency");
         rowData.setPropType(Type.INT_32);
-        rowData.setAttributeOperator("==");
+        rowData.setAttributeOperator(Operator.EQUALS);
         rowData.setAttributeValue("27");
-
         rootRow.addChildRow(rowData);
 
         /**
@@ -1824,12 +1805,10 @@ public class RowData
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
                                   null, Cardinality.N_A);
         rowData.addAttribute(attribute);
-
         rowData.setPropName("stimulusName");
         rowData.setPropType(Type.UTF_8_STRING);
-        rowData.setAttributeOperator("~~=");
+        rowData.setAttributeOperator(Operator.MATCHES_CASE_INSENSITIVE);
         rowData.setAttributeValue("caffeine");
-
         rootRow.addChildRow(rowData);
 
         /**
@@ -1839,9 +1818,7 @@ public class RowData
         attribute = new Attribute("derivedResponses", null, Type.PER_USER,
                                   derivedResponseCD, Cardinality.TO_MANY, true);
         rowData.addAttribute(attribute);
-
         rowData.setCollectionOperator(CollectionOperator.ALL);
-
         rootRow.addChildRow(rowData);
 
         /**
@@ -1856,10 +1833,8 @@ public class RowData
         rowData.addAttribute(attribute);
         attribute = new Attribute("label", Type.UTF_8_STRING);
         rowData.addAttribute(attribute);
-
-        rowData.setAttributeOperator("==");
+        rowData.setAttributeOperator(Operator.EQUALS);
         rowData.setAttributeValue("Test 27");
-
         rootRow.addChildRow(rowData);
 
         /**
@@ -1878,28 +1853,35 @@ public class RowData
          */
         rowData = new RowData();
         rowData.setCollectionOperator(CollectionOperator.ALL);
-
         attribute = new Attribute("epochGroup", Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
         rowData.addAttribute(attribute);
         attribute = new Attribute("epochs", Type.REFERENCE,
                                   epochCD, Cardinality.TO_MANY);
         rowData.addAttribute(attribute);
-
         rootRow.addChildRow(rowData);
 
+        /**
+         * Create a child row of the above row.
+         */
         RowData rowData2 = new RowData();
         attribute = new Attribute("startTime", Type.DATE_TIME);
         rowData2.addAttribute(attribute);
-
-        rowData2.setAttributeOperator(">=");
+        rowData2.setAttributeOperator(Operator.GREATER_THAN_EQUALS);
         rowData2.setAttributeValue(new GregorianCalendar(2010, 0, 1).getTime());
-
         rowData.addChildRow(rowData2);
 
         System.out.println("rootRow:\n"+rootRow.toString());
 
         return(rootRow);
+    }
+
+
+    /**
+     * Delete this method when done with development.
+     */
+    public int getChangeLevel() {
+        return(changeLevel);
     }
 
 

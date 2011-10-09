@@ -67,7 +67,7 @@ public enum Type {
 
 
     /**
-     * Get a string version of this type that can be used
+     * Get a string version of this enum value that can be used
      * in the GUI.
      */
     public String toString() {
@@ -94,6 +94,9 @@ public enum Type {
             case PER_USER_PARAMETERS_MAP:
                 return("per-user parameters map");
             default:
+                System.err.println("ERROR:  Unhandled Type enum.\n"+
+                    "If this happens, you need to update the switch\n"+ 
+                    "statement in Type.toString().");
                 return("ERROR");
         }
     }

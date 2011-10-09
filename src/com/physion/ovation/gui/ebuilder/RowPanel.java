@@ -41,6 +41,7 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datamodel.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
 import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
+import com.physion.ovation.gui.ebuilder.datatypes.Operator;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 
@@ -685,6 +686,13 @@ class RowPanel
      * This method is called when the user clicks on a +,++,- button
      * on the right side of a row, or when the user sets a time/date
      * value using the dateTimePicker.
+     *
+     * TODO:  The calls to getExpressionPanel().createRowPanels()
+     * really don't belong here.  The method getExpressionPanel()
+     * should not exist.  Instead, the ExpressionPanel should be
+     * a RowDataListener and update itself when it gets a
+     * a RowDataEvent that affects the number of RowPanels it
+     * contains.
      */
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -711,8 +719,8 @@ class RowPanel
             comboBoxChanged((JComboBox)e.getSource());
         }
         else {
-            System.err.println("ERROR: actionPerformed() does not handle "+
-                "events from this widget.  event = "+e);
+            System.err.println("ERROR: RowPanel.actionPerformed() does not "+
+                "handle events from this widget.  event = "+e);
         }
     }
 
@@ -803,7 +811,7 @@ class RowPanel
              * User has changed the operator for a "keyed" property.
              */
             rowData.setAttributeOperator(
-                operatorComboBox.getSelectedItem().toString());
+                (Operator)operatorComboBox.getSelectedItem());
         }
         else {
             /**
@@ -821,13 +829,16 @@ class RowPanel
              */
             handleAttributeSelected(comboBox, (Attribute)selectedObject);
         }
-        else if ((selectedObject instanceof String) &&
+        /*
+        else if ((selectedObject instanceof Operator) &&
                  rowData.getChildmostAttribute().isPrimitive()) {
+        */
+        else if (selectedObject instanceof Operator) {
             /**
-             * The user has selected a value in primitive operator
+             * The user has selected a value in the operatorComboBox
              * comboBox.  E.g. ==, !=, >.
              */
-            rowData.setAttributeOperator((String)selectedObject);
+            rowData.setAttributeOperator((Operator)selectedObject);
         }
         else if (selectedObject instanceof CollectionOperator) {
             /**
@@ -1192,13 +1203,11 @@ class RowPanel
              */
 
             if ((rightmostAttribute.getType() == Type.DATE_TIME) &&
-                (!DataModel.OPERATOR_IS_NULL.equals(
-                 rowData.getAttributeOperator())) &&
-                (!DataModel.OPERATOR_IS_NOT_NULL.equals(
-                 rowData.getAttributeOperator()))) {
+                (rowData.getAttributeOperator() != Operator.IS_NULL) &&
+                (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
                 /**
                  * We only display the dateTimePicker if the
-                 * operator is not "is null".
+                 * operator is not "is null" or "is not null".
                  */
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
@@ -1251,24 +1260,15 @@ class RowPanel
              */
 
             if (rightmostAttribute.getType() == Type.BOOLEAN) {
-                if (DataModel.OPERATOR_TRUE.equals(
-                    rowData.getAttributeOperator())) {
-                    operatorComboBox.setSelectedItem(
-                        DataModel.OPERATOR_TRUE);
-                }
-                else {
-                    operatorComboBox.setSelectedItem(
-                        DataModel.OPERATOR_FALSE);
-                }
+                operatorComboBox.setSelectedItem(
+                    rowData.getAttributeOperator());
             }
             else if (rightmostAttribute.getType() == Type.DATE_TIME) {
 
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
-                if ((!DataModel.OPERATOR_IS_NULL.equals(
-                     rowData.getAttributeOperator())) &&
-                    (!DataModel.OPERATOR_IS_NOT_NULL.equals(
-                     rowData.getAttributeOperator()))) {
+                if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
+                    (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
                     dateTimePicker.setDate((Date)rowData.getAttributeValue());
                 }
             }
@@ -1378,12 +1378,10 @@ class RowPanel
                 /** 
                  * Add the dateTimePicker where the user can enter the
                  * the value of the "keyed" property.   But, only if
-                 * the operator is not "is null" or "is not null".
+                 * the operator is not "is null" and "is not null".
                  */
-                if ((!DataModel.OPERATOR_IS_NULL.equals(
-                     rowData.getAttributeOperator())) &&
-                    (!DataModel.OPERATOR_IS_NOT_NULL.equals(
-                     rowData.getAttributeOperator()))) {
+                if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
+                    (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
 
                     gc = new GridBagConstraints();
                     gc.gridx = gridx++;
@@ -1415,10 +1413,17 @@ class RowPanel
                 add(valueTextField, gc);
             }
 
+            /**
+             * Set the property name, type, and operator.
+             */
             propNameTextField.setText(rowData.getPropName());
             propTypeComboBox.setSelectedItem(rowData.getPropType());
-            operatorComboBox.setSelectedItem(
-                rowData.getAttributeOperator());
+            operatorComboBox.setSelectedItem(rowData.getAttributeOperator());
+
+            /**
+             * Now based on the type, set the value of the
+             * attribute.
+             */
             if (rowData.getPropType() == Type.INT_32) {
                 valueSpinnerInt32.setValue(0);
             }
@@ -1432,10 +1437,13 @@ class RowPanel
                     valueTextField.setText("");
             }
             else if (rowData.getPropType() == Type.DATE_TIME) {
-                if ((!DataModel.OPERATOR_IS_NULL.equals(
-                     rowData.getAttributeOperator())) &&
-                    (!DataModel.OPERATOR_IS_NOT_NULL.equals(
-                    rowData.getAttributeOperator()))) {
+                /**
+                 * The property is a date/time type, so set
+                 * the value of the dateTimePicker if the
+                 * operator is not "is null" and "is not null".
+                 */
+                if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
+                    (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
 
                     if (rowData.getAttributeValue() instanceof Date) {
                         dateTimePicker.setDate(
@@ -1597,7 +1605,7 @@ class RowPanel
                  */
                 operatorComboBox.setModel(
                     new DefaultComboBoxModel(
-                        DataModel.OPERATORS_ARITHMATIC));
+                        Operator.OPERATORS_ARITHMATIC));
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
 
@@ -1629,22 +1637,22 @@ class RowPanel
 
             case BOOLEAN:
                 operatorComboBox.setModel(
-                    new DefaultComboBoxModel(DataModel.OPERATORS_BOOLEAN));
+                    new DefaultComboBoxModel(Operator.OPERATORS_BOOLEAN));
             break;
 
             case UTF_8_STRING:
-            operatorComboBox.setModel(new DefaultComboBoxModel(
-                DataModel.OPERATORS_STRING));
+                operatorComboBox.setModel(new DefaultComboBoxModel(
+                    Operator.OPERATORS_STRING));
             break;
 
             case DATE_TIME:
                 operatorComboBox.setModel(new DefaultComboBoxModel(
-                    DataModel.OPERATORS_DATE_TIME));
+                    Operator.OPERATORS_DATE_TIME));
             break;
 
             default:  // INT_16, INT_32, FLOAT_64
                 operatorComboBox.setModel(new DefaultComboBoxModel(
-                    DataModel.OPERATORS_ARITHMATIC));
+                    Operator.OPERATORS_ARITHMATIC));
         }
     }
 

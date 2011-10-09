@@ -13,47 +13,17 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
  * This class manages all the data types/classes that are part
  * of the system.  It is a singleton.  (I.e. only one instance
  * of this class should exist.)
+ *
+ * At some point in the future, Physion will probably replace
+ * this class with something else that more closely matches
+ * their existing C++ code.
  */
 public class DataModel {
 
-    public static final String OPERATOR_TRUE = "is true";
-    public static final String OPERATOR_FALSE = "is false";
-
-    /**
-     * Please note, we are using the String version of
-     * Attribute.IS_NULL and IS_NOT_NULL for the
-     * OPERATOR_IS_NULL and OPERATOR_IS_NOT_NULL operators.
-     */
-    public static final String OPERATOR_IS_NULL =
-        Attribute.IS_NULL.getDisplayName();
-
-    public static final String OPERATOR_IS_NOT_NULL =
-        Attribute.IS_NOT_NULL.getDisplayName();
-
-    public static final String[] OPERATORS_BOOLEAN =
-        {OPERATOR_TRUE, OPERATOR_FALSE};
-
-    public static final String[] OPERATORS_ARITHMATIC =
-        {"==", "!=", "<", "<=", ">", ">="};
-
-    /**
-     * The string operators are the arithmetic operators
-     * plus some extra operators.
-     */
-    public static final String[] OPERATORS_STRING =
-        {"==", "!=", "<", "<=", ">", ">=",
-        "~=", "~~="};
-
-    /**
-     * The time operators are the arithmetic operators
-     * plus the "is null" operator.
-     */
-    public static final String[] OPERATORS_DATE_TIME =
-        {"==", "!=", "<", "<=", ">", ">=",
-        OPERATOR_IS_NULL, OPERATOR_IS_NOT_NULL};
-
     /**
      * Possible types for a "properties" keyed value.
+     * I.e. A user can declare that a keyed property
+     * is one of these types.
      */
     public static final Type[] PROP_TYPES = {Type.INT_32,
                                              Type.FLOAT_64,
@@ -106,56 +76,11 @@ public class DataModel {
 
 
     /**
-     * Returns true if the passed in operator is a legal boolean
-     * operator.  E.g. it is "true" or "false".
-     */
-    public static boolean isOperatorBoolean(String operator) {
-
-        ArrayList<String> operators = new ArrayList<String>(
-            Arrays.asList(OPERATORS_BOOLEAN));
-        return(operators.contains(operator));
-    }
-
-
-    /**
-     * Returns true if the passed in operator is a legal arithmatic
-     * operator.  E.g. it is "==", "!=", ">=", etc.
-     */
-    public static boolean isOperatorArithmatic(String operator) {
-
-        ArrayList<String> operators = new ArrayList<String>(
-            Arrays.asList(OPERATORS_ARITHMATIC));
-        return(operators.contains(operator));
-    }
-
-
-    /**
-     * Returns true if the passed in operator is a legal date/time
-     * operator.  E.g. it is "==", "!=", "is null", etc.
-     */
-    public static boolean isOperatorDateTime(String operator) {
-
-        ArrayList<String> operators = new ArrayList<String>(
-            Arrays.asList(OPERATORS_DATE_TIME));
-        return(operators.contains(operator));
-    }
-
-
-    /**
-     * Returns true if the passed in operator is a legal string
-     * operator.  E.g. it is "==", "!=", ">=", "~~==", etc.
-     */
-    public static boolean isOperatorString(String operator) {
-
-        ArrayList<String> operators = new ArrayList<String>(
-            Arrays.asList(OPERATORS_STRING));
-        return(operators.contains(operator));
-    }
-
-
-    /**
      * This method creates hard coded values at the moment.
-     * Eventually, these values will come from a configuration file.
+     * Eventually, these values could come from a configuration file.
+     * But, as of October 2011, we have decided that there is
+     * nothing to be gained by writing a parser to do that.
+     * Changing the code in this method is pretty simple.
      */
     private static void initialize() {
 
@@ -198,17 +123,14 @@ public class DataModel {
         ClassDescription sourceCD =
             new ClassDescription("Source", taggableEntityBaseCD);
         allClassDescriptions.add(sourceCD);
-        possibleCUQs.add(sourceCD);
 
         ClassDescription epochGroupCD =
             new ClassDescription("EpochGroup", timelineElementCD);
         allClassDescriptions.add(epochGroupCD);
-        possibleCUQs.add(epochGroupCD);
 
         ClassDescription epochCD =
             new ClassDescription("Epoch", timelineElementCD);
         allClassDescriptions.add(epochCD);
-        possibleCUQs.add(epochCD);
 
         ClassDescription stimulusCD =
             new ClassDescription("Stimulus", iOBaseCD);
@@ -238,6 +160,43 @@ public class DataModel {
             new ClassDescription("AnalysisRecord", taggableEntityBaseCD);
         allClassDescriptions.add(analysisRecordCD);
 
+        /**
+         * Of the ClassDescriptions we created above,
+         * we want to have a subset of them available
+         * as choices in the "Class Under Qualification"
+         * comboBox at the top of the GUI.
+         * Create the list of possible CUQ's now.
+         */
+        possibleCUQs.add(epochCD);
+        possibleCUQs.add(epochGroupCD);
+        possibleCUQs.add(sourceCD);
+
+        /**
+         * The ClassDescription objects we created above are
+         * empty at this point.  Now we will set what Attributes
+         * each ClassDescription contains.
+         *
+         * Each block of code below follows the same form:
+         * Create an Attribute object, and add it to the
+         * ClassDescription.
+         *
+         * There are a few Attribute object constructors
+         * that you can use.  If the Attribute is a simple
+         * primitive such as int, float, string, time,
+         * you only need to provide a name and a type to
+         * the Attribute constructor.
+         *
+         * If an Attribute is a reference to a class,
+         * you also need to pass the ClassDescription
+         * to which it is a reference, and its
+         * cardinality:  to-one or to-many.
+         *
+         * The parameters-map, per-user, and per-user-parameters-map
+         * Attributes are created in a similar way.
+         * Just look at an example of the desired Attribute
+         * type below and cut and paste the code, and change
+         * the name of the Attribute.
+         */
 
         Attribute attribute;
 
@@ -246,7 +205,7 @@ public class DataModel {
          * Initialize values of the EntityBase class.
          */
         attribute = new Attribute("owner", Type.REFERENCE,
-                                            userCD, Cardinality.TO_ONE);
+                                  userCD, Cardinality.TO_ONE);
         entityBaseCD.addAttribute(attribute);
 
         attribute = new Attribute("uuid", Type.UTF_8_STRING);
@@ -573,7 +532,7 @@ public class DataModel {
     public static ClassDescription getClassDescription(String name) {
 
         /**
-         * Be sure we are initialized.
+         * Be sure the ClassDescription singleton has been initialized.
          */
         getInstance();
 
@@ -587,11 +546,24 @@ public class DataModel {
     }
 
 
+    /**
+     * Get a list of all the ClassDescription objects.
+     *
+     * Please note, this method does NOT return a copy of the
+     * list, so don't mess with it.
+     */
     public static ArrayList<ClassDescription> getAllClassDescriptions() {
         return(allClassDescriptions);
     }
 
 
+    /**
+     * Get a list of the ClassDescription objects that can
+     * be used as a CUQ (Class Under Qualification).
+     *
+     * Please note, this method does NOT return a copy of the
+     * list, so don't mess with it.
+     */
     public static ArrayList<ClassDescription> getPossibleCUQs() {
         return(possibleCUQs);
     }

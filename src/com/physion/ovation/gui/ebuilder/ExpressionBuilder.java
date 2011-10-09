@@ -451,11 +451,12 @@ public class ExpressionBuilder
 
         if ((event.getTiming() == RowDataEvent.TIMING_BEFORE) &&
             changeIsSavable(event.getChangeType())) {
-            //System.out.println("\nGot BEFORE_CHANGE event.");
+            //System.out.println("*** Got TIMING_BEFORE event.");
             possiblySaveState(true);
             stateIndex = stateList.size()-1;
         }
         else if (event.getTiming() == RowDataEvent.TIMING_AFTER) {
+            //System.out.println("*** Got TIMING_AFTER event.");
             enableButtons();
         }
         else {
