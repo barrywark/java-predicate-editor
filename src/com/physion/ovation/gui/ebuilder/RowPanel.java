@@ -38,10 +38,10 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
-import com.physion.ovation.gui.ebuilder.datamodel.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
 import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 import com.physion.ovation.gui.ebuilder.datatypes.Operator;
+import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 
@@ -636,10 +636,9 @@ class RowPanel
             getIndexOf(selectedItem) < 0) {
 
             System.err.println("ERROR:  Desired selectedItem not found in "+
-                "list.\nselectedItem = "+selectedItem+"\nItems in list:\n");
+                "list.\nselectedItem = "+selectedItem+"\nItems in list:");
             for (Object item : items) {
-                //System.out.println("  "+((Attribute)item).toStringDebug());
-                System.out.println("  "+item);
+                System.err.println("  "+item);
             }
         }
     }
@@ -686,13 +685,6 @@ class RowPanel
      * This method is called when the user clicks on a +,++,- button
      * on the right side of a row, or when the user sets a time/date
      * value using the dateTimePicker.
-     *
-     * TODO:  The calls to getExpressionPanel().createRowPanels()
-     * really don't belong here.  The method getExpressionPanel()
-     * should not exist.  Instead, the ExpressionPanel should be
-     * a RowDataListener and update itself when it gets a
-     * a RowDataEvent that affects the number of RowPanels it
-     * contains.
      */
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -702,15 +694,12 @@ class RowPanel
 
         if (e.getSource() == createCompoundRowButton) {
             rowData.createCompoundRow();
-            getExpressionPanel().createRowPanels();
         }
         else if (e.getSource() == createAttributeRowButton) {
             rowData.createAttributeRow();
-            getExpressionPanel().createRowPanels();
         }
         else if (e.getSource() == deleteRowButton) {
             rowData.removeFromParent();
-            getExpressionPanel().createRowPanels();
         }
         else if (e.getSource() instanceof DateTimePicker) {
             dateTimeChanged();
@@ -722,22 +711,6 @@ class RowPanel
             System.err.println("ERROR: RowPanel.actionPerformed() does not "+
                 "handle events from this widget.  event = "+e);
         }
-    }
-
-
-    /**
-     * Get the ExpressionPanel that contains this RowPanel.
-     * The ExpressionPanel is the panel that arranges all the
-     * RowPanels in a list.
-     */
-    private ExpressionPanel getExpressionPanel() {
-
-        Container parent = getParent();
-        while ((parent != null) &&
-               !(parent instanceof ExpressionPanel))
-            parent = getParent();
-
-        return((ExpressionPanel)parent);
     }
 
 
@@ -945,7 +918,7 @@ class RowPanel
             }
         }
 
-        getExpressionPanel().createRowPanels();
+        //getExpressionPanel().createRowPanels();
     }
 
 
@@ -1140,6 +1113,12 @@ class RowPanel
                  * Also set the selected item in the comboBox.
                  */
                 ClassDescription parentClass = rowData.getParentClass();
+                if (parentClass == null) {
+                    System.err.println("ERROR: layoutAttributeRow encountered "+
+                        "parentClass == null.\n"+
+                        "This should never happen.");
+                    return;
+                }
                 setComboBoxModel(getComboBox(index), parentClass,
                                  false, rowData.getAttribute(index));
             }

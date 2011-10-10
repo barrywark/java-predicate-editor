@@ -9,6 +9,7 @@ import javax.swing.event.EventListenerList;
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
 import com.physion.ovation.gui.ebuilder.datatypes.Operator;
+import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 
@@ -621,7 +622,7 @@ public class RowData
         getRootRow().classUnderQualification = classUnderQualification;
 
         if (!getRootRow().getChildRows().isEmpty()) {
-            System.out.println("INFO:  Clearing all childRows.");
+            //System.out.println("INFO:  Clearing all childRows.");
             getRootRow().getChildRows().clear();
         }
         fireRowDataEvent(RowDataEvent.TIMING_AFTER, RowDataEvent.TYPE_CUQ);
@@ -900,6 +901,55 @@ public class RowData
              */
             addAttribute(Attribute.SELECT_ATTRIBUTE);
         }
+
+        /**
+         * Make sure that if we have child rows they
+         * are appropriate for the childmost attribute
+         * of this row.  If they aren't, remove them.
+         */
+        if ((childmostAttribute.getClassDescription() == null) ||
+            (getCollectionOperator() == null) ||
+            !getCollectionOperator().isCompoundOperator()) {
+
+            /**
+             * This row cannot have children, so remove any
+             * children we currently have.
+             */
+            clearChildRows();
+        }
+        else {
+            /**
+             * Make sure the child rows are of the same
+             * class as the parent row.  In the current
+             * implementation, all child rows are the
+             * same class, so this code simply tests the
+             * first child row and then removes all 
+             * child rows if the first one is of the wrong
+             * type.  If, in the future, a parent row
+             * can have a heterogeneous set of child rows,
+             * the code below will have to be changed
+             * to a for loop that looks at all the child
+             * rows.
+             */
+            System.out.println("ClassDescription is not null");
+            if (getChildRows().size() > 0) {
+
+                System.out.println("ClassDescription is not null");
+
+                RowData firstChildRow = getChildRows().get(0);
+                Attribute attribute = null;
+                System.out.println("size() = "+
+                    firstChildRow.getAttributePath().size());
+                if (firstChildRow.getAttributePath().size() > 0) {
+                    attribute = firstChildRow.getAttribute(0);
+                    if (!childmostAttribute.getClassDescription().
+                        containsAttribute(attribute)) {
+                        clearChildRows();
+                    }
+                }
+            }
+        }
+
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_UNDEFINED);
     }
@@ -1339,6 +1389,20 @@ public class RowData
         childRow.addRowDataListener(this);
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_CHILD_ADD);
+    }
+
+
+    /**
+     * Clear the list of child rows.
+     *
+     * Currently, this is a private method, and is only
+     * called as part of some other change to this
+     * RowData object, so we don't call fireRowDataEvent().
+     * If this method becomes public, add calls to
+     * fireRowDataEvent().
+     */
+    private void clearChildRows() {
+        childRows = new ArrayList<RowData>();
     }
 
 

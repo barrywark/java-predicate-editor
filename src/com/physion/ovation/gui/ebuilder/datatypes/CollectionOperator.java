@@ -1,4 +1,4 @@
-package com.physion.ovation.gui.ebuilder.datamodel;
+package com.physion.ovation.gui.ebuilder.datatypes;
 
 
 /**

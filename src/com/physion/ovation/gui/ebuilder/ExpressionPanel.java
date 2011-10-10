@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Arrays;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
+import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
+import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
 
 
 /**
@@ -17,7 +19,8 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowData;
  * Physion decides it does not want to do something like that.
  */
 public class ExpressionPanel
-    extends JPanel {
+    extends JPanel
+    implements RowDataListener {
 
     private RowData rootRow;
 
@@ -38,7 +41,11 @@ public class ExpressionPanel
      */
     public void setRootRow(RowData rootRow) {
 
+        if (this.rootRow != null)
+            this.rootRow.removeRowDataListener(this);
+
         this.rootRow = rootRow;
+        rootRow.addRowDataListener(this);
         createRowPanels();
     }
 
@@ -48,6 +55,13 @@ public class ExpressionPanel
     }
 
 
+    /**
+     * Create all the RowPanels this ExpressionPanel contains.
+     *
+     * TODO: Make this code more clever so when rows are added
+     * or deleted we don't remove all the rows and recreate
+     * all the rows, but instead we only change what we need to.
+     */
     public void createRowPanels() {
 
         removeAll();
@@ -85,6 +99,17 @@ public class ExpressionPanel
      */
     private RowPanel getRowPanel(int index) {
         return((RowPanel)getComponent(index));
+    }
+
+
+    /**
+     * This is called when the expression tree we are displaying
+     * is modified.
+     */
+    public void rowDataChanged(RowDataEvent event) {
+
+        if (event.getTiming() == RowDataEvent.TIMING_AFTER)
+            createRowPanels();
     }
 
 

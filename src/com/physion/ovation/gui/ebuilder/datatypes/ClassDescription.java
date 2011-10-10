@@ -89,6 +89,27 @@ public class ClassDescription {
     }
 
 
+    public ClassDescription getParentClass() {
+        return(parentClass);
+    }
+
+
+    /*
+    public boolean isInstanceof(ClassDescription classDescription) {
+
+        if (classDescription == null) {
+            return(false);
+        }
+
+        while (classDescription != null) {
+            if (this.equals(classDescription))
+                return(true);
+            classDescription = classDescription.getParentClass();
+        }
+
+        return(false);
+    }
+    */
     public void addAttribute(Attribute attribute) {
         attributes.add(attribute);
     }
@@ -115,6 +136,17 @@ public class ClassDescription {
             allAttributes.addAll(parentClass.getAllAttributes());
 
         return(allAttributes);
+    }
+
+
+    public boolean containsAttribute(Attribute attribute) {
+
+        for (Attribute att : getAllAttributes()) {
+            if (att.equals(attribute))
+                return(true);
+        }
+
+        return(false);
     }
 
 
