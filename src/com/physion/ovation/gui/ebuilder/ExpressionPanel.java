@@ -160,6 +160,16 @@ public class ExpressionPanel
                 RowPanel rowPanel = getRowPanel(rowData);
                 rowPanel.setFocusToFirstFocusableComponent();
             }
+            else if ((event.getChangeType() ==
+                      RowDataEvent.TYPE_CHILD_DELETE) ||
+                     (event.getChangeType() == RowDataEvent.TYPE_CUQ)) {
+
+                /**
+                 * Set the focus to the first row.
+                 */
+                RowPanel rowPanel = getRowPanel(rootRow);
+                rowPanel.setFocusToFirstFocusableComponent();
+            }
         }
     }
 

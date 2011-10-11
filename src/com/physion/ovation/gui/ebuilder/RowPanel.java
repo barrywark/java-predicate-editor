@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.FocusManager;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.Document;
@@ -440,13 +441,19 @@ class RowPanel
 
 
         /**
-         * First, remove whatever components used to be in the
-         * row.
+         * First save which component has the focus before we start
+         * removing components from this RowPanel.
+         */
+        Component componentWithFocus = FocusManager.getCurrentManager().
+            getFocusOwner();
+
+        /**
+         * Now remove ALL the components that are in this RowPanel.
          */
         removeAll();
 
         /**
-         * Now start adding the components that are needed to
+         * Add back in the components that are needed to
          * display and edit our current rowData value.
          *
          * Start our "gridx" counter that is incremented every time
@@ -515,6 +522,23 @@ class RowPanel
          * Note that this also makes a call to repaint().
          */
         adjustBackgroundColor();
+
+        /**
+         * Set the focus back to the component that had it before
+         * we removed all the components and put some components
+         * back.
+         *
+         * If the same component that had the focus before is
+         * no longer being used, (i.e. it is not in this RowPanel
+         * any more), then set the focus to whatever the first
+         * focusable component is in this RowPanel.
+         */
+        if (componentWithFocus != null) {
+            if (componentWithFocus.getParent() != null)
+                componentWithFocus.requestFocusInWindow();
+            else
+                setFocusToFirstFocusableComponent();
+        }
     }
 
 
@@ -1657,7 +1681,6 @@ class RowPanel
      */
     void setFocusToFirstFocusableComponent() {
 
-        //System.out.println("Enter setFocusToFirst");
         /**
          * We could do something as simple
          * as this if we wanted.
