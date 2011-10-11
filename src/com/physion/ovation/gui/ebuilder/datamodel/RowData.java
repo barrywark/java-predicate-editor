@@ -320,10 +320,12 @@ public class RowData
 
     /**
      * Add a listener to this RowData.
-     * The listener will be modified when anything in this RowData
+     * The listener will be notified when anything in this RowData
      * or any of its descendents changes.  So, you only need to
      * listen to the root RowData of an expression tree to be notified
-     * if anything anywhere in the tree changes.
+     * if anything anywhere in the tree changes.  The RowDataEvent
+     * that the listener gets will have a reference to the actual
+     * RowData object that was changed.
      */
     public void addRowDataListener(RowDataListener listener) {
         rowDataListenerList.add(RowDataListener.class, listener);
@@ -339,17 +341,24 @@ public class RowData
 
 
     /**
+     * Fire a RowDataEvent for THIS RowData object.
+     * See RowDataEvent for information about timing and changeType.
+     */
+    private void fireRowDataEvent(int timing, int changeType) {
+        fireRowDataEvent(new RowDataEvent(this, timing, changeType));
+    }
+
+
+    /**
      * Notify all listeners that have registered interest for
-     * notification on this event type.
+     * notification on the passed in RowDataEvent.
      *
      * Please see the comments for the changeLevel member data
      * for more information about its purpose.
      */
-    private void fireRowDataEvent(int timing, int changeType) {
+    private void fireRowDataEvent(RowDataEvent rowDataEvent) {
 
-        //System.out.println("Enter fireRowDataEvent("+timing+", "+changeType+
-        //                   ")");
-        if (timing == RowDataEvent.TIMING_AFTER)
+        if (rowDataEvent.getTiming() == RowDataEvent.TIMING_AFTER)
             changeLevel--;
 
         if (changeLevel < 0) {
@@ -379,13 +388,6 @@ public class RowData
             //System.out.println("Send RowDataEvent("+timing+", "+changeType+
             //    ") for this: "+this.getRowString());
 
-            /**
-             * Create a RowDataEvent that will tell the listener
-             * about this event.
-             */
-            RowDataEvent rowDataEvent = new RowDataEvent(this, timing,
-                                                         changeType);
-
             RowDataListener listenerList[] =
                 rowDataListenerList.getListeners(RowDataListener.class);
             for (RowDataListener listener : listenerList) {
@@ -406,7 +408,7 @@ public class RowData
             }
         }
 
-        if (timing == RowDataEvent.TIMING_BEFORE)
+        if (rowDataEvent.getTiming() == RowDataEvent.TIMING_BEFORE)
             changeLevel++;
     }
 
@@ -420,14 +422,15 @@ public class RowData
      * If, at some point in the future, the GUI will need to keep
      * track of individual rows, we might want to restructure the
      * way RowDataEvents are passed up the listener "tree" in order
-     * to tell the root listener which row actually changed.
+     * to tell the root listener the "topmost" RowData that is
+     * handing him the event along with which RowData actually changed.
      * Perhaps "chain" the RowDataEvents together as a list.
      * No need for this sort of granularity/complication at the
      * present time.
      */
     @Override
-    public void rowDataChanged(RowDataEvent rowData) {
-        fireRowDataEvent(rowData.getTiming(), rowData.getChangeType());
+    public void rowDataChanged(RowDataEvent event) {
+        fireRowDataEvent(event);
     }
 
 
@@ -1371,7 +1374,11 @@ public class RowData
     }
 
 
-    private ArrayList<RowData> getChildRows() {
+    /**
+     * This returns this RowData's list of child RowDatas.
+     * It does NOT return a copy, so don't mess with it.
+     */
+    public ArrayList<RowData> getChildRows() {
 
         if (childRows == null)
             childRows = new ArrayList<RowData>();
@@ -1504,9 +1511,9 @@ public class RowData
         /**
          * Do a quick sanity check.
          */
-        if (collectionOperator != null &&
+        if ((collectionOperator != null) &&
             (collectionOperator != CollectionOperator.COUNT) &&
-            attributeOperator != null) {
+            (attributeOperator != null)) {
             string += "ERROR: RowData is in an inconsistent state.";
             string += "\ncollectionOperator = "+collectionOperator;
             string += "\nattributeOperator = "+attributeOperator;
@@ -1529,22 +1536,6 @@ public class RowData
         if (attributeOperator != null)
             string += " "+attributeOperator;
 
-        /**
-         * If the user specified the "is null" or "is not null" operator,
-         * then s/he cannot also specify a value.
-         */
-        /*
-        if ((attributeOperator != null) &&
-            (attributeOperator.equals(Attribute.IS_NULL.toString()) ||
-             attributeOperator.equals(Attribute.IS_NOT_NULL.toString())) &&
-            (attributeValue != null)) {
-            string += "ERROR: RowData is in an inconsistent state.";
-            string += "\nattributeOperator = "+attributeOperator;
-            string += "\nattributeValue = "+attributeValue;
-            return(string);
-        }
-        */
-
         if (attributeValue != null) {
             string += " \""+attributeValue+"\"";
         }
@@ -1565,12 +1556,9 @@ public class RowData
             /**
              * This is the root row, which does not have an attribute path.
              */
-            //return(classUnderQualification);
-            //System.out.println("getParentRow() == null");
             return(null);
         }
         else if (attributePath.isEmpty()) {
-            //System.out.println("attributePath.isEmpty()");
             return(null);
         }
         else

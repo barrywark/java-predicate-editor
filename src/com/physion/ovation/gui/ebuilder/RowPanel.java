@@ -259,6 +259,7 @@ class RowPanel
          * you change.
          */
         indentWidget = new JLabel();
+        indentWidget.setFocusable(false);
 
         deleteRowButton = new InvisibleButton("-");
         deleteRowButton.addActionListener(this);
@@ -353,6 +354,11 @@ class RowPanel
         buttonPanel.add(deleteRowButton, gc);
 
         initializeComponents();
+    }
+
+
+    RowData getRowData() {
+        return(rowData);
     }
 
 
@@ -1632,6 +1638,40 @@ class RowPanel
             default:  // INT_16, INT_32, FLOAT_64
                 operatorComboBox.setModel(new DefaultComboBoxModel(
                     Operator.OPERATORS_ARITHMATIC));
+        }
+    }
+
+
+    /**
+     * Set the focus to the first component we want to have
+     * the focus.  Currently, I am simply setting the focus
+     * to the first focusable component we contain, which
+     * is always the first comboBox.  We might instead want
+     * to set the focus to the last component this row
+     * contains.  Once we get some user feedback, we can
+     * work on this.
+     *
+     * Eventually, we probably want to have some sort of focus
+     * traversal policy to handle this stuff, but this is
+     * all we need for right now.
+     */
+    void setFocusToFirstFocusableComponent() {
+
+        //System.out.println("Enter setFocusToFirst");
+        /**
+         * We could do something as simple
+         * as this if we wanted.
+         */
+        //comboBoxes.get(0).requestFocusInWindow();
+
+        /**
+         * But this is safer.
+         */
+        for (Component component : getComponents()) {
+            if (component.isFocusable()) {
+                component.requestFocusInWindow();
+                return;
+            }
         }
     }
 

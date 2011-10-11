@@ -1,7 +1,9 @@
 package com.physion.ovation.gui.ebuilder;
 
+import java.awt.Component;
 import java.awt.GridLayout;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import java.util.Iterator;
 import java.util.Arrays;
 
@@ -97,19 +99,68 @@ public class ExpressionPanel
      * The root RowPanel, which is the one that is used
      * to select the Class Under Qualification, is at index 0.
      */
+    /*
     private RowPanel getRowPanel(int index) {
         return((RowPanel)getComponent(index));
+    }
+    */
+
+
+    /**
+     * This method returns the RowPanel that is displaying/editing
+     * the passed in rowData.  Returns null if no RowPanel in this
+     * ExpressionPanel is handling the passed in rowData.
+     */
+    private RowPanel getRowPanel(RowData rowData) {
+
+        for (Component component : getComponents()) {
+            if (((RowPanel)component).getRowData() == rowData) {
+                return((RowPanel)component);
+            }
+        }
+
+        return(null);
     }
 
 
     /**
      * This is called when the expression tree we are displaying
      * is modified.
+     *
+     * If the change is one that changes the number of rows
+     * in the GUI, recreate the RowPanels.
+     *
+     * TODO: Handle focus traversal properly if we want to have
+     * the GUI usable from the keyboard.
      */
     public void rowDataChanged(RowDataEvent event) {
 
-        if (event.getTiming() == RowDataEvent.TIMING_AFTER)
+        if ((event.getTiming() == RowDataEvent.TIMING_AFTER) &&
+            ((event.getChangeType() == RowDataEvent.TYPE_CHILD_ADD) ||
+             (event.getChangeType() == RowDataEvent.TYPE_CHILD_DELETE) ||
+             (event.getChangeType() == RowDataEvent.TYPE_CUQ))) {
+
             createRowPanels();
+
+            if (event.getChangeType() == RowDataEvent.TYPE_CHILD_ADD) {
+                /**
+                 * Set the focus to the new row.  Rows are always
+                 * added to the end of the parent row's list of children.
+                 * So, simply set the focus to the last child row of the
+                 * row that sent the event.
+                 */
+                RowData rowData = event.getRowData();
+                rowData = rowData.getChildRows().get(
+                    rowData.getChildRows().size()-1);
+
+                /**
+                 * Get the RowPanel that handles that rowData
+                 * and set the focus to it.
+                 */
+                RowPanel rowPanel = getRowPanel(rowData);
+                rowPanel.setFocusToFirstFocusableComponent();
+            }
+        }
     }
 
 
