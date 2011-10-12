@@ -1923,7 +1923,7 @@ public class RowData
         rowData2.setAttributeValue(new GregorianCalendar(2010, 0, 1).getTime());
         rowData.addChildRow(rowData2);
 
-        System.out.println("rootRow:\n"+rootRow.toString());
+        //System.out.println("rootRow:\n"+rootRow.toString());
 
         return(rootRow);
     }
