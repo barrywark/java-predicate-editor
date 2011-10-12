@@ -16,13 +16,17 @@ public class ExpressionImp
     implements Expression {
 
     /**
-     * 
+     * Required by Expression interface, but not needed for
+     * current work.
      */
     @Override
     public void accept(ExpressionVisitor expressionVisitor) {
     }
 
 
+    /**
+     * Create an Expression from the passed in rowData.
+     */
     private static Expression createExpression(RowData rowData) {
 
         Expression expression = null;
