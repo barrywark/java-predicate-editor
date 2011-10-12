@@ -14,4 +14,14 @@ public class StringLiteralValueExpressionImp
     public Object getValue() {
         return(value);
     }
+
+
+    StringLiteralValueExpressionImp(String value) {
+        this.value = value;
+    }
+
+
+    public String toString(String indent) {
+        return(indent+"StringLiteralValueExpression("+value+")");
+    }
 }

@@ -1046,21 +1046,26 @@ public class RowData
      * Please note, it is returning this RowData's member data.
      * It is NOT returning a copy, so if you make changes to
      * it, you are affecting this RowData object.
-     *
-     * TODO:  Make the RowData.getAttributePath() method private and
-     * force engineers to use the setAttribute(), addAttribute(), and
-     * removeAttribute() methods to access the attributePath.  This
-     * will let the RowData object impose whatever rules it needs to
-     * on the manipulation of the attributePath.  I have written
-     * the addAttribute() method, but that is just a start.
+     * Instead of calling this method, you should probably
+     * be calling the addAttribute() and getAttribute() methods.
      */
-    private ArrayList<Attribute> getAttributePath() {
+    public ArrayList<Attribute> getAttributePath() {
 
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
 
         return(attributePath);
     }
+
+
+    /**
+     * Get the number of Attribute objects in the attributePath.
+     */
+    /*
+    public int getAttributeCount() {
+        return(getAttributePath().size());
+    }
+    */
 
 
     /**

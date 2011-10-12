@@ -21,9 +21,12 @@ public class AttributeExpressionImp
     }
 
 
-    /*
-    AttributeExpressionImp(RowData rowData) {
-        attributeName = rowData.getAttributeName();
+    AttributeExpressionImp(String attributeName) {
+        this.attributeName = attributeName;
     }
-    */
+
+
+    public String toString(String indent) {
+        return(indent+"AttributeExpression("+attributeName+")");
+    }
 }

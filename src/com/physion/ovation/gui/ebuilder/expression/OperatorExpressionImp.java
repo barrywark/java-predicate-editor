@@ -20,12 +20,6 @@ public class OperatorExpressionImp
     private ArrayList<Expression> operandList;
 
 
-    public OperatorExpressionImp() {
-        operatorName = null;
-        operandList = new ArrayList<Expression>();
-    }
-
-
     /**
      * Get the operatorName for this OperatorExpression.
      *
@@ -57,6 +51,18 @@ public class OperatorExpressionImp
     }
 
 
+    OperatorExpressionImp() {
+        operatorName = null;
+        operandList = new ArrayList<Expression>();
+    }
+
+
+    OperatorExpressionImp(String operatorName) {
+        this();
+        this.operatorName = operatorName;
+    }
+
+
     /**
      * Create an OperatorExpressionImp object from a
      * RowData object.
@@ -66,13 +72,15 @@ public class OperatorExpressionImp
 
         operatorName = getOperatorName(rowData);
 
+        /*
         for (RowData childRow : rowData.getChildRows()) {
             addOperand(childRow);
         }
+        */
     }
 
 
-    private void addOperand(RowData rowData) {
+    void addOperand(RowData rowData) {
 
         OperatorExpression operatorExpression =
             new OperatorExpressionImp(rowData);
@@ -134,7 +142,7 @@ public class OperatorExpressionImp
     }
 
 
-    private void addOperand(Expression expression) {
+    void addOperand(Expression expression) {
         operandList.add(expression);
     }
 
@@ -158,10 +166,10 @@ public class OperatorExpressionImp
     public String toString(String indent) {
 
         String string = indent;
-        string += "OperatorExpression("+getOperatorName()+")\n";
+        string += "OperatorExpression("+getOperatorName()+")";
 
         for (Expression expression : getOperandList()) {
-            string += indent+expression.toString();
+            string += "\n"+indent+((ExpressionImp)expression).toString("  ");
         }
         return(string);
     }
