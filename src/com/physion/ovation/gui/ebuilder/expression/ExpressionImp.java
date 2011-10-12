@@ -67,12 +67,9 @@ public class ExpressionImp
         Attribute attribute = rowData.getChildmostAttribute();
         switch (attribute.getType()) {
 
-            /*
             case BOOLEAN:
-                return(new BooleanLiteralValueExpresion(
-                       rowData.getAttributeValue()));
-            break;
-            */
+                return(new BooleanLiteralValueExpressionImp(
+                       ((Boolean)rowData.getAttributeValue()).booleanValue()));
 
             case UTF_8_STRING:
                 return(new StringLiteralValueExpressionImp(
@@ -161,15 +158,21 @@ public class ExpressionImp
      */
     public static void main(String[] args) {
 
+        Attribute attribute;
+        RowData rowData;
+        RowData rootRow;
+        Expression expression;
+
         System.out.println("ExpressionImp test is starting...");
 
-        RowData rootRow = new RowData();
+        /**
+         * Test the Any collection operator, (which becomes "or"),
+         * and the String type and a couple attribute operators.
+         */
+        rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
         rootRow.setCollectionOperator(CollectionOperator.ANY);
-
-        Attribute attribute;
-        RowData rowData;
 
         rowData = new RowData();
         attribute = new Attribute("protocolID", Type.UTF_8_STRING);
@@ -181,7 +184,7 @@ public class ExpressionImp
         rowData = new RowData();
         attribute = new Attribute("protocolID", Type.UTF_8_STRING);
         rowData.addAttribute(attribute);
-        rowData.setAttributeOperator(Operator.EQUALS);
+        rowData.setAttributeOperator(Operator.MATCHES_CASE_INSENSITIVE);
         rowData.setAttributeValue("xyz");
         rootRow.addChildRow(rowData);
         
@@ -189,10 +192,30 @@ public class ExpressionImp
          * Now convert the RowData object we created above
          * into an Expression object.
          */
-        Expression expression = ExpressionImp.createExpressionTree(rootRow);
-
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nrootRow:\n"+rootRow);
         System.out.println("\nexpression:\n"+expression);
 
-        System.out.println("ExpressionImp test is ending.");
+        /**
+         * Test the All collection operator, (which becomes "and"),
+         * and the Boolean type.
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        attribute = new Attribute("incomplete", Type.BOOLEAN);
+        rowData.addAttribute(attribute);
+        rowData.setAttributeOperator(Operator.EQUALS);
+        rowData.setAttributeValue(new Boolean(true));
+        rootRow.addChildRow(rowData);
+
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nrootRow:\n"+rootRow);
+        System.out.println("\nexpression:\n"+expression);
+
+        System.out.println("\nExpressionImp test is ending.");
     }
 }
