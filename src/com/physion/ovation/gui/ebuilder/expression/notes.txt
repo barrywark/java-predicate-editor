@@ -125,7 +125,7 @@ much like the string "==" or "true".
 
 RowData:
 Epoch | All
-  Epoch | protocolParameters.key(time) == "Thu Oct 13 16:53:07 NZDT 2011"
+  Epoch | protocolParameters.key(time) == "Thu Oct 13 17:05:00 NZDT 2011"
 
 Expression:
 OperatorExpression(and)
@@ -137,24 +137,24 @@ OperatorExpression(and)
           StringLiteralValueExpression(key)
         ClassLiteralValueExpression(TimeValue)
       AttributeExpression(value)
-    TimeLiteralValueExpression(Thu Oct 13 16:53:07 NZDT 2011)
+    TimeLiteralValueExpression(Thu Oct 13 17:05:00 NZDT 2011)
 
 =====================================================================
 
 RowData:
 Epoch | All
-  Epoch | protocolParameters.key(float) == "12.3"
+  Epoch | nextEpoch.prevEpoch.nextEpoch.protocolParameters.key(float) == "12.3"
 
 Expression:
 OperatorExpression(and)
   OperatorExpression(==)
     OperatorExpression(.)
-      OperatorExpression(as)
-        OperatorExpression(parameter)
-          StringLiteralValueExpression(protocolParameters)
-          StringLiteralValueExpression(key)
-        ClassLiteralValueExpression(FloatValue)
-      AttributeExpression(value)
+      OperatorExpression(.)
+        OperatorExpression(.)
+          AttributeExpression(nextEpoch)
+          AttributeExpression(prevEpoch)
+        AttributeExpression(nextEpoch)
+      AttributeExpression(protocolParameters)
     Float64LiteralValueExpression(12.3)
 
 =====================================================================

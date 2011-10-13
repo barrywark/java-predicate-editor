@@ -515,6 +515,18 @@ public class ExpressionImp
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
+        attribute = new Attribute("nextEpoch", Type.REFERENCE,
+                                  DataModel.getClassDescription("Epoch"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
+        attribute = new Attribute("prevEpoch", Type.REFERENCE,
+                                  DataModel.getClassDescription("Epoch"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
+        attribute = new Attribute("nextEpoch", Type.REFERENCE,
+                                  DataModel.getClassDescription("Epoch"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
                                   null, Cardinality.N_A);
         rowData.addAttribute(attribute);
