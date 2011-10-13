@@ -123,6 +123,42 @@ much like the string "==" or "true".
 
 =====================================================================
 
+RowData:
+Epoch | All
+  Epoch | protocolParameters.key(time) == "Thu Oct 13 16:53:07 NZDT 2011"
+
+Expression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    OperatorExpression(.)
+      OperatorExpression(as)
+        OperatorExpression(parameter)
+          StringLiteralValueExpression(protocolParameters)
+          StringLiteralValueExpression(key)
+        ClassLiteralValueExpression(TimeValue)
+      AttributeExpression(value)
+    TimeLiteralValueExpression(Thu Oct 13 16:53:07 NZDT 2011)
+
+=====================================================================
+
+RowData:
+Epoch | All
+  Epoch | protocolParameters.key(float) == "12.3"
+
+Expression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    OperatorExpression(.)
+      OperatorExpression(as)
+        OperatorExpression(parameter)
+          StringLiteralValueExpression(protocolParameters)
+          StringLiteralValueExpression(key)
+        ClassLiteralValueExpression(FloatValue)
+      AttributeExpression(value)
+    Float64LiteralValueExpression(12.3)
+
+=====================================================================
+
 Below are a few more RowData structures for which I have not yet
 written conversion code.  I also show my guesses about how
 they would be converted to Expression objects.  Can you go through

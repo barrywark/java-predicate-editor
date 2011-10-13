@@ -2,6 +2,7 @@ package com.physion.ovation.gui.ebuilder.expression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
@@ -109,6 +110,14 @@ public class ExpressionImp
             case INT_32:
                 return(new Int32LiteralValueExpressionImp(
                        ((Integer)rowData.getAttributeValue()).intValue()));
+
+            case FLOAT_64:
+                return(new Float64LiteralValueExpressionImp(
+                       ((Double)rowData.getAttributeValue()).doubleValue()));
+
+            case DATE_TIME:
+                return(new TimeLiteralValueExpressionImp(
+                       ((Date)rowData.getAttributeValue())));
 
             case REFERENCE:
                 return(new ClassLiteralValueExpressionImp(
@@ -475,7 +484,7 @@ public class ExpressionImp
         System.out.println("\nExpression:\n"+expression);
 */
         /**
-         * Test a "Parameters Map" row of type int.
+         * Test a "Parameters Map" row of type time.
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
@@ -487,9 +496,32 @@ public class ExpressionImp
                                   null, Cardinality.N_A);
         rowData.addAttribute(attribute);
         rowData.setPropName("key");
-        rowData.setPropType(Type.INT_32);
+        rowData.setPropType(Type.DATE_TIME);
         rowData.setAttributeOperator(Operator.EQUALS);
-        rowData.setAttributeValue(new Integer(27));
+        rowData.setAttributeValue(new Date());
+        rootRow.addChildRow(rowData);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
+        /**
+         * Test a "Parameters Map" row of type float, that
+         * has an attributePath that is more than one level deep.
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
+                                  null, Cardinality.N_A);
+        rowData.addAttribute(attribute);
+        rowData.setPropName("key");
+        rowData.setPropType(Type.FLOAT_64);
+        rowData.setAttributeOperator(Operator.EQUALS);
+        rowData.setAttributeValue(new Double(12.3));
         rootRow.addChildRow(rowData);
 
         System.out.println("\nRowData:\n"+rootRow);
