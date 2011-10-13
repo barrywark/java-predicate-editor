@@ -170,7 +170,9 @@ public class OperatorExpressionImp
         String string = indent;
         string += "OperatorExpression("+getOperatorName()+")";
 
+        //System.out.println("string = "+string);
         for (Expression expression : getOperandList()) {
+            //System.out.println("expression = "+expression);
             string += "\n"+((ExpressionImp)expression).toString(indent+INDENT);
         }
         return(string);
