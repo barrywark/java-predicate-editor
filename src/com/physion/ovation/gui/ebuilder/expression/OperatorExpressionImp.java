@@ -16,6 +16,8 @@ public class OperatorExpressionImp
     extends ExpressionImp
     implements OperatorExpression {
 
+    private static final String INDENT = "  ";
+
     private String operatorName;
     private ArrayList<Expression> operandList;
 
@@ -169,7 +171,7 @@ public class OperatorExpressionImp
         string += "OperatorExpression("+getOperatorName()+")";
 
         for (Expression expression : getOperandList()) {
-            string += "\n"+indent+((ExpressionImp)expression).toString("  ");
+            string += "\n"+((ExpressionImp)expression).toString(indent+INDENT);
         }
         return(string);
     }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
+import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.Operator;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
@@ -210,6 +211,32 @@ public class ExpressionImp
         rowData.addAttribute(attribute);
         rowData.setAttributeOperator(Operator.EQUALS);
         rowData.setAttributeValue(new Boolean(true));
+        rootRow.addChildRow(rowData);
+
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nrootRow:\n"+rootRow);
+        System.out.println("\nexpression:\n"+expression);
+
+        /**
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.NONE);
+
+        rowData = new RowData();
+        attribute = new Attribute("epochGroup", Type.REFERENCE,
+                                  DataModel.getClassDescription("EpochGroup"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
+        attribute = new Attribute("source", Type.REFERENCE,
+                                  DataModel.getClassDescription("Source"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
+        attribute = new Attribute("label", Type.UTF_8_STRING);
+        rowData.addAttribute(attribute);
+        rowData.setAttributeOperator(Operator.EQUALS);
+        rowData.setAttributeValue("Test 27");
         rootRow.addChildRow(rowData);
 
         expression = ExpressionImp.createExpressionTree(rootRow);

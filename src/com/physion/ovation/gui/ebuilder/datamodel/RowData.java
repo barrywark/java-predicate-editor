@@ -1433,8 +1433,8 @@ public class RowData
 
     /**
      * Get the amount a RowString should be indented.
-     * This method will probably be unused once I switch to using
-     * widgets to render a cell.
+     * This method can be deleted if we switch to using
+     * something other than a JLabel to create the indent widget.
      */
     public String getIndentString() {
 
@@ -1442,6 +1442,10 @@ public class RowData
         for (RowData rowData = this.getParentRow(); rowData != null;
              rowData = rowData.getParentRow()) {
 
+            /**
+             * Increase the number of spaces in this string if
+             * you want the indent of rows to be greater.
+             */
             indentString += "      ";
         }
         return(indentString);
@@ -1475,8 +1479,13 @@ public class RowData
 
         String string = getRowString(debugVersion, indent);
 
-        for (RowData childRow : childRows)
+        for (RowData childRow : childRows) {
+            /**
+             * I am currently using two spaces as the indent level for
+             * string debug output, but you can change this below.
+             */
             string += "\n"+childRow.toString(debugVersion, indent+"  ");
+        }
 
         return(string);
     }
