@@ -1313,6 +1313,10 @@ public class RowData
      */
     private void possiblyAdjustOperatorAndValue(Type type) {
 
+        if (type == null) {
+            return;
+        }
+
         Operator attributeOperator = getAttributeOperator();
         switch (type) {
             case BOOLEAN:
