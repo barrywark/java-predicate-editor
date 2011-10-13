@@ -45,11 +45,23 @@ public class ExpressionImp
 
         OperatorExpressionImp expression = null;
 
-        if (rowData.getAttributeOperator() != null) {
+        Attribute childmostAttribute = rowData.getChildmostAttribute();
+
+        if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
             OperatorExpressionImp operatorExpression = 
                 new OperatorExpressionImp(rowData);
             operatorExpression.addOperand(
-                createExpression(rowData.getAttributePath()));
+                createExpression(rowData.getAttributePath(), rowData));
+            operatorExpression.addOperand(
+                createLiteralValueExpression(rowData.getPropType(), rowData));
+
+            expression = operatorExpression;
+        }
+        else if (rowData.getAttributeOperator() != null) {
+            OperatorExpressionImp operatorExpression = 
+                new OperatorExpressionImp(rowData);
+            operatorExpression.addOperand(
+                createExpression(rowData.getAttributePath(), rowData));
             operatorExpression.addOperand(
                 createLiteralValueExpression(rowData));
 
@@ -59,7 +71,7 @@ public class ExpressionImp
             OperatorExpressionImp operatorExpression = 
                 new OperatorExpressionImp(rowData);
             operatorExpression.addOperand(
-                createExpression(rowData.getAttributePath()));
+                createExpression(rowData.getAttributePath(), rowData));
             for (RowData childRow : rowData.getChildRows()) {
                 operatorExpression.addOperand(createExpression(childRow));
             }
@@ -74,10 +86,17 @@ public class ExpressionImp
     private static LiteralValueExpression createLiteralValueExpression(
         RowData rowData) {
 
+        return(createLiteralValueExpression(rowData.getChildmostAttribute().
+                                            getType(), rowData));
+    }
+    
+    private static LiteralValueExpression createLiteralValueExpression(
+        Type type, RowData rowData) {
+
         LiteralValueExpression literalValueExpression = null;
 
         Attribute attribute = rowData.getChildmostAttribute();
-        switch (attribute.getType()) {
+        switch (type) {
 
             case BOOLEAN:
                 return(new BooleanLiteralValueExpressionImp(
@@ -87,6 +106,10 @@ public class ExpressionImp
                 return(new StringLiteralValueExpressionImp(
                        rowData.getAttributeValue().toString()));
 
+            case INT_32:
+                return(new Int32LiteralValueExpressionImp(
+                       ((Integer)rowData.getAttributeValue()).intValue()));
+
             case REFERENCE:
                 return(new ClassLiteralValueExpressionImp(
                        attribute.getQueryName()));
@@ -94,23 +117,124 @@ public class ExpressionImp
             default:
                 System.err.println("ERROR:  ExpressionImp."+
                     "createLiteralValueExpression().  Unhandled type.\n"+
-                    "Type = "+attribute.getType()+"\n"+
+                    "Type = "+type+"\n"+
                     "rowData:\n"+rowData.getRowString());
+                (new Exception("Unhandled type")).printStackTrace();
                 return(null);
         }
     }
 
 
-    private static Expression createExpression(List<Attribute>
-                                               attributePath) {
+    private static ClassLiteralValueExpression
+        createClassLiteralValueExpression(Type type) {
+
+        switch (type) {
+
+            case BOOLEAN:
+                return(new ClassLiteralValueExpressionImp("BooleanValue"));
+
+            case UTF_8_STRING:
+                return(new ClassLiteralValueExpressionImp("StringValue"));
+
+            case INT_32:
+                return(new ClassLiteralValueExpressionImp("IntValue"));
+
+            case FLOAT_64:
+                return(new ClassLiteralValueExpressionImp("FloatValue"));
+
+            case DATE_TIME:
+                return(new ClassLiteralValueExpressionImp("TimeValue"));
+
+            default:
+                System.err.println("ERROR:  ExpressionImp."+
+                    "createClassLiteralValueExpression().  Unhandled type.\n"+
+                    "Type = "+type);
+                return(null);
+        }
+    }
+
+
+    /**
+     * Create an Expression for the passed in attribute, (which is
+     * of type PARAMETERS_MAP).
+     *
+     * For example:
+     *
+     *      protocolParamters.key(int) == 1
+     *
+     * becomes:
+     *
+     *      OperatorExpression(.)
+     *        OperatorExpression(as)
+     *          OperatorExpression(parameter)
+     *            StringLiteralValueExpression(protocolParameters)
+     *            StringLiteralValueExpression(key)
+     *          OperatorExpression(IntValue)
+     *        AttributeExpression(value)
+     */
+    private static Expression createExpression(Attribute attribute,
+                                               RowData rowData) {
+
+        /**
+         * The comments below assume the passed in attribute and
+         * rowData values are like the example described in this
+         * method's header comment.
+         */
+
+        /**
+         * Create the "." operator that is the root of this Expression.
+         */
+        OperatorExpressionImp dotOperator = new OperatorExpressionImp(".");
+
+        /**
+         * Create the "as" operator and the AttributeExpression(value),
+         * and add them as the left and right operands of the "." operator.
+         */
+        OperatorExpressionImp asOperator = new OperatorExpressionImp("as");
+        dotOperator.addOperand(asOperator);
+        dotOperator.addOperand(new AttributeExpressionImp("value"));
+
+        /**
+         * Create the "parameter" operator and the
+         * ClassLiteralValueExpression(IntValue), and add them as the left
+         * and right operands of the "as" operator.
+         */
+        OperatorExpressionImp parameterOperator = new OperatorExpressionImp(
+            "parameter");
+        asOperator.addOperand(parameterOperator);
+        asOperator.addOperand(createClassLiteralValueExpression(
+                              rowData.getPropType()));
+
+        /**
+         * Create the StringLiteralValueExpression operands
+         * of "protocolParameters" and "key", and add them
+         * as the left and right operands to the parameterOperator.
+         */
+        parameterOperator.addOperand(new StringLiteralValueExpressionImp(
+            attribute.getQueryName()));
+        parameterOperator.addOperand(new StringLiteralValueExpressionImp(
+                                     rowData.getPropName()));
+
+        return(dotOperator);
+    }
+
+
+    private static Expression createExpression(List<Attribute> attributePath,
+                                               RowData rowData) {
 
         if (attributePath.size() < 1) {
             return(null);
         }
 
         if (attributePath.size() == 1) {
-            return(new AttributeExpressionImp(attributePath.get(0).
-                                              getQueryName()));
+
+            Attribute attribute = attributePath.get(0);
+            if (attribute.getType() == Type.PARAMETERS_MAP) {
+                return(createExpression(attribute, rowData));
+            }
+            else {
+                return(new AttributeExpressionImp(attribute.getQueryName()));
+            }
         }
 
         OperatorExpressionImp operatorExpression =
@@ -125,7 +249,7 @@ public class ExpressionImp
 
         List<Attribute> subList = attributePath.subList(0,
                                             attributePath.size()-1);
-        Expression expression = createExpression(subList);
+        Expression expression = createExpression(subList, rowData);
         operatorExpression.addOperand(expression);
 
         Attribute attribute = (Attribute)attributePath.get(
@@ -300,7 +424,7 @@ public class ExpressionImp
          *      Epoch | All
          *        Epoch | owner is null
          */
-/*
+/* Not working yet.
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -325,6 +449,7 @@ public class ExpressionImp
          *        Epoch | responses All
          *          Response | uuid == "xyz"
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -344,6 +469,28 @@ public class ExpressionImp
         rowData2.setAttributeOperator(Operator.EQUALS);
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+*/
+        /**
+         * Test a "Parameters Map" row of type int.
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
+                                  null, Cardinality.N_A);
+        rowData.addAttribute(attribute);
+        rowData.setPropName("key");
+        rowData.setPropType(Type.INT_32);
+        rowData.setAttributeOperator(Operator.EQUALS);
+        rowData.setAttributeValue(new Integer(27));
+        rootRow.addChildRow(rowData);
 
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionImp.createExpressionTree(rootRow);

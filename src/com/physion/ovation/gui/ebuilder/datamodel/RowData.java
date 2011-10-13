@@ -1848,7 +1848,7 @@ public class RowData
         rowData.setPropName("animalID");
         rowData.setPropType(Type.INT_32);
         rowData.setAttributeOperator(Operator.LESS_THAN_EQUALS);
-        rowData.setAttributeValue("123");
+        rowData.setAttributeValue(new Integer(32));
         rootRow.addChildRow(rowData);
 
         /**
@@ -1861,7 +1861,7 @@ public class RowData
         rowData.setPropName("stimulusFrequency");
         rowData.setPropType(Type.INT_32);
         rowData.setAttributeOperator(Operator.EQUALS);
-        rowData.setAttributeValue("27");
+        rowData.setAttributeValue(new Integer(27));
         rootRow.addChildRow(rowData);
 
         /**
