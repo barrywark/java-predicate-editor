@@ -133,7 +133,7 @@ public class OperatorExpressionImp
                 return("and");
 
             case NONE:
-                return("none?");
+                return("ERROR");  // Should never be called with NONE.
 
             case COUNT:
                 return("count?");

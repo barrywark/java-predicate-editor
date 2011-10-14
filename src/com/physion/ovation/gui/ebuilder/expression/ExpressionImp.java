@@ -14,6 +14,7 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 
 /**
+ * TODO:  Put keywords such as "not", "or", "and", etc. into constants.
  */
 public class ExpressionImp
     implements Expression {
@@ -29,16 +30,59 @@ public class ExpressionImp
 
     /**
      * Create an Expression from the passed in root RowData.
+     * This method should only be called if the passed in
+     * RowData object is the rootRow of an expression tree.
      */
     private static Expression createExpressionTree(RowData rootRow) {
 
-        OperatorExpressionImp expression = new OperatorExpressionImp(rootRow);
-
-        for (RowData childRow : rootRow.getChildRows()) {
-            expression.addOperand(createExpression(childRow));
+        if (rootRow.isRootRow() == false) {
+            System.err.println("ERROR:  ExpressionImp.createExpression() "+
+                "was passed a rootRow parameter that is not really the "+
+                "root of an expression tree.");
+            return(null);
         }
 
-        return(expression);
+        /**
+         * This is the root Expression object that will be returned
+         * to the caller of this method.
+         */
+        OperatorExpressionImp rootExpression;
+
+        /**
+         * In most cases, this will be set to point to the
+         * same OperatorExpressionImp object as rootExpression.
+         * But, in the case of the None collection operator,
+         * this will point to a different OperatorExpressionImp
+         * object.
+         */
+        OperatorExpressionImp lastExpression;
+
+        /**
+         * A root row that uses the None collection
+         * operator is a special case.  It must be
+         * turned into TWO operators:  the "not" operator
+         * with the "or" operator as its only operand.
+         */
+        if (rootRow.getCollectionOperator() == CollectionOperator.NONE) {
+            rootExpression = new OperatorExpressionImp("not");
+            lastExpression = new OperatorExpressionImp("or");
+            rootExpression.addOperand(lastExpression);
+        }
+        else {
+            rootExpression = new OperatorExpressionImp(rootRow);
+            lastExpression = rootExpression;
+        }
+
+        /**
+         * At this point, lastExpression is a reference to
+         * the OperatorExpressionImp that will have the
+         * list of operands added to.
+         */
+        for (RowData childRow : rootRow.getChildRows()) {
+            lastExpression.addOperand(createExpression(childRow));
+        }
+
+        return(rootExpression);
     }
 
 
@@ -145,14 +189,18 @@ public class ExpressionImp
             case UTF_8_STRING:
                 return(new ClassLiteralValueExpressionImp("StringValue"));
 
+            case INT_16:
+                return(new ClassLiteralValueExpressionImp("IntegerValue"));
+
             case INT_32:
-                return(new ClassLiteralValueExpressionImp("IntValue"));
+                return(new ClassLiteralValueExpressionImp("IntegerValue"));
 
             case FLOAT_64:
-                return(new ClassLiteralValueExpressionImp("FloatValue"));
+                return(new ClassLiteralValueExpressionImp(
+                    "FloatingPointValue"));
 
             case DATE_TIME:
-                return(new ClassLiteralValueExpressionImp("TimeValue"));
+                return(new ClassLiteralValueExpressionImp("DateValue"));
 
             default:
                 System.err.println("ERROR:  ExpressionImp."+
@@ -375,8 +423,11 @@ public class ExpressionImp
          * Test an attribute path with two levels:
          *
          *      epochGroup.label == "Test 27"
+         *
+         * Also test using None collection operator which
+         * gets turned into two operators:  "not" with
+         * "or" as its only operand.
          */
-/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
