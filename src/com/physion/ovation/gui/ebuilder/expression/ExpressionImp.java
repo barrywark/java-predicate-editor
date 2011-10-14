@@ -33,7 +33,7 @@ public class ExpressionImp
      * This method should only be called if the passed in
      * RowData object is the rootRow of an expression tree.
      */
-    private static Expression createExpressionTree(RowData rootRow) {
+    public static Expression createExpressionTree(RowData rootRow) {
 
         if (rootRow.isRootRow() == false) {
             System.err.println("ERROR:  ExpressionImp.createExpression() "+
@@ -86,6 +86,10 @@ public class ExpressionImp
     }
 
 
+    /**
+     * Create an Expression from the passed in RowData object.
+     * This method is NOT meant to handle the root RowData object.
+     */
     private static Expression createExpression(RowData rowData) {
 
         OperatorExpressionImp expression = null;
@@ -93,35 +97,41 @@ public class ExpressionImp
         Attribute childmostAttribute = rowData.getChildmostAttribute();
 
         if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
-            OperatorExpressionImp operatorExpression = 
-                new OperatorExpressionImp(rowData);
-            operatorExpression.addOperand(
-                createExpression(rowData.getAttributePath(), rowData));
-            operatorExpression.addOperand(
-                createLiteralValueExpression(rowData.getPropType(), rowData));
-
-            expression = operatorExpression;
+            expression = new OperatorExpressionImp(rowData);
+            expression.addOperand(createExpression(rowData.getAttributePath(),
+                                  rowData));
+            expression.addOperand(createLiteralValueExpression(
+                rowData.getPropType(), rowData));
         }
         else if (rowData.getAttributeOperator() != null) {
-            OperatorExpressionImp operatorExpression = 
-                new OperatorExpressionImp(rowData);
-            operatorExpression.addOperand(
-                createExpression(rowData.getAttributePath(), rowData));
-            operatorExpression.addOperand(
-                createLiteralValueExpression(rowData));
-
-            expression = operatorExpression;
+            expression = new OperatorExpressionImp(rowData);
+            expression.addOperand(createExpression(rowData.getAttributePath(),
+                                  rowData));
+            expression.addOperand(createLiteralValueExpression(rowData));
         }
         else if (rowData.getCollectionOperator() != null) {
-            OperatorExpressionImp operatorExpression = 
-                new OperatorExpressionImp(rowData);
-            operatorExpression.addOperand(
-                createExpression(rowData.getAttributePath(), rowData));
-            for (RowData childRow : rowData.getChildRows()) {
-                operatorExpression.addOperand(createExpression(childRow));
+            /**
+             * A row that uses the None collection
+             * operator is a special case.  It must be
+             * turned into TWO operators:  the "not" operator
+             * with the "or" operator as its only operand.
+             */
+            OperatorExpressionImp lastExpression;
+            if (rowData.getCollectionOperator() == CollectionOperator.NONE) {
+                expression = new OperatorExpressionImp("not");
+                lastExpression = new OperatorExpressionImp("or");
+                expression.addOperand(lastExpression);
+            }
+            else {
+                expression = new OperatorExpressionImp(rowData);
+                lastExpression = expression;
             }
 
-            expression = operatorExpression;
+            lastExpression.addOperand(
+                createExpression(rowData.getAttributePath(), rowData));
+            for (RowData childRow : rowData.getChildRows()) {
+                lastExpression.addOperand(createExpression(childRow));
+            }
         }
 
         return(expression);
@@ -360,6 +370,7 @@ public class ExpressionImp
 
         Attribute attribute;
         RowData rowData;
+        RowData rowData2;
         RowData rootRow;
         Expression expression;
 
@@ -420,14 +431,16 @@ public class ExpressionImp
         System.out.println("\nExpression:\n"+expression);
 
         /**
-         * Test an attribute path with two levels:
-         *
-         *      epochGroup.label == "Test 27"
-         *
+         * Test an attribute path with two levels.
          * Also test using None collection operator which
          * gets turned into two operators:  "not" with
          * "or" as its only operand.
+         *
+         *      Epoch None
+         *          epochGroup.label == "Test 27"
+         *
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -501,7 +514,7 @@ public class ExpressionImp
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionImp.createExpressionTree(rootRow);
         System.out.println("\nExpression:\n"+expression);
-
+*/
         /**
          * Test a compound row:
          *
@@ -523,7 +536,7 @@ public class ExpressionImp
         rowData.setCollectionOperator(CollectionOperator.ALL);
         rootRow.addChildRow(rowData);
 
-        RowData rowData2 = new RowData();
+        rowData2 = new RowData();
         attribute = new Attribute("uuid", Type.UTF_8_STRING);
         rowData2.addAttribute(attribute);
         rowData2.setAttributeOperator(Operator.EQUALS);
@@ -533,7 +546,39 @@ public class ExpressionImp
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionImp.createExpressionTree(rootRow);
         System.out.println("\nExpression:\n"+expression);
-*/
+
+        /**
+         * Test a compound row:
+         *
+         *      Epoch | None
+         *        Epoch | responses None
+         *          Response | uuid == "xyz"
+         */
+/*
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.NONE);
+
+        rowData = new RowData();
+        attribute = new Attribute("responses", Type.REFERENCE,
+                                  DataModel.getClassDescription("Response"),
+                                  Cardinality.TO_MANY);
+        rowData.addAttribute(attribute);
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        attribute = new Attribute("uuid", Type.UTF_8_STRING);
+        rowData2.addAttribute(attribute);
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue("xyz");
+        rowData.addChildRow(rowData2);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
         /**
          * Test a "Parameters Map" row of type time.
          */
@@ -543,6 +588,16 @@ public class ExpressionImp
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
+        /*
+        attribute = new Attribute("nextEpoch", Type.REFERENCE,
+                                  DataModel.getClassDescription("Epoch"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
+        attribute = new Attribute("prevEpoch", Type.REFERENCE,
+                                  DataModel.getClassDescription("Epoch"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
+        */
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
                                   null, Cardinality.N_A);
         rowData.addAttribute(attribute);
@@ -560,6 +615,7 @@ public class ExpressionImp
          * Test a "Parameters Map" row of type float, that
          * has an attributePath that is more than one level deep.
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -590,7 +646,7 @@ public class ExpressionImp
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionImp.createExpressionTree(rootRow);
         System.out.println("\nExpression:\n"+expression);
-
+*/
         System.out.println("\nExpressionImp test is ending.");
     }
 }

@@ -73,12 +73,6 @@ public class OperatorExpressionImp
         this();
 
         operatorName = getOperatorName(rowData);
-
-        /*
-        for (RowData childRow : rowData.getChildRows()) {
-            addOperand(childRow);
-        }
-        */
     }
 
 
