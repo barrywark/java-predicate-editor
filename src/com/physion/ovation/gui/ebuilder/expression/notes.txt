@@ -55,6 +55,8 @@ OperatorExpression(none?)
 Please check that what I have implemented as far as "nesting" the "."
 operator below is correct.
 
+BW: Yes, that looks correct.
+
 RowData:
 Epoch | None
   Epoch | epochGroup.source.label == "Test 27"
@@ -111,15 +113,28 @@ come from?  Is it always used if the attribute is of type
 PARAMETERS_MAP?  I am guessing it is a sort of reserved word
 in the system, just like "as" or "IntValue" is.
 
+BW: "parameter" is an operator that we've defined (as a plugin to the query engine). It takes two operands: a PARAMETERS_MAP and a key.
+
 Where does the string "IntValue" come from?  Where can I find a
 mapping for the other types (float, string, time) also?
 I am simply using "BooleanValue", "StringValue", "IntValue",
 "FloatValue", "TimeValue", for now.
 
+BW: They come from the class names for the entities that we use to store each of these primitive value types (it's an object databse so everything has to be an object, afterall). The class names are:
+
+ovation.IntegerValue
+ovation.FloatingPointValue
+ovation.BooleanValue
+ovation.DateValue (for DateTime values)
+ovation.StringValue
+
+
 Where does the string "value" come from also?  Is that always
 used in this case?  I am guessing that "value" and "parameter"
 are just part of the language and I can treat them as constants
 much like the string "==" or "true".
+
+BW: Correct. The value classes (above) all have a "value" attribute which gives the primitive value... old-school boxing and unboxing.
 
 =====================================================================
 
@@ -176,6 +191,8 @@ Epoch | None
 Should I use the word "none" or should I "stack" the "not" operator
 and the "or" operator like this?
 
+BW: Use the not/or combo
+
 OperatorExpression(not)
   OperatorExpression(or)
     OperatorExpression(==)
@@ -192,6 +209,12 @@ Is my use of ReferenceLiteralValueExpression correct?
 Should the ReferenceListeralValueExpression.getObjectId() method
 return null in the example below?
 
+BW: You can use the isnull() operator:
+
+OperatorExpression("and")
+  OperatorExpressioni("isnull")
+    AttributeExpression("owner")
+    
 Epoch | All
   Epoch | owner is null
 
@@ -205,6 +228,12 @@ OperatorExpression("and")
 Same question as above for "is not null".  Do I simply change the
 OperatorExpression to be "!="?
 
+BW: use not(isnull(...)):
+OperatorExpression("and")
+  OperatorExpression("not")
+    OperatorExpression("isnull")
+        AttributeExpression("owner")
+
 Epoch | All
   Epoch | owner is null
 
@@ -217,3 +246,5 @@ OperatorExpression("and")
 
 Should there be both an Int16LiteralValueExpression and
 an Int32LiteralValueExpression class?
+
+BW: I believe the query engine will do the appropriate up/down casting, so we should be fine with just Int64LiteralValueExpression (i.e. long). I will confirm this.
