@@ -14,7 +14,8 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 
 /**
- * TODO:  Put keywords such as "not", "or", "and", etc. into constants.
+ * TODO:  Put keywords such as "not", "or", "and", "as", "value",
+ * "parameter", etc. into constants.
  */
 public class ExpressionImp
     implements Expression {
@@ -98,10 +99,19 @@ public class ExpressionImp
 
         if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
             expression = new OperatorExpressionImp(rowData);
-            expression.addOperand(createExpression(rowData.getAttributePath(),
+
+            OperatorExpressionImp dotOperand;
+            Expression valueOperand;
+
+            dotOperand = new OperatorExpressionImp(".");
+            valueOperand = createLiteralValueExpression(rowData.getPropType(),
+                                                        rowData);
+            expression.addOperand(dotOperand);
+            expression.addOperand(valueOperand);
+
+            dotOperand.addOperand(createExpression(rowData.getAttributePath(),
                                   rowData));
-            expression.addOperand(createLiteralValueExpression(
-                rowData.getPropType(), rowData));
+            dotOperand.addOperand(new AttributeExpressionImp("value"));
         }
         else if (rowData.getAttributeOperator() != null) {
             expression = new OperatorExpressionImp(rowData);
@@ -239,8 +249,10 @@ public class ExpressionImp
      *          OperatorExpression(IntValue)
      *        AttributeExpression(value)
      */
-    private static Expression createExpression(Attribute attribute,
-                                               RowData rowData) {
+    private static Expression createExpressionParametersMap(
+        Attribute attribute, RowData rowData) {
+
+        System.out.println("Enter createExpressionParametersMap()");
 
         /**
          * The comments below assume the passed in attribute and
@@ -258,8 +270,8 @@ public class ExpressionImp
          * and add them as the left and right operands of the "." operator.
          */
         OperatorExpressionImp asOperator = new OperatorExpressionImp("as");
-        dotOperator.addOperand(asOperator);
-        dotOperator.addOperand(new AttributeExpressionImp("value"));
+        //dotOperator.addOperand(asOperator);
+        //dotOperator.addOperand(new AttributeExpressionImp("value"));
 
         /**
          * Create the "parameter" operator and the
@@ -282,51 +294,97 @@ public class ExpressionImp
         parameterOperator.addOperand(new StringLiteralValueExpressionImp(
                                      rowData.getPropName()));
 
-        return(dotOperator);
+        return(asOperator);
     }
 
 
+    /**
+     * Create an expression based on the passed in attributePath and
+     * RowData object.  This method calls itself recursively to build
+     * up the Expression that represents the passed in attributePath.
+     * We sometimes use the passed in rowData parameter to know the
+     * property type and property name of the last attribute, if the
+     * last attribute is of a type where those values are relevant.
+     * For example, a PARAMETERS_MAP attribute type.
+     *
+     * Please note, although the passed in attributePath is "from"
+     * the passed in RowData object, it is possibly a sub-list of
+     * the RowData's full attributePath.  (This method calls itself
+     * recursively, chopping off the last attribute from the
+     * attributePath before calling itself.)  So, don't start
+     * calling RowData.getAttributePath() unless you really are
+     * sure that is what you want.
+     */
     private static Expression createExpression(List<Attribute> attributePath,
                                                RowData rowData) {
 
+        //System.out.println("Enter createExpression(List<Attribute>)");
+        //System.out.println("attributePath.size() = "+attributePath.size());
+
+        /*
         if (attributePath.size() < 1) {
             return(null);
         }
+        */
 
+        /**
+         * If the attributePath is, (or has been whittled down to),
+         * one attribute long, create the Expression for that one
+         * attribute.
+         */
         if (attributePath.size() == 1) {
 
             Attribute attribute = attributePath.get(0);
             if (attribute.getType() == Type.PARAMETERS_MAP) {
-                return(createExpression(attribute, rowData));
+                return(createExpressionParametersMap(attribute, rowData));
             }
             else {
                 return(new AttributeExpressionImp(attribute.getQueryName()));
             }
         }
 
-        OperatorExpressionImp operatorExpression =
-            new OperatorExpressionImp(".");
+        /**
+         * If we get here, the attributePath is longer than one
+         * attribute.  So, we will use the "." operator to concatenate
+         * attributes on the attributePath.
+         */
+        OperatorExpressionImp expression = new OperatorExpressionImp(".");
 
-        /*
-        int index = attributePath.size()-1;
-        Attribute attribute = attributePath.get(index);
-        AttributeExpression attributeExpression =
-            new AttributeExpressionImp(attribute.getQueryName());
-        */
+        /**
+         * Create and add the left operand.  Note, the left operand
+         * is the sub-list of all attributes to the left of the the
+         * rightmost attribute.  For example, if the attribute
+         * path is:
+         *
+         *      epochGroup.source.label
+         *
+         * the left operand is made of "epochGroup.source" and the
+         * right operand is "label".
+         */
 
-        List<Attribute> subList = attributePath.subList(0,
-                                            attributePath.size()-1);
-        Expression expression = createExpression(subList, rowData);
-        operatorExpression.addOperand(expression);
+        Expression operand;
+        List<Attribute> subList;
+        subList = attributePath.subList(0, attributePath.size()-1);
+        operand = createExpression(subList, rowData);
 
-        Attribute attribute = (Attribute)attributePath.get(
-            attributePath.size()-1);
-        AttributeExpression attributeExpression =
-            new AttributeExpressionImp(attribute.getQueryName());
+        //System.out.println("Add left operand.");
+        expression.addOperand(operand);
 
-        operatorExpression.addOperand(attributeExpression);
+        /**
+         * Create and add the right operand.  The right operand
+         * is the rightmost attribute in the passed in attributePath.
+         */
 
-        return(operatorExpression);
+        Attribute attribute = attributePath.get(attributePath.size()-1);
+
+        subList = attributePath.subList(attributePath.size()-1,
+                                        attributePath.size());
+        operand = createExpression(subList, rowData);
+
+        //System.out.println("Add right operand: ");
+        expression.addOperand(operand);
+
+        return(expression);
     }
 
 
@@ -588,16 +646,6 @@ public class ExpressionImp
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
-        /*
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("prevEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        */
         attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
                                   null, Cardinality.N_A);
         rowData.addAttribute(attribute);
@@ -615,7 +663,6 @@ public class ExpressionImp
          * Test a "Parameters Map" row of type float, that
          * has an attributePath that is more than one level deep.
          */
-/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -626,11 +673,11 @@ public class ExpressionImp
                                   DataModel.getClassDescription("Epoch"),
                                   Cardinality.TO_ONE);
         rowData.addAttribute(attribute);
-        attribute = new Attribute("prevEpoch", Type.REFERENCE,
+        attribute = new Attribute("nextEpoch", Type.REFERENCE,
                                   DataModel.getClassDescription("Epoch"),
                                   Cardinality.TO_ONE);
         rowData.addAttribute(attribute);
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
+        attribute = new Attribute("prevEpoch", Type.REFERENCE,
                                   DataModel.getClassDescription("Epoch"),
                                   Cardinality.TO_ONE);
         rowData.addAttribute(attribute);
@@ -646,7 +693,7 @@ public class ExpressionImp
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionImp.createExpressionTree(rootRow);
         System.out.println("\nExpression:\n"+expression);
-*/
+
         System.out.println("\nExpressionImp test is ending.");
     }
 }

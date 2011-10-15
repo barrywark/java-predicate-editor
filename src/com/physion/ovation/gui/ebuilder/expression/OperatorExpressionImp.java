@@ -3,11 +3,7 @@ package com.physion.ovation.gui.ebuilder.expression;
 import java.util.ArrayList;
 
 import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
-//import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
-//import com.physion.ovation.gui.ebuilder.datatypes.Type;
-//import com.physion.ovation.gui.ebuilder.datatypes.Operator;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
-//import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 
 /**
@@ -16,6 +12,11 @@ public class OperatorExpressionImp
     extends ExpressionImp
     implements OperatorExpression {
 
+    /**
+     * The indent amount to use for each level of nesting
+     * when displaying this object as a string value meant
+     * to be sent to a console window.  E.g. for debugging.
+     */
     private static final String INDENT = "  ";
 
     private String operatorName;
@@ -53,12 +54,22 @@ public class OperatorExpressionImp
     }
 
 
+    /**
+     * Create an OperatorExpressionImp.
+     * Before this object is of any use, you will need
+     * to set the operatorName and add some operands
+     * to the operandList.
+     */
     OperatorExpressionImp() {
         operatorName = null;
         operandList = new ArrayList<Expression>();
     }
 
 
+    /**
+     * Create an OperatorExpressionImp with the
+     * specified operatorName.
+     */
     OperatorExpressionImp(String operatorName) {
         this();
         this.operatorName = operatorName;
@@ -108,7 +119,8 @@ public class OperatorExpressionImp
          * If this is NOT the root row, then the collection
          * operator is simply the lower case version of the
          * collection operator's string value.
-         * E.g. All becomes "all".
+         * E.g. CollectionOperator.ALL becomes "all",
+         * CollectionOperator.ANY becomes "any".
          */
         if (!rowData.isRootRow()) {
             return(rowData.getCollectionOperator().toString().toLowerCase());
