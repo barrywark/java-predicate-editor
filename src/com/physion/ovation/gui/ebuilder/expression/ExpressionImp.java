@@ -107,7 +107,7 @@ public class ExpressionImp
             if (childmostAttribute.getIsMine())
                 myAnyOperator = new OperatorExpressionImp("my");
             else
-                myAnyOperator = new OperatorExpressionImp("aNy");
+                myAnyOperator = new OperatorExpressionImp("any");
 
             /*
             OperatorExpressionImp leftOperator =
@@ -381,6 +381,13 @@ public class ExpressionImp
                                         rowData.getPropType()));
                 //myAnyOperator.addOperand(leftOperator);
                 return(leftOperator);
+            }
+            else if (attribute.getType() == Type.PER_USER) {
+
+                String queryName = attribute.getQueryName();
+                if (attribute.getIsMine() == true)
+                    queryName = "my"+queryName;
+                return(new AttributeExpressionImp(queryName));
             }
             else {
                 return(new AttributeExpressionImp(attribute.getQueryName()));
@@ -680,6 +687,74 @@ public class ExpressionImp
         System.out.println("\nExpression:\n"+expression);
 
         /**
+         * Test a compound row:
+         *
+         *      Epoch | All
+         *        Epoch | All keywords None
+         *          KeywordTag | uuid == "xyz"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        attribute = new Attribute("keywords", Type.PER_USER,
+                                  DataModel.getClassDescription("KeywordTag"),
+                                  Cardinality.TO_MANY);
+        attribute.setIsMine(false);
+        rowData.addAttribute(attribute);
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        attribute = new Attribute("uuid", Type.UTF_8_STRING);
+        rowData2.addAttribute(attribute);
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue("xyz");
+        rowData.addChildRow(rowData2);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
+        /**
+         * Test a compound row:
+         *
+         *      Epoch | All
+         *        Epoch | My keywords All
+         *          KeywordTag | uuid == "xyz"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        attribute = new Attribute("nextEpoch", Type.REFERENCE,
+                                  DataModel.getClassDescription("Epoch"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
+        attribute = new Attribute("keywords", Type.PER_USER,
+                                  DataModel.getClassDescription("KeywordTag"),
+                                  Cardinality.TO_MANY);
+        attribute.setIsMine(true);
+        rowData.addAttribute(attribute);
+        rowData.setCollectionOperator(CollectionOperator.ALL);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        attribute = new Attribute("uuid", Type.UTF_8_STRING);
+        rowData2.addAttribute(attribute);
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue("xyz");
+        rowData.addChildRow(rowData2);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
+        /**
          * Test a "Parameters Map" row of type time.
          */
 /*
@@ -741,6 +816,7 @@ public class ExpressionImp
         /**
          * Test a "Per User Parameters Map" row.
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -763,7 +839,7 @@ public class ExpressionImp
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionImp.createExpressionTree(rootRow);
         System.out.println("\nExpression:\n"+expression);
-
+*/
         System.out.println("\nExpressionImp test is ending.");
     }
 }
