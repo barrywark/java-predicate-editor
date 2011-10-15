@@ -131,9 +131,11 @@ public class ExpressionPanel
      */
     public void rowDataChanged(RowDataEvent event) {
 
+        //System.out.println("event.getChangeType() = "+event.getChangeType());
         if ((event.getTiming() == RowDataEvent.TIMING_AFTER) &&
             ((event.getChangeType() == RowDataEvent.TYPE_CHILD_ADD) ||
              (event.getChangeType() == RowDataEvent.TYPE_CHILD_DELETE) ||
+             (event.getChangeType() == RowDataEvent.TYPE_ATTRIBUTE) ||
              (event.getChangeType() == RowDataEvent.TYPE_CUQ))) {
 
             createRowPanels();

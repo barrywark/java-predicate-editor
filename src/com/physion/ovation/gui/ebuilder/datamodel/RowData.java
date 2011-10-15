@@ -933,15 +933,10 @@ public class RowData
              * to a for loop that looks at all the child
              * rows.
              */
-            System.out.println("ClassDescription is not null");
             if (getChildRows().size() > 0) {
-
-                System.out.println("ClassDescription is not null");
 
                 RowData firstChildRow = getChildRows().get(0);
                 Attribute attribute = null;
-                System.out.println("size() = "+
-                    firstChildRow.getAttributePath().size());
                 if (firstChildRow.getAttributePath().size() > 0) {
                     attribute = firstChildRow.getAttribute(0);
                     if (!childmostAttribute.getClassDescription().
