@@ -14,7 +14,7 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 /**
  * TODO:  Put keywords such as "not", "or", "and", "as", "value",
- * "parameter", etc. into constants.
+ * "parameter", "my", "elementsOfType", etc. into constants.
  */
 public class ExpressionImp
     implements Expression {
@@ -96,7 +96,40 @@ public class ExpressionImp
 
         Attribute childmostAttribute = rowData.getChildmostAttribute();
 
-        if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
+        if (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
+
+            /**
+             * As of October 2011, there is only the "properties"
+             * attribute that is of this PER_USER_PARAMETERS_MAP
+             * type.
+             */
+            OperatorExpressionImp myAnyOperator;
+            if (childmostAttribute.getIsMine())
+                myAnyOperator = new OperatorExpressionImp("my");
+            else
+                myAnyOperator = new OperatorExpressionImp("any");
+
+            OperatorExpressionImp leftOperator =
+                new OperatorExpressionImp("elementsOfType");
+            OperatorExpressionImp nameOperator =
+                new OperatorExpressionImp(childmostAttribute.getQueryName());
+            nameOperator.addOperand(new StringLiteralValueExpressionImp(
+                rowData.getPropName()));
+            leftOperator.addOperand(nameOperator);
+            leftOperator.addOperand(createClassLiteralValueExpression(
+                                    rowData.getPropType()));
+            myAnyOperator.addOperand(leftOperator);
+
+            OperatorExpressionImp rightOperator =
+                new OperatorExpressionImp(rowData);
+            rightOperator.addOperand(new AttributeExpressionImp("value"));
+            rightOperator.addOperand(createLiteralValueExpression(
+                rowData.getPropType(), rowData));
+            myAnyOperator.addOperand(rightOperator);
+
+            expression = myAnyOperator;
+        }
+        else if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
             expression = new OperatorExpressionImp(rowData);
 
             OperatorExpressionImp dotOperand;
@@ -632,6 +665,7 @@ public class ExpressionImp
         /**
          * Test a "Parameters Map" row of type time.
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -655,6 +689,7 @@ public class ExpressionImp
          * Test a "Parameters Map" row of type float, that
          * has an attributePath that is more than one level deep.
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -680,6 +715,28 @@ public class ExpressionImp
         rowData.setPropType(Type.FLOAT_64);
         rowData.setAttributeOperator(Operator.EQUALS);
         rowData.setAttributeValue(new Double(12.3));
+        rootRow.addChildRow(rowData);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
+        /**
+         * Test a "Per User Parameters Map" row.
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        attribute = new Attribute("properties", Type.PER_USER_PARAMETERS_MAP,
+                                  null, Cardinality.N_A);
+        rowData.addAttribute(attribute);
+        rowData.setPropName("someKey");
+        rowData.setPropType(Type.INT_32);
+        rowData.setAttributeOperator(Operator.NOT_EQUALS);
+        rowData.setAttributeValue(new Integer(34));
         rootRow.addChildRow(rowData);
 
         System.out.println("\nRowData:\n"+rootRow);

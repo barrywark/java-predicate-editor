@@ -150,6 +150,11 @@ public class OperatorExpressionImp
 
 
     void addOperand(Expression expression) {
+
+        if (expression == null) {
+            (new Exception("expression == null")).printStackTrace();
+        }
+
         operandList.add(expression);
     }
 
