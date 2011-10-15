@@ -2,7 +2,6 @@ package com.physion.ovation.gui.ebuilder.expression;
 
 import java.util.ArrayList;
 
-import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 
 

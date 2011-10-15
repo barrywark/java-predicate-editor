@@ -1,50 +1,44 @@
 package com.physion.ovation.gui.ebuilder;
 
-import java.util.EventObject;
-import java.util.ArrayList;
-import java.util.Date;
 import java.awt.Color;
-import java.awt.Insets;
-import java.awt.Graphics;
 import java.awt.Component;
-import java.awt.Container;
-import java.awt.GridBagLayout;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JComboBox;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.JTextField;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.FocusManager;
-import javax.swing.event.DocumentListener;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
-import javax.swing.text.BadLocationException;
-import javax.swing.BorderFactory;
 
 import com.lavantech.gui.comp.DateTimePicker;
 import com.lavantech.gui.comp.TimePanel;
-
+import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
-import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
 import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
-import com.physion.ovation.gui.ebuilder.datatypes.Operator;
-import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
-import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
+import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
+import com.physion.ovation.gui.ebuilder.datatypes.Operator;
+import com.physion.ovation.gui.ebuilder.datatypes.Type;
 
 
 /**
@@ -190,7 +184,7 @@ class RowPanel
     /**
      * This is the ExpressionPanel that contains this RowPanel.
      */
-    private ExpressionPanel expressionPanel;
+    //private ExpressionPanel expressionPanel;
 
     /**
      * This is the RowData object that this RowPanel is displaying/editing.
@@ -1033,7 +1027,7 @@ class RowPanel
          * into the first comboBox.
          */
         ClassDescription[] values =
-            DataModel.getInstance().getPossibleCUQs().
+            DataModel.getPossibleCUQs().
             toArray(new ClassDescription[0]);
 
         setComboBoxModel(getComboBox(0), values,
@@ -1640,7 +1634,7 @@ class RowPanel
      * If the type is Type.UTF_8_STRING, then the operators
      * are: ==, !=, >, <, ~~=, etc.
      */
-    private void setOperatorComboBoxModel(Type type) {
+	private void setOperatorComboBoxModel(Type type) {
 
         switch(type) {
 

@@ -1,8 +1,6 @@
 package com.physion.ovation.gui.ebuilder.datamodel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
@@ -576,7 +574,7 @@ public class DataModel {
 
         System.out.println("DataModel test is starting...");
 
-        DataModel dataModel = DataModel.getInstance();
+        DataModel.getInstance();
 
         System.out.println("DataModel test is ending.");
     }

@@ -1,7 +1,5 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
-import  com.physion.ovation.gui.ebuilder.datamodel.RowData;
-
 
 /**
  */

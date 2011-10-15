@@ -1,6 +1,5 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
@@ -369,8 +368,6 @@ public class ExpressionImp
          * Create and add the right operand.  The right operand
          * is the rightmost attribute in the passed in attributePath.
          */
-
-        Attribute attribute = attributePath.get(attributePath.size()-1);
 
         subList = attributePath.subList(attributePath.size()-1,
                                         attributePath.size());

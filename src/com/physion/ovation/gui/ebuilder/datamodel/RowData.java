@@ -3,7 +3,6 @@ package com.physion.ovation.gui.ebuilder.datamodel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.EventListener;
 import javax.swing.event.EventListenerList;
 
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;

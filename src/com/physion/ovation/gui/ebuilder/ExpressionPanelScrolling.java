@@ -7,9 +7,6 @@ import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-import java.util.Iterator;
-import java.util.Arrays;
-
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 
 /**
