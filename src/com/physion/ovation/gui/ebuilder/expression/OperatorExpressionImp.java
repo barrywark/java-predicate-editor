@@ -100,8 +100,9 @@ public class OperatorExpressionImp
      */
     private String getOperatorName(RowData rowData) {
 
-        if (rowData.getCollectionOperator() != null)
+        if (rowData.getCollectionOperator() != null) {
             return(getCollectionOperatorName(rowData));
+        }
         else {
             if (rowData.getAttributeOperator() != null) {
                 return(rowData.getAttributeOperator().toString());

@@ -107,8 +107,9 @@ public class ExpressionImp
             if (childmostAttribute.getIsMine())
                 myAnyOperator = new OperatorExpressionImp("my");
             else
-                myAnyOperator = new OperatorExpressionImp("any");
+                myAnyOperator = new OperatorExpressionImp("aNy");
 
+            /*
             OperatorExpressionImp leftOperator =
                 new OperatorExpressionImp("elementsOfType");
             OperatorExpressionImp nameOperator =
@@ -119,6 +120,9 @@ public class ExpressionImp
             leftOperator.addOperand(createClassLiteralValueExpression(
                                     rowData.getPropType()));
             myAnyOperator.addOperand(leftOperator);
+            */
+            myAnyOperator.addOperand(createExpression(
+                rowData.getAttributePath(), rowData));
 
             OperatorExpressionImp rightOperator =
                 new OperatorExpressionImp(rowData);
@@ -364,6 +368,19 @@ public class ExpressionImp
             Attribute attribute = attributePath.get(0);
             if (attribute.getType() == Type.PARAMETERS_MAP) {
                 return(createExpressionParametersMap(attribute, rowData));
+            }
+            else if (attribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
+                OperatorExpressionImp leftOperator =
+                    new OperatorExpressionImp("elementsOfType");
+                OperatorExpressionImp nameOperator =
+                    new OperatorExpressionImp(attribute.getQueryName());
+                nameOperator.addOperand(new StringLiteralValueExpressionImp(
+                    rowData.getPropName()));
+                leftOperator.addOperand(nameOperator);
+                leftOperator.addOperand(createClassLiteralValueExpression(
+                                        rowData.getPropType()));
+                //myAnyOperator.addOperand(leftOperator);
+                return(leftOperator);
             }
             else {
                 return(new AttributeExpressionImp(attribute.getQueryName()));
@@ -727,9 +744,13 @@ public class ExpressionImp
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
-        rootRow.setCollectionOperator(CollectionOperator.ALL);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
 
         rowData = new RowData();
+        attribute = new Attribute("nextEpoch", Type.REFERENCE,
+                                  DataModel.getClassDescription("Epoch"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
         attribute = new Attribute("properties", Type.PER_USER_PARAMETERS_MAP,
                                   null, Cardinality.N_A);
         rowData.addAttribute(attribute);
