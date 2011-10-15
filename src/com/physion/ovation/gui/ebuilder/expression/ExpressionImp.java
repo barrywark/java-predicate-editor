@@ -248,11 +248,13 @@ public class ExpressionImp
      *            StringLiteralValueExpression(key)
      *          OperatorExpression(IntValue)
      *        AttributeExpression(value)
+     *
+     * This method only returns the "as" sub-tree above.
      */
     private static Expression createExpressionParametersMap(
         Attribute attribute, RowData rowData) {
 
-        System.out.println("Enter createExpressionParametersMap()");
+        //System.out.println("Enter createExpressionParametersMap()");
 
         /**
          * The comments below assume the passed in attribute and
@@ -261,17 +263,10 @@ public class ExpressionImp
          */
 
         /**
-         * Create the "." operator that is the root of this Expression.
-         */
-        OperatorExpressionImp dotOperator = new OperatorExpressionImp(".");
-
-        /**
          * Create the "as" operator and the AttributeExpression(value),
          * and add them as the left and right operands of the "." operator.
          */
         OperatorExpressionImp asOperator = new OperatorExpressionImp("as");
-        //dotOperator.addOperand(asOperator);
-        //dotOperator.addOperand(new AttributeExpressionImp("value"));
 
         /**
          * Create the "parameter" operator and the
