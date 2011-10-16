@@ -366,7 +366,7 @@ public class ExpressionTranslator {
                        attribute.getQueryName()));
 
             default:
-                System.err.println("ERROR:  ExpressionImp."+
+                System.err.println("ERROR:  ExpressionTranslator."+
                     "createLiteralValueExpression().  Unhandled type.\n"+
                     "Type = "+type+"\n"+
                     "rowData:\n"+rowData.getRowString());
@@ -401,7 +401,7 @@ public class ExpressionTranslator {
                 return(new ClassLiteralValueExpression("DateValue"));
 
             default:
-                System.err.println("ERROR:  ExpressionImp."+
+                System.err.println("ERROR:  ExpressionTranslator."+
                     "createClassLiteralValueExpression().  Unhandled type.\n"+
                     "Type = "+type);
                 return(null);

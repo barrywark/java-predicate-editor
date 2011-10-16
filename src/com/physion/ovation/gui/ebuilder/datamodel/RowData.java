@@ -867,7 +867,7 @@ public class RowData
             setPropType(Type.INT_32);
             setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
             setPropName(null);
-            setAttributeValue(null);
+            setAttributeValue(new Integer(0));
         }
         else if (childmostAttribute.isPrimitive()) {
 
