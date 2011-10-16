@@ -3,8 +3,8 @@ package com.physion.ovation.gui.ebuilder.expression;
 
 /**
  */
-public interface LiteralValueExpression
-    extends Expression {
+public interface ILiteralValueExpression
+    extends IExpression {
 
     /**
      * Get the value.

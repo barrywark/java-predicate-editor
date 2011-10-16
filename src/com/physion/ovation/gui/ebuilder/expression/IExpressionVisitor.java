@@ -16,7 +16,7 @@ package com.physion.ovation.gui.ebuilder.expression;
  * is currently, (October 12, 2011), in the directory
  * physion/trunk.
  */
-public interface ExpressionVisitor {
+public interface IExpressionVisitor {
 
     /**
      * Return true to indicate visitor needs to see operands.
