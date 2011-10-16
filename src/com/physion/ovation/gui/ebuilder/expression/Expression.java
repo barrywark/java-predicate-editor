@@ -1,15 +1,5 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
-import java.util.List;
-import java.util.Date;
-
-import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
-import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
-import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
-import com.physion.ovation.gui.ebuilder.datatypes.Type;
-import com.physion.ovation.gui.ebuilder.datatypes.Operator;
-import com.physion.ovation.gui.ebuilder.datamodel.RowData;
-import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 
 /**
