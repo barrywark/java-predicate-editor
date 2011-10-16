@@ -25,6 +25,12 @@ public class ExpressionTranslator {
      */
     public static IExpression createExpressionTree(RowData rootRow) {
 
+        if (rootRow == null) {
+            //System.out.println("ExpressionTranslator.createExpression() "+
+            //                   "was passed a null rootRow parameter.");
+            return(null);
+        }
+
         if (rootRow.isRootRow() == false) {
             System.err.println("ERROR:  "+
                 "ExpressionTranslator.createExpression() "+

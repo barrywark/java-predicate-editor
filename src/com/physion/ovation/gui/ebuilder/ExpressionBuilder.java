@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
+import com.physion.ovation.gui.ebuilder.expression.ExpressionTranslator;
 
 
 /**
@@ -708,6 +709,8 @@ public class ExpressionBuilder
         if (returnValue.status == ExpressionBuilder.RETURN_STATUS_OK) {
             System.out.println("User pressed OK.");
             System.out.println("rootRow:\n"+returnValue.rootRow);
+            System.out.println("Expression:\n"+
+                ExpressionTranslator.createExpressionTree(returnValue.rootRow));
         }
         else {
             System.out.println("User pressed Cancel or closed the window.");
@@ -723,8 +726,10 @@ public class ExpressionBuilder
         RowData rootRow = RowData.createTestRowData();
         returnValue = ExpressionBuilder.editExpression(rootRow);
         System.out.println("\nstatus = "+returnValue.status);
-        System.out.println("Modified rootRow:\n"+returnValue.rootRow);
         System.out.println("Original rootRow:\n"+rootRow);
+        System.out.println("Modified rootRow:\n"+returnValue.rootRow);
+        System.out.println("Expression:\n"+
+            ExpressionTranslator.createExpressionTree(returnValue.rootRow));
         System.exit(returnValue.status);
     }
 }
