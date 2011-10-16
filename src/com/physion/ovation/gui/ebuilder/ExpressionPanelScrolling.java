@@ -17,7 +17,14 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowData;
  */
 public class ExpressionPanelScrolling
     extends JPanel {
-
+	/**
+	 * We never serialize this class, so this declaration is
+	 * just to stop the compiler warning.
+	 * You can suppress the warning instead if you want using
+	 * @SuppressWarnings("serial")
+	 */
+	private static final long serialVersionUID = 1L;
+	
     private ExpressionPanel expressionPanel;
 
 

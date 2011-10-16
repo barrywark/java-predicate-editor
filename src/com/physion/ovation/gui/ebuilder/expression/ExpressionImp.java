@@ -69,7 +69,9 @@ public class ExpressionImp
             rootExpression.addOperand(lastExpression);
         }
         else {
-            rootExpression = new OperatorExpressionImp(rootRow);
+            //rootExpression = new OperatorExpressionImp(rootRow);
+            rootExpression = new OperatorExpressionImp(
+                getCollectionOperatorName(rootRow));
             lastExpression = rootExpression;
         }
 
@@ -87,73 +89,67 @@ public class ExpressionImp
 
 
     /**
-     * Create an Expression from the passed in RowData object.
-     * This method is NOT meant to handle the root RowData object.
+     * Create the operator, or operators, for the passed in
+     * RowData object.  This method should only be called on
+     * a RowData object that is NOT the root of the tree.
+     *
+     * Most of the time only one operator needs to be created.
+     * For example, the RowData attributeOperators "==", "any",
+     * "is null", can all be represented by a single
+     * OperatorExpressionImp object.
+     *
+     * But, some operators need two OperatorExpressionImp
+     * objects to represent them.  For example, the "None"
+     * CollectionOperator becomes the "not" operator with
+     * the "or" operator as its only operand.
+     * The "is not null" attribute operator becomes the
+     * "not" operator with the "is null" operator as its
+     * only operand.
+     *
+     * So, this method returns an OperatorExpression which
+     * might have an operand that is another OperatorExpression.
+     * The caller needs to check whether the returned
+     * OperatorExpression has an operand.  If it does, then the
+     * caller will want to hang the rest of the expression tree
+     * of the returned OperatorExpression's first (and only)
+     * operand returned from OperatorExpression.getOperandList().
      */
-    private static Expression createExpression(RowData rowData) {
+    private static OperatorExpressionImp createOperators(RowData rowData) {
 
-        OperatorExpressionImp expression = null;
+        OperatorExpressionImp op1;
+        OperatorExpressionImp op2;
 
         Attribute childmostAttribute = rowData.getChildmostAttribute();
 
-        if (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
+        if ((childmostAttribute != null) &&
+            (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
+
+            if (childmostAttribute.getIsMine())
+                op1 = new OperatorExpressionImp("my");
+            else
+                op1 = new OperatorExpressionImp("any");
+        }
+        else if ((childmostAttribute != null) &&
+                 (childmostAttribute.getType() == Type.PARAMETERS_MAP)) {
 
             /**
-             * As of October 2011, there is only the "properties"
-             * attribute that is of this PER_USER_PARAMETERS_MAP
-             * type.
+             * TODO:  Can this case be gotten rid of because it is
+             * the same as the default case at the end of this long
+             * if/else block.
              */
-            OperatorExpressionImp myAnyOperator;
-            if (childmostAttribute.getIsMine())
-                myAnyOperator = new OperatorExpressionImp("my");
-            else
-                myAnyOperator = new OperatorExpressionImp("any");
-
-            /*
-            OperatorExpressionImp leftOperator =
-                new OperatorExpressionImp("elementsOfType");
-            OperatorExpressionImp nameOperator =
-                new OperatorExpressionImp(childmostAttribute.getQueryName());
-            nameOperator.addOperand(new StringLiteralValueExpressionImp(
-                rowData.getPropName()));
-            leftOperator.addOperand(nameOperator);
-            leftOperator.addOperand(createClassLiteralValueExpression(
-                                    rowData.getPropType()));
-            myAnyOperator.addOperand(leftOperator);
-            */
-            myAnyOperator.addOperand(createExpression(
-                rowData.getAttributePath(), rowData));
-
-            OperatorExpressionImp rightOperator =
-                new OperatorExpressionImp(rowData);
-            rightOperator.addOperand(new AttributeExpressionImp("value"));
-            rightOperator.addOperand(createLiteralValueExpression(
-                rowData.getPropType(), rowData));
-            myAnyOperator.addOperand(rightOperator);
-
-            expression = myAnyOperator;
+            //op1 = new OperatorExpressionImp(rowData);
+            op1 = new OperatorExpressionImp(
+                rowData.getAttributeOperator().toString());
         }
-        else if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
-            expression = new OperatorExpressionImp(rowData);
-
-            OperatorExpressionImp dotOperand;
-            Expression valueOperand;
-
-            dotOperand = new OperatorExpressionImp(".");
-            valueOperand = createLiteralValueExpression(rowData.getPropType(),
-                                                        rowData);
-            expression.addOperand(dotOperand);
-            expression.addOperand(valueOperand);
-
-            dotOperand.addOperand(createExpression(rowData.getAttributePath(),
-                                  rowData));
-            dotOperand.addOperand(new AttributeExpressionImp("value"));
+        else if (rowData.getAttributeOperator() == Operator.IS_NULL) {
+            //op1 = new OperatorExpressionImp(Operator.IS_NULL.toString());
+            op1 = new OperatorExpressionImp("isnull");
         }
-        else if (rowData.getAttributeOperator() != null) {
-            expression = new OperatorExpressionImp(rowData);
-            expression.addOperand(createExpression(rowData.getAttributePath(),
-                                  rowData));
-            expression.addOperand(createLiteralValueExpression(rowData));
+        else if (rowData.getAttributeOperator() == Operator.IS_NOT_NULL) {
+            op1 = new OperatorExpressionImp("not");
+            //op2 = new OperatorExpressionImp(Operator.IS_NULL.toString());
+            op2 = new OperatorExpressionImp("isnull");
+            op1.addOperand(op2);
         }
         else if (rowData.getCollectionOperator() != null) {
             /**
@@ -164,19 +160,178 @@ public class ExpressionImp
              */
             OperatorExpressionImp lastExpression;
             if (rowData.getCollectionOperator() == CollectionOperator.NONE) {
-                expression = new OperatorExpressionImp("not");
-                lastExpression = new OperatorExpressionImp("or");
-                expression.addOperand(lastExpression);
+                op1 = new OperatorExpressionImp("not");
+                op2 = new OperatorExpressionImp("or");
+                op1.addOperand(op2);
             }
             else {
-                expression = new OperatorExpressionImp(rowData);
-                lastExpression = expression;
+                //op1 = new OperatorExpressionImp(rowData);
+                op1 = new OperatorExpressionImp(
+                    getCollectionOperatorName(rowData));
             }
+        }
+        else {
+            //op1 = new OperatorExpressionImp(rowData);
+            op1 = new OperatorExpressionImp(
+                rowData.getAttributeOperator().toString());
+        }
 
-            lastExpression.addOperand(
+        return(op1);
+    }
+
+
+    /**
+     * This method is only meant to be used on an OperatorExpressionImp
+     * object that has just been created by the createOperators() method.
+     * It either returns the passed in OperatorExpressionImp object or
+     * it returns the one and only operand in its operandList.
+     */
+    private static OperatorExpressionImp getLastOperator(OperatorExpressionImp
+        op) {
+
+        if (op.getOperandList().size() < 1) {
+            return(op);
+        }
+        else {
+            return((OperatorExpressionImp)op.getOperandList().get(0));
+        }
+    }
+
+
+    /**
+     * Convert the passed in RowData's CollectionOperator enum value
+     * to the string value PQL expects.
+     */
+    private static String getOperatorName(RowData rowData) {
+
+        if (rowData.getCollectionOperator() != null) {
+            return(getCollectionOperatorName(rowData));
+        }
+        else {
+            if (rowData.getAttributeOperator() != null) {
+                return(rowData.getAttributeOperator().toString());
+            }
+        }
+
+        return("ERROR");
+    }
+
+
+    private static String getCollectionOperatorName(RowData rowData) {
+
+        /**
+         * If this is NOT the root row, then the collection
+         * operator is simply the lower case version of the
+         * collection operator's string value.
+         * E.g. CollectionOperator.ALL becomes "all",
+         * CollectionOperator.ANY becomes "any".
+         */
+        if (!rowData.isRootRow()) {
+            return(rowData.getCollectionOperator().toString().toLowerCase());
+        }
+
+        /**
+         * This IS the root row, so the collection operator
+         * is handled differently.
+         */
+        switch (rowData.getCollectionOperator()) {
+
+            case ANY:
+                return("or");
+
+            case ALL:
+                return("and");
+
+            case NONE:
+                return("ERROR");  // Should never be called with NONE.
+
+            case COUNT:
+                return("count?");
+
+            default:
+                return("ERROR");
+        }
+    }
+
+
+    /**
+     * Create an Expression from the passed in RowData object.
+     * This method is NOT meant to handle the root RowData object.
+     */
+    private static OperatorExpressionImp createExpression(RowData rowData) {
+
+        OperatorExpressionImp expression;
+        OperatorExpressionImp lastOperator;
+
+        Attribute childmostAttribute = rowData.getChildmostAttribute();
+
+        /**
+         * Create the operator that is the "top" node that this
+         * method will return.  (The returned OperatorExpressionImp
+         * will be placed in the operandList of whatever is
+         * at the very top of the expression tree.  For example,
+         * the very top of the expression tree might be a single
+         * collection operator or the "not" operator with a child
+         * operand that is the collection operator.
+         */
+        expression = createOperators(rowData);
+        lastOperator = getLastOperator(expression);
+
+        /**
+         * At this point, lastOperator is either equal to the
+         * same value that is in the expression variable,
+         * or it is set to the one and only operand in expression's
+         * operandList.
+         */
+
+        if (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
+
+            /**
+             * As of October 2011, there is only the "properties"
+             * attribute that is of this PER_USER_PARAMETERS_MAP
+             * type.
+             */
+
+            lastOperator.addOperand(createExpression(
+                rowData.getAttributePath(), rowData));
+
+            OperatorExpressionImp rightOperator =
+                //new OperatorExpressionImp(rowData);
+                createOperators(rowData);
+            rightOperator.addOperand(new AttributeExpressionImp("value"));
+            rightOperator.addOperand(createLiteralValueExpression(
+                rowData.getPropType(), rowData));
+            lastOperator.addOperand(rightOperator);
+        }
+        else if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
+
+            OperatorExpressionImp dotOperand;
+            Expression valueOperand;
+
+            dotOperand = new OperatorExpressionImp(".");
+            valueOperand = createLiteralValueExpression(rowData.getPropType(),
+                                                        rowData);
+            lastOperator.addOperand(dotOperand);
+            lastOperator.addOperand(valueOperand);
+
+            dotOperand.addOperand(createExpression(rowData.getAttributePath(),
+                                  rowData));
+            dotOperand.addOperand(new AttributeExpressionImp("value"));
+        }
+        else if (rowData.getAttributeOperator() != null) {
+            lastOperator.addOperand(createExpression(rowData.getAttributePath(),
+                                    rowData));
+            if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
+                (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
+                lastOperator.addOperand(createLiteralValueExpression(rowData));
+            }
+        }
+        else if (rowData.getCollectionOperator() != null) {
+
+            lastOperator.addOperand(
                 createExpression(rowData.getAttributePath(), rowData));
             for (RowData childRow : rowData.getChildRows()) {
-                lastExpression.addOperand(createExpression(childRow));
+                lastOperator.addOperand(createExpression(childRow));
             }
         }
 
@@ -193,8 +348,6 @@ public class ExpressionImp
     
     private static LiteralValueExpression createLiteralValueExpression(
         Type type, RowData rowData) {
-
-        LiteralValueExpression literalValueExpression = null;
 
         Attribute attribute = rowData.getChildmostAttribute();
         switch (type) {
@@ -520,7 +673,6 @@ public class ExpressionImp
          * Test the All collection operator, (which becomes "and"),
          * and the Boolean type.
          */
-/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -599,12 +751,11 @@ public class ExpressionImp
         System.out.println("\nExpression:\n"+expression);
 
         /**
-         * Test a reference value.
+         * Test a reference value for null.
          *
          *      Epoch | All
          *        Epoch | owner is null
          */
-/* Not working yet.
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -621,7 +772,30 @@ public class ExpressionImp
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionImp.createExpressionTree(rootRow);
         System.out.println("\nExpression:\n"+expression);
-*/
+
+        /**
+         * Test a reference value for not null.
+         *
+         *      Epoch | All
+         *        Epoch | owner is not null
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(
+            DataModel.getClassDescription("Epoch"));
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        attribute = new Attribute("owner", Type.REFERENCE,
+                                  DataModel.getClassDescription("User"),
+                                  Cardinality.TO_ONE);
+        rowData.addAttribute(attribute);
+        rowData.setAttributeOperator(Operator.IS_NOT_NULL);
+        rootRow.addChildRow(rowData);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionImp.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
         /**
          * Test a compound row:
          *
@@ -693,6 +867,7 @@ public class ExpressionImp
          *        Epoch | All keywords None
          *          KeywordTag | uuid == "xyz"
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -725,6 +900,7 @@ public class ExpressionImp
          *        Epoch | My keywords All
          *          KeywordTag | uuid == "xyz"
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));

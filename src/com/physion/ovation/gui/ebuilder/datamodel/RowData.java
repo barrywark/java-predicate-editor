@@ -1762,16 +1762,6 @@ public class RowData
      */
     public static RowData createTestRowData() {
 
-        ClassDescription entityBaseCD =
-            DataModel.getClassDescription("EntityBase");
-        ClassDescription taggableEntityBaseCD =
-            DataModel.getClassDescription("TaggableEntityBase");
-        ClassDescription userCD =
-            DataModel.getClassDescription("User");
-        ClassDescription keywordTagCD =
-            DataModel.getClassDescription("KeywordTag");
-        ClassDescription timelineElementCD =
-            DataModel.getClassDescription("TimelineElement");
         ClassDescription epochCD =
             DataModel.getClassDescription("Epoch");
         ClassDescription epochGroupCD =

@@ -19,8 +19,16 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
 public class ExpressionPanel
     extends JPanel
     implements RowDataListener {
+	
+	/**
+	 * We never serialize this class, so this declaration is
+	 * just to stop the compiler warning.
+	 * You can suppress the warning instead if you want using
+	 * @SuppressWarnings("serial")
+	 */
+	private static final long serialVersionUID = 1L;
 
-    private RowData rootRow;
+	private RowData rootRow;
 
 
     /**

@@ -16,7 +16,14 @@ import javax.swing.JButton;
 class InvisibleButton
     extends JButton {
 
-
+	/**
+	 * We never serialize this class, so this declaration is
+	 * just to stop the compiler warning.
+	 * You can suppress the warning instead if you want using
+	 * @SuppressWarnings("serial")
+	 */
+	private static final long serialVersionUID = 1L;
+	
     /**
      * If this is set to false, we will not draw ourselves or take
      * the focus.

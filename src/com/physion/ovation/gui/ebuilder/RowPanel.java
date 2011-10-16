@@ -53,7 +53,15 @@ class RowPanel
     extends JPanel
     implements ActionListener, DocumentListener, ChangeListener,
         RowDataListener {
-
+	
+	/**
+	 * We never serialize this class, so this declaration is
+	 * just to stop the compiler warning.
+	 * You can suppress the warning instead if you want using
+	 * @SuppressWarnings("serial")
+	 */
+	private static final long serialVersionUID = 1L;
+	
     /**
      * A comboBox dropdown list will dispaly at least this many
      * items before it starts to use a scrollbar.
@@ -109,7 +117,8 @@ class RowPanel
      *
      * Because of this, we generate the JComboBoxes as we need them.
      */
-    private ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
+    @SuppressWarnings("unchecked")
+	private ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
 
     /**
      * This text field is used to enter the value of a "primitive"
@@ -148,7 +157,8 @@ class RowPanel
      * "keyed" "properties" attribute will be.
      * E.g. int, string, boolean, time.
      */
-    private JComboBox propTypeComboBox;
+    @SuppressWarnings("unchecked")
+	private JComboBox propTypeComboBox;
 
     /**
      * This comboBox will be used for an Attribute Row that
@@ -156,7 +166,8 @@ class RowPanel
      * contains a "keyed" "properties" definition.
      * It will contain values like:  ==, !=, >, is null.
      */
-    private JComboBox operatorComboBox;
+    @SuppressWarnings("unchecked")
+	private JComboBox operatorComboBox;
 
     /**
      * This is the widget that is displayed to let a user select
@@ -225,7 +236,8 @@ class RowPanel
      * Other methods add or remove the components depending on
      * what RowData this row is displaying/editing.
      */
-    public RowPanel(RowData rowData) {
+    @SuppressWarnings("unchecked")
+	public RowPanel(RowData rowData) {
 
         this.rowData = rowData;
 
@@ -361,7 +373,8 @@ class RowPanel
      * Get the comboBox at the specified index.  Create it if it
      * does not already exist.
      */
-    private JComboBox getComboBox(int index) {
+    @SuppressWarnings("unchecked")
+	private JComboBox getComboBox(int index) {
 
         while (index >= comboBoxes.size())
             comboBoxes.add(createComboBox(null));
@@ -375,7 +388,8 @@ class RowPanel
      * Pass null if you just want a default model that you
      * later change to something else.
      */
-    private JComboBox createComboBox(ComboBoxModel model) {
+    @SuppressWarnings("unchecked")
+	private JComboBox createComboBox(ComboBoxModel model) {
 
         JComboBox comboBox;
         if (model == null)
@@ -569,7 +583,8 @@ class RowPanel
      * the selected item to this value.  Pass null if you do not want to
      * set the selected item.
      */
-    private void setComboBoxModel(JComboBox comboBox,
+    @SuppressWarnings("unchecked")
+	private void setComboBoxModel(JComboBox comboBox,
                                   ClassDescription classDescription,
                                   boolean appendNulls,
                                   Object selectedItem) {
@@ -648,7 +663,8 @@ class RowPanel
      * the selected item to this value.  Pass null if you do not want to
      * set the selected item.
      */
-    private void setComboBoxModel(JComboBox comboBox, Object[] items,
+    @SuppressWarnings("unchecked")
+	private void setComboBoxModel(JComboBox comboBox, Object[] items,
                                   Object selectedItem) {
 
         DefaultComboBoxModel model = new DefaultComboBoxModel(items);
@@ -710,7 +726,8 @@ class RowPanel
      * on the right side of a row, or when the user sets a time/date
      * value using the dateTimePicker.
      */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void actionPerformed(ActionEvent e) {
 
         //System.out.println("Enter actionPerformed on: "+
@@ -761,7 +778,8 @@ class RowPanel
      * item in a comboBox.  For example, the user changes the
      * selected attribute or collection operator.
      */
-    private void comboBoxChanged(JComboBox comboBox) {
+    @SuppressWarnings("unchecked")
+	private void comboBoxChanged(JComboBox comboBox) {
 
         /**
          * If we are in the process of updating the RowData due
@@ -794,7 +812,8 @@ class RowPanel
      * This method is called when the user changes a comboBox
      * in a row other than the first, (i.e. root), row.
      */
-    private void handleChildRowChange(JComboBox comboBox) {
+    @SuppressWarnings("unchecked")
+	private void handleChildRowChange(JComboBox comboBox) {
 
         if (comboBox == propTypeComboBox) {
             /**
@@ -882,7 +901,8 @@ class RowPanel
      *
      * @param selectedAttribute The selected Attribute.
      */
-    private void handleAttributeSelected(JComboBox comboBox,
+    @SuppressWarnings("unchecked")
+	private void handleAttributeSelected(JComboBox comboBox,
                                          Attribute selectedAttribute) {
 
         int comboBoxIndex = comboBoxes.indexOf(comboBox);
@@ -913,7 +933,8 @@ class RowPanel
      *      comboBox 0 - Used to select the Class Under Qualification.
      *      comboBox 1 - Used to select the Collection Operator.
      */
-    private void handleRootRowChange(JComboBox comboBox) {
+    @SuppressWarnings("unchecked")
+	private void handleRootRowChange(JComboBox comboBox) {
 
         if (comboBox == comboBoxes.get(0)) {
             /**
@@ -1102,7 +1123,8 @@ class RowPanel
      * into a separate method.  It won't reduce the amount
      * of code, but might make it a bit easier to understand.
      */
-    private void layoutAttributeRow() {
+    @SuppressWarnings("unchecked")
+	private void layoutAttributeRow() {
 
         GridBagConstraints gc;
 
@@ -1634,6 +1656,7 @@ class RowPanel
      * If the type is Type.UTF_8_STRING, then the operators
      * are: ==, !=, >, <, ~~=, etc.
      */
+	@SuppressWarnings("unchecked")
 	private void setOperatorComboBoxModel(Type type) {
 
         switch(type) {

@@ -54,6 +54,14 @@ public class ExpressionBuilder
     implements ActionListener, RowDataListener {
 
     /**
+	 * We never serialize this class, so this declaration is
+	 * just to stop the compiler warning.
+	 * You can suppress the warning instead if you want using
+	 * @SuppressWarnings("serial")
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Number of pixels used as a spacer.
      */
     private int INSET = 6;
