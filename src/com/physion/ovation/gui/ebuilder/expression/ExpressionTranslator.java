@@ -145,13 +145,21 @@ public class ExpressionTranslator {
             op1.addOperand(op2);
         }
         else if (rowData.getCollectionOperator() != null) {
-            /**
-             * A row that uses the None collection
-             * operator is a special case.  It must be
-             * turned into TWO operators:  the "not" operator
-             * with the "or" operator as its only operand.
-             */
-            if (rowData.getCollectionOperator() == CollectionOperator.NONE) {
+
+            if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
+                op1 = new OperatorExpression(rowData.getAttributeOperator().
+                                             toString());
+                op2 = new OperatorExpression("count");
+                op1.addOperand(op2);
+            }
+            else if (rowData.getCollectionOperator() ==
+                     CollectionOperator.NONE) {
+                /**
+                 * A row that uses the None collection
+                 * operator is a special case.  It must be
+                 * turned into TWO operators:  the "not" operator
+                 * with the "or" operator as its only operand.
+                 */
                 op1 = new OperatorExpression("not");
                 op2 = new OperatorExpression("or");
                 op1.addOperand(op2);
@@ -208,6 +216,26 @@ public class ExpressionTranslator {
     }
     */
 
+
+    /**
+     * Get the string that should be used for the CollectionOperator
+     * of the passed in rowData.  The mapping of the string displayed
+     * in the GUI, (e.g. "Any", "All"), to the string used in the
+     * expression tree depends upon whether the passed in rowData
+     * is the root row.  For the root row:
+     *
+     *      Any -> or
+     *      All -> and
+     *
+     * For other rows:
+     *
+     *      Any -> any
+     *      All -> all
+     *
+     * The None and Count CollectionOperators are not handled by
+     * this method.  They are handled elsewhere.  None becomes
+     * two operators (not/or), and Count also becomes two operators.
+     */
     private static String getCollectionOperatorName(RowData rowData) {
 
         /**
@@ -233,14 +261,10 @@ public class ExpressionTranslator {
             case ALL:
                 return("and");
 
-            case NONE:
-                return("ERROR");  // Should never be called with NONE.
-
-            case COUNT:
-                return("count?");
-
+            //case NONE:
+            //case COUNT:
             default:
-                return("ERROR");
+                return("ERROR");  // Should never be called with NONE or COUNT.
         }
     }
 
@@ -307,7 +331,33 @@ public class ExpressionTranslator {
                                   rowData));
             dotOperand.addOperand(new AttributeExpression("value"));
         }
+        else if (rowData.getCollectionOperator() != null) {
+
+            if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
+                /**
+                 * This is a row with a Count CollectionOperator like
+                 * this:
+                 *
+                 *      responses Count == 27
+                 */
+                lastOperator.addOperand(
+                    createExpression(rowData.getAttributePath(), rowData));
+                expression.addOperand(createLiteralValueExpression(
+                    Type.INT_32, rowData));
+            }
+            else {
+                /**
+                 * This is an Any/All/None row.
+                 */
+                lastOperator.addOperand(
+                    createExpression(rowData.getAttributePath(), rowData));
+                for (RowData childRow : rowData.getChildRows()) {
+                    lastOperator.addOperand(createExpression(childRow));
+                } 
+            }
+        }
         else if (rowData.getAttributeOperator() != null) {
+
             lastOperator.addOperand(createExpression(rowData.getAttributePath(),
                                     rowData));
             if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
@@ -315,19 +365,15 @@ public class ExpressionTranslator {
                 lastOperator.addOperand(createLiteralValueExpression(rowData));
             }
         }
-        else if (rowData.getCollectionOperator() != null) {
-
-            lastOperator.addOperand(
-                createExpression(rowData.getAttributePath(), rowData));
-            for (RowData childRow : rowData.getChildRows()) {
-                lastOperator.addOperand(createExpression(childRow));
-            }
-        }
 
         return(expression);
     }
 
 
+    /**
+     * Create a LiteralValueExpression of the appropriate subclass
+     * based on the passed in rowData.
+     */
     private static ILiteralValueExpression createLiteralValueExpression(
         RowData rowData) {
 
@@ -335,6 +381,12 @@ public class ExpressionTranslator {
                                             getType(), rowData));
     }
     
+
+    /**
+     * Create a LiteralValueExpression of the appropriate subclass
+     * based on the passed in type.  The value of the LiteralValueExpression
+     * comes from the passed in rowData.
+     */
     private static ILiteralValueExpression createLiteralValueExpression(
         Type type, RowData rowData) {
 
@@ -348,6 +400,15 @@ public class ExpressionTranslator {
             case UTF_8_STRING:
                 return(new StringLiteralValueExpression(
                        rowData.getAttributeValue().toString()));
+
+            case INT_16:
+                /**
+                 * Note that we change the INT_16 to an INT_32.
+                 * As of October 15, 2011, there is no
+                 * Int16LiteralValueExpression.
+                 */
+                return(new Int32LiteralValueExpression(
+                       ((Integer)rowData.getAttributeValue()).intValue()));
 
             case INT_32:
                 return(new Int32LiteralValueExpression(

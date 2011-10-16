@@ -1322,7 +1322,7 @@ public class RowData
                      */
                     setAttributeOperator(Operator.OPERATORS_BOOLEAN[0]);
                 }
-                setAttributeValue(null);
+                setAttributeValue(new Boolean(true));
             break;
             case UTF_8_STRING:
                 if (!Operator.isOperatorString(attributeOperator)) {
