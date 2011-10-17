@@ -464,6 +464,23 @@ public class ExpressionBuilder
 
 
     /**
+     * Temporary method until I get the Expression to RowData translation
+     * working.
+     */
+    private static ReturnValue editExpression(ExpressionTree expressionTree,
+        RowData rootRow) {
+
+        if (expressionTree == null) {
+            expressionTree = new ExpressionTree();
+        }
+
+        //RowData rootRow = ExpressionTranslator.createRowData(expressionTree);
+
+        return(editExpression(rootRow));
+    }
+
+
+    /**
      * This method is called when the expression tree we are
      * displaying/editing changes.  Actually, it is called
      * both BEFORE the tree changes and AFTER the tree
@@ -736,6 +753,7 @@ public class ExpressionBuilder
         }
         else {
             System.out.println("User pressed Cancel or closed the window.");
+            System.exit(returnValue.status);
         }
 
         /**
@@ -745,27 +763,30 @@ public class ExpressionBuilder
          * some values and have the window initialized to that
          * tree's value.
          */
-/*
+
         RowData rootRow = RowData.createTestRowData();
         returnValue = ExpressionBuilder.editExpression(rootRow);
         System.out.println("\nstatus = "+returnValue.status);
         System.out.println("Original rootRow:\n"+rootRow);
         System.out.println("Modified rootRow:\n"+returnValue.rootRow);
         System.out.println("Expression:\n"+returnValue.expressionTree);
-*/
+
         while (true) {
 
-            RowData originalRootRow = returnValue.rootRow;
-            returnValue = ExpressionBuilder.editExpression(
-                returnValue.expressionTree);
-            System.out.println("\nstatus = "+returnValue.status);
-            System.out.println("Original rootRow:\n"+originalRootRow);
-            System.out.println("Modified rootRow:\n"+returnValue.rootRow);
-            System.out.println("Expression:\n"+returnValue.expressionTree);
             if (returnValue.status == RETURN_STATUS_CANCEL) {
                 System.out.println("User pressed Cancel or closed the window.");
                 System.exit(returnValue.status);
             }
+
+            RowData originalRootRow = returnValue.rootRow;
+            //returnValue = ExpressionBuilder.editExpression(
+            //    returnValue.expressionTree);
+            returnValue = ExpressionBuilder.editExpression(
+                returnValue.expressionTree, returnValue.rootRow);
+            System.out.println("\nstatus = "+returnValue.status);
+            System.out.println("Original rootRow:\n"+originalRootRow);
+            System.out.println("Modified rootRow:\n"+returnValue.rootRow);
+            System.out.println("Expression:\n"+returnValue.expressionTree);
         }
     }
 }

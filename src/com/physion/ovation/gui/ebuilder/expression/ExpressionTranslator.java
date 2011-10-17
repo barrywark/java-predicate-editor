@@ -1,5 +1,6 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
@@ -26,6 +27,12 @@ public class ExpressionTranslator {
     public static final String OE_NOT = "not";
     public static final String OE_OR = "or";
     public static final String OE_AND = "and";
+    public static final String OE_COUNT = "count";
+
+    public static final String OE_EQUALS = "==";
+    public static final String OE_NOT_EQUALS = "!=";
+
+    public static final String OE_IS_NULL = "isnull";
 
 
     public static RowData createRowData(ExpressionTree expressionTree) {
@@ -57,13 +64,168 @@ public class ExpressionTranslator {
 
         rootRow.setCollectionOperator(getCOForOE(oe));
 
+        ArrayList<RowData> childRows = getChildRows(getFirstChildOE(oe));
+        rootRow.addChildRows(childRows);
+
         return(rootRow);
     }
 
 
     /**
+     * This returns the first operator of the passed in tree that
+     * is NOT the operator associated with the root RowData object.
+     * For example, if the Expression starts like this:
+     *
+     *      OperatorExpression("and")
+     *        OperatorExpression("==")
+     *          ...
+     *
+     * this method would return the OperatorExpression("==") object.
+     * If the Expression starts like this:
+     *
+     *      OperatorExpression("not")
+     *        OperatorExpression("or")
+     *          OperatorExpression("==")
+     *            ...
+     *  
+     * this method would return the OperatorExpression("==") object.
+     * If the Expression starts like this:
+     *
+     *      OperatorExpression("and")
+     *        OperatorExpression("not")
+     *          OperatorExpression("isnull")
+     *            ...
+     *
+     * this method would return the OperatorExpression("not") object.
+     *
+     * I.e. this method returns the OperatorExpression that
+     * will be used to create the first child row of the the
+     * GUI's root row.  (Note, the GUI's root row might use
+     * one or two of the first operators in the Expression tree,
+     * as demonstrated in the examples above.
+     */
+    private static IOperatorExpression getFirstChildOE(IOperatorExpression oe) {
+        
+        if (oe.getOperandList().size() < 1)
+            return(null);
+
+        if (OE_NOT.equals(oe.getOperatorName())) {
+            oe = (IOperatorExpression)(oe.getOperandList().get(0));
+            if (oe.getOperandList().size() < 1)
+                return(null);
+            return((IOperatorExpression)(oe.getOperandList().get(0)));
+        }
+        else {
+            return((IOperatorExpression)(oe.getOperandList().get(0)));
+        }
+    }
+
+
+    /**
+     * Get the list of child RowData objects that describe the passed
+     * in expression tree.  This method calls itself recursively to
+     * generate the sub-tree of RowData objects.
+     *
+     * This method should NOT be called with the OperatorExpression
+     * that is the root operator (or operators) of the Expression tree.
+     * That operator(s) must be handled a bit differently to generate
+     * the root RowData object.  See getFirstChildOE() and the method
+     * that calls it for more information about generating the root
+     * RowData object in the GUI.
+     *
+     * This method never returns null, but might return an empty list.
+     */
+    private static ArrayList<RowData> getChildRows(IOperatorExpression oe) {
+
+        ArrayList<RowData> childRows = new ArrayList<RowData>();
+
+        /**
+         * If the oe is null, return an empty list.
+         */
+        if (oe == null)
+            return(childRows);
+
+        ArrayList<IExpression> ol = oe.getOperandList();
+        int olIndex = 0;
+
+        RowData rowData = new RowData();
+
+        CollectionOperator collectionOperator = getCOForOE(oe);
+        Operator attributeOperator = getAOForOE(oe);
+
+        if (collectionOperator != null) {
+            rowData.setCollectionOperator(collectionOperator);
+            if (attributeOperator != null) {
+                rowData.setAttributeOperator(attributeOperator);
+            }
+        }
+        else {
+            if (attributeOperator != null) {
+                rowData.setAttributeOperator(attributeOperator);
+                IExpression ex = ol.get(olIndex++);
+
+                setAttributePath(rowData, ex);
+
+                if ((attributeOperator != Operator.IS_NULL) &&
+                    (attributeOperator != Operator.IS_NOT_NULL) &&
+                    (attributeOperator != Operator.IS_TRUE) &&
+                    (attributeOperator != Operator.IS_FALSE)) {
+                    
+                    ex = ol.get(olIndex++);
+                    Object attributeValue = getAttributeValue(ex);
+                    rowData.setAttributeValue(attributeValue);
+                }
+            }
+        }
+
+        childRows.add(rowData);
+
+        if (olIndex < ol.size()) {
+        }
+
+        return(childRows);
+    }
+
+
+    /**
+     * TODO: Write this method.
+     */
+    private static void setAttributePath(RowData rowData, IExpression ex) {
+
+        Attribute attribute;
+
+        attribute = new Attribute("protocolID", Type.UTF_8_STRING);
+        rowData.addAttribute(attribute);
+    }
+
+
+    /**
+     * Convert the passed in IExpression into an attributeValue
+     * that the RowData object expects.
+     *
+     * TODO:  Write this method.
+     */
+    private static Object getAttributeValue(IExpression ex) {
+        return(new String("someValue"));
+    }
+
+
+    /*
+    private static boolean isCollectionOperator(String operatorString) {
+
+        if (OE_OR.equals(operatorString) ||
+            OE_NOT.equals(operatorString) ||
+
+    }
+    */
+
+
+    /**
      * Get the CollectionOperator that is equivalent to the passed
      * in OperatorExpression.
+     *
+     * If the passed in OperatorExpression cannot be mapped to a
+     * CollectionOperator, this method returns null.
      */
     private static CollectionOperator getCOForOE(IOperatorExpression oe) {
 
@@ -79,9 +241,43 @@ public class ExpressionTranslator {
                 return(CollectionOperator.NONE);
             }
         }
+        else if (OE_COUNT.equals(oe.getOperatorName())) {
+            return(CollectionOperator.COUNT);
+        }
 
-        System.err.println("ERROR:  ExpressionTranslator.getCOForOE()"+
-            "\nCode must be updated to handle this type of expression.");
+        //System.err.println("ERROR:  ExpressionTranslator.getCOForOE()"+
+        //    "\nCode must be updated to handle this type of expression.");
+        return(null);
+    }
+
+
+    /**
+     * Get the attribute Operator that is equivalent to the passed
+     * in OperatorExpression.
+     *
+     * If the passed in OperatorExpression cannot be mapped to a
+     * attribute Operator, this method returns null.
+     */
+    private static Operator getAOForOE(IOperatorExpression oe) {
+
+        if (OE_EQUALS.equals(oe.getOperatorName())) {
+            return(Operator.EQUALS);
+        }
+        else if (OE_NOT_EQUALS.equals(oe.getOperatorName())) {
+            return(Operator.NOT_EQUALS);
+        }
+        else if (OE_IS_NULL.equals(oe.getOperatorName())) {
+            return(Operator.IS_NULL);
+        }
+        else if (OE_NOT.equals(oe.getOperatorName())) {
+            oe = (IOperatorExpression)(oe.getOperandList().get(0));
+            if (OE_IS_NULL.equals(oe.getOperatorName())) {
+                return(Operator.IS_NOT_NULL);
+            }
+            // What if we get here?
+        }
+        // Do more
+
         return(null);
     }
 

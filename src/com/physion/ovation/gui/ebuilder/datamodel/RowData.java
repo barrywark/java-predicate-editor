@@ -1402,6 +1402,14 @@ public class RowData
     }
 
 
+    public void addChildRows(ArrayList<RowData> childRows) {
+
+        for (RowData rowData : childRows) {
+            addChildRow(rowData);
+        }
+    }
+
+
     /**
      * Clear the list of child rows.
      *
