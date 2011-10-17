@@ -138,4 +138,4 @@ don't make sense, wait until we talk by Skype.
     structure of an Expression tree.  (I realize the ExpressionTree
     file you wrote was a quick "conversion" from the C++ code.)
 
-
+    Ask Barry whether "count" operator is handled properly.
