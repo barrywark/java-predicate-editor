@@ -760,17 +760,55 @@ public class ExpressionTranslator {
      *      OperatorExpression(.)
      *        OperatorExpression(as)
      *          OperatorExpression(parameter)
-     *            StringLiteralValueExpression(protocolParameters)
+     *            AttributeExpression(protocolParameters)
      *            StringLiteralValueExpression(key)
-     *          OperatorExpression(IntValue)
+     *          OperatorExpression(ovation.IntegerValue)
      *        AttributeExpression(value)
      *
      * This method only returns the "as" sub-tree above.
+     *
+     * Please note, if the passed in attributePath is more than
+     * just the one "protocolParameters" entry in the example above,
+     * this method concatenates all the Attributes together to
+     * get a long path name.  For example:
+     *
+     *      OperatorExpression(.)
+     *        OperatorExpression(as)
+     *          OperatorExpression(parameter)
+     *            AttributeExpression(nextEpoch.nextEpoch.protocolParameters)
+     *            StringLiteralValueExpression(key)
+     *          OperatorExpression(ovation.IntegerValue)
+     *        AttributeExpression(value)
+     *      
+     *
+     * @return The "as" sub-tree described in the example above.
      */
     private static IExpression createExpressionParametersMap(
-        Attribute attribute, RowData rowData) {
+        List<Attribute> attributePath, RowData rowData) {
 
         //System.out.println("Enter createExpressionParametersMap()");
+
+        /**
+         * If the attributePath has more than one Attribute in it,
+         * we need to concatenate all the Attributes up to
+         * the "protocolParameters" Attribute.
+         */
+        String path = "";
+        /*
+        for (int index = 0; index < attributePath.size()-1; index++) {
+            path += attributePath.get(index).getQueryName();
+        }
+        */
+        boolean first = true;
+        for (Attribute attribute : attributePath) {
+
+            if (first)
+                first = false;
+            else 
+                path += ".";
+
+            path += attribute.getQueryName();
+        }
 
         /**
          * The comments below assume the passed in attribute and
@@ -799,10 +837,16 @@ public class ExpressionTranslator {
          * Create the StringLiteralValueExpression operands
          * of "protocolParameters" and "key", and add them
          * as the left and right operands to the parameterOperator.
+         *
+         * Note that we prepend the "path" we computed above
+         * to the final Attribute name.  E.g.
+         *
+         *      "nextEpoch.nextEpoch"+"protocolParameters"
          */
         //parameterOperator.addOperand(new StringLiteralValueExpression(
         parameterOperator.addOperand(new AttributeExpression(
-            attribute.getQueryName()));
+            //attribute.getQueryName()));
+            path));
         parameterOperator.addOperand(new StringLiteralValueExpression(
                                      rowData.getPropName()));
 
@@ -826,12 +870,54 @@ public class ExpressionTranslator {
      * attributePath before calling itself.)  So, don't start
      * calling RowData.getAttributePath() unless you really are
      * sure that is what you want.
+     *
+     * Note, the syntax of the Expression tree is NOT consistent
+     * for all data types.  For "generic" attributes, we create
+     * a tree of nested OpertorExpressions.  For example:
+     *
+     * rootRow:
+     * Epoch | Any
+     *   Epoch | nextEpoch.nextEpoch.prevEpoch.protocolID == "Test 27"
+     * 
+     * Expression:
+     * CUQ: Epoch
+     * rootExpression:
+     * OperatorExpression(or)
+     *   OperatorExpression(==)
+     *     OperatorExpression(.)
+     *       OperatorExpression(.)
+     *         OperatorExpression(.)
+     *           AttributeExpression(nextEpoch)
+     *           AttributeExpression(nextEpoch)
+     *         AttributeExpression(prevEpoch)
+     *       AttributeExpression(protocolID)
+     *     StringLiteralValueExpression(Test 27)
+     *
+     * But for a PARAMETERS_MAP type, all the Attributes on attributePath 
+     * get concatenated into a single operand like this:
+     *
+     * TODO: Paste output here.
      */
     private static IExpression createExpression(List<Attribute> attributePath,
-                                               RowData rowData) {
+                                                RowData rowData) {
 
         //System.out.println("Enter createExpression(List<Attribute>)");
         //System.out.println("attributePath.size() = "+attributePath.size());
+
+        if (attributePath.size() < 1) {
+            /**
+             * This should never happen.
+             */
+            return(null);
+        }
+
+        /**
+         * Handle the special cases.  E.g. PARAMETERS_MAP
+         */
+        Attribute lastAttribute = attributePath.get(attributePath.size()-1);
+        if (lastAttribute.getType() == Type.PARAMETERS_MAP) {
+            return(createExpressionParametersMap(attributePath, rowData));
+        }
 
         /**
          * If the attributePath is, (or has been whittled down to),
@@ -842,7 +928,13 @@ public class ExpressionTranslator {
 
             Attribute attribute = attributePath.get(0);
             if (attribute.getType() == Type.PARAMETERS_MAP) {
-                return(createExpressionParametersMap(attribute, rowData));
+                /**
+                 * We should never get here.
+                 * This type should already have been handled
+                 * above.
+                 */
+                //return(createExpressionParametersMap(attribute, rowData));
+                return(null);
             }
             else if (attribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
                 OperatorExpression leftOperator =
