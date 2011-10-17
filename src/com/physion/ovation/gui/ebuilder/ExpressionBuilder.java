@@ -17,6 +17,7 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTranslator;
+import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
 
 
 /**
@@ -379,8 +380,13 @@ public class ExpressionBuilder
      * An example of using this method is in this
      * class's main() method.
      */
+    /*
+    private static ReturnValue editExpression() {
+        return(editExpression((RowData)null));
+    }
+    */
     public static ReturnValue editExpression() {
-        return(editExpression(null));
+        return(editExpression((ExpressionTree)null));
     }
 
 
@@ -403,7 +409,7 @@ public class ExpressionBuilder
      * should look at.  Please see ExpressionBuilder.ReturnValue
      * for more information.
      */
-    public static ReturnValue editExpression(RowData rootRow) {
+    private static ReturnValue editExpression(RowData rootRow) {
 
         /**
          * Create a returnValue that is already initialized
@@ -432,12 +438,28 @@ public class ExpressionBuilder
         dialog.setVisible(true);
 
         returnValue.status = dialog.getReturnStatus();
-        if (returnValue.status == RETURN_STATUS_OK)
+        if (returnValue.status == RETURN_STATUS_OK) {
             returnValue.rootRow = dialog.getRootRow();
-        else
+            returnValue.expressionTree =
+                ExpressionTranslator.createExpressionTree(dialog.getRootRow());
+        }
+        else {
             returnValue.rootRow = null;
+            returnValue.expressionTree = null;
+        }
 
         return(returnValue);
+    }
+
+
+    public static ReturnValue editExpression(ExpressionTree expressionTree) {
+
+        if (expressionTree == null) {
+            expressionTree = new ExpressionTree();
+        }
+
+        RowData rootRow = ExpressionTranslator.createRowData(expressionTree);
+        return(editExpression(rootRow));
     }
 
 
@@ -684,7 +706,8 @@ public class ExpressionBuilder
      */
     public static class ReturnValue {
         public int status = RETURN_STATUS_CANCEL;
-        public RowData rootRow = null;
+        public RowData rootRow = null;  // Delete this eventually?
+        public ExpressionTree expressionTree = null;
     }
 
 
@@ -709,8 +732,7 @@ public class ExpressionBuilder
         if (returnValue.status == ExpressionBuilder.RETURN_STATUS_OK) {
             System.out.println("User pressed OK.");
             System.out.println("rootRow:\n"+returnValue.rootRow);
-            System.out.println("Expression:\n"+
-                ExpressionTranslator.createExpressionTree(returnValue.rootRow));
+            System.out.println("Expression:\n"+returnValue.expressionTree);
         }
         else {
             System.out.println("User pressed Cancel or closed the window.");
@@ -723,13 +745,27 @@ public class ExpressionBuilder
          * some values and have the window initialized to that
          * tree's value.
          */
+/*
         RowData rootRow = RowData.createTestRowData();
         returnValue = ExpressionBuilder.editExpression(rootRow);
         System.out.println("\nstatus = "+returnValue.status);
         System.out.println("Original rootRow:\n"+rootRow);
         System.out.println("Modified rootRow:\n"+returnValue.rootRow);
-        System.out.println("Expression:\n"+
-            ExpressionTranslator.createExpressionTree(returnValue.rootRow));
-        System.exit(returnValue.status);
+        System.out.println("Expression:\n"+returnValue.expressionTree);
+*/
+        while (true) {
+
+            RowData originalRootRow = returnValue.rootRow;
+            returnValue = ExpressionBuilder.editExpression(
+                returnValue.expressionTree);
+            System.out.println("\nstatus = "+returnValue.status);
+            System.out.println("Original rootRow:\n"+originalRootRow);
+            System.out.println("Modified rootRow:\n"+returnValue.rootRow);
+            System.out.println("Expression:\n"+returnValue.expressionTree);
+            if (returnValue.status == RETURN_STATUS_CANCEL) {
+                System.out.println("User pressed Cancel or closed the window.");
+                System.exit(returnValue.status);
+            }
+        }
     }
 }

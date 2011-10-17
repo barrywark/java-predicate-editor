@@ -2,6 +2,7 @@ package com.physion.ovation.gui.ebuilder.expression;
 
 
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
+import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 /**
  * This class represents an "entire" expression tree.
@@ -21,6 +22,16 @@ public class ExpressionTree {
                    Expression rootExpression) {
         this.classUnderQualification = classUnderQualification;
         this.rootExpression = rootExpression;
+    }
+
+
+    /**
+     * Create a default ExpressionTree.
+     * TODO:  Are the below values what we want as a default?
+     */
+    public ExpressionTree() {
+        classUnderQualification = DataModel.getClassDescription("Epoch");
+        rootExpression = new OperatorExpression(ExpressionTranslator.OE_OR);
     }
 
 

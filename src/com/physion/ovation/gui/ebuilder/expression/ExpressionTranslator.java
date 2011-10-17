@@ -16,10 +16,75 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
  * TODO:  Put keywords such as "not", "or", "and", "as", "value",
  * "parameter", "my", "elementsOfType", etc. into constants.
  *
+ * TODO:  In what class should the declarations of OE_NOT, OE_OR, etc. go?
+ *
  * TODO:  Do I want to put all this code into the ExpressionTree class
  * and get rid of the class ExpressionTranslator?
  */
 public class ExpressionTranslator {
+
+    public static final String OE_NOT = "not";
+    public static final String OE_OR = "or";
+    public static final String OE_AND = "and";
+
+
+    public static RowData createRowData(ExpressionTree expressionTree) {
+
+        /**
+         * First create the root RowData object.
+         * It simply contains the CUQ (Class Under Qualification)
+         * and a CollectionOperator.
+         *
+         * Note that mapping an Expression collection operator into
+         * a RowData CollectionOperator, is not always one-to-one.
+         * These are one-to-one:
+         *
+         *      "or" -> CollectionOperator.ANY
+         *      "and" -> CollectionOperator.ALL
+         *
+         * but the RowData CollectionOperator.NONE is represented by
+         * the Expression tree having a "not" OperatorExpression with
+         * an "or" OperatorExpression as its only operand:
+         *
+         *      "not(or)" -> CollectionOperator.NONE
+         */
+        RowData rootRow = RowData.createRootRow();
+        rootRow.setClassUnderQualification(
+            expressionTree.getClassUnderQualification());
+
+        IOperatorExpression oe = (IOperatorExpression)expressionTree.
+            getRootExpression();
+
+        rootRow.setCollectionOperator(getCOForOE(oe));
+
+        return(rootRow);
+    }
+
+
+    /**
+     * Get the CollectionOperator that is equivalent to the passed
+     * in OperatorExpression.
+     */
+    private static CollectionOperator getCOForOE(IOperatorExpression oe) {
+
+        if (OE_OR.equals(oe.getOperatorName())) {
+            return(CollectionOperator.ANY);
+        }
+        else if (OE_AND.equals(oe.getOperatorName())) {
+            return(CollectionOperator.ALL);
+        }
+        else if (OE_NOT.equals(oe.getOperatorName())) {
+            oe = (IOperatorExpression)(oe.getOperandList().get(0));
+            if (OE_OR.equals(oe.getOperatorName())) {
+                return(CollectionOperator.NONE);
+            }
+        }
+
+        System.err.println("ERROR:  ExpressionTranslator.getCOForOE()"+
+            "\nCode must be updated to handle this type of expression.");
+        return(null);
+    }
+
 
     /**
      * Create an Expression from the passed in root RowData.
