@@ -15,6 +15,9 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 /**
  * TODO:  Put keywords such as "not", "or", "and", "as", "value",
  * "parameter", "my", "elementsOfType", etc. into constants.
+ *
+ * TODO:  Do I want to put all this code into the ExpressionTree class
+ * and get rid of the class ExpressionTranslator?
  */
 public class ExpressionTranslator {
 
@@ -23,7 +26,8 @@ public class ExpressionTranslator {
      * This method should only be called if the passed in
      * RowData object is the rootRow of an expression tree.
      */
-    public static IExpression createExpressionTree(RowData rootRow) {
+    //public static IExpression createExpressionTree(RowData rootRow) {
+    public static ExpressionTree createExpressionTree(RowData rootRow) {
 
         if (rootRow == null) {
             //System.out.println("ExpressionTranslator.createExpression() "+
@@ -40,8 +44,8 @@ public class ExpressionTranslator {
         }
 
         /**
-         * This is the root Expression object that will be returned
-         * to the caller of this method.
+         * This is the root Expression object.  I.e. the "top" node of the
+         * expression tree.
          */
         OperatorExpression rootExpression;
 
@@ -80,7 +84,10 @@ public class ExpressionTranslator {
             lastExpression.addOperand(createExpression(childRow));
         }
 
-        return(rootExpression);
+        //return(rootExpression);
+        ExpressionTree expressionTree = new ExpressionTree(
+            rootRow.getClassUnderQualification(), rootExpression);
+        return(expressionTree);
     }
 
 
@@ -643,7 +650,8 @@ public class ExpressionTranslator {
         RowData rowData;
         //RowData rowData2;
         RowData rootRow;
-        IExpression expression;
+        //IExpression expression;
+        ExpressionTree expression;
 
         System.out.println("ExpressionTranslator test is starting...");
 
