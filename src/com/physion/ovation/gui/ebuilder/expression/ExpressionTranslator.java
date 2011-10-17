@@ -708,26 +708,33 @@ public class ExpressionTranslator {
     private static IClassLiteralValueExpression
         createClassLiteralValueExpression(Type type) {
 
+        String name = "ovation.";
+
         switch (type) {
 
             case BOOLEAN:
-                return(new ClassLiteralValueExpression("BooleanValue"));
+                name += "BooleanValue";
+            break;
 
             case UTF_8_STRING:
-                return(new ClassLiteralValueExpression("StringValue"));
+                name += "StringValue";
+            break;
 
             case INT_16:
-                return(new ClassLiteralValueExpression("IntegerValue"));
+                name += "IntegerValue";
+            break;
 
             case INT_32:
-                return(new ClassLiteralValueExpression("IntegerValue"));
+                name += "IntegerValue";
+            break;
 
             case FLOAT_64:
-                return(new ClassLiteralValueExpression(
-                    "FloatingPointValue"));
+                name += "FloatingPointValue";
+            break;
 
             case DATE_TIME:
-                return(new ClassLiteralValueExpression("DateValue"));
+                name += "DateValue";
+            break;
 
             default:
                 System.err.println("ERROR:  ExpressionTranslator."+
@@ -735,6 +742,8 @@ public class ExpressionTranslator {
                     "Type = "+type);
                 return(null);
         }
+
+        return(new ClassLiteralValueExpression(name));
     }
 
 
@@ -791,7 +800,8 @@ public class ExpressionTranslator {
          * of "protocolParameters" and "key", and add them
          * as the left and right operands to the parameterOperator.
          */
-        parameterOperator.addOperand(new StringLiteralValueExpression(
+        //parameterOperator.addOperand(new StringLiteralValueExpression(
+        parameterOperator.addOperand(new AttributeExpression(
             attribute.getQueryName()));
         parameterOperator.addOperand(new StringLiteralValueExpression(
                                      rowData.getPropName()));
@@ -1213,7 +1223,6 @@ public class ExpressionTranslator {
         /**
          * Test a "Parameters Map" row of type time.
          */
-/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
