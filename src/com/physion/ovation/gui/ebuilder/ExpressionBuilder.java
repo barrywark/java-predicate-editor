@@ -748,8 +748,8 @@ public class ExpressionBuilder
         returnValue = ExpressionBuilder.editExpression();
         if (returnValue.status == ExpressionBuilder.RETURN_STATUS_OK) {
             System.out.println("User pressed OK.");
-            System.out.println("rootRow:\n"+returnValue.rootRow);
-            System.out.println("Expression:\n"+returnValue.expressionTree);
+            System.out.println("\nrootRow:\n"+returnValue.rootRow);
+            System.out.println("\nExpression:\n"+returnValue.expressionTree);
         }
         else {
             System.out.println("User pressed Cancel or closed the window.");
@@ -767,9 +767,9 @@ public class ExpressionBuilder
         RowData rootRow = RowData.createTestRowData();
         returnValue = ExpressionBuilder.editExpression(rootRow);
         System.out.println("\nstatus = "+returnValue.status);
-        System.out.println("Original rootRow:\n"+rootRow);
-        System.out.println("Modified rootRow:\n"+returnValue.rootRow);
-        System.out.println("Expression:\n"+returnValue.expressionTree);
+        System.out.println("\nOriginal rootRow:\n"+rootRow);
+        System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
+        System.out.println("\nExpression:\n"+returnValue.expressionTree);
 
         while (true) {
 
@@ -784,9 +784,9 @@ public class ExpressionBuilder
             returnValue = ExpressionBuilder.editExpression(
                 returnValue.expressionTree, returnValue.rootRow);
             System.out.println("\nstatus = "+returnValue.status);
-            System.out.println("Original rootRow:\n"+originalRootRow);
-            System.out.println("Modified rootRow:\n"+returnValue.rootRow);
-            System.out.println("Expression:\n"+returnValue.expressionTree);
+            System.out.println("\nOriginal rootRow:\n"+originalRootRow);
+            System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
+            System.out.println("\nExpression:\n"+returnValue.expressionTree);
         }
     }
 }
