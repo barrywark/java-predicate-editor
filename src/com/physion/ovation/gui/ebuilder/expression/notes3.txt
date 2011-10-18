@@ -58,3 +58,6 @@ OperatorExpression(and)
     Float64LiteralValueExpression(12.3)
 
 ExpressionTranslator test is ending.
+
+
+BW: Both of these examples look correct to me.
