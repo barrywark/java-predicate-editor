@@ -1,0 +1,60 @@
+Barry,
+
+Below is the output of the latest code after the changes you
+described in your most recent email to me about the PARAMETERS_MAP
+type attribute "protocolParameters".
+
+There are two examples below.  The second example has the
+protocolParameters attribute "nested" multiple levels down
+and as far as I can tell it is in the format you described in
+your email.
+
+========
+
+ExpressionTranslator test is starting...
+
+RowData:
+Epoch | Any
+  Epoch | protocolParameters.key(time) == "Wed Oct 19 00:10:37 NZDT 2011"
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(==)
+    OperatorExpression(.)
+      OperatorExpression(as)
+        OperatorExpression(parameter)
+          AttributeExpression(protocolParameters)
+          StringLiteralValueExpression(key)
+        ClassLiteralValueExpression(ovation.DateValue)
+      AttributeExpression(value)
+    TimeLiteralValueExpression(Wed Oct 19 00:10:37 NZDT 2011)
+
+========
+
+RowData:
+Epoch | All
+  Epoch | nextEpoch.nextEpoch.prevEpoch.protocolParameters.key(float) == "12.3"
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    OperatorExpression(.)
+      OperatorExpression(as)
+        OperatorExpression(parameter)
+          OperatorExpression(.)
+            OperatorExpression(.)
+              OperatorExpression(.)
+                AttributeExpression(nextEpoch)
+                AttributeExpression(nextEpoch)
+              AttributeExpression(prevEpoch)
+            AttributeExpression(protocolParameters)
+          StringLiteralValueExpression(key)
+        ClassLiteralValueExpression(ovation.FloatingPointValue)
+      AttributeExpression(value)
+    Float64LiteralValueExpression(12.3)
+
+ExpressionTranslator test is ending.
