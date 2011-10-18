@@ -566,6 +566,19 @@ public class DataModel {
         return(possibleCUQs);
     }
 
+
+    /**
+     * Get a copy of the Attribute with the passed in name
+     * that is in the passed in classDescription.
+     */
+    /*
+    public static Attribute getAttribute(String queryName,
+        ClassDescription classDescription) {
+
+        return(classDescription.getAttribute(queryName));
+    }
+    */
+
     
     /**
      * This is a simple test program for this class.

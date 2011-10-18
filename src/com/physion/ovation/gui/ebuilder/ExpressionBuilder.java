@@ -414,6 +414,7 @@ public class ExpressionBuilder
         /**
          * Create a returnValue that is already initialized
          * to the values used if a user cancels out of the window.
+         * (The default ReturnValue constructor does that.)
          */
         ReturnValue returnValue = new ReturnValue();
 
@@ -452,6 +453,9 @@ public class ExpressionBuilder
     }
 
 
+    /**
+     * This will eventually be the API.
+     */
     public static ReturnValue editExpression(ExpressionTree expressionTree) {
 
         if (expressionTree == null) {
@@ -465,7 +469,9 @@ public class ExpressionBuilder
 
     /**
      * Temporary method until I get the Expression to RowData translation
-     * working.
+     * working.  It "tries" to convert the passed in ExpressionTree to
+     * a RowData object, but if that fails, it uses the passed in rootRow
+     * parameter.
      */
     private static ReturnValue editExpression(ExpressionTree expressionTree,
         RowData rootRow) {
@@ -474,7 +480,18 @@ public class ExpressionBuilder
             expressionTree = new ExpressionTree();
         }
 
-        //RowData rootRow = ExpressionTranslator.createRowData(expressionTree);
+        try {
+            //rootRow = ExpressionTranslator.createRowData(expressionTree);
+            //System.out.println("\nConverted ExpressionTree rootRow:\n"+rootRow);
+        }
+        catch (Exception e) {
+            /**
+             * An exception occurred doing the conversion
+             * of the ExpressionTree to a RowData, so just
+             * use the passed in rootRow.
+             */
+            e.printStackTrace();
+        }
 
         return(editExpression(rootRow));
     }
@@ -745,6 +762,7 @@ public class ExpressionBuilder
          * Display a GUI that is empty.  I.e. the user must
          * create a new expression from scratch.
          */
+/*
         returnValue = ExpressionBuilder.editExpression();
         if (returnValue.status == ExpressionBuilder.RETURN_STATUS_OK) {
             System.out.println("User pressed OK.");
@@ -755,7 +773,7 @@ public class ExpressionBuilder
             System.out.println("User pressed Cancel or closed the window.");
             System.exit(returnValue.status);
         }
-
+*/
         /**
          * After the user Oks or Cancels out of the window
          * created above, create another window.  This time
@@ -765,28 +783,25 @@ public class ExpressionBuilder
          */
 
         RowData rootRow = RowData.createTestRowData();
+        //RowData rootRow = null;
+        RowData originalRootRow = rootRow;
         returnValue = ExpressionBuilder.editExpression(rootRow);
-        System.out.println("\nstatus = "+returnValue.status);
-        System.out.println("\nOriginal rootRow:\n"+rootRow);
-        System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
-        System.out.println("\nExpression:\n"+returnValue.expressionTree);
-
         while (true) {
 
+            System.out.println("\nstatus = "+returnValue.status);
+            System.out.println("\nOriginal rootRow:\n"+originalRootRow);
+            System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
+            System.out.println("\nExpression:\n"+returnValue.expressionTree);
             if (returnValue.status == RETURN_STATUS_CANCEL) {
                 System.out.println("User pressed Cancel or closed the window.");
                 System.exit(returnValue.status);
             }
 
-            RowData originalRootRow = returnValue.rootRow;
+            originalRootRow = returnValue.rootRow;
             //returnValue = ExpressionBuilder.editExpression(
             //    returnValue.expressionTree);
             returnValue = ExpressionBuilder.editExpression(
                 returnValue.expressionTree, returnValue.rootRow);
-            System.out.println("\nstatus = "+returnValue.status);
-            System.out.println("\nOriginal rootRow:\n"+originalRootRow);
-            System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
-            System.out.println("\nExpression:\n"+returnValue.expressionTree);
         }
     }
 }

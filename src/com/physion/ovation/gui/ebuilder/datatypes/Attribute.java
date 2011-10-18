@@ -275,8 +275,9 @@ public class Attribute {
      * is the string that is displayed in a comboBox.
      *
      * As of September 2011, the displayName and the queryName
-     * are the same for all attributes except for the
-     * EntityBase.properties attribute.  So, we only bother
+     * is the same for almost all attributes.  An Attribute
+     * where there queryName and displayName are not the same is
+     * the EntityBase.properties attribute.  So, we only bother
      * to set the displayName to a non-null value for that
      * one attribute.  In the case of the EntityBase.properties
      * attribute, the displayName is "Property".  In addition,

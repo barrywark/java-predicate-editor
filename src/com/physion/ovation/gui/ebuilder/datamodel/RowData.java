@@ -41,6 +41,10 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
  * the path in order to have the comboBox that holds "is null" etc. be created.
  * So, maybe we should not also store that information in the attributeOperator
  * member data?
+ *
+ * TODO:  During development, the code creates exceptions and displays
+ * them in the console.  We might want to change the code to actually
+ * throw Exceptions when the code is final.
  */
 public class RowData
     implements RowDataListener {
@@ -1132,6 +1136,15 @@ public class RowData
 
     public void setAttributeValue(Object attributeValue) {
 
+        if (attributeValue instanceof Boolean) {
+            String s = "Boolean values are handled with the operator.  "+
+                "Do NOT set an attributeValue.  Instead set the "+
+                "attributeOperator to be Operator.IS_TRUE or "+
+                "Operator.IS_FALSE";
+            (new Exception(s)).printStackTrace();
+            return;
+        }
+
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE_VALUE);
         this.attributeValue = attributeValue;
@@ -1322,7 +1335,11 @@ public class RowData
                      */
                     setAttributeOperator(Operator.OPERATORS_BOOLEAN[0]);
                 }
-                setAttributeValue(new Boolean(true));
+                /**
+                 * Booleans are handled using the Operator.IS_TRUE
+                 * and Operator.IS_FALSE.  So no value is set.
+                 */
+                setAttributeValue(null);
             break;
             case UTF_8_STRING:
                 if (!Operator.isOperatorString(attributeOperator)) {

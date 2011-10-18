@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Date;
 
 import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
+import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
 import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
@@ -14,25 +15,40 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 
 /**
- * TODO:  Put keywords such as "not", "or", "and", "as", "value",
- * "parameter", "my", "elementsOfType", etc. into constants.
- *
- * TODO:  In what class should the declarations of OE_NOT, OE_OR, etc. go?
- *
  * TODO:  Do I want to put all this code into the ExpressionTree class
- * and get rid of the class ExpressionTranslator?
+ * and get rid of the class ExpressionTranslator?  Do we want to split
+ * the Expression to RowData translator code into a separate class from the
+ * RowData to Expression translator code?
  */
 public class ExpressionTranslator {
+
+
+    public static final String AE_VALUE = "value";
 
     public static final String OE_NOT = "not";
     public static final String OE_OR = "or";
     public static final String OE_AND = "and";
     public static final String OE_COUNT = "count";
+    public static final String OE_AS = "as";
+    public static final String OE_PARAMETER = "parameter";
+    public static final String OE_MY = "my";
+    public static final String OE_ANY = "any";
+    public static final String OE_ELEMENTS_OF_TYPE = "elementsOfType";
 
     public static final String OE_EQUALS = "==";
     public static final String OE_NOT_EQUALS = "!=";
+    public static final String OE_LESS_THAN = "<";
+    public static final String OE_GREATER_THAN = ">";
+    public static final String OE_LESS_THAN_EQUALS = "<=";
+    public static final String OE_GREATER_THAN_EQUALS = ">=";
+    public static final String OE_MATCHES_CASE_SENSITIVE = "=~";
+    public static final String OE_MATCHES_CASE_INSENSITIVE = "=~~";
+    public static final String OE_DOES_NOT_MATCH_CASE_SENSITIVE = "!~";
+    public static final String OE_DOES_NOT_MATCH_CASE_INSENSITIVE = "!~~";
 
     public static final String OE_IS_NULL = "isnull";
+    // Note there is no OE_IS_NOT_NULL value.
+    public static final String OE_DOT = ".";
 
 
     public static RowData createRowData(ExpressionTree expressionTree) {
@@ -64,7 +80,8 @@ public class ExpressionTranslator {
 
         rootRow.setCollectionOperator(getCOForOE(oe));
 
-        ArrayList<RowData> childRows = getChildRows(getFirstChildOE(oe));
+        ArrayList<RowData> childRows = getChildRows(getFirstChildOE(oe),
+            expressionTree.getClassUnderQualification());
         rootRow.addChildRows(childRows);
 
         return(rootRow);
@@ -134,8 +151,14 @@ public class ExpressionTranslator {
      * RowData object in the GUI.
      *
      * This method never returns null, but might return an empty list.
+     *
+     * @param classDescription The ClassDescription that is the "parent"
+     * class for all the child rows that will be created.  So, if we
+     * are creating child rows for the topmost row in the GUI, this
+     * would be the Class Under Qualification.
      */
-    private static ArrayList<RowData> getChildRows(IOperatorExpression oe) {
+    private static ArrayList<RowData> getChildRows(IOperatorExpression oe,
+        ClassDescription classDescription) {
 
         ArrayList<RowData> childRows = new ArrayList<RowData>();
 
@@ -161,18 +184,28 @@ public class ExpressionTranslator {
         }
         else {
             if (attributeOperator != null) {
-                rowData.setAttributeOperator(attributeOperator);
-                IExpression ex = ol.get(olIndex++);
 
-                setAttributePath(rowData, ex);
+                rowData.setAttributeOperator(attributeOperator);
+
+                /**
+                 * Convert the left operand into a RowData
+                 * attributePath.
+                 */
+                IExpression ex = ol.get(olIndex++);
+                setAttributePath(rowData, ex, classDescription);
+
+                /**
+                 * Now handle the right operand.
+                 */
 
                 if ((attributeOperator != Operator.IS_NULL) &&
                     (attributeOperator != Operator.IS_NOT_NULL) &&
                     (attributeOperator != Operator.IS_TRUE) &&
                     (attributeOperator != Operator.IS_FALSE)) {
                     
-                    ex = ol.get(olIndex++);
-                    Object attributeValue = getAttributeValue(ex);
+                    ILiteralValueExpression lve;
+                    lve = (ILiteralValueExpression)ol.get(olIndex++);
+                    Object attributeValue = getAttributeValue(lve);
                     rowData.setAttributeValue(attributeValue);
                 }
             }
@@ -188,25 +221,120 @@ public class ExpressionTranslator {
 
 
     /**
-     * TODO: Write this method.
+     * Set the value of the rowData's attributePath to be the
+     * equivalent of the value in the Expression.
+     *
+     * @param rowData The RowData object whose attributePath we will set.
+     *
+     * @param ex The Expression that is the left operand of an operator.
      */
-    private static void setAttributePath(RowData rowData, IExpression ex) {
+    private static void setAttributePath(RowData rowData, IExpression ex,
+        ClassDescription classDescription) {
 
-        Attribute attribute;
+        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
 
-        attribute = new Attribute("protocolID", Type.UTF_8_STRING);
-        rowData.addAttribute(attribute);
+        appendToAttributePath(attributePath, ex, classDescription);
+
+        for (Attribute attribute : attributePath) {
+            rowData.addAttribute(attribute);
+        }
     }
 
 
     /**
-     * Convert the passed in IExpression into an attributeValue
-     * that the RowData object expects.
-     *
-     * TODO:  Write this method.
+     * Please note, this method calls itself recursively.
      */
-    private static Object getAttributeValue(IExpression ex) {
-        return(new String("someValue"));
+    private static void appendToAttributePath(
+        ArrayList<Attribute> attributePath, IExpression ex,
+        ClassDescription classDescription) {
+
+        if (ex instanceof IOperatorExpression) {
+
+            IOperatorExpression oe = (IOperatorExpression)ex;
+            if (OE_DOT.equals(oe.getOperatorName())) {
+
+                IExpression op = oe.getOperandList().get(0);
+                appendToAttributePath(attributePath, op, classDescription);
+
+                if (oe.getOperandList().size() > 1) {
+                    op = oe.getOperandList().get(1);
+                    appendToAttributePath(attributePath, op, classDescription);
+                }
+            }
+            else {
+                (new Exception("Unhandled IOperatorExpression")).
+                    printStackTrace();
+            }
+        }
+        else if (ex instanceof IAttributeExpression) {
+
+                IAttributeExpression ae = (IAttributeExpression)ex;
+
+                Attribute attribute = getAttribute(ae.getAttributeName(),
+                                                   classDescription);
+                attributePath.add(attribute);
+        }
+        else {
+            (new Exception("Unhandled IExpression")).printStackTrace();
+        }
+    }
+
+
+    private static Attribute getAttribute(String attributeName,
+        ClassDescription classDescription) {
+
+        Attribute attribute = classDescription.getAttribute(attributeName);
+        
+        return(attribute);
+    }
+
+
+    /**
+     * Convert the passed in ILiteralValueExpression into an attributeValue
+     * that the RowData object expects.
+     */
+    private static Object getAttributeValue(ILiteralValueExpression lve) {
+    
+        Object attributeValue = null;
+
+        /**
+         * Some values in the Expression tree are already the
+         * correct object type for the RowData object.
+         *
+         * But, Expression IInt32LiteralValueExpression values
+         * need to compared to the DataModel to figure out
+         * whether the attributeValue should be an Integer or a
+         * Short object.  (INT_16 or INT_32)
+         */
+        if ((lve instanceof ITimeLiteralValueExpression) ||
+            (lve instanceof IStringLiteralValueExpression) ||
+            (lve instanceof IFloat64LiteralValueExpression)) {
+            return(lve.getValue());
+        }
+        else if (lve instanceof IBooleanLiteralValueExpression) {
+            /**
+             * We should not be passed an IBooleanLiteralValueExpression
+             * to turn into an attributeValue, because booleans are
+             * handled via the special Operator.IS_TRUE
+             * The caller should have figured that out and not called us.
+             */
+            (new Exception("Unhandled ILiteralValueExpression subclass")).
+                printStackTrace();
+            return(null);
+        }
+        else if (lve instanceof IInt32LiteralValueExpression) {
+            /**
+             * Look at the DataModel to figure out whether this
+             * should be a Short or an Integer.
+             * TODO: Do that.
+             */
+            return(lve.getValue());
+        }
+        else {
+            (new Exception("Unhandled ILiteralValueExpression subclass")).
+                printStackTrace();
+            return(new String("ERROR"));
+        }
     }
 
 
@@ -253,18 +381,68 @@ public class ExpressionTranslator {
 
     /**
      * Get the attribute Operator that is equivalent to the passed
-     * in OperatorExpression.
+     * in IOperatorExpression.
      *
-     * If the passed in OperatorExpression cannot be mapped to a
+     * If the passed in IOperatorExpression cannot be mapped to a
      * attribute Operator, this method returns null.
+     * Note, that is not necessarily and error.
      */
     private static Operator getAOForOE(IOperatorExpression oe) {
 
+        /**
+         * Note there is no OE_IS_NOT_NULL, OE_IS_TRUE, OE_IS_FALSE.
+         * Those values are handled differently in an Expression and
+         * in a RowData.
+         */
+
         if (OE_EQUALS.equals(oe.getOperatorName())) {
-            return(Operator.EQUALS);
+
+            IExpression ex = null;
+            if (oe.getOperandList().size() > 1)
+                ex = oe.getOperandList().get(1);
+
+            if (ex instanceof IBooleanLiteralValueExpression) {
+
+                IBooleanLiteralValueExpression blve;
+                blve = (IBooleanLiteralValueExpression)ex;
+                Boolean value = (Boolean)blve.getValue();
+                if (value.booleanValue() == true)
+                    return(Operator.IS_TRUE);
+                else
+                    return(Operator.IS_FALSE);
+            }
+            else {
+                return(Operator.EQUALS);
+            }
         }
         else if (OE_NOT_EQUALS.equals(oe.getOperatorName())) {
             return(Operator.NOT_EQUALS);
+        }
+        else if (OE_LESS_THAN.equals(oe.getOperatorName())) {
+            return(Operator.LESS_THAN);
+        }
+        else if (OE_GREATER_THAN.equals(oe.getOperatorName())) {
+            return(Operator.GREATER_THAN);
+        }
+        else if (OE_LESS_THAN_EQUALS.equals(oe.getOperatorName())) {
+            return(Operator.LESS_THAN_EQUALS);
+        }
+        else if (OE_GREATER_THAN_EQUALS.equals(oe.getOperatorName())) {
+            return(Operator.GREATER_THAN_EQUALS);
+        }
+        else if (OE_MATCHES_CASE_SENSITIVE.equals(oe.getOperatorName())) {
+            return(Operator.MATCHES_CASE_SENSITIVE);
+        }
+        else if (OE_MATCHES_CASE_INSENSITIVE.equals(oe.getOperatorName())) {
+            return(Operator.MATCHES_CASE_INSENSITIVE);
+        }
+        else if (OE_DOES_NOT_MATCH_CASE_SENSITIVE.equals(
+                 oe.getOperatorName())) {
+            return(Operator.DOES_NOT_MATCH_CASE_SENSITIVE);
+        }
+        else if (OE_DOES_NOT_MATCH_CASE_INSENSITIVE.equals(
+                 oe.getOperatorName())) {
+            return(Operator.DOES_NOT_MATCH_CASE_INSENSITIVE);
         }
         else if (OE_IS_NULL.equals(oe.getOperatorName())) {
             return(Operator.IS_NULL);
@@ -276,8 +454,11 @@ public class ExpressionTranslator {
             }
             // What if we get here?
         }
-        // Do more
 
+        /**
+         * The passed in IOperatorExpression cannot be mapped to an
+         * attribute Operator.
+         */
         return(null);
     }
 
@@ -389,9 +570,9 @@ public class ExpressionTranslator {
             (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
 
             if (childmostAttribute.getIsMine())
-                op1 = new OperatorExpression("my");
+                op1 = new OperatorExpression(OE_MY);
             else
-                op1 = new OperatorExpression("any");
+                op1 = new OperatorExpression(OE_ANY);
         }
         else if ((childmostAttribute != null) &&
                  (childmostAttribute.getType() == Type.PARAMETERS_MAP)) {
@@ -404,12 +585,24 @@ public class ExpressionTranslator {
             op1 = new OperatorExpression(
                 rowData.getAttributeOperator().toString());
         }
+        else if (rowData.getAttributeOperator() == Operator.IS_TRUE) {
+            /**
+             * Note that the Operator.IS_TRUE and Operator.IS_FALSE
+             * are not operators in the Expression tree.  In the
+             * Expression tree we use the "==" operator and
+             * a BooleanLiteralValueExpression.
+             */
+            op1 = new OperatorExpression(OE_EQUALS);
+        }
+        else if (rowData.getAttributeOperator() == Operator.IS_FALSE) {
+            op1 = new OperatorExpression(OE_EQUALS);
+        }
         else if (rowData.getAttributeOperator() == Operator.IS_NULL) {
-            op1 = new OperatorExpression("isnull");
+            op1 = new OperatorExpression(OE_IS_NULL);
         }
         else if (rowData.getAttributeOperator() == Operator.IS_NOT_NULL) {
-            op1 = new OperatorExpression("not");
-            op2 = new OperatorExpression("isnull");
+            op1 = new OperatorExpression(OE_NOT);
+            op2 = new OperatorExpression(OE_IS_NULL);
             op1.addOperand(op2);
         }
         else if (rowData.getCollectionOperator() != null) {
@@ -417,7 +610,7 @@ public class ExpressionTranslator {
             if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
                 op1 = new OperatorExpression(rowData.getAttributeOperator().
                                              toString());
-                op2 = new OperatorExpression("count");
+                op2 = new OperatorExpression(OE_COUNT);
                 op1.addOperand(op2);
             }
             else if (rowData.getCollectionOperator() ==
@@ -428,8 +621,8 @@ public class ExpressionTranslator {
                  * turned into TWO operators:  the "not" operator
                  * with the "or" operator as its only operand.
                  */
-                op1 = new OperatorExpression("not");
-                op2 = new OperatorExpression("or");
+                op1 = new OperatorExpression(OE_NOT);
+                op2 = new OperatorExpression(OE_OR);
                 op1.addOperand(op2);
             }
             else {
@@ -579,7 +772,7 @@ public class ExpressionTranslator {
                 rowData.getAttributePath(), rowData));
 
             OperatorExpression rightOperator = createOperators(rowData);
-            rightOperator.addOperand(new AttributeExpression("value"));
+            rightOperator.addOperand(new AttributeExpression(AE_VALUE));
             rightOperator.addOperand(createLiteralValueExpression(
                 rowData.getPropType(), rowData));
             lastOperator.addOperand(rightOperator);
@@ -597,7 +790,7 @@ public class ExpressionTranslator {
 
             dotOperand.addOperand(createExpression(rowData.getAttributePath(),
                                   rowData));
-            dotOperand.addOperand(new AttributeExpression("value"));
+            dotOperand.addOperand(new AttributeExpression(AE_VALUE));
         }
         else if (rowData.getCollectionOperator() != null) {
 
@@ -662,8 +855,9 @@ public class ExpressionTranslator {
         switch (type) {
 
             case BOOLEAN:
-                return(new BooleanLiteralValueExpression(
-                       ((Boolean)rowData.getAttributeValue()).booleanValue()));
+                boolean value;
+                value = (rowData.getAttributeOperator() == Operator.IS_TRUE);
+                return(new BooleanLiteralValueExpression(value));
 
             case UTF_8_STRING:
                 return(new StringLiteralValueExpression(
@@ -820,7 +1014,7 @@ public class ExpressionTranslator {
          * Create the "as" operator and the AttributeExpression(value),
          * and add them as the left and right operands of the "." operator.
          */
-        OperatorExpression asOperator = new OperatorExpression("as");
+        OperatorExpression asOperator = new OperatorExpression(OE_AS);
 
         /**
          * Create the "parameter" operator and the
@@ -828,7 +1022,7 @@ public class ExpressionTranslator {
          * and right operands of the "as" operator.
          */
         OperatorExpression parameterOperator = new OperatorExpression(
-            "parameter");
+            OE_PARAMETER);
         asOperator.addOperand(parameterOperator);
         asOperator.addOperand(createClassLiteralValueExpression(
                               rowData.getPropType()));
@@ -912,7 +1106,7 @@ public class ExpressionTranslator {
         }
 
         /**
-         * Handle the special cases.  E.g. PARAMETERS_MAP
+         * Handle the special cases:  PARAMETERS_MAP
          */
         Attribute lastAttribute = attributePath.get(attributePath.size()-1);
         if (lastAttribute.getType() == Type.PARAMETERS_MAP) {
@@ -938,7 +1132,7 @@ public class ExpressionTranslator {
             }
             else if (attribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
                 OperatorExpression leftOperator =
-                    new OperatorExpression("elementsOfType");
+                    new OperatorExpression(OE_ELEMENTS_OF_TYPE);
                 OperatorExpression nameOperator =
                     new OperatorExpression(attribute.getQueryName());
                 nameOperator.addOperand(new StringLiteralValueExpression(
@@ -953,7 +1147,7 @@ public class ExpressionTranslator {
 
                 String queryName = attribute.getQueryName();
                 if (attribute.getIsMine() == true)
-                    queryName = "my"+queryName;
+                    queryName = OE_MY+queryName;
                 return(new AttributeExpression(queryName));
             }
             else {
@@ -1054,6 +1248,12 @@ public class ExpressionTranslator {
         /**
          * Test the All collection operator, (which becomes "and"),
          * and the Boolean type.
+         *
+         *      incomplete is true
+         *
+         * Note, the GUI does not accept:
+         *
+         *      incomplete == true
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
@@ -1063,13 +1263,23 @@ public class ExpressionTranslator {
         rowData = new RowData();
         attribute = new Attribute("incomplete", Type.BOOLEAN);
         rowData.addAttribute(attribute);
-        rowData.setAttributeOperator(Operator.EQUALS);
-        rowData.setAttributeValue(new Boolean(true));
+        /**
+         * This is the wrong way to handle booleans in the GUI.
+         */
+        //rowData.setAttributeOperator(Operator.EQUALS);
+        //rowData.setAttributeValue(new Boolean(true));
+        /**
+         * This is the correct way.
+         */
+        rowData.setAttributeOperator(Operator.IS_TRUE);
+
         rootRow.addChildRow(rowData);
 
         expression = ExpressionTranslator.createExpressionTree(rootRow);
         System.out.println("\nRowData:\n"+rootRow);
         System.out.println("\nExpression:\n"+expression);
+        rowData = ExpressionTranslator.createRowData(expression);
+        System.out.println("\nRowData:\n"+rowData);
 
         /**
          * Test an attribute path with two levels.
@@ -1132,12 +1342,16 @@ public class ExpressionTranslator {
         System.out.println("\nRowData:\n"+rootRow);
         System.out.println("\nExpression:\n"+expression);
 
+        rowData = ExpressionTranslator.createRowData(expression);
+        System.out.println("\nRowData:\n"+rowData);
+
         /**
          * Test a reference value for null.
          *
          *      Epoch | All
          *        Epoch | owner is null
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -1161,6 +1375,7 @@ public class ExpressionTranslator {
          *      Epoch | All
          *        Epoch | owner is not null
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -1315,6 +1530,7 @@ public class ExpressionTranslator {
         /**
          * Test a "Parameters Map" row of type time.
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));

@@ -675,11 +675,19 @@ class RowPanel
         if (((DefaultComboBoxModel)(comboBox.getModel())).
             getIndexOf(selectedItem) < 0) {
 
-            System.err.println("ERROR:  Desired selectedItem not found in "+
-                "list.\nselectedItem = "+selectedItem+"\nItems in list:");
-            for (Object item : items) {
-                System.err.println("  "+item);
+            String s = "Desired selectedItem not found in "+
+                "list.\nselectedItem = "+selectedItem;
+            if (selectedItem instanceof Attribute) {
+                s += " ("+((Attribute)selectedItem).toStringDebug()+")";
             }
+            s += "\nItems in list:";
+            for (Object item : items) {
+                s += "\n  "+item;
+                if (item instanceof Attribute) {
+                    s += " ("+((Attribute)item).toStringDebug()+")";
+                }
+            }
+            (new Exception(s)).printStackTrace();
         }
     }
 

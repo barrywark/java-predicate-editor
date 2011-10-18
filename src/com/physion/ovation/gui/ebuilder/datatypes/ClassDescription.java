@@ -150,6 +150,25 @@ public class ClassDescription {
     }
 
 
+    /**
+     * Get a copy of the Attribute with the passed in queryName
+     * if such an attribute exists in this ClassDescription.
+     * Returns null if it doesn't.
+     *
+     * @param queryName A string like:  "incomplete", "protocolID",
+     * "properties".  Not a displayName like "My Property".
+     */
+    public Attribute getAttribute(String queryName) {
+        
+        for (Attribute att : getAllAttributes()) {
+            if (att.getQueryName().equals(queryName))
+                return(new Attribute(att));
+        }
+
+        return(null);
+    }
+
+
     public String toString() {
         return(name);
     }
