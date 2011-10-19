@@ -22,12 +22,38 @@ OperatorExpression(and)
       OperatorExpression(==)
         AttributeExpression(uuid)
         StringLiteralValueExpression(xyz)
+        
+BW: I believe this is correct below. Only change is or => any. For to-many or PER_USER to-many relationships, I believe the translation is "None" => not(any()), "All" => all() and "Any" => any()
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(mykeywords)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
+        
+
 
 ===========
 
 In the example above, "mykeywords" is not given any operands.
 
+********
+BW: 
+Yes, and per your previous email this appears to contradict with the information in data_query.html. The reference in question is the target of the mykeywords operator. If the target is some path expression (e.g. epochGroup.source), then the operand would be the expression for epochGroup.source, e.g.
+
+OperatorExpression(.)
+    AttributeExpression(epochGroup)
+    AttributeExpression(source)
+
+but there is no "this" expression in PQL. We use the "null" reference (i.e. #0-0-0-0, a PQL literal reference expression) to represent AttributeExpression(this). It's up to you how you want to handle this. We could create a ReferenceLiteralExpression type or you could use AttributeExpression(this) and we can do the conversion on our side. I sort of prefer AttributeExpression(this) because it's more consistent and does a better job of hiding a mistake in the PQL specification.
+
 Now, for the more complicated version.
+********
 
 RowData:
 Epoch | All
@@ -37,6 +63,9 @@ Epoch | All
 From reading the data_query.html document, I am guessing that the
 expression tree of "nextEpoch.nextEpoch.prevEpoch" becomes
 the one and only operand for the "mykeywords" operator.
+
+BW: correct
+
 Like the example below:
 
 Expression:
@@ -62,9 +91,13 @@ and the second operator is the operator "==".
 
 Is all/any of the above correct?
 
+BW: Yes, but should be not(any), instead of not(or) operator.
+
 I did notice that the above format causes one of the dots "." to
 disappear in the translation from RowData to Expression, so that
 makes me wonder if I have things correct.
+
+BW: Yes, it's correct. We "think" nextEpoch.nextEpoch.prevEpoch.My keywords, but the expression tree is mykeywords(nextEpoch.nextEpoch.prevEpoch). In otherwords, the last . isn't "real".
 
 ==========
 
@@ -76,6 +109,8 @@ attributes, they are really more like operators.  They "act"
 like attributes as far as how the user interacts with them in
 the GUI and how the RowData object handles them, but when they
 get translated into an Expression tree they become operators.
+
+BW: Bingo. We want the UI to *feel* like they're attributes, but we play some games on the backend with queries to make it all work.
 
 Also, after reading the data_query.html document, I think the
 way the PER_USER "attributes" are handled in the GUI and RowData
@@ -96,6 +131,8 @@ attributes for keywords, mykeywords, analysisRecords,
 myanalysisRecords, etc.  Having one Attribute entry in a
 ClassDescription with an optional isMine flag doesn't help in
 any way that I can see.  It just complicates things.
+
+BW: It's fine with me if you would prefer to use separate attributes (e.g. keywords and mykeywords). 
 
 Anyway, the above might call for a short Skype conversation before
 I start restructuring and cleaning up the code in case I'm missing
