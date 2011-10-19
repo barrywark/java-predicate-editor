@@ -48,6 +48,8 @@ OperatorExpression(and)
         AttributeExpression(uuid)
         StringLiteralValueExpression(xyz)
         
+BW: This looks correct
+    
 =================
 
 If my above assumption about "this" is correct, then which
@@ -77,6 +79,8 @@ OperatorExpression(and)
         StringLiteralValueExpression(xyz)
 
 (With using "this")
+
+BW: This is correct (not using "this"). Heuristic would be: for PER_USER attributes, use AttributeExpression(this) if there is no other operand (i.e. it is the first in a Row) otherwise use the current operand.
 
 Expression:
 CUQ: Epoch
