@@ -1584,29 +1584,21 @@ public class RowData
     /**
      * Get the "childmost" or "leaf" Attribute that is specified
      * by this row.
-     *
-     * TODO:  Change this to return a COPY of the Attribute.
      */
     public Attribute getChildmostAttribute() {
 
-        if (getParentRow() == null) {
-            /**
-             * This is the root row, which does not have an attribute path.
-             */
-            return(null);
-        }
-        else if (attributePath.isEmpty()) {
+        if ((attributePath == null) || attributePath.isEmpty()) {
             return(null);
         }
         else
-            return(attributePath.get(attributePath.size()-1));
+            return(new Attribute(attributePath.get(attributePath.size()-1)));
     }
 
 
     /**
      * Get the class that this RowData considers its "parent" class.
-     * I.e. this is the class whose attribute will fill the leftmost
-     * comboBox.
+     * I.e. this is the class whose list of attributes will be the
+     * leftmost comboBox's selections.
      */
     public ClassDescription getParentClass() {
 
