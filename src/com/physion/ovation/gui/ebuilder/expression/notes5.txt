@@ -1,0 +1,104 @@
+Barry,
+
+Ok.  Your comments all make sense.  Just need to confirm.
+
+The "None" collection operator is handled differently in the root row
+verses all following rows.  In the root row, None becomes not(or()) and
+in following rows it becomes not(any()).  For example:
+
+Modified rootRow:
+Epoch | None
+  Epoch | responses None
+    Response | units == "asdf"
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        AttributeExpression(responses)
+        OperatorExpression(==)
+          AttributeExpression(units)
+          StringLiteralValueExpression(asdf)
+
+================
+
+I was not sure if you were suggesting in your responses in notes4.txt
+that a PER_USER attribute such as mykeywords should ALWAYS be given an
+operand.  If mykeywords is going to operate on "this", rather than
+give it no operand, it should be given AttributeExpression(this)
+as an operand.  For example:
+
+RowData:
+Epoch | All
+  Epoch | My keywords None
+    KeywordTag | uuid == "xyz"
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(mykeywords)
+        AttributeExpression(this)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
+        
+=================
+
+If my above assumption about "this" is correct, then which
+of the below is correct?  Or are both correct?
+
+RowData:
+Epoch | All
+  Epoch | nextEpoch.nextEpoch.prevEpoch.My keywords None
+    KeywordTag | uuid == "xyz"
+
+(Without using "this")
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(mykeywords)
+        OperatorExpression(.)
+          OperatorExpression(.)
+            AttributeExpression(nextEpoch)
+            AttributeExpression(nextEpoch)
+          AttributeExpression(prevEpoch)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
+
+(With using "this")
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(mykeywords)
+        OperatorExpression(.)
+          OperatorExpression(.)
+            OperatorExpression(.)
+              AttributeExpression(this)
+              AttributeExpression(nextEpoch)
+            AttributeExpression(nextEpoch)
+          AttributeExpression(prevEpoch)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
+
+The latter version makes me a little uneasy because the other
+Expressions don't use "this".  But, by using "this", it keeps
+the mykeywords attribute consistent in always having an operand.
+
+Any corrections/thoughts on the above?
+
