@@ -41,10 +41,8 @@ public class Attribute {
     public static final Attribute SELECT_ATTRIBUTE =
         new Attribute("Select Attribute", Type.REFERENCE);
     public static final Attribute IS_NULL =
-        //new Attribute("is null", Type.REFERENCE);
         new Attribute(Operator.IS_NULL.toString(), Type.REFERENCE);
     public static final Attribute IS_NOT_NULL =
-        //new Attribute("is not null", Type.REFERENCE);
         new Attribute(Operator.IS_NOT_NULL.toString(), Type.REFERENCE);
 
 
@@ -245,10 +243,25 @@ public class Attribute {
      * Get the "query" name of this attribute that should be used
      * in query strings.  E.g. "uuid", "owner", "properties".
      *
+     * If we are a special type, such as the PER_USER type "keywords",
+     * this method will optionally prepend the "my" prefix to it
+     * if our isMine flag is true.
+     *
      * If you want the string that should be displayed in a comboBox
      * dropdown list, you should use the getDisplayName() method.
      */
-    public String getQueryName() {
+    public String getFullQueryName() {
+
+        if (((type == Type.PER_USER) ||
+             (type == Type.PER_USER_PARAMETERS_MAP)) &&
+            (isMine == true)) {
+            return("my"+getBaseQueryName());
+        }
+        return(getBaseQueryName());
+    }
+
+
+    public String getBaseQueryName() {
         return(queryName);
     }
 
@@ -292,7 +305,7 @@ public class Attribute {
 
         String string = displayName;
         if (string == null)
-            string = getQueryName();
+            string = getBaseQueryName();
 
         /**
          * For most attributes, we are done at this point, but
@@ -400,7 +413,7 @@ public class Attribute {
 
         String string;
 
-        string = queryName;
+        string = getFullQueryName();
         if (displayName != null)
             string += "("+displayName+")("+isMine+")";
         string += " "+type;

@@ -32,7 +32,7 @@ public class ExpressionTranslator {
     public static final String OE_COUNT = "count";
     public static final String OE_AS = "as";
     public static final String OE_PARAMETER = "parameter";
-    public static final String OE_MY = "my";
+    //public static final String OE_MY = "my";
     public static final String OE_ANY = "any";
     public static final String OE_ELEMENTS_OF_TYPE = "elementsOfType";
 
@@ -371,6 +371,34 @@ public class ExpressionTranslator {
     }
 
 
+    private static boolean isPerUserOperator(IExpression ex,
+                                             ClassDescription cd) {
+
+        if (ex instanceof IOperatorExpression) {
+
+            IOperatorExpression oe = (IOperatorExpression)ex;
+            String name = oe.getOperatorName();
+            System.out.println("name = "+name);
+
+            ArrayList<Attribute> attributes = cd.getAllAttributes();
+            for (Attribute attribute : attributes) {
+                System.out.println("attribute = "+attribute);
+                if (attribute.getType() == Type.PER_USER) {
+                    Attribute testAtt = new Attribute(attribute);
+                    testAtt.setIsMine(false);
+                    if (testAtt.getFullQueryName().equals(name))
+                        return(true);
+                    testAtt.setIsMine(true);
+                    if (testAtt.getFullQueryName().equals(name))
+                        return(true);
+                }
+            }
+        }
+
+        return(false);
+    }
+
+
     /**
      * Append the passed in Expression to the passed in attributePath.
      * It converts the passed in Expression tree into Attributes
@@ -390,7 +418,33 @@ public class ExpressionTranslator {
         ArrayList<Attribute> attributePath, IExpression ex,
         ClassDescription classDescription) {
 
-        if (ex instanceof IOperatorExpression) {
+        if ((ex instanceof IAttributeExpression) ||
+            (isPerUserOperator(ex, classDescription))) {
+
+            String name;
+            if (ex instanceof IAttributeExpression) {
+                IAttributeExpression ae = (IAttributeExpression)ex;
+                name = ae.getAttributeName();
+            }
+            else {
+                IOperatorExpression oe = (IOperatorExpression)ex;
+                name = oe.getOperatorName();
+            }
+
+            Attribute attribute = getAttribute(name, classDescription);
+
+            if (attribute == null) {
+                String s = "Attribute name \""+name+
+                    "\" does not exist in class \""+classDescription.getName()+
+                    "\"";
+                (new Exception(s)).printStackTrace();
+            }
+            else {
+                attributePath.add(attribute);
+                return(attribute.getClassDescription());
+            }
+        }
+        else if (ex instanceof IOperatorExpression) {
 
             IOperatorExpression oe = (IOperatorExpression)ex;
             if (OE_DOT.equals(oe.getOperatorName())) {
@@ -429,24 +483,6 @@ public class ExpressionTranslator {
                 String s = "Unhandled IOperatorExpression: "+
                     oe.getOperatorName();
                 (new Exception(s)).printStackTrace();
-            }
-        }
-        else if (ex instanceof IAttributeExpression) {
-
-            IAttributeExpression ae = (IAttributeExpression)ex;
-
-            Attribute attribute = getAttribute(ae.getAttributeName(),
-                                               classDescription);
-
-            if (attribute == null) {
-                String s = "Attribute name \""+ae.getAttributeName()+
-                    "\" does not exist in class \""+classDescription.getName()+
-                    "\"";
-                (new Exception(s)).printStackTrace();
-            }
-            else {
-                attributePath.add(attribute);
-                return(attribute.getClassDescription());
             }
         }
         else {
@@ -764,8 +800,11 @@ public class ExpressionTranslator {
         if ((childmostAttribute != null) &&
             (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
 
+            /**
+             * This is wrong.
+             */
             if (childmostAttribute.getIsMine())
-                op1 = new OperatorExpression(OE_MY);
+                op1 = new OperatorExpression("my");
             else
                 op1 = new OperatorExpression(OE_ANY);
         }
@@ -996,11 +1035,29 @@ public class ExpressionTranslator {
                                   rowData));
             dotOperand.addOperand(new AttributeExpression(AE_VALUE));
         }
+//        else if ((childmostAttribute != null) &&
+//                 (childmostAttribute.getType() == Type.PER_USER)) {
+//
+//            System.out.println("This is a PER_USER attribute");
+//            /**
+//             * This is an Attribute like "keywords" that is
+//             * actually either "keywords" or "mykeywords", depending
+//             * on the "isMine" flag.  Really, this attribute is an
+//             * operator.
+//             */
+//            OperatorExpression perUserOE = new OperatorExpression(
+//                childmostAttribute.getFullQueryName());
+//            lastOperator.addOperand(perUserOE);
+//
+//            //perUserOE.addOperand(createExpression(rowData.getAttributePath(),
+//            //                     rowData));
+//            perUserOE.addOperand(the child rows);
+//        }
         else if (rowData.getCollectionOperator() != null) {
 
             if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
                 /**
-                 * This is a row with a Count CollectionOperator like
+                 * This is a row with a CollectionOperator.COUNT like
                  * this:
                  *
                  *      responses Count == 27
@@ -1098,7 +1155,7 @@ public class ExpressionTranslator {
 
             case REFERENCE:
                 return(new ClassLiteralValueExpression(
-                       attribute.getQueryName()));
+                       attribute.getFullQueryName()));
 
             default:
                 System.err.println("ERROR:  ExpressionTranslator."+
@@ -1233,7 +1290,7 @@ public class ExpressionTranslator {
 
         Attribute lastAttribute = attributePath.get(attributePath.size()-1);
         IExpression aeQueryName = new AttributeExpression(
-            lastAttribute.getQueryName());
+            lastAttribute.getFullQueryName());
         IExpression parameterLeftOperand;
         if (attributePath.size() > 1) {
             List<Attribute> allButLastAttribute = attributePath.subList(0,
@@ -1361,20 +1418,27 @@ public class ExpressionTranslator {
         if (attributePath.size() == 1) {
 
             Attribute attribute = attributePath.get(0);
+
+            /**
+             * Quick sanity check during development.
+             */
             if (attribute.getType() == Type.PARAMETERS_MAP) {
                 /**
                  * We should never get here.
                  * This type should already have been handled
                  * above.
                  */
-                //return(createExpressionParametersMap(attribute, rowData));
+                String s = "Got an Attribute of Type.PARAMETERS_MAP "+
+                    "unexpectedly.  There is a problem in the code.";
+                (new Exception(s)).printStackTrace();
                 return(null);
             }
-            else if (attribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
+
+            if (attribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
                 OperatorExpression leftOperator =
                     new OperatorExpression(OE_ELEMENTS_OF_TYPE);
                 OperatorExpression nameOperator =
-                    new OperatorExpression(attribute.getQueryName());
+                    new OperatorExpression(attribute.getFullQueryName());
                 nameOperator.addOperand(new StringLiteralValueExpression(
                     rowData.getPropName()));
                 leftOperator.addOperand(nameOperator);
@@ -1384,14 +1448,12 @@ public class ExpressionTranslator {
                 return(leftOperator);
             }
             else if (attribute.getType() == Type.PER_USER) {
-
-                String queryName = attribute.getQueryName();
-                if (attribute.getIsMine() == true)
-                    queryName = OE_MY+queryName;
-                return(new AttributeExpression(queryName));
+                return(new OperatorExpression(
+                       attribute.getFullQueryName()));
             }
-            else {
-                return(new AttributeExpression(attribute.getQueryName()));
+            else  {
+                return(new AttributeExpression(
+                       attribute.getFullQueryName()));
             }
         }
 
@@ -1719,6 +1781,7 @@ public class ExpressionTranslator {
          *        Epoch | responses All
          *          Response | resources Count <= 5
          */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
@@ -1816,22 +1879,31 @@ public class ExpressionTranslator {
          * Test a PER_USER attribute type.
          *
          *      Epoch | All
-         *        Epoch | All keywords All
+         *        Epoch | My keywords None
          *          KeywordTag | uuid == "xyz"
          */
-/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
-        attribute = new Attribute("keywords", Type.PER_USER,
-                                  DataModel.getClassDescription("KeywordTag"),
-                                  Cardinality.TO_MANY);
-        attribute.setIsMine(false);
+        attribute = DataModel.getClassDescription("Epoch").
+            getAttribute("nextEpoch");
         rowData.addAttribute(attribute);
-        rowData.setCollectionOperator(CollectionOperator.ALL);
+
+        attribute = DataModel.getClassDescription("Epoch").
+            getAttribute("nextEpoch");
+        rowData.addAttribute(attribute);
+        attribute = DataModel.getClassDescription("Epoch").
+            getAttribute("prevEpoch");
+        rowData.addAttribute(attribute);
+
+        attribute = DataModel.getClassDescription("TaggableEntityBase").
+            getAttribute("keywords");
+        attribute.setIsMine(true);
+        rowData.addAttribute(attribute);
+        rowData.setCollectionOperator(CollectionOperator.NONE);
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();

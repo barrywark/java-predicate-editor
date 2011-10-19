@@ -1115,7 +1115,7 @@ public class RowData
                     if (debugVersion)
                         string += attribute.getDisplayName();
                     else
-                        string += attribute.getQueryName();
+                        string += attribute.getFullQueryName();
 
                 }
                 else {

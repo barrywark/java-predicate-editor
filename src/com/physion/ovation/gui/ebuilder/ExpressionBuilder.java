@@ -110,6 +110,10 @@ public class ExpressionBuilder
      */
     private int stateIndex = -1;
 
+    /**
+     * Flag for develoment work.  Delete these.
+     */
+    private static boolean convertRowDataToExpression = false;
 
     /**
      * Create an ExpressionBuilder dialog with its expression
@@ -441,8 +445,20 @@ public class ExpressionBuilder
         returnValue.status = dialog.getReturnStatus();
         if (returnValue.status == RETURN_STATUS_OK) {
             returnValue.rootRow = dialog.getRootRow();
-            returnValue.expressionTree =
-                ExpressionTranslator.createExpressionTree(dialog.getRootRow());
+            returnValue.expressionTree = null;
+
+            if (convertRowDataToExpression) {
+                try {
+                    returnValue.expressionTree =
+                        ExpressionTranslator.createExpressionTree(
+                            dialog.getRootRow());
+                }
+                catch (Exception e) {
+                    System.err.println(
+                        "ExpressionTranslator failed to translate "+
+                        "the RowData tree into an ExpressionTree");
+                }
+            }
         }
         else {
             returnValue.rootRow = null;
@@ -476,21 +492,26 @@ public class ExpressionBuilder
     private static ReturnValue editExpression(ExpressionTree expressionTree,
         RowData rootRow) {
 
+        /*
         if (expressionTree == null) {
             expressionTree = new ExpressionTree();
         }
+        */
 
-        try {
-            //rootRow = ExpressionTranslator.createRowData(expressionTree);
-            //System.out.println("\nConverted ExpressionTree rootRow:\n"+rootRow);
-        }
-        catch (Exception e) {
-            /**
-             * An exception occurred doing the conversion
-             * of the ExpressionTree to a RowData, so just
-             * use the passed in rootRow.
-             */
-            e.printStackTrace();
+        if (expressionTree != null) {
+            try {
+                rootRow = ExpressionTranslator.createRowData(expressionTree);
+                System.out.println("\nConverted ExpressionTree rootRow:\n"+
+                    rootRow);
+            }
+            catch (Exception e) {
+                /**
+                 * An exception occurred doing the conversion
+                 * of the ExpressionTree to a RowData, so just
+                 * use the passed in rootRow.
+                 */
+                e.printStackTrace();
+            }
         }
 
         return(editExpression(rootRow));
@@ -755,6 +776,14 @@ public class ExpressionBuilder
      */
     public static void main(String[] args) {
 
+        if (args.length > 0) {
+            convertRowDataToExpression = true;
+            System.out.println("Will try to convert RowData to Expression.");
+        }
+        else {
+            System.out.println("Will not convert RowData to Expression.");
+        }
+
         ExpressionBuilder.ReturnValue returnValue;
 
 
@@ -782,8 +811,8 @@ public class ExpressionBuilder
          * tree's value.
          */
 
-        RowData rootRow = RowData.createTestRowData();
-        //RowData rootRow = null;
+        //RowData rootRow = RowData.createTestRowData();
+        RowData rootRow = null;
         RowData originalRootRow = rootRow;
         returnValue = ExpressionBuilder.editExpression(rootRow);
         while (true) {
@@ -791,7 +820,11 @@ public class ExpressionBuilder
             System.out.println("\nstatus = "+returnValue.status);
             System.out.println("\nOriginal rootRow:\n"+originalRootRow);
             System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
-            System.out.println("\nExpression:\n"+returnValue.expressionTree);
+            if (convertRowDataToExpression) {
+                System.out.println("\nExpression:\n"+
+                    returnValue.expressionTree);
+            }
+
             if (returnValue.status == RETURN_STATUS_CANCEL) {
                 System.out.println("User pressed Cancel or closed the window.");
                 System.exit(returnValue.status);

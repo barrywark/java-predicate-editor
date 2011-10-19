@@ -139,6 +139,20 @@ public class ClassDescription {
     }
 
 
+    /**
+     * Please make sure you want this method and not the
+     * method getAllAttributes().
+     *
+     * Please note, this method returns a reference to this
+     * ClassDescription's internal list, so don't mess with it.
+     */
+    /*
+    public ArrayList<Attribute> getAttributeList() {
+        return(attributes);
+    }
+    */
+
+
     public boolean containsAttribute(Attribute attribute) {
 
         for (Attribute att : getAllAttributes()) {
@@ -159,9 +173,14 @@ public class ClassDescription {
      * "properties".  Not a displayName like "My Property".
      */
     public Attribute getAttribute(String queryName) {
+
+        if (queryName.startsWith("my")) {
+            System.out.println("Temporary hack in getAttribute");
+            queryName = queryName.substring(2);
+        }
         
         for (Attribute att : getAllAttributes()) {
-            if (att.getQueryName().equals(queryName))
+            if (att.getBaseQueryName().equals(queryName))
                 return(new Attribute(att));
         }
 

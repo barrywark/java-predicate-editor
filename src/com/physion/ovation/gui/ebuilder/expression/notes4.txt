@@ -1,0 +1,103 @@
+Barry,
+
+I think I might understand now...
+
+Please correct the following examples of the "keywords" PER_USER type.
+
+The first example is based on your original ExpressionTree.java file
+you sent me a week ago.
+
+RowData:
+Epoch | All
+  Epoch | My keywords None
+    KeywordTag | uuid == "xyz"
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(or)
+      OperatorExpression(mykeywords)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
+
+===========
+
+In the example above, "mykeywords" is not given any operands.
+
+Now, for the more complicated version.
+
+RowData:
+Epoch | All
+  Epoch | nextEpoch.nextEpoch.prevEpoch.My keywords None
+    KeywordTag | uuid == "xyz"
+
+From reading the data_query.html document, I am guessing that the
+expression tree of "nextEpoch.nextEpoch.prevEpoch" becomes
+the one and only operand for the "mykeywords" operator.
+Like the example below:
+
+Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(or)
+      OperatorExpression(mykeywords)
+        OperatorExpression(.)
+          OperatorExpression(.)
+            AttributeExpression(nextEpoch)
+            AttributeExpression(nextEpoch)
+          AttributeExpression(prevEpoch)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
+
+In the tree above, the "or" operator, (which is really not-or), has
+two operands.  The first is the operator "mykeywords", which has
+its own operand which is the tree "nextEpoch.nextEpoch.prevEpoch",
+and the second operator is the operator "==".
+
+Is all/any of the above correct?
+
+I did notice that the above format causes one of the dots "." to
+disappear in the translation from RowData to Expression, so that
+makes me wonder if I have things correct.
+
+==========
+
+I think part of the problem with my getting up to speed on this
+conversion to Expression tree format has come from the fact that
+when we first started designing the GUI weeks ago, we referred
+to these PER_USER attributes as "Attributes".  They are not
+attributes, they are really more like operators.  They "act"
+like attributes as far as how the user interacts with them in
+the GUI and how the RowData object handles them, but when they
+get translated into an Expression tree they become operators.
+
+Also, after reading the document, I think the way the PER_USER
+"attributes" are handled in the GUI and RowData code is way
+more complicated than it needs to be.  The GUI and RowData
+use the Attribute class.  The Attribute class has a "isMine"
+flag that is used for keywords, analysisRecords,
+derivedResponses, and properties.
+
+When we discussed this weeks ago, we decided that there would
+be those attributes, (keywords, analysisRecords, derivedResponses,
+and properties), and that the Attribute class that the GUI uses
+would have an "isMine" flag.  This was not a problem in the GUI
+and RowData code, but now that I am converting back and forth
+to Expression trees, this makes for very complicated code.
+
+This would be much more simple if there were different
+attributes for keywords, mykeywords, analysisRecords,
+myanalysisRecords, etc.  Having one Attribute entry in a
+ClassDescription with an optional isMine flag doesn't help in
+any way that I can see.  It just complicates things.
+
+Anyway, the above might call for a short Skype conversation before
+I start restructuring and cleaning up the code in case I'm missing
+something.
+
