@@ -77,9 +77,9 @@ like attributes as far as how the user interacts with them in
 the GUI and how the RowData object handles them, but when they
 get translated into an Expression tree they become operators.
 
-Also, after reading the document, I think the way the PER_USER
-"attributes" are handled in the GUI and RowData code is way
-more complicated than it needs to be.  The GUI and RowData
+Also, after reading the data_query.html document, I think the
+way the PER_USER "attributes" are handled in the GUI and RowData
+code is way more complicated than it needs to be.  The GUI and RowData
 use the Attribute class.  The Attribute class has a "isMine"
 flag that is used for keywords, analysisRecords,
 derivedResponses, and properties.

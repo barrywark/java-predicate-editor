@@ -500,7 +500,10 @@ public class ExpressionBuilder
 
         if (expressionTree != null) {
             try {
-                rootRow = ExpressionTranslator.createRowData(expressionTree);
+                RowData convertedRootRow;
+                convertedRootRow = ExpressionTranslator.createRowData(
+                    expressionTree);
+                rootRow = convertedRootRow;
                 System.out.println("\nConverted ExpressionTree rootRow:\n"+
                     rootRow);
             }
@@ -811,8 +814,8 @@ public class ExpressionBuilder
          * tree's value.
          */
 
-        //RowData rootRow = RowData.createTestRowData();
-        RowData rootRow = null;
+        RowData rootRow = RowData.createTestRowData();
+        //RowData rootRow = null;
         RowData originalRootRow = rootRow;
         returnValue = ExpressionBuilder.editExpression(rootRow);
         while (true) {

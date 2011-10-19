@@ -173,9 +173,11 @@ public class ExpressionTranslator {
     private static ArrayList<RowData> getChildRows(IOperatorExpression oe,
         ClassDescription classDescription) {
 
+        /*
         System.out.println("\nEnter getChildRows()");
         System.out.println("oe: "+(Expression)oe);
         System.out.println("classDescription: "+classDescription);
+        */
         ArrayList<RowData> childRows = new ArrayList<RowData>();
 
         /**
@@ -204,7 +206,7 @@ public class ExpressionTranslator {
                 }
             }
         }
-        System.out.println("collectionOperator = "+collectionOperator);
+        //System.out.println("collectionOperator = "+collectionOperator);
 
         if (collectionOperator == CollectionOperator.NONE) {
             /**
@@ -219,7 +221,7 @@ public class ExpressionTranslator {
         }
 
         Operator attributeOperator = getAOForOE(oe);
-        System.out.println("attributeOperator = "+attributeOperator);
+        //System.out.println("attributeOperator = "+attributeOperator);
 
         if (collectionOperator != null) {
             rowData.setCollectionOperator(collectionOperator);
@@ -241,13 +243,13 @@ public class ExpressionTranslator {
                      */
                     IExpression firstOperand = ol.get(olIndex++);
                     setAttributePath(rowData, firstOperand, classDescription);
-                    System.out.println("rowData so far: "+
-                        rowData.getRowString());
+                    //System.out.println("rowData so far: "+
+                    //    rowData.getRowString());
                     Attribute childmostAttribute =
                         rowData.getChildmostAttribute();
                     childClass = childmostAttribute.getClassDescription();
                 }
-                System.out.println("childClass: "+childClass);
+                //System.out.println("childClass: "+childClass);
 
                 /**
                  * When we get here, we know that the row is one
@@ -277,8 +279,8 @@ public class ExpressionTranslator {
                  */
                 for (; olIndex < ol.size(); olIndex++) {
 
-                    System.out.println("operand = "+
-                        ((Expression)ol.get(olIndex)).toString(""));
+                    //System.out.println("operand = "+
+                    //    ((Expression)ol.get(olIndex)).toString(""));
                     IOperatorExpression operand =
                         (IOperatorExpression)ol.get(olIndex);
                     createAndAddChildRows(rowData, operand, childClass);
@@ -378,11 +380,11 @@ public class ExpressionTranslator {
 
             IOperatorExpression oe = (IOperatorExpression)ex;
             String name = oe.getOperatorName();
-            System.out.println("name = "+name);
+            //System.out.println("name = "+name);
 
             ArrayList<Attribute> attributes = cd.getAllAttributes();
             for (Attribute attribute : attributes) {
-                System.out.println("attribute = "+attribute);
+                //System.out.println("attribute = "+attribute);
                 if (attribute.getType() == Type.PER_USER) {
                     Attribute testAtt = new Attribute(attribute);
                     testAtt.setIsMine(false);
