@@ -420,13 +420,6 @@ class RowPanel
 
 
     /**
-     * This method lays out the components, (e.g. comboBoxes),
-     * that will be needed to display this RowPanel's current
-     * rowData value.
-     * It also sets the data models the comboBoxes will use
-     * and sets the selected value in the comboBoxes to the
-     * corresponding values in this RowPanel's rowData value.
-     *
      * All this method does is set a flag that can be used to
      * ignore GUI events while the GUI is being setup.
      * The initializeComponentsProtected() method, that this
@@ -444,9 +437,17 @@ class RowPanel
 
 
     /**
-     * Layout whatever components the RowData for this row needs.
-     * This method places the assorted comboBoxes, text fields, labels,
-     * and buttons in a panel using the GridBagLayout layout manager.
+     * This method lays out the components, (e.g. comboBoxes),
+     * that will be needed to display this RowPanel's current
+     * rowData value.
+     * It also sets the data models the comboBoxes will use
+     * and sets the selected value in the comboBoxes to the
+     * corresponding values in this RowPanel's rowData value.
+     *
+     * All this method does is set a flag that can be used to
+     * ignore GUI events while the GUI is being setup.
+     * The initializeComponentsProtected() method, that this
+     * method calls, does the real work.
      */
     private void initializeComponentsProtected() {
 
@@ -1286,8 +1287,9 @@ class RowPanel
                     attributeValue.toString().isEmpty()) {
                     attributeValue = new Short((short)0);
                 }
-                else
+                else {
                     attributeValue = new Short(attributeValue.toString());
+                }
                 valueSpinnerInt16.setValue(attributeValue);
             }
             else if (rightmostAttribute.getType() == Type.INT_32) {
@@ -1295,11 +1297,13 @@ class RowPanel
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
                 if ((attributeValue == null) ||
-                    attributeValue.toString().isEmpty())
+                    attributeValue.toString().isEmpty()) {
                     attributeValue = new Integer(0);
-                else
+                }
+                else {
                     attributeValue = new Integer(attributeValue.toString());
-                valueSpinnerInt16.setValue(attributeValue);
+                }
+                valueSpinnerInt32.setValue(attributeValue);
             }
             else {
                 operatorComboBox.setSelectedItem(
@@ -1430,8 +1434,23 @@ class RowPanel
              * Now based on the type, set the value of the
              * attribute.
              */
-            if (rowData.getPropType() == Type.INT_32) {
-                valueSpinnerInt32.setValue(0);
+            if (rowData.getPropType() == Type.INT_16) {
+                short value = 0;
+                if ((rowData.getAttributeValue() != null) &&
+                    (rowData.getAttributeValue() instanceof Number)) {
+                    value = ((Number)rowData.getAttributeValue()).shortValue();
+                }
+                    
+                valueSpinnerInt16.setValue(value);
+            }
+            else if (rowData.getPropType() == Type.INT_32) {
+                int value = 0;
+                if ((rowData.getAttributeValue() != null) &&
+                    (rowData.getAttributeValue() instanceof Number)) {
+                    value = ((Number)rowData.getAttributeValue()).intValue();
+                }
+                    
+                valueSpinnerInt32.setValue(value);
             }
             else if ((rowData.getPropType() == Type.FLOAT_64) ||
                      (rowData.getPropType() == Type.UTF_8_STRING)) {
