@@ -1,0 +1,494 @@
+ExpressionTranslator test is starting...
+
+===== CollectionOperator.ANY With Two Operands =====
+
+Original RowData:
+Epoch | Any
+  Epoch | protocolID == "abc"
+  Epoch | protocolID =~~ "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(==)
+    AttributeExpression(protocolID)
+    StringLiteralValueExpression(abc)
+  OperatorExpression(=~~)
+    AttributeExpression(protocolID)
+    StringLiteralValueExpression(xyz)
+
+===== Attribute Boolean Operator.IS_TRUE =====
+
+Original RowData:
+Epoch | All
+  Epoch | incomplete is true
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    AttributeExpression(incomplete)
+    BooleanLiteralValueExpression(true)
+
+===== Attribute Path Nested Twice =====
+
+Original RowData:
+Epoch | None
+  Epoch | epochGroup.label == "Test 27"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(==)
+      OperatorExpression(.)
+        AttributeExpression(epochGroup)
+        AttributeExpression(label)
+      StringLiteralValueExpression(Test 27)
+
+===== Attribute Path Nested Thrice =====
+
+Original RowData:
+Epoch | None
+  Epoch | epochGroup.source.label == "Test 27"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(==)
+      OperatorExpression(.)
+        OperatorExpression(.)
+          AttributeExpression(epochGroup)
+          AttributeExpression(source)
+        AttributeExpression(label)
+      StringLiteralValueExpression(Test 27)
+
+===== Reference Value Operator.IS_NULL =====
+
+Original RowData:
+Epoch | All
+  Epoch | owner.is null is null
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(isnull)
+    AttributeExpression(owner)
+
+===== Reference Value Operator.IS_NOT_NULL =====
+
+Original RowData:
+Epoch | All
+  Epoch | owner.is not null is not null
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(isnull)
+      AttributeExpression(owner)
+
+===== Compound Row =====
+
+Original RowData:
+Epoch | All
+  Epoch | responses None
+    Response | uuid == "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      AttributeExpression(responses)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
+
+===== Compound Row Nested Classes =====
+
+Original RowData:
+Epoch | All
+  Epoch | responses All
+    Response | epoch Any
+      Epoch | protocolID != "Test 27"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(all)
+    AttributeExpression(responses)
+    OperatorExpression(any)
+      AttributeExpression(epoch)
+      OperatorExpression(!=)
+        AttributeExpression(protocolID)
+        StringLiteralValueExpression(Test 27)
+
+===== Compound Row ALL COUNT =====
+
+Original RowData:
+Epoch | All
+  Epoch | responses All
+    Response | resources Count <= "5"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(all)
+    AttributeExpression(responses)
+    OperatorExpression(<=)
+      OperatorExpression(count)
+        AttributeExpression(resources)
+      Int32LiteralValueExpression(5)
+
+===== Compound Row ANY ANY =====
+
+Original RowData:
+Epoch | Any
+  Epoch | responses Any
+    Response | uuid == "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(any)
+    AttributeExpression(responses)
+    OperatorExpression(==)
+      AttributeExpression(uuid)
+      StringLiteralValueExpression(xyz)
+
+===== Compound Row NONE NONE =====
+
+Original RowData:
+Epoch | None
+  Epoch | responses None
+    Response | uuid == "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        AttributeExpression(responses)
+        OperatorExpression(==)
+          AttributeExpression(uuid)
+          StringLiteralValueExpression(xyz)
+
+===== PER_USER =====
+
+Original RowData:
+Epoch | All
+  Epoch | My Keywords None
+    KeywordTag | uuid == "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(mykeywords)
+        AttributeExpression(this)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
+
+===== PER_USER CollectionOperator.COUNT =====
+
+Original RowData:
+Epoch | All
+  Epoch | My Keywords Count == "5"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    OperatorExpression(count)
+      OperatorExpression(mykeywords)
+        AttributeExpression(this)
+    Int32LiteralValueExpression(5)
+
+===== PER_USER Nested Once CollectionOperator.ANY =====
+
+Original RowData:
+Epoch | Any
+  Epoch | nextEpoch.All Keywords Any
+    KeywordTag | uuid == "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(any)
+    OperatorExpression(keywords)
+      AttributeExpression(nextEpoch)
+    OperatorExpression(==)
+      AttributeExpression(uuid)
+      StringLiteralValueExpression(xyz)
+
+===== PER_USER Nested Twice CollectionOperator.NONE =====
+
+Original RowData:
+Epoch | None
+  Epoch | nextEpoch.nextEpoch.All Keywords None
+    KeywordTag | uuid == "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        OperatorExpression(keywords)
+          OperatorExpression(.)
+            AttributeExpression(nextEpoch)
+            AttributeExpression(nextEpoch)
+        OperatorExpression(==)
+          AttributeExpression(uuid)
+          StringLiteralValueExpression(xyz)
+
+===== PER_USER Nested Thrice CollectionOperator.ALL =====
+
+Original RowData:
+Epoch | All
+  Epoch | nextEpoch.nextEpoch.prevEpoch.All Keywords All
+    KeywordTag | uuid == "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(all)
+    OperatorExpression(keywords)
+      OperatorExpression(.)
+        OperatorExpression(.)
+          AttributeExpression(nextEpoch)
+          AttributeExpression(nextEpoch)
+        AttributeExpression(prevEpoch)
+    OperatorExpression(==)
+      AttributeExpression(uuid)
+      StringLiteralValueExpression(xyz)
+
+===== PARAMETERS_MAP Type Date =====
+
+Original RowData:
+Epoch | All
+  Epoch | protocolParameters.someTimeKey(time) == "Thu Oct 20 21:10:03 NZDT 2011"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    OperatorExpression(.)
+      OperatorExpression(as)
+        OperatorExpression(parameter)
+          AttributeExpression(protocolParameters)
+          StringLiteralValueExpression(someTimeKey)
+        ClassLiteralValueExpression(ovation.DateValue)
+      AttributeExpression(value)
+    TimeLiteralValueExpression(Thu Oct 20 21:10:03 NZDT 2011)
+
+===== PARAMETERS_MAP Nested =====
+
+Original RowData:
+Epoch | All
+  Epoch | nextEpoch.nextEpoch.prevEpoch.protocolParameters.someKey(float) == "12.3"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    OperatorExpression(.)
+      OperatorExpression(as)
+        OperatorExpression(parameter)
+          OperatorExpression(.)
+            OperatorExpression(.)
+              OperatorExpression(.)
+                AttributeExpression(nextEpoch)
+                AttributeExpression(nextEpoch)
+              AttributeExpression(prevEpoch)
+            AttributeExpression(protocolParameters)
+          StringLiteralValueExpression(someKey)
+        ClassLiteralValueExpression(ovation.FloatingPointValue)
+      AttributeExpression(value)
+    Float64LiteralValueExpression(12.3)
+
+===== PER_USER_PARAMETERS_MAP =====
+
+Original RowData:
+Epoch | All
+  Epoch | Any Property.someKey(int) != "34"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(any)
+    OperatorExpression(elementsOfType)
+      OperatorExpression(properties)
+        AttributeExpression(this)
+        StringLiteralValueExpression(someKey)
+      ClassLiteralValueExpression(ovation.IntegerValue)
+    OperatorExpression(!=)
+      AttributeExpression(value)
+      Int32LiteralValueExpression(34)
+
+===== PER_USER_PARAMETERS_MAP Nested =====
+
+Original RowData:
+Epoch | Any
+  Epoch | nextEpoch.nextEpoch.prevEpoch.Any Property.someKey(int) != "34"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(any)
+    OperatorExpression(elementsOfType)
+      OperatorExpression(properties)
+        OperatorExpression(.)
+          OperatorExpression(.)
+            AttributeExpression(nextEpoch)
+            AttributeExpression(nextEpoch)
+          AttributeExpression(prevEpoch)
+        StringLiteralValueExpression(someKey)
+      ClassLiteralValueExpression(ovation.IntegerValue)
+    OperatorExpression(!=)
+      AttributeExpression(value)
+      Int32LiteralValueExpression(34)
+
+===== Reference isnull() =====
+
+Original RowData:
+Epoch | All
+  Epoch | nextEpoch.nextEpoch.is null is null
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(isnull)
+    OperatorExpression(.)
+      AttributeExpression(nextEpoch)
+      AttributeExpression(nextEpoch)
+
+===== Compound Operators Nested =====
+
+Original RowData:
+Epoch | All
+  Epoch | None
+    Epoch | protocolID =~~ "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(=~~)
+        AttributeExpression(protocolID)
+        StringLiteralValueExpression(xyz)
+
+===== Compound Operators In Different Positions =====
+
+Original RowData:
+Epoch | All
+  Epoch | Any
+    Epoch | All
+      Epoch | None
+        Epoch | protocolID =~~ "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(any)
+    OperatorExpression(all)
+      OperatorExpression(not)
+        OperatorExpression(any)
+          OperatorExpression(=~~)
+            AttributeExpression(protocolID)
+            StringLiteralValueExpression(xyz)
+
+===== Compound Operators In Different Positions =====
+
+Original RowData:
+Epoch | All
+  Epoch | All
+    Epoch | Any
+      Epoch | None
+        Epoch | protocolID =~~ "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(all)
+    OperatorExpression(any)
+      OperatorExpression(not)
+        OperatorExpression(any)
+          OperatorExpression(=~~)
+            AttributeExpression(protocolID)
+            StringLiteralValueExpression(xyz)
+
+===== Compound Operators In Different Positions =====
+
+Original RowData:
+Epoch | Any
+  Epoch | Any
+    Epoch | All
+      Epoch | None
+        Epoch | protocolID =~~ "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(any)
+    OperatorExpression(all)
+      OperatorExpression(not)
+        OperatorExpression(any)
+          OperatorExpression(=~~)
+            AttributeExpression(protocolID)
+            StringLiteralValueExpression(xyz)
+
+===== Compound Operators In Different Positions =====
+
+Original RowData:
+Epoch | None
+  Epoch | None
+    Epoch | All
+      Epoch | Any
+        Epoch | protocolID =~~ "xyz"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        OperatorExpression(all)
+          OperatorExpression(any)
+            OperatorExpression(=~~)
+              AttributeExpression(protocolID)
+              StringLiteralValueExpression(xyz)
+
+ExpressionTranslator test is ending.
