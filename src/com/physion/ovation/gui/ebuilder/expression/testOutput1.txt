@@ -115,6 +115,8 @@ OperatorExpression(and)
 
 ===== Compound Row Nested Classes =====
 
+BW: THIS EXAMPLE DOESN'T MAKE SENSE; epoch IS A TO-ONE RELATIONSHIP FROM Response
+
 Original RowData:
 Epoch | All
   Epoch | responses All
@@ -401,7 +403,7 @@ CUQ: Epoch
 rootExpression:
 OperatorExpression(and)
   OperatorExpression(not)
-    OperatorExpression(any)
+    OperatorExpression(or)
       OperatorExpression(=~~)
         AttributeExpression(protocolID)
         StringLiteralValueExpression(xyz)
@@ -419,10 +421,10 @@ Translated To Expression:
 CUQ: Epoch
 rootExpression:
 OperatorExpression(and)
-  OperatorExpression(any)
-    OperatorExpression(all)
+  OperatorExpression(or)
+    OperatorExpression(and)
       OperatorExpression(not)
-        OperatorExpression(any)
+        OperatorExpression(or)
           OperatorExpression(=~~)
             AttributeExpression(protocolID)
             StringLiteralValueExpression(xyz)
@@ -440,10 +442,10 @@ Translated To Expression:
 CUQ: Epoch
 rootExpression:
 OperatorExpression(and)
-  OperatorExpression(all)
-    OperatorExpression(any)
+  OperatorExpression(and)
+    OperatorExpression(or)
       OperatorExpression(not)
-        OperatorExpression(any)
+        OperatorExpression(or)
           OperatorExpression(=~~)
             AttributeExpression(protocolID)
             StringLiteralValueExpression(xyz)
@@ -461,10 +463,10 @@ Translated To Expression:
 CUQ: Epoch
 rootExpression:
 OperatorExpression(or)
-  OperatorExpression(any)
-    OperatorExpression(all)
+  OperatorExpression(or)
+    OperatorExpression(and)
       OperatorExpression(not)
-        OperatorExpression(any)
+        OperatorExpression(or)
           OperatorExpression(=~~)
             AttributeExpression(protocolID)
             StringLiteralValueExpression(xyz)
@@ -484,9 +486,9 @@ rootExpression:
 OperatorExpression(not)
   OperatorExpression(or)
     OperatorExpression(not)
-      OperatorExpression(any)
-        OperatorExpression(all)
-          OperatorExpression(any)
+      OperatorExpression(or)
+        OperatorExpression(and)
+          OperatorExpression(or)
             OperatorExpression(=~~)
               AttributeExpression(protocolID)
               StringLiteralValueExpression(xyz)
