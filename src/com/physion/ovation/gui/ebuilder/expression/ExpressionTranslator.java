@@ -1194,7 +1194,7 @@ public class ExpressionTranslator {
         else {
             createAndAddDotPath(pupmOperator, rowData);
         }
-//xxx
+
         pupmOperator.addOperand(new StringLiteralValueExpression(
             rowData.getPropName()));
     }
