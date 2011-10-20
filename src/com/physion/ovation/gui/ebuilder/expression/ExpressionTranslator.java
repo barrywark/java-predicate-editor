@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
+import com.physion.ovation.gui.ebuilder.ExpressionBuilder;
 import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
@@ -1632,12 +1633,11 @@ public class ExpressionTranslator {
      */
     public static void runAllTests() {
 
+        RowData rootRow;
         RowData rowData;
         RowData rowData2;
         RowData rowData3;
         RowData rowData4;
-        RowData rootRow;
-        //IExpression expression;
         ExpressionTree expression;
 
         ClassDescription epochCD = DataModel.getClassDescription("Epoch");
@@ -1666,13 +1666,7 @@ public class ExpressionTranslator {
         rowData.setAttributeValue("xyz");
         rootRow.addChildRow(rowData);
         
-        /**
-         * Now convert the RowData object we created above
-         * into an Expression object.
-         */
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nRowData:\n"+rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("CollectionOperator.ANY With Two Operands", rootRow);
 
         /**
          * Test the All collection operator, (which becomes "and"),
@@ -1702,11 +1696,7 @@ public class ExpressionTranslator {
 
         rootRow.addChildRow(rowData);
 
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nRowData:\n"+rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        //rowData = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nExpression Translated To RowData:\n"+rowData);
+        printResults("Attribute Boolean Operator.IS_TRUE", rootRow);
 
         /**
          * Test an attribute path with two levels.
@@ -1729,9 +1719,7 @@ public class ExpressionTranslator {
         rowData.setAttributeValue("Test 27");
         rootRow.addChildRow(rowData);
 
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nRowData:\n"+rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("Attribute Path Nested Twice", rootRow);
 
         /**
          * Test an attribute path with three levels:
@@ -1750,12 +1738,7 @@ public class ExpressionTranslator {
         rowData.setAttributeValue("Test 27");
         rootRow.addChildRow(rowData);
 
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nRowData:\n"+rootRow);
-        System.out.println("\nExpression:\n"+expression);
-
-        //rowData = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nRowData:\n"+rowData);
+        printResults("Attribute Path Nested Thrice", rootRow);
 
         /**
          * Test a reference value for null.
@@ -1769,12 +1752,11 @@ public class ExpressionTranslator {
 
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("owner"));
+        rowData.addAttribute(Attribute.IS_NULL);  // optional call
         rowData.setAttributeOperator(Operator.IS_NULL);
         rootRow.addChildRow(rowData);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("Reference Value Operator.IS_NULL", rootRow);
 
         /**
          * Test a reference value for not null.
@@ -1788,12 +1770,11 @@ public class ExpressionTranslator {
 
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("owner"));
+        rowData.addAttribute(Attribute.IS_NOT_NULL);  // optional call
         rowData.setAttributeOperator(Operator.IS_NOT_NULL);
         rootRow.addChildRow(rowData);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("Reference Value Operator.IS_NOT_NULL", rootRow);
 
         /**
          * Test a compound row:
@@ -1817,11 +1798,7 @@ public class ExpressionTranslator {
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        //rootRow = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+        printResults("Compound Row", rootRow);
 
         /**
          * Test a compound row:
@@ -1851,11 +1828,7 @@ public class ExpressionTranslator {
         rowData3.setAttributeValue("Test 27");
         rowData2.addChildRow(rowData3);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        //rootRow = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+        printResults("Compound Row Nested Classes", rootRow);
 
         /**
          * Test a compound row that uses the Count collection operator:
@@ -1880,11 +1853,7 @@ public class ExpressionTranslator {
         rowData2.setAttributeValue(new Integer(5));
         rowData.addChildRow(rowData2);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        //rootRow = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+        printResults("Compound Row ALL COUNT", rootRow);
 
         /**
          * Test a compound row:
@@ -1908,9 +1877,7 @@ public class ExpressionTranslator {
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("Compound Row ANY ANY", rootRow);
 
         /**
          * Test a compound row:
@@ -1934,11 +1901,7 @@ public class ExpressionTranslator {
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        //rootRow = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+        printResults("Compound Row NONE NONE", rootRow);
 
         /**
          * Test a PER_USER attribute type.
@@ -1962,9 +1925,7 @@ public class ExpressionTranslator {
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("PER_USER", rootRow);
 
         /**
          * Test a PER_USER attribute type with Count.
@@ -1983,9 +1944,7 @@ public class ExpressionTranslator {
         rowData.setAttributeValue(new Integer(5));
         rootRow.addChildRow(rowData);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("PER_USER CollectionOperator.COUNT", rootRow);
 
         /**
          * Test a nested PER_USER attribute type.
@@ -1996,12 +1955,12 @@ public class ExpressionTranslator {
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ALL);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
 
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("keywords"));
-        rowData.setCollectionOperator(CollectionOperator.ALL);
+        rowData.setCollectionOperator(CollectionOperator.ANY);
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();
@@ -2010,9 +1969,33 @@ public class ExpressionTranslator {
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("PER_USER Nested Once CollectionOperator.ANY", rootRow);
+
+        /**
+         * Test a nested PER_USER attribute type.
+         *
+         *      Epoch | All
+         *        Epoch | nextEpoch.All keywords All
+         *          KeywordTag | uuid == "xyz"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.NONE);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("keywords"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(epochCD.getAttribute("uuid"));
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue("xyz");
+        rowData.addChildRow(rowData2);
+
+        printResults("PER_USER Nested Twice CollectionOperator.NONE", rootRow);
 
         /**
          * Test a nested PER_USER attribute type.
@@ -2039,9 +2022,7 @@ public class ExpressionTranslator {
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("PER_USER Nested Thrice CollectionOperator.ALL", rootRow);
 
         /**
          * Test a PARAMETERS_MAP row of type time.
@@ -2052,15 +2033,13 @@ public class ExpressionTranslator {
 
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
-        rowData.setPropName("key");
+        rowData.setPropName("someTimeKey");
         rowData.setPropType(Type.DATE_TIME);
         rowData.setAttributeOperator(Operator.EQUALS);
         rowData.setAttributeValue(new Date());
         rootRow.addChildRow(rowData);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("PARAMETERS_MAP Type Date", rootRow);
 
         /**
          * Test a PARAMETERS_MAP row of type float, that
@@ -2075,15 +2054,13 @@ public class ExpressionTranslator {
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
         rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
-        rowData.setPropName("key");
+        rowData.setPropName("someKey");
         rowData.setPropType(Type.FLOAT_64);
         rowData.setAttributeOperator(Operator.EQUALS);
         rowData.setAttributeValue(new Double(12.3));
         rootRow.addChildRow(rowData);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("PARAMETERS_MAP Nested", rootRow);
 
         /**
          * Test a PER_USER_PARAMETERS_MAP row.
@@ -2092,7 +2069,7 @@ public class ExpressionTranslator {
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("properties"));
@@ -2102,9 +2079,7 @@ public class ExpressionTranslator {
         rowData.setAttributeValue(new Integer(34));
         rootRow.addChildRow(rowData);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("PER_USER_PARAMETERS_MAP", rootRow);
 
         /**
          * Test a PER_USER_PARAMETERS_MAP row.
@@ -2126,9 +2101,7 @@ public class ExpressionTranslator {
         rowData.setAttributeValue(new Integer(34));
         rootRow.addChildRow(rowData);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
+        printResults("PER_USER_PARAMETERS_MAP Nested", rootRow);
 
         /**
          * Test handling a reference.
@@ -2145,11 +2118,7 @@ public class ExpressionTranslator {
         rowData.setAttributeOperator(Operator.IS_NULL);
         rootRow.addChildRow(rowData);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        //rootRow = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+        printResults("Reference isnull()", rootRow);
 
         /**
          * Test compound row.
@@ -2172,11 +2141,7 @@ public class ExpressionTranslator {
         rowData4.setAttributeValue("xyz");
         rowData.addChildRow(rowData4);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        //rootRow = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+        printResults("Compound Operators Nested", rootRow);
 
         /**
          * Test compound row.
@@ -2208,11 +2173,106 @@ public class ExpressionTranslator {
         rowData4.setAttributeValue("xyz");
         rowData3.addChildRow(rowData4);
 
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        //rootRow = ExpressionTranslator.createRowData(expression);
-        //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+        printResults("Compound Operators In Different Positions", rootRow);
+
+        /**
+         * Test compound row.
+         *
+         *      All of the following
+         *        All of the following
+         *          Any of the following
+         *            None of the following
+         *              protocolID =~~ "xyz"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        rowData.setCollectionOperator(CollectionOperator.ALL);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.setCollectionOperator(CollectionOperator.ANY);
+        rowData.addChildRow(rowData2);
+
+        rowData3 = new RowData();
+        rowData3.setCollectionOperator(CollectionOperator.NONE);
+        rowData2.addChildRow(rowData3);
+
+        rowData4 = new RowData();
+        rowData4.addAttribute(epochCD.getAttribute("protocolID"));
+        rowData4.setAttributeOperator(Operator.MATCHES_CASE_INSENSITIVE);
+        rowData4.setAttributeValue("xyz");
+        rowData3.addChildRow(rowData4);
+
+        printResults("Compound Operators In Different Positions", rootRow);
+
+        /**
+         * Test compound row.
+         *
+         *      Any of the following
+         *        Any of the following
+         *          All of the following
+         *            None of the following
+         *              protocolID =~~ "xyz"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.setCollectionOperator(CollectionOperator.ALL);
+        rowData.addChildRow(rowData2);
+
+        rowData3 = new RowData();
+        rowData3.setCollectionOperator(CollectionOperator.NONE);
+        rowData2.addChildRow(rowData3);
+
+        rowData4 = new RowData();
+        rowData4.addAttribute(epochCD.getAttribute("protocolID"));
+        rowData4.setAttributeOperator(Operator.MATCHES_CASE_INSENSITIVE);
+        rowData4.setAttributeValue("xyz");
+        rowData3.addChildRow(rowData4);
+
+        printResults("Compound Operators In Different Positions", rootRow);
+
+        /**
+         * Test compound row.
+         *
+         *      None of the following
+         *        None of the following
+         *          All of the following
+         *            Any of the following
+         *              protocolID =~~ "xyz"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.NONE);
+
+        rowData = new RowData();
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.setCollectionOperator(CollectionOperator.ALL);
+        rowData.addChildRow(rowData2);
+
+        rowData3 = new RowData();
+        rowData3.setCollectionOperator(CollectionOperator.ANY);
+        rowData2.addChildRow(rowData3);
+
+        rowData4 = new RowData();
+        rowData4.addAttribute(epochCD.getAttribute("protocolID"));
+        rowData4.setAttributeOperator(Operator.MATCHES_CASE_INSENSITIVE);
+        rowData4.setAttributeValue("xyz");
+        rowData3.addChildRow(rowData4);
+
+        printResults("Compound Operators In Different Positions", rootRow);
     }
 
 
@@ -2231,35 +2291,13 @@ public class ExpressionTranslator {
         ClassDescription sourceCD = DataModel.getClassDescription("Source");
         ClassDescription responseCD = DataModel.getClassDescription("Response");
 
-        /**
-         * Test a reference value for null.
-         *
-         *      Epoch | All
-         *        Epoch | owner is null
-         */
-/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("owner"));
-        rowData.setAttributeOperator(Operator.IS_NULL);
-        rootRow.addChildRow(rowData);
-
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-        rootRow = ExpressionTranslator.createRowData(expression);
-        System.out.println("\nExpression Translated To RowData:\n"+rootRow);
-*/
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ALL);
-
-        rowData = new RowData();
-        //rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        //rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("owner"));
         rowData.addAttribute(Attribute.IS_NULL);
         rowData.setAttributeOperator(Operator.IS_NULL);
@@ -2273,6 +2311,28 @@ public class ExpressionTranslator {
     }
 
 
+    private static void printResults(String label, RowData rootRow) {
+
+        System.out.println("\n===== "+label+" =====");
+
+        /*
+        ExpressionBuilder.ReturnValue returnValue;
+        returnValue = ExpressionBuilder.editExpression(rootRow);
+        if (returnValue.status != ExpressionBuilder.RETURN_STATUS_OK)
+            System.exit(returnValue.status);
+        */
+
+        System.out.println("\nOriginal RowData:\n"+rootRow);
+
+        ExpressionTree expression = ExpressionTranslator.createExpressionTree(
+            rootRow);
+        System.out.println("\nTranslated To Expression:\n"+expression);
+
+        //rootRow = ExpressionTranslator.createRowData(expression);
+        //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+    }
+
+
     /**
      * This is a simple test program for this class.
      */
@@ -2280,8 +2340,8 @@ public class ExpressionTranslator {
 
         System.out.println("ExpressionTranslator test is starting...");
 
-        //runAllTests();
-        runOneTest();
+        runAllTests();
+        //runOneTest();
 
         System.out.println("\nExpressionTranslator test is ending.");
     }

@@ -732,6 +732,21 @@ public class RowData
         }
 
         /**
+         * Try and help the engineer who is creating a RowData
+         * object by adding the proper Attribute to the end of
+         * this RowData's attributePath if it is not already
+         * there.
+         */
+        if ((attributeOperator == Operator.IS_NULL) &&
+            !Attribute.IS_NULL.equals(getChildmostAttribute())) {
+            addAttribute(Attribute.IS_NULL);
+        }
+        if ((attributeOperator == Operator.IS_NOT_NULL) &&
+            !Attribute.IS_NOT_NULL.equals(getChildmostAttribute())) {
+            addAttribute(Attribute.IS_NOT_NULL);
+        }
+
+        /**
          * If we are a time value, and the operator is being set
          * to something other than "is null" or "is not null",
          * make sure the attributeValue is a Date.
@@ -1008,17 +1023,34 @@ public class RowData
 
         //System.out.println("Enter addAttribute("+attribute+")");
 
-        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
-                         RowDataEvent.TYPE_ATTRIBUTE_PATH);
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
 
+        Attribute childmost = getChildmostAttribute();
+        if (childmost != null) {
+            if (childmost.isSpecial() && attribute.isSpecial()) {
+                String s = "Bad call to RowData.addAttribute() with a "+
+                    "special Attribute: "+attribute+".  The attributePath "+
+                    "already ends with the special Attribute: "+childmost+" "+
+                    "so you can't add another one.  Note that calls to "+
+                    "setAttributeOperator(Operator.IS_NULL), for example, "+
+                    "can add the Attribute.IS_NULL automatically if it is "+
+                    "not already at the end of the attributePath.";
+                (new Exception(s)).printStackTrace();
+                return;
+            }
+        }
+
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_ATTRIBUTE_PATH);
         attributePath.add(attribute);
 
-        if (attribute.equals(Attribute.IS_NULL)) {
+        if (attribute.equals(Attribute.IS_NULL) &&
+            (attributeOperator != Operator.IS_NULL)) {
             setAttributeOperator(Operator.IS_NULL);
         }
-        else if (attribute.equals(Attribute.IS_NOT_NULL)) {
+        else if (attribute.equals(Attribute.IS_NOT_NULL) &&
+                 (attributeOperator != Operator.IS_NOT_NULL)) {
             setAttributeOperator(Operator.IS_NOT_NULL);
         }
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,

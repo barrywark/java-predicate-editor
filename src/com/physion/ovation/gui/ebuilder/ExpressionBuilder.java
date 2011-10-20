@@ -413,7 +413,7 @@ public class ExpressionBuilder
      * should look at.  Please see ExpressionBuilder.ReturnValue
      * for more information.
      */
-    private static ReturnValue editExpression(RowData rootRow) {
+    public static ReturnValue editExpression(RowData rootRow) {
 
         /**
          * Create a returnValue that is already initialized
