@@ -64,35 +64,30 @@ public class Attribute {
      * The "display" name of this attribute.  I.e. the string that
      * will be displayed in a comboBox dropdown list.
      *
-     * As of September 2011, the only time this string and the
-     * queryName are different is in the case of the
-     * EntityBase.properties attribute.
-     *
-     * Because the displayName is almost always the same as the
+     * Because the displayName is usually the same as the
      * queryName, we only set the displayName to a non-null value if it
      * is different from the queryName.  The getDisplayName() method
      * will return the value stored in our queryName member data if
      * displayName is null.
+     *
+     * As of October 2011, below are the Attributes that have
+     * displayNames that are different from their queryNames:
+     *
+     *      My Property = myproperties
+     *      Any Property = properties
+     *
+     *      My Keywords = mykeywords
+     *      All Keywords = keywords
+     *
+     *      My DerivedResponses = myderivedRespones
+     *      All Keywords = derivedRespones
+     *
+     *      My AnalysisRecords = myanalysisRecords
+     *      All AnalysisRecords = analysisRecords
+     *
+     * The displayNames might change before the code is finished.
      */
     private String displayName;
-
-    /**
-     * This value only matters to Attributes of Type.PER_USER and
-     * Type.PER_USER_PARAMETERS_MAP.  In addition, it only matters
-     * when this Attribute is being used to generate a label to
-     * be used in a GUI or when creating a query string.  It is NOT
-     * used when setting up the list of Attribute objects in a
-     * ClassDescription.
-     *
-     * If this flag is true, this Attribute is used to create a
-     * query string that is looking for records
-     * associated with attributes the current user created.
-     * E.g. "my" keywords.  The attribute is prefaced with "My"
-     * when it is displayed to the user.  If this flag is false,
-     * then the attribute is prefaced with "Any" or "All" when it
-     * is displayed.
-     */
-    private boolean isMine;
 
     /**
      * The type of this attribute.  E.g. BOOLEAN, INT, REFERENCE.
@@ -116,7 +111,7 @@ public class Attribute {
 
     public Attribute(Attribute other) {
         this(other.queryName, other.displayName, other.type,
-             other.classDescription, other.cardinality, other.isMine);
+             other.classDescription, other.cardinality);
     }
 
 
@@ -126,13 +121,12 @@ public class Attribute {
      */
     public Attribute(String queryName, String displayName, Type type,
                      ClassDescription classDescription,
-                     Cardinality cardinality, boolean isMine) {
+                     Cardinality cardinality) {
         this.queryName = queryName;
         this.displayName = displayName;
         this.type = type;
         this.classDescription = classDescription;
         this.cardinality = cardinality;
-        this.isMine = isMine;
 
         if ((this.type == Type.PARAMETERS_MAP) &&
             (this.cardinality != Cardinality.N_A)) {
@@ -149,7 +143,6 @@ public class Attribute {
      * A constructor with some values defaulted:
      * 
      *      displayName = null
-     *      isMine = false;
      *
      * Use this constructor to create most Attributes that are
      * a reference to a class.
@@ -157,7 +150,7 @@ public class Attribute {
     public Attribute(String queryName, Type type,
                      ClassDescription classDescription,
                      Cardinality cardinality) {
-        this(queryName, null, type, classDescription, cardinality, false);
+        this(queryName, null, type, classDescription, cardinality);
     }
 
 
@@ -167,13 +160,12 @@ public class Attribute {
      *      displayName = null
      *      classDescription = null
      *      cardinality = Cardinality.N_A
-     *      isMine = false;
      *
      * Use this constuctor to create a "primitive" Attribute such as
      * boolean, int, float, string, time/date.
      */
     public Attribute(String queryName, Type type) {
-        this(queryName, null, type, null, Cardinality.N_A, false);
+        this(queryName, null, type, null, Cardinality.N_A);
     }
 
 
@@ -205,9 +197,6 @@ public class Attribute {
         //if (!this.getDisplayName().equals(other.getDisplayName()))
         //    return(false);
 
-        if (this.isMine != other.isMine)
-            return(false);
-
         if (this.type != other.type)
             return(false);
 
@@ -231,7 +220,7 @@ public class Attribute {
      * in query strings.  E.g. "uuid", "owner", "properties".
      *
      * If you want to set the string that should be displayed in a
-     * comboBox dropdown list, you should use the getDisplayName()
+     * comboBox dropdown list, you should use the setDisplayName()
      * method.
      */
     public void setQueryName(String queryName) {
@@ -241,27 +230,13 @@ public class Attribute {
 
     /**
      * Get the "query" name of this attribute that should be used
-     * in query strings.  E.g. "uuid", "owner", "properties".
-     *
-     * If we are a special type, such as the PER_USER type "keywords",
-     * this method will optionally prepend the "my" prefix to it
-     * if our isMine flag is true.
-     *
+     * in query strings.  E.g. "uuid", "owner", "properties",
+     * "myproperties", "keywords", "mykeywords".
+     * 
      * If you want the string that should be displayed in a comboBox
      * dropdown list, you should use the getDisplayName() method.
      */
-    public String getFullQueryName() {
-
-        if (((type == Type.PER_USER) ||
-             (type == Type.PER_USER_PARAMETERS_MAP)) &&
-            (isMine == true)) {
-            return("my"+getBaseQueryName());
-        }
-        return(getBaseQueryName());
-    }
-
-
-    public String getBaseQueryName() {
+    public String getQueryName() {
         return(queryName);
     }
 
@@ -274,9 +249,6 @@ public class Attribute {
      *
      * But if the displayName and queryName are different values,
      * you need to call this method to set the displayName.
-     * As of September 2011, the displayName and the queryName
-     * are the same for all attributes except for the
-     * EntityBase.properties attribute.
      */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
@@ -288,47 +260,20 @@ public class Attribute {
      * is the string that is displayed in a comboBox.
      *
      * As of September 2011, the displayName and the queryName
-     * is the same for almost all attributes.  An Attribute
-     * where there queryName and displayName are not the same is
-     * the EntityBase.properties attribute.  So, we only bother
-     * to set the displayName to a non-null value for that
-     * one attribute.  In the case of the EntityBase.properties
-     * attribute, the displayName is "Property".  In addition,
-     * the string "My " or "Any " is prepended to the displayName
-     * depending upon the isMine flag.
+     * is the same for most attributes.  So, we only bother
+     * to set the displayName to a non-null value for those
+     * attributes.
      *
      * @return The "display" name for this Attribute.  Please
-     * note, this method never returns null even if our
-     * displayName member data is null.
+     * note, this method returns the queryName if the displayName
+     * is null.
      */
     public String getDisplayName() {
 
-        String string = displayName;
-        if (string == null)
-            string = getBaseQueryName();
-
-        /**
-         * For most attributes, we are done at this point, but
-         * for a few of them, we need to prepend My, Any, or All
-         * to the name.  E.g. EntityBase.properties becomes
-         * "My Property" or "Any Property".  Epoch.derivedResponses
-         * becomes "My derivedResponses" or "All derivedResponses".
-         */
-
-        if (type == Type.PER_USER) {
-            if (isMine)
-                string = "My "+string;
-            else
-                string = "All "+string;
-        }
-        else if (type == Type.PER_USER_PARAMETERS_MAP) {
-            if (isMine)
-                string = "My "+string;
-            else
-                string = "Any "+string;
-        }
-
-        return(string);
+        if (displayName != null)
+            return(displayName);
+        else
+            return(queryName);
     }
 
 
@@ -341,20 +286,6 @@ public class Attribute {
      */
     public String toString() {
         return(getDisplayName());
-    }
-
-
-    /**
-     * This value only matters to Attributes of Type.PER_USER and
-     * Type.PER_USER_PARAMETERS_MAP.
-     */
-    public void setIsMine(boolean isMine) {
-        this.isMine = isMine;
-    }
-
-
-    public boolean getIsMine() {
-        return(isMine);
     }
 
 
@@ -413,9 +344,9 @@ public class Attribute {
 
         String string;
 
-        string = getFullQueryName();
+        string = getQueryName();
         if (displayName != null)
-            string += "("+displayName+")("+isMine+")";
+            string += "("+displayName+")";
         string += " "+type;
 
         if ((type == Type.REFERENCE) && !isSpecial()) {

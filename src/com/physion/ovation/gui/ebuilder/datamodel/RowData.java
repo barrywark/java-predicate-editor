@@ -1115,7 +1115,7 @@ public class RowData
                     if (debugVersion)
                         string += attribute.getDisplayName();
                     else
-                        string += attribute.getFullQueryName();
+                        string += attribute.getQueryName();
 
                 }
                 else {
@@ -1846,9 +1846,7 @@ public class RowData
         attribute = new Attribute("nextEpoch", Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         rowData.addAttribute(attribute);
-        attribute = new Attribute("properties", "Property",
-                                  Type.PER_USER_PARAMETERS_MAP,
-                                  null, Cardinality.TO_MANY, true);
+        attribute = epochCD.getAttribute("myproperties");
         rowData.addAttribute(attribute);
         rowData.setPropName("animalID");
         rowData.setPropType(Type.INT_32);
@@ -1886,8 +1884,7 @@ public class RowData
          * Create a "Per User" derivedResponse row.
          */
         rowData = new RowData();
-        attribute = new Attribute("derivedResponses", null, Type.PER_USER,
-                                  derivedResponseCD, Cardinality.TO_MANY, true);
+        attribute = epochCD.getAttribute("derivedResponses");
         rowData.addAttribute(attribute);
         rowData.setCollectionOperator(CollectionOperator.ALL);
         rootRow.addChildRow(rowData);

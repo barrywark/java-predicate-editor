@@ -190,7 +190,14 @@ public class DataModel {
          * cardinality:  to-one or to-many.
          *
          * The parameters-map, per-user, and per-user-parameters-map
-         * Attributes are created in a similar way.
+         * Attributes are created in a similar way, but
+         * have a "displayName" that is different than their "queryName".
+         * An Attribute like "protocolID" appears in both the
+         * GUI's comboBox as "protocolID" as well as in the Expression
+         * that is generated from the Attribute.  But, an Attribute
+         * like "keywords" or "mykeywords" appears in the comboBox
+         * as "All Keywords" or "My Keywords".
+         *
          * Just look at an example of the desired Attribute
          * type below and cut and paste the code, and change
          * the name of the Attribute.
@@ -212,14 +219,14 @@ public class DataModel {
         attribute = new Attribute("incomplete", Type.BOOLEAN);
         entityBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("properties", Type.PER_USER_PARAMETERS_MAP,
+        attribute = new Attribute("myproperties", "My Property",
+                                  Type.PER_USER_PARAMETERS_MAP,
                                   null, Cardinality.TO_MANY);
+        entityBaseCD.addAttribute(attribute);
 
-        /**
-         * This is the only Attribute that has a displayName
-         * different from its queryName.
-         */
-        attribute.setDisplayName("Property");
+        attribute = new Attribute("properties", "Any Property",
+                                  Type.PER_USER_PARAMETERS_MAP,
+                                  null, Cardinality.TO_MANY);
         entityBaseCD.addAttribute(attribute);
 
         attribute = new Attribute("resources", Type.REFERENCE,
@@ -229,7 +236,11 @@ public class DataModel {
         /**
          * Initialize values of the TaggableEntityBase class.
          */
-        attribute = new Attribute("keywords", Type.PER_USER,
+        attribute = new Attribute("mykeywords", "My Keywords", Type.PER_USER,
+                                  keywordTagCD, Cardinality.TO_MANY);
+        taggableEntityBaseCD.addAttribute(attribute);
+
+        attribute = new Attribute("keywords", "All Keywords", Type.PER_USER,
                                   keywordTagCD, Cardinality.TO_MANY);
         taggableEntityBaseCD.addAttribute(attribute);
 
@@ -293,7 +304,13 @@ public class DataModel {
             experimentCD, Cardinality.TO_MANY);
         projectCD.addAttribute(attribute);
 
-        attribute = new Attribute("analysisRecords", Type.PER_USER,
+        attribute = new Attribute("myanalysisRecords", "My AnalysisRecords",
+                                  Type.PER_USER,
+                                  analysisRecordCD, Cardinality.TO_MANY);
+        projectCD.addAttribute(attribute);
+
+        attribute = new Attribute("analysisRecords", "All AnalysisRecords",
+                                  Type.PER_USER,
                                   analysisRecordCD, Cardinality.TO_MANY);
         projectCD.addAttribute(attribute);
 
@@ -401,7 +418,13 @@ public class DataModel {
                                   responseCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("derivedResponses", Type.PER_USER,
+        attribute = new Attribute("myderivedResponses", "My DerivedResponses",
+                                  Type.PER_USER,
+                                  derivedResponseCD, Cardinality.TO_MANY);
+        epochCD.addAttribute(attribute);
+
+        attribute = new Attribute("derivedResponses", "All DerivedResponses",
+                                  Type.PER_USER,
                                   derivedResponseCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 

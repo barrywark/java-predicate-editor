@@ -598,48 +598,16 @@ class RowPanel
         ArrayList<Attribute> copy = new ArrayList<Attribute>();
 
         /**
-         * First, prepend the special "Select Attribute" attribute
-         * if requested.
+         * First, prepend the special "Select Attribute" attribute.
          */
-        //if (prependSelectAttribute)
-        //    copy.add(Attribute.SELECT_ATTRIBUTE);
         copy.add(Attribute.SELECT_ATTRIBUTE);
 
         /**
          * Go through the list of attributes adding them to our
-         * copy of the ArrayList.  But, if an attribute is of type
-         * Type.PER_USER or Type.PER_USER_PARAMETERS_MAP,
-         * insert two entries into our copy, one entry has its
-         * isMine flag set to true, and the other false.
-         *
-         * This messing around is needed because we want the
-         * user to have two versions of these attributes that
-         * s/he can choose.  E.g. EntityBase.properties becomes
-         * "My Property" and "Any Property" as comboBox choices.
-         * E.g. Epoch.derivedResponses becomes "My derivedResponses"
-         * and "All derivedResponses".
+         * copy of the ArrayList.
          */
         for (Attribute attribute : attributes) {
-
-            if (attribute.getType() == Type.PER_USER) {
-                Attribute newAttribute = new Attribute(attribute);
-                newAttribute.setIsMine(true);
-                copy.add(newAttribute);
-                newAttribute = new Attribute(attribute);
-                newAttribute.setIsMine(false);
-                copy.add(newAttribute);
-            }
-            else if (attribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
-                Attribute newAttribute = new Attribute(attribute);
-                newAttribute.setIsMine(true);
-                copy.add(newAttribute);
-                newAttribute = new Attribute(attribute);
-                newAttribute.setIsMine(false);
-                copy.add(newAttribute);
-            }
-            else {
-                copy.add(attribute);
-            }
+            copy.add(attribute);
         }
 
         if (appendNulls) {

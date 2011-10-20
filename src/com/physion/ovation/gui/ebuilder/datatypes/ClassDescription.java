@@ -165,22 +165,26 @@ public class ClassDescription {
 
 
     /**
-     * Get a copy of the Attribute with the passed in queryName
+     * Get a COPY of the Attribute with the passed in queryName
      * if such an attribute exists in this ClassDescription.
      * Returns null if it doesn't.
      *
+     * Please note, we are checking this ClassDescription's
+     * "direct" Attributes and all our parent class Attributes.
+     *
      * @param queryName A string like:  "incomplete", "protocolID",
      * "properties".  Not a displayName like "My Property".
+     *
+     * @return The Attribute, if it exists, that has the passed
+     * in queryName.  Please note, we return a COPY of this ClassDescription's
+     * Attribute, so you are free to do with it what you want.
+     * Returns null if the Attribute does not exist in the passed
+     * in ClassDescription.
      */
     public Attribute getAttribute(String queryName) {
 
-        if (queryName.startsWith("my")) {
-            System.out.println("Temporary hack in getAttribute");
-            queryName = queryName.substring(2);
-        }
-        
         for (Attribute att : getAllAttributes()) {
-            if (att.getBaseQueryName().equals(queryName))
+            if (att.getQueryName().equals(queryName))
                 return(new Attribute(att));
         }
 

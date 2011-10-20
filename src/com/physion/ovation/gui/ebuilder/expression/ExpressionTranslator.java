@@ -15,14 +15,15 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 
 /**
- * TODO:  Do we want to split the Expression to RowData translator
+ * TODO:  Split the Expression to RowData translator
  * code into a separate class from the
- * RowData to Expression translator code?
+ * RowData to Expression translator code.
  */
 public class ExpressionTranslator {
 
 
     public static final String AE_VALUE = "value";
+    public static final String AE_THIS = "this";
 
     public static final String OE_NOT = "not";
     public static final String OE_OR = "or";
@@ -234,7 +235,6 @@ public class ExpressionTranslator {
 
                 int olIndex = 0;
                 ClassDescription childClass = classDescription;
-                //if (rowData.getAttributeCount() > 0) {
                 if (ol.size() > 1) {
                     /**
                      * Convert the first operand into a RowData
@@ -372,6 +372,10 @@ public class ExpressionTranslator {
     }
 
 
+    /**
+     * This returns true if the passed in IExpression is
+     * a PER_USER Attribute like "keywords", "mykeywords", etc.
+     */
     private static boolean isPerUserOperator(IExpression ex,
                                              ClassDescription cd) {
 
@@ -379,20 +383,11 @@ public class ExpressionTranslator {
 
             IOperatorExpression oe = (IOperatorExpression)ex;
             String name = oe.getOperatorName();
-            //System.out.println("name = "+name);
 
-            ArrayList<Attribute> attributes = cd.getAllAttributes();
-            for (Attribute attribute : attributes) {
-                //System.out.println("attribute = "+attribute);
-                if (attribute.getType() == Type.PER_USER) {
-                    Attribute testAtt = new Attribute(attribute);
-                    testAtt.setIsMine(false);
-                    if (testAtt.getFullQueryName().equals(name))
-                        return(true);
-                    testAtt.setIsMine(true);
-                    if (testAtt.getFullQueryName().equals(name))
-                        return(true);
-                }
+            Attribute attribute = cd.getAttribute(name);
+            if ((attribute != null) &&
+                (attribute.getType() == Type.PER_USER)) {
+                return(true);
             }
         }
 
@@ -803,13 +798,12 @@ public class ExpressionTranslator {
         if ((childmostAttribute != null) &&
             (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
 
-            /**
-             * This is wrong.
-             */
-            if (childmostAttribute.getIsMine())
-                op1 = new OperatorExpression("my");
-            else
-                op1 = new OperatorExpression(OE_ANY);
+            op1 = new OperatorExpression(OE_ANY);
+/*
+            op2 = new OperatorExpression(
+                rowData.getAttributeOperator().toString());
+            op1.addOperand(op2);
+*/
         }
         else if ((childmostAttribute != null) &&
                  (childmostAttribute.getType() == Type.PARAMETERS_MAP)) {
@@ -1012,10 +1006,11 @@ public class ExpressionTranslator {
 
             /**
              * As of October 2011, there is only the "properties"
-             * attribute that is of this PER_USER_PARAMETERS_MAP
-             * type.
+             * and "myproperties" attributes that are of this
+             * PER_USER_PARAMETERS_MAP type.
              */
 
+            /*
             lastOperator.addOperand(createExpression(
                 rowData.getAttributePath(), rowData));
 
@@ -1024,41 +1019,15 @@ public class ExpressionTranslator {
             rightOperator.addOperand(createLiteralValueExpression(
                 rowData.getPropType(), rowData));
             lastOperator.addOperand(rightOperator);
+            */
+
+            createAndAddPerUserParametersMap(lastOperator, rowData);
         }
         else if ((childmostAttribute != null) &&
                  (childmostAttribute.getType() == Type.PARAMETERS_MAP)) {
 
-            OperatorExpression dotOperand;
-            IExpression valueOperand;
-
-            dotOperand = new OperatorExpression(".");
-            valueOperand = createLiteralValueExpression(rowData.getPropType(),
-                                                        rowData);
-            lastOperator.addOperand(dotOperand);
-            lastOperator.addOperand(valueOperand);
-
-            dotOperand.addOperand(createExpression(rowData.getAttributePath(),
-                                  rowData));
-            dotOperand.addOperand(new AttributeExpression(AE_VALUE));
+            createAndAddParametersMap(lastOperator, rowData);
         }
-//        else if ((childmostAttribute != null) &&
-//                 (childmostAttribute.getType() == Type.PER_USER)) {
-//
-//            System.out.println("This is a PER_USER attribute");
-//            /**
-//             * This is an Attribute like "keywords" that is
-//             * actually either "keywords" or "mykeywords", depending
-//             * on the "isMine" flag.  Really, this attribute is an
-//             * operator.
-//             */
-//            OperatorExpression perUserOE = new OperatorExpression(
-//                childmostAttribute.getFullQueryName());
-//            lastOperator.addOperand(perUserOE);
-//
-//            //perUserOE.addOperand(createExpression(rowData.getAttributePath(),
-//            //                     rowData));
-//            perUserOE.addOperand(the child rows);
-//        }
         else if (rowData.getCollectionOperator() != null) {
 
             if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
@@ -1103,6 +1072,176 @@ public class ExpressionTranslator {
         }
 
         return(expression);
+    }
+
+
+    /**
+     * Create and add the operands for a PER_USER expression.
+     *
+     * The comments use these example rowData values:
+     *
+     *      nextEpoch.nextEpoch.prevEpoch.My Keywords None
+     *          uuid == "xyz"
+     */
+/*
+    private static void createAndAddPerUserExpression(OperatorExpression parent,
+        RowData rowData) {
+
+        parent.addOperand(createPerUserExpression(rowData));
+
+        /**
+         * Now create all the other operands.
+         * For example, the "uuid == xyz" operand.
+         */
+/*
+        for (RowData childRow : rowData.getChildRows()) {
+            parent.addOperand(createExpression(childRow));
+        }
+    }
+*/
+
+    private static OperatorExpression createPerUserExpression(RowData rowData) {
+
+        Attribute childmostAttribute = rowData.getChildmostAttribute();
+        OperatorExpression oe;
+        oe = new OperatorExpression(childmostAttribute.getQueryName());
+
+        if (rowData.getAttributeCount() < 2) {
+            oe.addOperand(new AttributeExpression(AE_THIS));
+        }
+        else {
+            /**
+             * Add the expression that represents the
+             * "nextEpoch.nextEpoch.prevEpoch" path.
+             */
+            createAndAddDotPath(oe, rowData);
+        }
+        return(oe);
+    }
+
+
+    private static void createAndAddParametersMap(
+        OperatorExpression lastOperator, RowData rowData) {
+
+        OperatorExpression dotOperand;
+        IExpression valueOperand;
+
+        dotOperand = new OperatorExpression(".");
+        valueOperand = createLiteralValueExpression(rowData.getPropType(),
+                                                    rowData);
+        lastOperator.addOperand(dotOperand);
+        lastOperator.addOperand(valueOperand);
+
+        dotOperand.addOperand(createExpression(rowData.getAttributePath(),
+                              rowData));
+        dotOperand.addOperand(new AttributeExpression(AE_VALUE));
+    }
+
+
+    /**
+     * Create and add the Expressions for the PER_USER_PARAMETERS_MAP
+     * type.  As of October 2011, only the "properties" and "myproperties"
+     * Attributes are of this type.
+     *
+     * By the time this method is called, lastOperator has been set
+     * to the OperatorExpression("any").
+     * (This is always the case for an Attribute of type
+     * PER_USER_PARAMETERS_MAP as far as I understand.)
+     *
+     * An example tree might look like this:
+     *
+     */
+    private static void createAndAddPerUserParametersMap(
+        OperatorExpression lastOperator, RowData rowData) {
+
+        OperatorExpression op2;
+        OperatorExpression elementsOfTypeOperator;
+        IExpression valueOperand;
+        OperatorExpression pupmOperator;  // Per User Properties Map Operator
+
+        elementsOfTypeOperator = new OperatorExpression(OE_ELEMENTS_OF_TYPE);
+        lastOperator.addOperand(elementsOfTypeOperator);
+
+        op2 = new OperatorExpression(
+            rowData.getAttributeOperator().toString());
+        lastOperator.addOperand(op2);
+
+        op2.addOperand(new AttributeExpression(AE_VALUE));
+        valueOperand = createLiteralValueExpression(rowData.getPropType(),
+                                                    rowData);
+        op2.addOperand(valueOperand);
+
+        Attribute attribute = rowData.getChildmostAttribute();
+        pupmOperator = new OperatorExpression(attribute.getQueryName());
+        elementsOfTypeOperator.addOperand(pupmOperator);
+        elementsOfTypeOperator.addOperand(createClassLiteralValueExpression(
+                                          rowData.getPropType()));
+
+        /**
+         * Create the two operands for the pupmOperator.
+         * (Per User Properties Map Operator)
+         * As of October 2011, only the "properties" and "myproperties"
+         * attributes were of this type.
+         *
+         * The first operand is the qualifying path to the attribute,
+         * if any.  We use "this" if no path exists.
+         * The second operand is the property key the user entered.
+         */
+
+        if (rowData.getAttributeCount() < 2) {
+            pupmOperator.addOperand(new AttributeExpression(AE_THIS));
+        }
+        else {
+            createAndAddDotPath(pupmOperator, rowData);
+        }
+//xxx
+        pupmOperator.addOperand(new StringLiteralValueExpression(
+            rowData.getPropName()));
+    }
+
+
+    /**
+     * Look at the passed in rowData object and create a
+     * "dot path" of all the Attributes in the rowData's
+     * attributePath except for the last Attribute.
+     * I.e. the attributePath qualifies what the last Attribute is.
+     * Then add that Expression to the passed in parent Expression.
+     *
+     * For example, if the rowData's attributePath is:
+     *
+     *      nextEpoch.nextEpoch.prevEpoch.My Keywords
+     *
+     * and the parent is:
+     *
+     *    OperatorExpression(mykeywords)
+     *
+     * this method will add the Expression tree below to parent:
+     *
+     *      OperatorExpression(.)
+     *        OperatorExpression(.)
+     *          AttributeExpression(nextEpoch)
+     *          AttributeExpression(nextEpoch)
+     *        AttributeExpression(prevEpoch)
+     *
+     * to create:
+     *
+     *    OperatorExpression(mykeywords)
+     *      OperatorExpression(.)
+     *        OperatorExpression(.)
+     *          AttributeExpression(nextEpoch)
+     *          AttributeExpression(nextEpoch)
+     *        AttributeExpression(prevEpoch)
+     */
+    private static final void createAndAddDotPath(OperatorExpression parent,
+        RowData rowData) {
+
+        List<Attribute> attributePath = rowData.getAttributePath();
+
+        attributePath = attributePath.subList(0, attributePath.size()-1);
+        if (attributePath.size() < 1)
+            return;
+
+        parent.addOperand(createExpression(attributePath, rowData));
     }
 
 
@@ -1161,7 +1300,7 @@ public class ExpressionTranslator {
 
             case REFERENCE:
                 return(new ClassLiteralValueExpression(
-                       attribute.getFullQueryName()));
+                       attribute.getQueryName()));
 
             default:
                 System.err.println("ERROR:  ExpressionTranslator."+
@@ -1296,7 +1435,7 @@ public class ExpressionTranslator {
 
         Attribute lastAttribute = attributePath.get(attributePath.size()-1);
         IExpression aeQueryName = new AttributeExpression(
-            lastAttribute.getFullQueryName());
+            lastAttribute.getQueryName());
         IExpression parameterLeftOperand;
         if (attributePath.size() > 1) {
             List<Attribute> allButLastAttribute = attributePath.subList(0,
@@ -1384,36 +1523,22 @@ public class ExpressionTranslator {
         if (attributePath.size() < 1) {
 
             /**
-             * Check whether this row is a compound row.
-             */
-            /*
-            if ((rowData.getCollectionOperator() != null) &&
-                (rowData.getCollectionOperator().isCompoundOperator())) {
-
-                String name = getCollectionOperatorName(rowData);
-                OperatorExpression oe = new OperatorExpression("xxxx");//name);
-                return(oe);
-            }
-            */
-
-            /**
              * This should never happen.
              */
-             /*
-            String s = "attributePath.size() < 1 but we are not "+
-                "a compound row, so something is wrong.";
-                */
             String s = "attributePath.size() < 1";
             (new Exception(s)).printStackTrace();
             return(null);
         }
 
         /**
-         * Handle the special cases:  PARAMETERS_MAP
+         * Handle the special cases:  PARAMETERS_MAP, PER_USER
          */
         Attribute lastAttribute = attributePath.get(attributePath.size()-1);
         if (lastAttribute.getType() == Type.PARAMETERS_MAP) {
             return(createExpressionParametersMap(attributePath, rowData));
+        }
+        else if (lastAttribute.getType() == Type.PER_USER) {
+            return(createPerUserExpression(rowData));
         }
 
         /**
@@ -1440,11 +1565,12 @@ public class ExpressionTranslator {
                 return(null);
             }
 
+/*
             if (attribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
                 OperatorExpression leftOperator =
                     new OperatorExpression(OE_ELEMENTS_OF_TYPE);
                 OperatorExpression nameOperator =
-                    new OperatorExpression(attribute.getFullQueryName());
+                    new OperatorExpression(attribute.getQueryName());
                 nameOperator.addOperand(new StringLiteralValueExpression(
                     rowData.getPropName()));
                 leftOperator.addOperand(nameOperator);
@@ -1453,13 +1579,13 @@ public class ExpressionTranslator {
                 //myAnyOperator.addOperand(leftOperator);
                 return(leftOperator);
             }
-            else if (attribute.getType() == Type.PER_USER) {
+            else*/ if (attribute.getType() == Type.PER_USER) {
                 return(new OperatorExpression(
-                       attribute.getFullQueryName()));
+                       attribute.getQueryName()));
             }
             else  {
                 return(new AttributeExpression(
-                       attribute.getFullQueryName()));
+                       attribute.getQueryName()));
             }
         }
 
@@ -1511,7 +1637,6 @@ public class ExpressionTranslator {
      */
     public static void main(String[] args) {
 
-        Attribute attribute;
         RowData rowData;
         RowData rowData2;
         RowData rowData3;
@@ -1522,14 +1647,15 @@ public class ExpressionTranslator {
 
         System.out.println("ExpressionTranslator test is starting...");
 
+        ClassDescription epochCD = DataModel.getClassDescription("Epoch");
+
         /**
          * Test the Any collection operator, (which becomes "or"),
          * and the String type and a couple attribute operators.
          */
 /*
         rootRow = new RowData();
-        rootRow.setClassUnderQualification(
-            DataModel.getClassDescription("Epoch"));
+        rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ANY);
 
         rowData = new RowData();
@@ -1888,28 +2014,70 @@ public class ExpressionTranslator {
          *        Epoch | My keywords None
          *          KeywordTag | uuid == "xyz"
          */
+/*
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("mykeywords"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(epochCD.getAttribute("uuid"));
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue("xyz");
+        rowData.addChildRow(rowData2);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionTranslator.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
+        /**
+         * Test a PER_USER attribute type with Count.
+         *
+         *      Epoch | All
+         *        Epoch | My keywords Count == 5
+         */
+/*
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("mykeywords"));
+        rowData.setCollectionOperator(CollectionOperator.COUNT);
+        rowData.setAttributeOperator(Operator.EQUALS);
+        rowData.setAttributeValue(new Integer(5));
+        rootRow.addChildRow(rowData);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionTranslator.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
+        /**
+         * Test a nested PER_USER attribute type.
+         *
+         *      Epoch | All
+         *        Epoch | nextEpoch.All keywords All
+         *          KeywordTag | uuid == "xyz"
+         */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(
             DataModel.getClassDescription("Epoch"));
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
-        attribute = DataModel.getClassDescription("Epoch").
-            getAttribute("nextEpoch");
+        attribute = DataModel.getClassDescription("Epoch")
+            .getAttribute("nextEpoch");
         rowData.addAttribute(attribute);
 
         attribute = DataModel.getClassDescription("Epoch").
-            getAttribute("nextEpoch");
-        rowData.addAttribute(attribute);
-        attribute = DataModel.getClassDescription("Epoch").
-            getAttribute("prevEpoch");
-        rowData.addAttribute(attribute);
-
-        attribute = DataModel.getClassDescription("TaggableEntityBase").
             getAttribute("keywords");
-        attribute.setIsMine(true);
         rowData.addAttribute(attribute);
-        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rowData.setCollectionOperator(CollectionOperator.ALL);
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();
@@ -1932,71 +2100,19 @@ public class ExpressionTranslator {
          */
 /*
         rootRow = new RowData();
-        rootRow.setClassUnderQualification(
-            DataModel.getClassDescription("Epoch"));
+        rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("prevEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("keywords", Type.PER_USER,
-                                  DataModel.getClassDescription("KeywordTag"),
-                                  Cardinality.TO_MANY);
-        attribute.setIsMine(false);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("keywords"));
         rowData.setCollectionOperator(CollectionOperator.ALL);
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();
-        attribute = new Attribute("uuid", Type.UTF_8_STRING);
-        rowData2.addAttribute(attribute);
-        rowData2.setAttributeOperator(Operator.EQUALS);
-        rowData2.setAttributeValue("xyz");
-        rowData.addChildRow(rowData2);
-
-        System.out.println("\nRowData:\n"+rootRow);
-        expression = ExpressionTranslator.createExpressionTree(rootRow);
-        System.out.println("\nExpression:\n"+expression);
-
-        /**
-         * Test a PER_USER attribute type.
-         *
-         *      Epoch | All
-         *        Epoch | My keywords All
-         *          KeywordTag | uuid == "xyz"
-         */
-/*
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(
-            DataModel.getClassDescription("Epoch"));
-        rootRow.setCollectionOperator(CollectionOperator.ALL);
-
-        rowData = new RowData();
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("keywords", Type.PER_USER,
-                                  DataModel.getClassDescription("KeywordTag"),
-                                  Cardinality.TO_MANY);
-        attribute.setIsMine(true);
-        rowData.addAttribute(attribute);
-        rowData.setCollectionOperator(CollectionOperator.ALL);
-        rootRow.addChildRow(rowData);
-
-        rowData2 = new RowData();
-        attribute = new Attribute("uuid", Type.UTF_8_STRING);
-        rowData2.addAttribute(attribute);
+        rowData2.addAttribute(epochCD.getAttribute("uuid"));
         rowData2.setAttributeOperator(Operator.EQUALS);
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
@@ -2010,14 +2126,11 @@ public class ExpressionTranslator {
          */
 /*
         rootRow = new RowData();
-        rootRow.setClassUnderQualification(
-            DataModel.getClassDescription("Epoch"));
-        rootRow.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
-        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
-                                  null, Cardinality.N_A);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
         rowData.setPropName("key");
         rowData.setPropType(Type.DATE_TIME);
         rowData.setAttributeOperator(Operator.EQUALS);
@@ -2034,26 +2147,14 @@ public class ExpressionTranslator {
          */
 /*
         rootRow = new RowData();
-        rootRow.setClassUnderQualification(
-            DataModel.getClassDescription("Epoch"));
+        rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("prevEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
-                                  null, Cardinality.N_A);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
         rowData.setPropName("key");
         rowData.setPropType(Type.FLOAT_64);
         rowData.setAttributeOperator(Operator.EQUALS);
@@ -2065,32 +2166,40 @@ public class ExpressionTranslator {
         System.out.println("\nExpression:\n"+expression);
 
         /**
-         * Test a "Per User Parameters Map" row.
+         * Test a PER_USER_PARAMETERS_MAP row.
          *
-         *  nextEpoch.nextEpoch.prevEpoch.Any properties.someKey(int) != "34"
+         *      Any properties.someKey(int) != "34"
          */
-/* 
         rootRow = new RowData();
-        rootRow.setClassUnderQualification(
-            DataModel.getClassDescription("Epoch"));
+        rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ANY);
 
         rowData = new RowData();
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("prevEpoch", Type.REFERENCE,
-                                  DataModel.getClassDescription("Epoch"),
-                                  Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("properties", Type.PER_USER_PARAMETERS_MAP,
-                                  null, Cardinality.N_A);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("properties"));
+        rowData.setPropName("someKey");
+        rowData.setPropType(Type.INT_32);
+        rowData.setAttributeOperator(Operator.NOT_EQUALS);
+        rowData.setAttributeValue(new Integer(34));
+        rootRow.addChildRow(rowData);
+
+        System.out.println("\nRowData:\n"+rootRow);
+        expression = ExpressionTranslator.createExpressionTree(rootRow);
+        System.out.println("\nExpression:\n"+expression);
+
+        /**
+         * Test a PER_USER_PARAMETERS_MAP row.
+         *
+         * nextEpoch.nextEpoch.prevEpoch.Any properties.someKey(int) != "34"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("properties"));
         rowData.setPropName("someKey");
         rowData.setPropType(Type.INT_32);
         rowData.setAttributeOperator(Operator.NOT_EQUALS);
