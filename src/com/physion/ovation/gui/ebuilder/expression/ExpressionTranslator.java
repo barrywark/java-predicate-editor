@@ -15,9 +15,8 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 
 
 /**
- * TODO:  Do I want to put all this code into the ExpressionTree class
- * and get rid of the class ExpressionTranslator?  Do we want to split
- * the Expression to RowData translator code into a separate class from the
+ * TODO:  Do we want to split the Expression to RowData translator
+ * code into a separate class from the
  * RowData to Expression translator code?
  */
 public class ExpressionTranslator {
@@ -779,7 +778,9 @@ public class ExpressionTranslator {
      * But, some operators need two OpertorExpression
      * objects to represent them.  For example, the "None"
      * CollectionOperator becomes the "not" operator with
-     * the "or" operator as its only operand.
+     * the "or" operator as its only operand if the rowData
+     * is the root row.  I.e. not(or())  It becomes not(any())
+     * for rows other than the root row.
      * The "is not null" attribute operator becomes the
      * "not" operator with the "is null" operator as its
      * only operand.
@@ -854,11 +855,14 @@ public class ExpressionTranslator {
                 /**
                  * A row that uses the None collection
                  * operator is a special case.  It must be
-                 * turned into TWO operators:  the "not" operator
-                 * with the "or" operator as its only operand.
+                 * turned into TWO operators, either not(or())
+                 * or not(any()).
                  */
                 op1 = new OperatorExpression(OE_NOT);
-                op2 = new OperatorExpression(OE_OR);
+                if (rowData.isRootRow())
+                    op2 = new OperatorExpression(OE_OR);
+                else
+                    op2 = new OperatorExpression(OE_ANY);
                 op1.addOperand(op2);
             }
             else {
