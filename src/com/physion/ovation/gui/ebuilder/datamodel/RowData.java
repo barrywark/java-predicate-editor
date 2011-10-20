@@ -1800,7 +1800,6 @@ public class RowData
          */
         RowData rootRow = RowData.createRootRow();
 
-        Attribute attribute;
         RowData rowData;
 
         /**
@@ -1813,12 +1812,8 @@ public class RowData
          *      epochGroup.source is null
          */
         rowData = new RowData();
-        attribute = new Attribute("epochGroup", Type.REFERENCE,
-                                  epochGroupCD, Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("source", Type.REFERENCE,
-                                  sourceCD, Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("epochGroup"));
+        rowData.addAttribute(epochGroupCD.getAttribute("source"));
         rowData.addAttribute(Attribute.IS_NULL);
         rootRow.addChildRow(rowData);
 
@@ -1826,15 +1821,13 @@ public class RowData
          * Create a startTime and endTime "Date/Time" row.
          */
         rowData = new RowData();
-        attribute = new Attribute("startTime", Type.DATE_TIME);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("startTime"));
         rowData.setAttributeOperator(Operator.GREATER_THAN_EQUALS);
         rowData.setAttributeValue(new GregorianCalendar(2011, 0, 1).getTime());
         rootRow.addChildRow(rowData);
 
         rowData = new RowData();
-        attribute = new Attribute("endTime", Type.DATE_TIME);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("endTime"));
         rowData.setAttributeOperator(Operator.LESS_THAN_EQUALS);
         rowData.setAttributeValue(new Date());
         rootRow.addChildRow(rowData);
@@ -1843,11 +1836,8 @@ public class RowData
          * Create a "My Property" row.
          */
         rowData = new RowData();
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
-                                  epochCD, Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = epochCD.getAttribute("myproperties");
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("myproperties"));
         rowData.setPropName("animalID");
         rowData.setPropType(Type.INT_32);
         rowData.setAttributeOperator(Operator.LESS_THAN_EQUALS);
@@ -1858,9 +1848,7 @@ public class RowData
          * Create a "Parameters Map" row of type int.
          */
         rowData = new RowData();
-        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
-                                  null, Cardinality.N_A);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
         rowData.setPropName("stimulusFrequency");
         rowData.setPropType(Type.INT_32);
         rowData.setAttributeOperator(Operator.EQUALS);
@@ -1871,9 +1859,7 @@ public class RowData
          * Create a "Parameters Map" row of type string.
          */
         rowData = new RowData();
-        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
-                                  null, Cardinality.N_A);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
         rowData.setPropName("stimulusName");
         rowData.setPropType(Type.UTF_8_STRING);
         rowData.setAttributeOperator(Operator.MATCHES_CASE_INSENSITIVE);
@@ -1884,8 +1870,7 @@ public class RowData
          * Create a "Per User" derivedResponse row.
          */
         rowData = new RowData();
-        attribute = epochCD.getAttribute("derivedResponses");
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("derivedResponses"));
         rowData.setCollectionOperator(CollectionOperator.ALL);
         rootRow.addChildRow(rowData);
 
@@ -1893,14 +1878,9 @@ public class RowData
          * Create a row that ends with a string value.
          */
         rowData = new RowData();
-        attribute = new Attribute("epochGroup", Type.REFERENCE,
-                                  epochGroupCD, Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("source", Type.REFERENCE,
-                                  sourceCD, Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("label", Type.UTF_8_STRING);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("epochGroup"));
+        rowData.addAttribute(epochGroupCD.getAttribute("source"));
+        rowData.addAttribute(sourceCD.getAttribute("label"));
         rowData.setAttributeOperator(Operator.EQUALS);
         rowData.setAttributeValue("Test 27");
         rootRow.addChildRow(rowData);
@@ -1909,9 +1889,7 @@ public class RowData
          * Create another child row.
          */
         rowData = new RowData();
-        attribute = new Attribute("resources", Type.REFERENCE,
-                                  resourceCD, Cardinality.TO_MANY);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("resources"));
         rowData.setCollectionOperator(CollectionOperator.NONE);
 
         rootRow.addChildRow(rowData);
@@ -1921,20 +1899,15 @@ public class RowData
          */
         rowData = new RowData();
         rowData.setCollectionOperator(CollectionOperator.ALL);
-        attribute = new Attribute("epochGroup", Type.REFERENCE,
-                                  epochGroupCD, Cardinality.TO_ONE);
-        rowData.addAttribute(attribute);
-        attribute = new Attribute("epochs", Type.REFERENCE,
-                                  epochCD, Cardinality.TO_MANY);
-        rowData.addAttribute(attribute);
+        rowData.addAttribute(epochCD.getAttribute("epochGroup"));
+        rowData.addAttribute(epochGroupCD.getAttribute("epochs"));
         rootRow.addChildRow(rowData);
 
         /**
          * Create a child row of the above row.
          */
         RowData rowData2 = new RowData();
-        attribute = new Attribute("startTime", Type.DATE_TIME);
-        rowData2.addAttribute(attribute);
+        rowData2.addAttribute(epochCD.getAttribute("startTime"));
         rowData2.setAttributeOperator(Operator.GREATER_THAN_EQUALS);
         rowData2.setAttributeValue(new GregorianCalendar(2010, 0, 1).getTime());
         rowData.addChildRow(rowData2);

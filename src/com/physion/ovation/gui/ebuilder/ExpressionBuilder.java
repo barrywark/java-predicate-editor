@@ -113,7 +113,7 @@ public class ExpressionBuilder
     /**
      * Flag for develoment work.  Delete these.
      */
-    private static boolean convertRowDataToExpression = false;
+    private static boolean convert = false;
 
     /**
      * Create an ExpressionBuilder dialog with its expression
@@ -384,14 +384,14 @@ public class ExpressionBuilder
      * An example of using this method is in this
      * class's main() method.
      */
-    /*
     private static ReturnValue editExpression() {
         return(editExpression((RowData)null));
     }
-    */
+    /*
     public static ReturnValue editExpression() {
         return(editExpression((ExpressionTree)null));
     }
+    */
 
 
     /**
@@ -447,17 +447,15 @@ public class ExpressionBuilder
             returnValue.rootRow = dialog.getRootRow();
             returnValue.expressionTree = null;
 
-            if (convertRowDataToExpression) {
-                try {
-                    returnValue.expressionTree =
-                        ExpressionTranslator.createExpressionTree(
-                            dialog.getRootRow());
-                }
-                catch (Exception e) {
-                    System.err.println(
-                        "ExpressionTranslator failed to translate "+
-                        "the RowData tree into an ExpressionTree");
-                }
+            try {
+                returnValue.expressionTree =
+                    ExpressionTranslator.createExpressionTree(
+                        dialog.getRootRow());
+            }
+            catch (Exception e) {
+                System.err.println(
+                    "ExpressionTranslator failed to translate "+
+                    "the RowData tree into an ExpressionTree");
             }
         }
         else {
@@ -780,11 +778,13 @@ public class ExpressionBuilder
     public static void main(String[] args) {
 
         if (args.length > 0) {
-            convertRowDataToExpression = true;
-            System.out.println("Will try to convert RowData to Expression.");
+            convert = true;
+            System.out.println("Will convert RowData to Expression and\n"+
+                "will try to convert Expression to RowData.");
         }
         else {
-            System.out.println("Will not convert RowData to Expression.");
+            System.out.println("Will convert RowData to Expression but\n"+
+                "will not try to convert Expression to RowData.");
         }
 
         ExpressionBuilder.ReturnValue returnValue;
@@ -823,10 +823,7 @@ public class ExpressionBuilder
             System.out.println("\nstatus = "+returnValue.status);
             System.out.println("\nOriginal rootRow:\n"+originalRootRow);
             System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
-            if (convertRowDataToExpression) {
-                System.out.println("\nExpression:\n"+
-                    returnValue.expressionTree);
-            }
+            System.out.println("\nExpression:\n"+returnValue.expressionTree);
 
             if (returnValue.status == RETURN_STATUS_CANCEL) {
                 System.out.println("User pressed Cancel or closed the window.");
@@ -834,10 +831,15 @@ public class ExpressionBuilder
             }
 
             originalRootRow = returnValue.rootRow;
-            //returnValue = ExpressionBuilder.editExpression(
-            //    returnValue.expressionTree);
-            returnValue = ExpressionBuilder.editExpression(
-                returnValue.expressionTree, returnValue.rootRow);
+
+            if (convert == true) {
+                returnValue = ExpressionBuilder.editExpression(
+                    returnValue.expressionTree, returnValue.rootRow);
+            }
+            else {
+                returnValue = ExpressionBuilder.editExpression(
+                    returnValue.rootRow);
+            } 
         }
     }
 }
