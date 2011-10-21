@@ -115,13 +115,11 @@ OperatorExpression(and)
 
 ===== Compound Row Nested Classes =====
 
-BW: THIS EXAMPLE DOESN'T MAKE SENSE; epoch IS A TO-ONE RELATIONSHIP FROM Response
-
 Original RowData:
 Epoch | All
   Epoch | responses All
-    Response | epoch Any
-      Epoch | protocolID != "Test 27"
+    Response | resources Any
+      Resource | uuid != "ID 27"
 
 Translated To Expression:
 CUQ: Epoch
@@ -130,10 +128,10 @@ OperatorExpression(and)
   OperatorExpression(all)
     AttributeExpression(responses)
     OperatorExpression(any)
-      AttributeExpression(epoch)
+      AttributeExpression(resources)
       OperatorExpression(!=)
-        AttributeExpression(protocolID)
-        StringLiteralValueExpression(Test 27)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(ID 27)
 
 ===== Compound Row ALL COUNT =====
 
@@ -290,7 +288,7 @@ OperatorExpression(and)
 
 Original RowData:
 Epoch | All
-  Epoch | protocolParameters.someTimeKey(time) == "Thu Oct 20 21:10:03 NZDT 2011"
+  Epoch | protocolParameters.someTimeKey(time) == "Fri Jan 01 13:00:00 NZDT 2010"
 
 Translated To Expression:
 CUQ: Epoch
@@ -304,7 +302,7 @@ OperatorExpression(and)
           StringLiteralValueExpression(someTimeKey)
         ClassLiteralValueExpression(ovation.DateValue)
       AttributeExpression(value)
-    TimeLiteralValueExpression(Thu Oct 20 21:10:03 NZDT 2011)
+    TimeLiteralValueExpression(Fri Jan 01 13:00:00 NZDT 2010)
 
 ===== PARAMETERS_MAP Nested =====
 
@@ -492,5 +490,77 @@ OperatorExpression(not)
             OperatorExpression(=~~)
               AttributeExpression(protocolID)
               StringLiteralValueExpression(xyz)
+
+===== Nested PER_USER With PARAMETERS_MAP & PER_USER Children =====
+
+Original RowData:
+Epoch | Any
+  Epoch | nextEpoch.My DerivedResponses None
+    DerivedResponse | derivationParameters.someKey(boolean) is true
+    DerivedResponse | My Keywords Count == "5"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(myderivedResponses)
+        AttributeExpression(nextEpoch)
+      OperatorExpression(is true)
+        OperatorExpression(.)
+          OperatorExpression(as)
+            OperatorExpression(parameter)
+              AttributeExpression(derivationParameters)
+              StringLiteralValueExpression(someKey)
+            ClassLiteralValueExpression(ovation.BooleanValue)
+          AttributeExpression(value)
+        BooleanLiteralValueExpression(true)
+      OperatorExpression(==)
+        OperatorExpression(count)
+          OperatorExpression(mykeywords)
+            AttributeExpression(this)
+        Int32LiteralValueExpression(5)
+
+===== Nested PER_USER With PM, PU, and PUPM Children =====
+
+Original RowData:
+Epoch | Any
+  Epoch | nextEpoch.My DerivedResponses None
+    DerivedResponse | derivationParameters.someKey(boolean) is true
+    DerivedResponse | My Keywords Count == "5"
+    DerivedResponse | externalDevice.My Property.someKey2(float) == "34.5"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(myderivedResponses)
+        AttributeExpression(nextEpoch)
+      OperatorExpression(is true)
+        OperatorExpression(.)
+          OperatorExpression(as)
+            OperatorExpression(parameter)
+              AttributeExpression(derivationParameters)
+              StringLiteralValueExpression(someKey)
+            ClassLiteralValueExpression(ovation.BooleanValue)
+          AttributeExpression(value)
+        BooleanLiteralValueExpression(true)
+      OperatorExpression(==)
+        OperatorExpression(count)
+          OperatorExpression(mykeywords)
+            AttributeExpression(this)
+        Int32LiteralValueExpression(5)
+      OperatorExpression(any)
+        OperatorExpression(elementsOfType)
+          OperatorExpression(myproperties)
+            AttributeExpression(externalDevice)
+            StringLiteralValueExpression(someKey2)
+          ClassLiteralValueExpression(ovation.FloatingPointValue)
+        OperatorExpression(==)
+          AttributeExpression(value)
+          Float64LiteralValueExpression(34.5)
 
 ExpressionTranslator test is ending.

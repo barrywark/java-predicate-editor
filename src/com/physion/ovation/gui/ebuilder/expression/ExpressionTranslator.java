@@ -2004,7 +2004,7 @@ public class ExpressionTranslator {
         rowData.setPropName("someTimeKey");
         rowData.setPropType(Type.DATE_TIME);
         rowData.setAttributeOperator(Operator.EQUALS);
-        rowData.setAttributeValue(new Date());
+        rowData.setAttributeValue(new Date(1262304000000L));
         rootRow.addChildRow(rowData);
 
         printResults("PARAMETERS_MAP Type Date", rootRow);
