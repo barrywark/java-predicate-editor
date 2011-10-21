@@ -12,6 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JButton;
+import javax.swing.UIManager;
 
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
@@ -62,6 +63,8 @@ public class ExpressionBuilder
 	 * @SuppressWarnings("serial")
 	 */
 	private static final long serialVersionUID = 1L;
+
+    private static final String SAVE_FILE_NAME = "saved.ExpTree";
 
 	/**
      * Number of pixels used as a spacer.
@@ -768,14 +771,83 @@ public class ExpressionBuilder
 
 
     /**
+     * Set the look and feel to something specific.
+     * You need to comment/uncomment the setting of the
+     * "lookAndFeel" variable below to what you want. 
+     */
+    public static void setLookAndFeel() {
+
+        String lookAndFeel;
+
+        /**
+         * Print out the name of the current look and feel.
+         */
+        lookAndFeel = UIManager.getLookAndFeel().toString();
+        System.out.println("\nCurrent default look and feel is:\n    "+
+                           lookAndFeel);
+
+        /**
+         * Below is a selection of look and feels that you can
+         * use.  Note that you cannot use the Windows on Mac and
+         * vice verse.  So if you want to use the system's look
+         * and feel, just use the line below that calls
+         * getSystemLookAndFeelClassName().
+         *
+         * GTKLookAndFeel is a Linux look and feel.
+         *
+         * MotifLookAndFeel is ugly.
+         *
+         * The NimbusLookAndFeel would be a good starting point
+         * to use.  I think with a few changes to margins/borders/sizes
+         * it could look close to what you envisioned.
+         */
+        //lookAndFeel = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+        //lookAndFeel = "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
+        //lookAndFeel = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+        lookAndFeel = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+
+        /**
+         * Below is the default Swing MetalLookAndFeel that you do not like.
+         */
+        //lookAndFeel = UIManager.getCrossPlatformLookAndFeelClassName();
+
+        /**
+         * This will get the "system" look and feel for the OS
+         * on which we are currently running and use that.
+         */
+        //lookAndFeel = UIManager.getSystemLookAndFeelClassName();
+
+        try {
+            System.out.println("\nSetting look and feel to:\n    "+lookAndFeel);
+            UIManager.setLookAndFeel(lookAndFeel);
+        }
+        catch(Exception e) {
+            //e.printStackTrace();
+            System.err.println("\nSetting look and feel failed:\n    "+
+                               e.getMessage());
+        }
+    }
+
+
+    /**
      * A simple example test program to test this class and show
      * how the editExpression() methods are used.
      *
      * This example first displays a GUI that is empty.  After
      * the user Oks or Cancels out of that GUI, we display a
      * GUI filled with an existing expression tree.
+     *
+     * Currently, if there is any argument on the command line
+     * we will try to convert Expression objects into RowData
+     * objects.  This is just for Steve's testing currently.
      */
     public static void main(String[] args) {
+
+        /**
+         * Create a default ReturnValue.
+         */
+        ExpressionBuilder.ReturnValue returnValue;
+
 
         if (args.length > 0) {
             convert = true;
@@ -787,14 +859,18 @@ public class ExpressionBuilder
                 "will not try to convert Expression to RowData.");
         }
 
-        ExpressionBuilder.ReturnValue returnValue;
-
+        /**
+         * Set the look and feel to something.
+         * Currently, this is really only to test out some
+         * different look and feels.
+         */
+        setLookAndFeel();
 
         /**
          * Display a GUI that is empty.  I.e. the user must
          * create a new expression from scratch.
          */
-/*
+        /*
         returnValue = ExpressionBuilder.editExpression();
         if (returnValue.status == ExpressionBuilder.RETURN_STATUS_OK) {
             System.out.println("User pressed OK.");
@@ -805,7 +881,8 @@ public class ExpressionBuilder
             System.out.println("User pressed Cancel or closed the window.");
             System.exit(returnValue.status);
         }
-*/
+        */
+
         /**
          * After the user Oks or Cancels out of the window
          * created above, create another window.  This time
@@ -814,8 +891,21 @@ public class ExpressionBuilder
          * tree's value.
          */
 
-        RowData rootRow = RowData.createTestRowData();
+        /**
+         * Read in the ExpressionTree that we serialized out
+         * to a file last time this application was run.
+         */
+        /*
+        ExpressionTree expressionTree = ExpressionTree.readExpressionTree(
+            SAVE_FILE_NAME);
+        if (expressionTree != null) {
+            System.out.println("\nSerialized ExpressionTree Read In:\n"+
+                               expressionTree);
+        }
+        */
+
         //RowData rootRow = null;
+        RowData rootRow = RowData.createTestRowData();
         RowData originalRootRow = rootRow;
         returnValue = ExpressionBuilder.editExpression(rootRow);
         while (true) {
@@ -826,9 +916,26 @@ public class ExpressionBuilder
             System.out.println("\nExpression:\n"+returnValue.expressionTree);
 
             if (returnValue.status == RETURN_STATUS_CANCEL) {
+                /**
+                 * User canceled or closed out the window,
+                 * so exit the GUI without saving the current
+                 * ExpressionTree.
+                 */
                 System.out.println("User pressed Cancel or closed the window.");
                 System.exit(returnValue.status);
             }
+
+            /**
+             * User pressed the OK button.
+             *
+             * Write out the serialized version of the 
+             * ExpressionTree.  We will read it in when
+             * this program is run again.
+             *
+             * This is just for testing the serialization.
+             */
+            if (returnValue.expressionTree != null)
+                returnValue.expressionTree.writeExpressionTree(SAVE_FILE_NAME);
 
             originalRootRow = returnValue.rootRow;
 

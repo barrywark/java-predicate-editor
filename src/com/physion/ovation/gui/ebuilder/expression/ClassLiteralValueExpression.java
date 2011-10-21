@@ -1,6 +1,9 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
 
+import java.io.Serializable;
+
+
 /**
  * TODO: Decide whether the "value" is a String or a Class object.
  * Decide whether the value will be gotten using getValue() or
@@ -8,7 +11,7 @@ package com.physion.ovation.gui.ebuilder.expression;
  */
 public class ClassLiteralValueExpression
     extends Expression
-    implements IClassLiteralValueExpression {
+    implements IClassLiteralValueExpression, Serializable {
 
     private String value;
 

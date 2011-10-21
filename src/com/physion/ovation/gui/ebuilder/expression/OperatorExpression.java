@@ -1,5 +1,7 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
+import java.io.Serializable;
+
 import java.util.ArrayList;
 
 
@@ -7,7 +9,7 @@ import java.util.ArrayList;
  */
 public class OperatorExpression 
     extends Expression
-    implements IOperatorExpression {
+    implements IOperatorExpression, Serializable {
 
     /**
      * The indent amount to use for each level of nesting

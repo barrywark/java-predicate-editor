@@ -795,7 +795,7 @@ public class ExpressionTranslator {
         }
 
         ExpressionTree expressionTree = new ExpressionTree(
-            rootRow.getClassUnderQualification(), rootExpression);
+            rootRow.getClassUnderQualification().getName(), rootExpression);
         return(expressionTree);
     }
 

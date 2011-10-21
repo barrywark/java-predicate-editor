@@ -1,6 +1,5 @@
 package com.physion.ovation.gui.ebuilder.datatypes;
 
-
 /**
  * This is used to specify the relationship of an attribute
  * to the class which contains it.  For example, an Epoch

@@ -1,5 +1,6 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
+import java.io.Serializable;
 import java.util.Date;
 
 
@@ -7,7 +8,7 @@ import java.util.Date;
  */
 public class TimeLiteralValueExpression
     extends Expression
-    implements ITimeLiteralValueExpression {
+    implements ITimeLiteralValueExpression, Serializable {
 
     private Date value;
 

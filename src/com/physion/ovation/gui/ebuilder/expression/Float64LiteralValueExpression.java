@@ -1,11 +1,13 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
+import java.io.Serializable;
+
 
 /**
  */
 public class Float64LiteralValueExpression
     extends Expression
-    implements IFloat64LiteralValueExpression {
+    implements IFloat64LiteralValueExpression, Serializable {
 
     private double value;
 

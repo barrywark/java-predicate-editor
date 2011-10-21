@@ -1,11 +1,12 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
+import java.io.Serializable;
 
 
 /**
  */
 public class Expression
-    implements IExpression {
+    implements IExpression, Serializable {
 
     /**
      * Required by Expression interface, but not needed for

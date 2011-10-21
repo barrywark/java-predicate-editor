@@ -1,11 +1,14 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
 
+import java.io.Serializable;
+
+
 /**
  */
 public class Int32LiteralValueExpression
     extends Expression
-    implements IInt32LiteralValueExpression {
+    implements IInt32LiteralValueExpression, Serializable {
 
     private int value;
 

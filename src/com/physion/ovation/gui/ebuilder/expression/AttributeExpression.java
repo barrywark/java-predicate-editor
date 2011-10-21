@@ -1,11 +1,13 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
+import java.io.Serializable;
+
 
 /**
  */
 public class AttributeExpression
     extends Expression
-    implements IAttributeExpression {
+    implements IAttributeExpression, Serializable {
 
     private String attributeName;
 

@@ -1,11 +1,13 @@
 package com.physion.ovation.gui.ebuilder.expression;
 
 
+import java.io.Serializable;
+
 /**
  */
 public class StringLiteralValueExpression
     extends Expression
-    implements IStringLiteralValueExpression {
+    implements IStringLiteralValueExpression, Serializable {
 
     private String value;
 
