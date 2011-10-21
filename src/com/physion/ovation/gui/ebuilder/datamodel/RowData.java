@@ -1023,6 +1023,13 @@ public class RowData
 
         //System.out.println("Enter addAttribute("+attribute+")");
 
+        if (attribute == null) {
+            String s = "Bad call to RowData.addAttribute() with a "+
+                "null attribute parameter.";
+            (new Exception(s)).printStackTrace();
+            return;
+        }
+
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
 

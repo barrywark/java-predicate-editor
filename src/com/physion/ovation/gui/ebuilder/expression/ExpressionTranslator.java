@@ -574,6 +574,52 @@ public class ExpressionTranslator {
     }
     */
 
+    private static OperatorExpression getOEForCO(CollectionOperator co,
+                                                 boolean isCompoundOperator) {
+
+        if (isCompoundOperator) {
+            switch (co) {
+                case ANY:
+                    return(new OperatorExpression(OE_OR));
+
+                case ALL:
+                    return(new OperatorExpression(OE_AND));
+
+                case NONE:
+                    OperatorExpression notOE = new OperatorExpression(OE_NOT);
+                    notOE.addOperand(new OperatorExpression(OE_OR));
+                    return(notOE);
+
+                default:
+                    String s = "Illegal collectionOperator in rowData?";
+                    (new Exception(s)).printStackTrace();
+                    return(null);
+            }
+        }
+        else {
+            switch (co) {
+                case ANY:
+                    return(new OperatorExpression(OE_ANY));
+
+                case ALL:
+                    return(new OperatorExpression(OE_ALL));
+
+                case NONE:
+                    OperatorExpression notOE = new OperatorExpression(OE_NOT);
+                    notOE.addOperand(new OperatorExpression(OE_ANY));
+                    return(notOE);
+
+                case COUNT:
+                    return(new OperatorExpression(OE_COUNT));
+
+                default:
+                    String s = "Illegal collectionOperator in rowData?";
+                    (new Exception(s)).printStackTrace();
+                    return(null);
+            }
+        }
+    }
+
 
     /**
      * Get the CollectionOperator that is equivalent to the passed
@@ -729,21 +775,12 @@ public class ExpressionTranslator {
         OperatorExpression lastExpression;
 
         /**
-         * A root row that uses the None collection
-         * operator is a special case.  It must be
-         * turned into TWO operators:  the "not" operator
-         * with the "or" operator as its only operand.
+         * Create the root expression.  If the root
+         * row uses the None CollectionOperator, that
+         * might actually create two operators.  I.e. not(or)
          */
-        if (rootRow.getCollectionOperator() == CollectionOperator.NONE) {
-            rootExpression = new OperatorExpression(OE_NOT);
-            lastExpression = new OperatorExpression(OE_OR);
-            rootExpression.addOperand(lastExpression);
-        }
-        else {
-            rootExpression = new OperatorExpression(
-                getCollectionOperatorName(rootRow));
-            lastExpression = rootExpression;
-        }
+        rootExpression = getOEForCO(rootRow.getCollectionOperator(), true);
+        lastExpression = getLastOperator(rootExpression);
 
         /**
          * At this point, lastExpression is a reference to
@@ -796,29 +833,32 @@ public class ExpressionTranslator {
         OperatorExpression op2;
 
         Attribute childmostAttribute = rowData.getChildmostAttribute();
+        CollectionOperator co = rowData.getCollectionOperator();
+        Operator ao = rowData.getAttributeOperator();
 
-        if ((childmostAttribute != null) &&
-            (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
-
-            op1 = new OperatorExpression(OE_ANY);
-/*
-            op2 = new OperatorExpression(
-                rowData.getAttributeOperator().toString());
-            op1.addOperand(op2);
-*/
+        if (childmostAttribute == null) {
+            return(getOEForCO(co, true));
         }
-        else if ((childmostAttribute != null) &&
-                 (childmostAttribute.getType() == Type.PARAMETERS_MAP)) {
-
-            /**
-             * TODO:  Can this case be gotten rid of because it is
-             * the same as the default case at the end of this long
-             * if/else block?
-             */
-            op1 = new OperatorExpression(
-                rowData.getAttributeOperator().toString());
+        else {
+            if (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP) {
+                /**
+                 * Handle the special case of the PER_USER_PARAMETERS_MAP
+                 * type that always has the "any" operator.
+                 * Note, in a future release of the GUI, this might change.
+                 */
+                return(new OperatorExpression(OE_ANY));
+            }
+            else if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
+                return(new OperatorExpression(ao.toString()));
+            }
         }
-        else if (rowData.getAttributeOperator() == Operator.IS_TRUE) {
+
+        /**
+         * If we get here, rowData is not a Compound Row, but
+         * it still could have a CollectionOperator.
+         */
+
+        if (ao == Operator.IS_TRUE) {
             /**
              * Note that the Operator.IS_TRUE and Operator.IS_FALSE
              * are not operators in the Expression tree.  In the
@@ -827,48 +867,30 @@ public class ExpressionTranslator {
              */
             op1 = new OperatorExpression(OE_EQUALS);
         }
-        else if (rowData.getAttributeOperator() == Operator.IS_FALSE) {
+        else if (ao == Operator.IS_FALSE) {
             op1 = new OperatorExpression(OE_EQUALS);
         }
-        else if (rowData.getAttributeOperator() == Operator.IS_NULL) {
+        else if (ao == Operator.IS_NULL) {
             op1 = new OperatorExpression(OE_IS_NULL);
         }
-        else if (rowData.getAttributeOperator() == Operator.IS_NOT_NULL) {
+        else if (ao == Operator.IS_NOT_NULL) {
             op1 = new OperatorExpression(OE_NOT);
             op2 = new OperatorExpression(OE_IS_NULL);
             op1.addOperand(op2);
         }
-        else if (rowData.getCollectionOperator() != null) {
+        else if (co != null) {
 
-            if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
-                op1 = new OperatorExpression(rowData.getAttributeOperator().
-                                             toString());
-                op2 = new OperatorExpression(OE_COUNT);
-                op1.addOperand(op2);
-            }
-            else if (rowData.getCollectionOperator() ==
-                     CollectionOperator.NONE) {
-                /**
-                 * A row that uses the None collection
-                 * operator is a special case.  It must be
-                 * turned into TWO operators, either not(or())
-                 * or not(any()).
-                 */
-                op1 = new OperatorExpression(OE_NOT);
-                if (rowData.isRootRow())
-                    op2 = new OperatorExpression(OE_OR);
-                else
-                    op2 = new OperatorExpression(OE_ANY);
+            if (co == CollectionOperator.COUNT) {
+                op1 = new OperatorExpression(ao.toString());
+                op2 = getOEForCO(co, false);
                 op1.addOperand(op2);
             }
             else {
-                op1 = new OperatorExpression(
-                    getCollectionOperatorName(rowData));
+                op1 = getOEForCO(co, false);
             }
         }
         else {
-            op1 = new OperatorExpression(
-                rowData.getAttributeOperator().toString());
+            op1 = new OperatorExpression(ao.toString());
         }
 
         return(op1);
@@ -912,65 +934,6 @@ public class ExpressionTranslator {
         return("ERROR");
     }
     */
-
-
-    private static String getCollectionOperatorName(RowData rowData) {
-        return(getCollectionOperatorName(rowData.getCollectionOperator(),
-                                         rowData.isRootRow()));
-    }
-
-
-    /**
-     * Get the string that should be used for the CollectionOperator
-     * of the passed in rowData.  The mapping of the string displayed
-     * in the GUI, (e.g. "Any", "All"), to the string used in the
-     * expression tree depends upon whether the passed in rowData
-     * is the root row.  For the root row:
-     *
-     *      Any -> or
-     *      All -> and
-     *
-     * For other rows:
-     *
-     *      Any -> any
-     *      All -> all
-     *
-     * The None and Count CollectionOperators are not handled by
-     * this method.  They are handled elsewhere.  None becomes
-     * two operators (not/or), and Count also becomes two operators.
-     */
-    private static String getCollectionOperatorName(CollectionOperator co,
-                                                    boolean isRootRow) {
-
-        /**
-         * If this is NOT the root row, then the collection
-         * operator is simply the lower case version of the
-         * collection operator's string value.
-         * E.g. CollectionOperator.ALL becomes "all",
-         * CollectionOperator.ANY becomes "any".
-         */
-        if (isRootRow == false) {
-            return(co.toString().toLowerCase());
-        }
-
-        /**
-         * This IS the root row, so the collection operator
-         * is handled differently.
-         */
-        switch (co) {
-
-            case ANY:
-                return(OE_OR);
-
-            case ALL:
-                return(OE_AND);
-
-            //case NONE:
-            //case COUNT:
-            default:
-                return("ERROR");  // Should never be called with NONE or COUNT.
-        }
-    }
 
 
     /**
@@ -1645,6 +1608,11 @@ public class ExpressionTranslator {
             "EpochGroup");
         ClassDescription sourceCD = DataModel.getClassDescription("Source");
         ClassDescription responseCD = DataModel.getClassDescription("Response");
+        ClassDescription resourceCD = DataModel.getClassDescription("Resource");
+        ClassDescription derivedResponseCD =
+            DataModel.getClassDescription("DerivedResponse");
+        ClassDescription externalDeviceCD = 
+            DataModel.getClassDescription("ExternalDevice");
 
         /**
          * Test the Any collection operator, (which becomes "or"),
@@ -1780,7 +1748,7 @@ public class ExpressionTranslator {
          * Test a compound row:
          *
          *      Epoch | All
-         *        Epoch | responses All
+         *        Epoch | responses None
          *          Response | uuid == "xyz"
          */
         rootRow = new RowData();
@@ -1805,7 +1773,7 @@ public class ExpressionTranslator {
          *
          *      Epoch | All
          *        Epoch | responses All
-         *          Response | epoch Any
+         *          Response | resources Any
          *            Epoch | protocolID != "Test 27"
          */
         rootRow = new RowData();
@@ -1818,14 +1786,14 @@ public class ExpressionTranslator {
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();
-        rowData2.addAttribute(responseCD.getAttribute("epoch"));
+        rowData2.addAttribute(responseCD.getAttribute("resources"));
         rowData2.setCollectionOperator(CollectionOperator.ANY);
         rowData.addChildRow(rowData2);
 
         rowData3 = new RowData();
-        rowData3.addAttribute(epochCD.getAttribute("protocolID"));
+        rowData3.addAttribute(resourceCD.getAttribute("uuid"));
         rowData3.setAttributeOperator(Operator.NOT_EQUALS);
-        rowData3.setAttributeValue("Test 27");
+        rowData3.setAttributeValue("ID 27");
         rowData2.addChildRow(rowData3);
 
         printResults("Compound Row Nested Classes", rootRow);
@@ -2273,6 +2241,122 @@ public class ExpressionTranslator {
         rowData3.addChildRow(rowData4);
 
         printResults("Compound Operators In Different Positions", rootRow);
+
+        /**
+         * Test compound row with PARAMETERS_MAP and PER_USER child.
+         *
+         *  Modified rootRow:
+         *  Epoch | Any
+         *    Epoch | nextEpoch.My DerivedResponses None
+         *      DerivedResponse | derivationParameters.somekey(boolean) is true
+         *      DerivedResponse | My Keywords Count == "5"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("myderivedResponses"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute(
+                              "derivationParameters"));
+        rowData2.setPropName("someKey");
+        rowData2.setPropType(Type.BOOLEAN);
+        rowData2.setAttributeOperator(Operator.IS_TRUE);
+        rowData.addChildRow(rowData2);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute("mykeywords"));
+        rowData2.setCollectionOperator(CollectionOperator.COUNT);
+        rowData2.setAttributeValue(new Integer(5));
+        rowData.addChildRow(rowData2);
+
+        /**
+         * Test compound row with PARAMETERS_MAP, PER_USER children.
+         *
+         *  Modified rootRow:
+         *  Epoch | Any
+         *    Epoch | nextEpoch.My DerivedResponses None
+         *      DerivedResponse | derivationParameters.somekey(boolean) is true
+         *      DerivedResponse | My Keywords Count == "5"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("myderivedResponses"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute(
+                              "derivationParameters"));
+        rowData2.setPropName("someKey");
+        rowData2.setPropType(Type.BOOLEAN);
+        rowData2.setAttributeOperator(Operator.IS_TRUE);
+        rowData.addChildRow(rowData2);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute("mykeywords"));
+        rowData2.setCollectionOperator(CollectionOperator.COUNT);
+        rowData2.setAttributeValue(new Integer(5));
+        rowData.addChildRow(rowData2);
+
+        printResults("Nested PER_USER With PARAMETERS_MAP & PER_USER Children",
+                     rootRow);
+
+        /**
+         * Test compound row with PARAMETERS_MAP, PER_USER, and
+         * PER_USER_PARAMETERS_MAP child.
+         *
+         *  Epoch | Any
+         *    Epoch | nextEpoch.My DerivedResponses None
+         *      DerivedResponse | derivationParameters.someKey(boolean) is true
+         *      DerivedResponse | My Keywords Count == "5"
+         *      DerivedResponse | externalDevice.My Property.someKey2(float) ==
+         *                                                               "34.5"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("myderivedResponses"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute(
+                              "derivationParameters"));
+        rowData2.setPropName("someKey");
+        rowData2.setPropType(Type.BOOLEAN);
+        rowData2.setAttributeOperator(Operator.IS_TRUE);
+        rowData.addChildRow(rowData2);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute("mykeywords"));
+        rowData2.setCollectionOperator(CollectionOperator.COUNT);
+        rowData2.setAttributeValue(new Integer(5));
+        rowData.addChildRow(rowData2);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute("externalDevice"));
+        rowData2.addAttribute(externalDeviceCD.getAttribute("myproperties"));
+        rowData2.setPropName("someKey2");
+        rowData2.setPropType(Type.FLOAT_64);
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue(new Double(34.5));
+        rowData.addChildRow(rowData2);
+
+        printResults("Nested PER_USER With PM, PU, and PUPM Children",
+                     rootRow);
     }
 
 
@@ -2345,5 +2429,4 @@ public class ExpressionTranslator {
 
         System.out.println("\nExpressionTranslator test is ending.");
     }
-
 }
