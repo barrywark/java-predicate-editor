@@ -543,19 +543,20 @@ public class RowData
                 classDescription = attribute.getClassDescription();
         }
 
-
         if (classDescription == null) {
             System.err.println("ERROR: In createAttributeRow "+
                 "classDescription == null.  This should never happen.");
             return;
         }
 
+        /*
         ArrayList<Attribute> attributes = classDescription.getAllAttributes();
         if (attributes.isEmpty()) {
             System.err.println("ERROR: In createAttributeRow "+
                 "attributes.isEmpty == true.  This should never happen.");
             return;
         }
+        */
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_CHILD_ADD);
@@ -1636,21 +1637,26 @@ public class RowData
 
     /**
      * Get the class that this RowData considers its "parent" class.
+     * If our parent row has an attributePath, this will will be
+     * the class of the last, (rightmost), attribute on the attributePath.
+     *
+     * If our parent row does not have an attributePath, then this
+     * will be the parent class of our parent row.
+     *
      * I.e. this is the class whose list of attributes will be the
-     * leftmost comboBox's selections.
+     * leftmost comboBox's selections in this row.
      */
     public ClassDescription getParentClass() {
 
         if (parentRow == null) {
             return(classUnderQualification);
         }
+        else if (parentRow.getChildmostAttribute() == null) {
+                //return(getClassUnderQualification());
+                return(parentRow.getParentClass());
+        }
         else {
-            if (parentRow.getChildmostAttribute() == null) {
-                return(getClassUnderQualification());
-            }
-            else {
-                return(parentRow.getChildmostAttribute().getClassDescription());
-            }
+            return(parentRow.getChildmostAttribute().getClassDescription());
         }
     }
 

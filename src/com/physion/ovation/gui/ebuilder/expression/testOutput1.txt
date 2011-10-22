@@ -563,4 +563,26 @@ OperatorExpression(or)
           AttributeExpression(value)
           Float64LiteralValueExpression(34.5)
 
+===== Compound Row, Class Change Between Parent And Child =====
+
+Original RowData:
+Epoch | None
+  Epoch | responses None
+    Response | None
+      Response | samplingRate >= "55.2"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        AttributeExpression(responses)
+        OperatorExpression(not)
+          OperatorExpression(or)
+            OperatorExpression(>=)
+              AttributeExpression(samplingRate)
+              Float64LiteralValueExpression(55.2)
+
 ExpressionTranslator test is ending.

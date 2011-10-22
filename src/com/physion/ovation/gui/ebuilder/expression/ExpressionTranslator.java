@@ -2357,6 +2357,33 @@ public class ExpressionTranslator {
 
         printResults("Nested PER_USER With PM, PU, and PUPM Children",
                      rootRow);
+
+        /**
+         * Test compound row where class changes between parent and child.
+         *
+         *                                                               "34.5"
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.NONE);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("responses"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.setCollectionOperator(CollectionOperator.NONE);
+        rowData.addChildRow(rowData2);
+
+        rowData3 = new RowData();
+        rowData3.addAttribute(responseCD.getAttribute("samplingRate"));
+        rowData3.setAttributeOperator(Operator.GREATER_THAN_EQUALS);
+        rowData3.setAttributeValue(new Double(55.2));
+        rowData2.addChildRow(rowData3);
+
+        printResults("Compound Row, Class Change Between Parent And Child",
+                     rootRow);
     }
 
 

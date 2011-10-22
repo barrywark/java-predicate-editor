@@ -804,7 +804,7 @@ public class ExpressionBuilder
         //lookAndFeel = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         //lookAndFeel = "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
         //lookAndFeel = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
-        lookAndFeel = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+        //lookAndFeel = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
 
         /**
          * Below is the default Swing MetalLookAndFeel that you do not like.
@@ -815,7 +815,7 @@ public class ExpressionBuilder
          * This will get the "system" look and feel for the OS
          * on which we are currently running and use that.
          */
-        //lookAndFeel = UIManager.getSystemLookAndFeelClassName();
+        lookAndFeel = UIManager.getSystemLookAndFeelClassName();
 
         try {
             System.out.println("\nSetting look and feel to:\n    "+lookAndFeel);
