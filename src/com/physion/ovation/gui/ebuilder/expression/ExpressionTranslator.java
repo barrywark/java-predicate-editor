@@ -949,7 +949,7 @@ public class ExpressionTranslator {
 
         /**
          * Create the operator that is the "top" node that this
-         * method will return.  (The returned OpertorExpression
+         * method will return.  The returned OperatorExpression
          * will be placed in the operandList of whatever is
          * at the very top of the expression tree.  For example,
          * the very top of the expression tree might be a single
@@ -1030,30 +1030,13 @@ public class ExpressionTranslator {
 
 
     /**
-     * Create and add the operands for a PER_USER expression.
+     * Create the operands for a PER_USER expression.
      *
      * The comments use these example rowData values:
      *
      *      nextEpoch.nextEpoch.prevEpoch.My Keywords None
      *          uuid == "xyz"
      */
-/*
-    private static void createAndAddPerUserExpression(OperatorExpression parent,
-        RowData rowData) {
-
-        parent.addOperand(createPerUserExpression(rowData));
-
-        /**
-         * Now create all the other operands.
-         * For example, the "uuid == xyz" operand.
-         */
-/*
-        for (RowData childRow : rowData.getChildRows()) {
-            parent.addOperand(createExpression(childRow));
-        }
-    }
-*/
-
     private static OperatorExpression createPerUserExpression(RowData rowData) {
 
         Attribute childmostAttribute = rowData.getChildmostAttribute();

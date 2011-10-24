@@ -909,10 +909,20 @@ public class RowData
             */
         }
 
-        if (childmostAttribute.getCardinality() != Cardinality.TO_MANY) {
+        if ((childmostAttribute.getCardinality() != Cardinality.TO_MANY) ||
+            (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
+            /**
+             * A row of this type does not display a second collection
+             * operator.
+             */
             setCollectionOperator2(null);
         }
         else if (getCollectionOperator2() == null) {
+            /**
+             * A row of this type should have a second collection operator,
+             * but this row's second collection operator is currently set
+             * to null.  Set it to some non-null default value.
+             */
             setCollectionOperator2(DEFAULT_COLLECTION_OPERATOR2);
         }
 
@@ -941,7 +951,6 @@ public class RowData
              * so set the attributeOperator to "is null" or
              * "is not null".
              */
-            //setAttributeOperator(childmostAttribute.getDisplayName());
             setAttributeOperator(Operator.fromString(
                 childmostAttribute.getDisplayName()));
         }
