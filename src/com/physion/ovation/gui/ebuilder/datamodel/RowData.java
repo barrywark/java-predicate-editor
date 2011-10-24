@@ -715,12 +715,23 @@ public class RowData
             setAttributeOperator(null);
             setAttributeValue(null);
 
-            /**
-             * Set collectionOperator2 to a default value if
-             * it is currently null.
-             */
-            if (collectionOperator2 == null) {
-                collectionOperator2 = DEFAULT_COLLECTION_OPERATOR2;
+            Attribute childmostAttribute = getChildmostAttribute();
+            if ((childmostAttribute != null) &&
+                (childmostAttribute.getCardinality() ==
+                 Cardinality.TO_MANY) &&
+                (childmostAttribute.getType() !=
+                 Type.PER_USER_PARAMETERS_MAP)) {
+
+                /**
+                 * Set collectionOperator2 to a default value if
+                 * it is currently null.
+                 */
+                if (getCollectionOperator2() == null) {
+                    setCollectionOperator2(DEFAULT_COLLECTION_OPERATOR2);
+                }
+            }
+            else {
+                setCollectionOperator2(null);
             }
         }
         else if ((collectionOperator != null) &&
@@ -1676,6 +1687,10 @@ public class RowData
 
         if (collectionOperator != null) {
             string += " "+collectionOperator;
+        }
+
+        if (collectionOperator2 != null) {
+            string += " have "+collectionOperator2;
         }
 
         if (propName != null) {
