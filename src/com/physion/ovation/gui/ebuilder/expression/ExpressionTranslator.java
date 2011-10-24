@@ -574,6 +574,27 @@ public class ExpressionTranslator {
     }
     */
 
+    /**
+     * Get the OperatorExpression that corresponds to the passed
+     * in CollectionOperator.
+     *
+     * Please note, for CollectionOperator.NONE, this method returns
+     * a reference to OperatorExpression(not).  The OperatorExpression(not)
+     * has as its only child operand another OperatorExpression() that
+     * is either "or" or "any".  For example, this method returns a
+     * tree like this:
+     *
+     *      OperatorExprssion(not)
+     *        OperatorExpression(or)
+     *
+     * or a tree like this:
+     *
+     *      OperatorExprssion(not)
+     *        OperatorExpression(any)
+     *
+     * Use the getLastOperator() method to get the child operator
+     * if it exists.
+     */
     private static OperatorExpression getOEForCO(CollectionOperator co,
                                                  boolean isCompoundOperator) {
 
@@ -898,10 +919,24 @@ public class ExpressionTranslator {
 
 
     /**
-     * This method is only meant to be used on an OpertorExpression
+     * This method is meant to be used on an OperatorExpression
      * object that has just been created by the createOperators() method.
      * It either returns the passed in OpertorExpression object or
      * it returns the one and only operand in its operandList.
+     *
+     * For example, if you pass it a tree like this:
+     *
+     *      OperatorExprssion(not)
+     *        OperatorExpression(or)
+     *
+     * this method returns a reference to the OperatorExpression(or) node.
+     *
+     * If you pass it a "tree" like this:
+     *
+     *      OperatorExpression(any)
+     *
+     * this method returns a reference to the same OperatorExpression(any)
+     * node you passed as the op parameter.
      */
     private static OperatorExpression getLastOperator(OperatorExpression
         op) {
@@ -939,6 +974,12 @@ public class ExpressionTranslator {
     /**
      * Create an Expression from the passed in RowData object.
      * This method is NOT meant to handle the root RowData object.
+     * The method createExpressionTree() handles the root row and
+     * starts the whole process of translating everything below
+     * the root row, which calls this method for every child RowData
+     * object.
+     *
+     * Please note, this method calls itself recursively.
      */
     private static OperatorExpression createExpression(RowData rowData) {
 
@@ -980,6 +1021,28 @@ public class ExpressionTranslator {
                  (childmostAttribute.getType() == Type.PARAMETERS_MAP)) {
 
             createAndAddParametersMap(lastOperator, rowData);
+        }
+        else if ((rowData.getCollectionOperator() != null) &&
+                 (rowData.getCollectionOperator2() != null)) {
+
+                IExpression ex = createExpressionPath(
+                    rowData.getAttributePath(), rowData);
+                lastOperator.addOperand(ex);
+
+                OperatorExpression op = getOEForCO(
+                    rowData.getCollectionOperator2(), true);
+                lastOperator.addOperand(op);
+
+                lastOperator = getLastOperator(op);
+                /*
+                lastOperator.addOperand(createExpressionPath(
+                    rowData.getAttributePath(), rowData));
+                */
+
+                for (RowData childRow : rowData.getChildRows()) {
+                    //System.out.println("Add an operand");
+                    op.addOperand(createExpression(childRow));
+                } 
         }
         else if (rowData.getCollectionOperator() != null) {
 
