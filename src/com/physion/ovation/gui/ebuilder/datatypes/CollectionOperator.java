@@ -30,7 +30,8 @@ public enum CollectionOperator {
     /**
      * An array of all the CollectionOperator values that is
      * useful when creating a ComboBoxModel to be used for a
-     * JComboBox.
+     * JComboBox.  This is all operators except for the COUNT
+     * operator.
      */
     private static CollectionOperator[] compoundCollectionOperators = null;
 

@@ -48,6 +48,9 @@ import com.physion.ovation.gui.ebuilder.datatypes.Type;
  * We create all the widgets we will need in our constructor, and
  * thereafter we simply add or remove them from the JPanel based on
  * the RowData value for that row.
+ *
+ * TODO:  Change code so the assorted "special" comboBoxes and
+ * spinners are created lazily.
  */
 class RowPanel
     extends JPanel
@@ -109,13 +112,17 @@ class RowPanel
     private InvisibleButton createAttributeRowButton;
 
     /**
-     * This holds all the JComboBoxes we use in this row.
+     * This holds the attribute JComboBoxes we use in this row.
      * Note that a user can, theoretically, have an infinitely
      * long path of attributes.  For example,
      *
      *      nextEpoch.prevEpoch.nextEpoch.prevEpoch...
      *
      * Because of this, we generate the JComboBoxes as we need them.
+     *
+     * Please note, the first comboBox in this array is also used
+     * if this is a root row as to hold the Class Under Qualification
+     * selection.
      */
     @SuppressWarnings("unchecked")
 	private ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
@@ -170,6 +177,24 @@ class RowPanel
 	private JComboBox operatorComboBox;
 
     /**
+     * This comboBox will be used to hold collection
+     * operators:  Any, All, None, Count.
+     */
+    @SuppressWarnings("unchecked")
+	private JComboBox collectionOperatorComboBox;
+
+    /**
+     * This comboBox will be used for an Attribute Row
+     * that ends with an Attribute that has a TO_MANY
+     * relationship and whose collectionOperator is
+     * set to Any/All/None, (but not Count).
+     * This comboBox can contain only Any/All/None.
+     * It cannot contain Count.
+     */
+    @SuppressWarnings("unchecked")
+	private JComboBox collectionOperator2ComboBox;
+
+    /**
      * This is the widget that is displayed to let a user select
      * a date and time.
      */
@@ -193,9 +218,9 @@ class RowPanel
     private final JLabel ofTheFollowingLabel = new JLabel(" of the following");
 
     /**
-     * This is the ExpressionPanel that contains this RowPanel.
+     * This label never changes.
      */
-    //private ExpressionPanel expressionPanel;
+    private final JLabel haveLabel = new JLabel("have");
 
     /**
      * This is the RowData object that this RowPanel is displaying/editing.
@@ -337,6 +362,20 @@ class RowPanel
          * value has those operators plus ~==, and ~~==.
          */
         operatorComboBox = createComboBox(null);
+
+        /**
+         * Create the first collection operator comboBox.
+         * It can contain Any, All, None, Count.
+         */
+        collectionOperatorComboBox = createComboBox(new DefaultComboBoxModel(
+            CollectionOperator.values()));
+
+        /**
+         * Create the second collection operator comboBox.
+         * It can only contain Any, All, None, but not Count.
+         */
+        collectionOperator2ComboBox = createComboBox(new DefaultComboBoxModel(
+            CollectionOperator.getCompoundCollectionOperators()));
 
         buttonPanel = new JPanel(new GridBagLayout());
         buttonPanel.setOpaque(false);
@@ -792,74 +831,64 @@ class RowPanel
 
     /**
      * This method is called when the user changes a comboBox
-     * in a row other than the first, (i.e. root), row.
+     * in a row other than the first row.  I.e. the user is
+     * changing a comboBox in a row that is NOT the root row.
      */
     @SuppressWarnings("unchecked")
 	private void handleChildRowChange(JComboBox comboBox) {
 
+        Object selectedItem = comboBox.getSelectedItem();
         if (comboBox == propTypeComboBox) {
             /**
              * User has changed the type of a "keyed" "properties"
              * attribute in a "My/Any Property" row.
              */
-            rowData.setPropType((Type)propTypeComboBox.getSelectedItem());
+            rowData.setPropType((Type)selectedItem);
         }
         else if (comboBox == operatorComboBox) {
             /**
              * User has changed the operator for a "keyed" property.
              */
-            rowData.setAttributeOperator(
-                (Operator)operatorComboBox.getSelectedItem());
+            rowData.setAttributeOperator((Operator)selectedItem);
         }
-        else {
+        else if (comboBox == collectionOperatorComboBox) {
+            /**
+             * User has changed the first collection operator
+             * of a row that ends with an Attribute that has
+             * a TO_MANY relationship.
+             *
+             * For example, the change the value of the "Any"
+             * comboBox in the example below:
+             *
+             *      epochGroup.epochs Any have All of the following
+             */
+            rowData.setCollectionOperator((CollectionOperator)selectedItem);
+        }
+        else if (comboBox == collectionOperator2ComboBox) {
+            /**
+             * User has changed the second collection operator
+             * of a row that ends with an Attribute that has
+             * a TO_MANY relationship.  (And the first collection
+             * operator was not set to Count.)
+             *
+             * For example, the change the value of the "All"
+             * comboBox in the example below:
+             *
+             *      epochGroup.epochs Any have All of the following
+             */
+            rowData.setCollectionOperator2((CollectionOperator)selectedItem);
+        }
+        else if (selectedItem instanceof Attribute) {
             /**
              * One of the comboBoxes in our list of comboBoxes we
-             * use for attributes was changed.
-             */
-        }
-
-        Object selectedObject = comboBox.getSelectedItem();
-        if (selectedObject instanceof Attribute) {
-            /**
+             * use for attributes, the attribute operator, or
+             * collection operators was changed.
+             *
              * User selected an Attribute in a comboBox dropdown.
              * Set the values "to the right" of the comboBox to
              * appropriate values.
              */
-            handleAttributeSelected(comboBox, (Attribute)selectedObject);
-        }
-        /*
-        else if ((selectedObject instanceof Operator) &&
-                 rowData.getChildmostAttribute().isPrimitive()) {
-        */
-        else if (selectedObject instanceof Operator) {
-            /**
-             * The user has selected a value in the operatorComboBox
-             * comboBox.  E.g. ==, !=, >.
-             */
-            rowData.setAttributeOperator((Operator)selectedObject);
-        }
-        else if (selectedObject instanceof CollectionOperator) {
-            /**
-             * User is changing the value of the Collection Operator.
-             * E.g. the user is changing the value of Count, Any, All,
-             * None.
-             */
-            CollectionOperator collectionOperator =
-                (CollectionOperator)selectedObject;
-            if (!rowData.getCollectionOperator().equals(
-                collectionOperator)) {
-                rowData.setCollectionOperator(collectionOperator);
-                /**
-                 * Collection operator has been set to Count, so set
-                 * the attribute value to 0.
-                 * Move this code to RowData object because this
-                 * is business logic that the GUI should not know
-                 * about.
-                 */
-                if (collectionOperator == CollectionOperator.COUNT) {
-                    rowData.setAttributeValue(new Integer(0));
-                }
-            }
+            handleAttributeSelected(comboBox, (Attribute)selectedItem);
         }
 
         /*
@@ -910,10 +939,13 @@ class RowPanel
      * So we need to adjust the value of the "root" row, (also known
      * as the Class Under Qualification.)
      *
-     * The first row has only two comboBoxes:
+     * The first row has only two comboBoxes.  The first comboBox,
+     * which is the first comboBox in our comboBox array,
+     * is used to select the Class Under Qualification.
      *
-     *      comboBox 0 - Used to select the Class Under Qualification.
-     *      comboBox 1 - Used to select the Collection Operator.
+     * The second comboBox, which is the collectionOperator2ComboBox
+     * that is set up to only hold Any/All/None, is used to select
+     * the Collection Operator.
      */
     @SuppressWarnings("unchecked")
 	private void handleRootRowChange(JComboBox comboBox) {
@@ -933,19 +965,20 @@ class RowPanel
                 rowData.setClassUnderQualification(classDescription);
             }
         }
-        else if (comboBox == comboBoxes.get(1)) {
+        //else if (comboBox == comboBoxes.get(1)) {
+        else if (comboBox == collectionOperator2ComboBox) {
             /**
              * User is changing the value of the Collection Operator.
              */
             CollectionOperator collectionOperator =
                 (CollectionOperator)comboBox.getSelectedItem();
-            if (!rowData.getCollectionOperator().equals(
-                collectionOperator)) {
-                rowData.setCollectionOperator(collectionOperator);
-            }
+            rowData.setCollectionOperator(collectionOperator);
         }
-
-        //getExpressionPanel().createRowPanels();
+        else {
+            /**
+             * This should never happen.
+             */
+        }
     }
 
 
@@ -1015,7 +1048,7 @@ class RowPanel
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
         gc.insets = LEFT_INSETS;
-        add(getComboBox(1), gc);
+        add(collectionOperator2ComboBox, gc);
 
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
@@ -1026,9 +1059,11 @@ class RowPanel
 
         /**
          * Get the list of possible classes that can be used
-         * as a "Class Under Qualification" and put that list
-         * into the first comboBox.
+         * as a "Class Under Qualification" and set that list
+         * as the first comboBox's model, and set the currently
+         * selected value to be this row's value.
          */
+
         ClassDescription[] values =
             DataModel.getPossibleCUQs().
             toArray(new ClassDescription[0]);
@@ -1037,12 +1072,15 @@ class RowPanel
                          rowData.getClassUnderQualification());
 
         /**
-         * Now set the model and selected value of the 
-         * Collection Operator combobox.
+         * Now set the selected value of the Collection Operator combobox.
          */
+        /*
         setComboBoxModel(getComboBox(1), CollectionOperator.
                          getCompoundCollectionOperators(),
                          rowData.getRootRow().getCollectionOperator());
+        */
+        collectionOperator2ComboBox.setSelectedItem(
+            rowData.getRootRow().getCollectionOperator());
     }
 
 
@@ -1489,57 +1527,76 @@ class RowPanel
                  */
             }
         }
-        else if (rowData.getCollectionOperator() ==
-                 CollectionOperator.COUNT) {
-
-            /**
-             * This row says something like:
-             *
-             *      epochGroups.epochs Count == 5
-             */
+        else if (rowData.getCollectionOperator() != null) {
 
             /** 
              * Add comboBox for the Collection Operator which
-             * will display the value "Count".
+             * will display the value Any, All, None, or Count.
              */
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
-            add(getComboBox(index++), gc);
+            add(collectionOperatorComboBox, gc);
 
-            /** 
-             * Add comboBox for the Attribute Operator which
-             * will display a value like ==,!=, <, etc.
-             */
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.insets = LEFT_INSETS;
-            add(operatorComboBox, gc);
+            if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
 
-            /** 
-             * Add count spinner.
-             */
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.fill = GridBagConstraints.BOTH;
-            gc.insets = LEFT_INSETS;
-            add(countSpinnerInt32, gc);
-        }
-        else if (rowData.getCollectionOperator() != null) {
+                /**
+                 * This row says something like:
+                 *
+                 *      epochGroups.epochs Count == 5
+                 */
 
-            /**
-             * This row says something like:
-             *
-             *      epochGroups.epochs Any of the following
-             */
+                /** 
+                 * Add comboBox for the Attribute Operator which
+                 * will display a value like ==,!=, <, etc.
+                 */
+                gc = new GridBagConstraints();
+                gc.gridx = gridx++;
+                gc.insets = LEFT_INSETS;
+                add(operatorComboBox, gc);
 
-            /** 
-             * Add comboBox for the Collection Operator.
-             */
-            gc = new GridBagConstraints();
-            gc.gridx = gridx++;
-            gc.insets = LEFT_INSETS;
-            add(getComboBox(index++), gc);
+                /** 
+                 * Add count spinner.
+                 */
+                gc = new GridBagConstraints();
+                gc.gridx = gridx++;
+                gc.fill = GridBagConstraints.BOTH;
+                gc.insets = LEFT_INSETS;
+                add(countSpinnerInt32, gc);
+            }
+            else {
+                /**
+                 * This row has a collection operator set to
+                 * Any, All, or None.  (But not Count.)
+                 *
+                 * This row says something like:
+                 *
+                 *      epochGroups.epochs Any have All of the following
+                 */
+                if (rowData.getCollectionOperator2() != null) {
+
+                    /** 
+                     * Add the "have" label.
+                     */
+                    gc = new GridBagConstraints();
+                    gc.gridx = gridx++;
+                    gc.insets = LEFT_INSETS;
+                    add(haveLabel, gc);
+
+                    /** 
+                     * Add comboBox for the second Collection Operator.
+                     */
+                    gc = new GridBagConstraints();
+                    gc.gridx = gridx++;
+                    gc.insets = LEFT_INSETS;
+                    add(collectionOperator2ComboBox, gc);
+                }
+                else {
+                    /**
+                     * This should never happen.
+                     */
+                }
+            }
         }
         else {
             /**
@@ -1550,6 +1607,11 @@ class RowPanel
              */
         }
 
+        /**
+         * Add the "of the following" label to the end
+         * of the row if this is a compound row.
+         * (I.e. the row ends with Any, All, or None.)
+         */
         if (rowData.isCompoundRow()) {
 
             gc = new GridBagConstraints();
@@ -1568,14 +1630,10 @@ class RowPanel
          * look like one of these examples:
          *
          *      epochGroup.epochs Count == 5
-         *      epochGroup.epochs All of the following
+         *      epochGroup.epochs All have Any of the following
          *
          * If it does end in a TO_MANY relationship, initialize
-         * the last two or three comboBox model(s) and value(s).
-         * E.g. the row ends in either:
-         *
-         *      (collection operator) (arithmatic operator) (text field)
-         *      (collection operator) ("of the following" label)
+         * the last one or two comboBox and value(s).
          */
         Attribute childmostAttribute = rowData.getChildmostAttribute();
         if (childmostAttribute.getCardinality() == Cardinality.TO_MANY) {
@@ -1592,33 +1650,17 @@ class RowPanel
              *      resources Any
              *      resources None
              *
-             * So, there is at least a comboBox
-             * to the right of the attribute comboBox that the user
-             * can use to select the Collection Operator to use:
-             * Any, All, None, Count.
-             *
-             * Set that comboBox's model to the list of all the
-             * Collection Operators: Any, All, None, Count.
-             */
-            int widgetIndex = rowData.getAttributeCount();
-            DefaultComboBoxModel model = new DefaultComboBoxModel(
-                CollectionOperator.values());
-            getComboBox(widgetIndex).setModel(model);
-
-            /**
              * Set the value of the Collection Operator comboBox
              * to be this row's value.
              */
-            getComboBox(widgetIndex).setSelectedItem(
+            collectionOperatorComboBox.setSelectedItem(
                 rowData.getCollectionOperator());
-            widgetIndex++;
 
             /**
-             * Now set the value of the operatorComboBox and spinner if the
+             * Set the value of the operatorComboBox and spinner if the
              * collection operator is currently set to Count.
              */
-            if (rowData.getCollectionOperator() ==
-                CollectionOperator.COUNT) {
+            if (rowData.getCollectionOperator() == CollectionOperator.COUNT) {
 
                 /**
                  * This row is something like:
@@ -1628,9 +1670,8 @@ class RowPanel
                  * Set the operator that is used for the Count.
                  * E.g. ==, >, <=
                  */
-                operatorComboBox.setModel(
-                    new DefaultComboBoxModel(
-                        Operator.OPERATORS_ARITHMATIC));
+                operatorComboBox.setModel(new DefaultComboBoxModel(
+                    Operator.OPERATORS_ARITHMATIC));
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
 
@@ -1644,6 +1685,17 @@ class RowPanel
                     intValue = ((Integer)attributeValue).intValue();
                 }
                 countSpinnerInt32.setValue(intValue);
+            }
+            else {
+                /**
+                 * The first collection operator is set to something
+                 * besides Count, so there is a second collection
+                 * operator comboBox displayed.  Set the value of the
+                 * second Collection Operator comboBox to be this
+                 * row's value.
+                 */
+                collectionOperator2ComboBox.setSelectedItem(
+                    rowData.getCollectionOperator2());
             }
         }
     }

@@ -49,6 +49,9 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
 public class RowData
     implements RowDataListener {
 
+    public static final CollectionOperator DEFAULT_COLLECTION_OPERATOR2 =
+        CollectionOperator.ANY;
+
     /**
      * This is the "topmost", or "root" class that is the ancestor
      * of ALL other rows.
@@ -143,6 +146,15 @@ public class RowData
     private CollectionOperator collectionOperator;
 
     /**
+     * This is the second CollectionOperator that appears
+     * in a row that ends with an Attribute that has
+     * Cardinality.TO_MANY relationship to its parent class.
+     *
+     * TODO: Think of a better name for this value.
+     */
+    private CollectionOperator collectionOperator2;
+
+    /**
      * This is the list of this row's direct children.
      */
     private ArrayList<RowData> childRows;
@@ -184,6 +196,12 @@ public class RowData
         childRows = new ArrayList<RowData>();
         rowDataListenerList = new EventListenerList();
         parentRow = null;
+        attributeOperator = null;
+        attributeValue = null;
+        propName = null;
+        propType = null;
+        collectionOperator = null;
+        collectionOperator2 = null;
         changeLevel = 0;
     }
 
@@ -212,6 +230,7 @@ public class RowData
         this.propName = other.propName;
         this.propType = other.propType;
         this.collectionOperator = other.collectionOperator;
+        this.collectionOperator2 = other.collectionOperator2;
 
         for (Attribute attribute : other.getAttributePath()) {
             this.addAttribute(new Attribute(attribute));
@@ -676,6 +695,9 @@ public class RowData
 
     public void setCollectionOperator(CollectionOperator collectionOperator) {
 
+        if (this.collectionOperator == collectionOperator)
+            return;
+
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_COLLECTION_OPERATOR);
         this.collectionOperator = collectionOperator;
@@ -689,13 +711,27 @@ public class RowData
          */
         if ((collectionOperator != null) &&
             collectionOperator.isCompoundOperator()) {
+
             setAttributeOperator(null);
             setAttributeValue(null);
+
+            /**
+             * Set collectionOperator2 to a default value if
+             * it is currently null.
+             */
+            if (collectionOperator2 == null) {
+                collectionOperator2 = DEFAULT_COLLECTION_OPERATOR2;
+            }
         }
         else if ((collectionOperator != null) &&
-                 !collectionOperator.isCompoundOperator()) {
+                 (collectionOperator == CollectionOperator.COUNT)) {
+            /**
+             * collectionOperator is being set to COUNT.
+             */
             setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
-            setAttributeValue("");
+            setAttributeValue(new Integer(0));
+
+            setCollectionOperator2(null);
         }
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_COLLECTION_OPERATOR);
@@ -704,6 +740,26 @@ public class RowData
 
     public CollectionOperator getCollectionOperator() {
         return(collectionOperator);
+    }
+
+
+    public void setCollectionOperator2(CollectionOperator collectionOperator2) {
+
+        if (this.collectionOperator2 == collectionOperator2)
+            return;
+
+        fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
+                         RowDataEvent.TYPE_COLLECTION_OPERATOR);
+
+        this.collectionOperator2 = collectionOperator2;
+
+        fireRowDataEvent(RowDataEvent.TIMING_AFTER,
+                         RowDataEvent.TYPE_COLLECTION_OPERATOR);
+    }
+
+    
+    public CollectionOperator getCollectionOperator2() {
+        return(collectionOperator2);
     }
 
     
@@ -847,8 +903,17 @@ public class RowData
         }
         else {
             setCollectionOperator(CollectionOperator.COUNT);
+            /*
             setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
             setAttributeValue(new Integer(0));
+            */
+        }
+
+        if (childmostAttribute.getCardinality() != Cardinality.TO_MANY) {
+            setCollectionOperator2(null);
+        }
+        else if (getCollectionOperator2() == null) {
+            setCollectionOperator2(DEFAULT_COLLECTION_OPERATOR2);
         }
 
         /**
@@ -863,6 +928,7 @@ public class RowData
          */
         if (childmostAttribute.equals(Attribute.SELECT_ATTRIBUTE)) {
             setCollectionOperator(null);
+            setCollectionOperator2(null);
             setAttributeOperator(null);
             setAttributeValue(null);
         }
