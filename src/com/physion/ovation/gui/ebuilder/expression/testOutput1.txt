@@ -99,26 +99,82 @@ OperatorExpression(and)
 
 Original RowData:
 Epoch | All
-  Epoch | responses None
+  Epoch | responses All have Any
     Response | uuid == "xyz"
 
 Translated To Expression:
 CUQ: Epoch
 rootExpression:
 OperatorExpression(and)
-  OperatorExpression(not)
-    OperatorExpression(any)
-      AttributeExpression(responses)
+  OperatorExpression(all)
+    AttributeExpression(responses)
+    OperatorExpression(or)
       OperatorExpression(==)
         AttributeExpression(uuid)
         StringLiteralValueExpression(xyz)
+
+===== Compound Row With Lots Of None Collection Operators =====
+
+Original RowData:
+Epoch | None
+  Epoch | responses None have None
+    Response | uuid == "xyz"
+    Response | samplingRate != "1.23"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        AttributeExpression(responses)
+        OperatorExpression(not)
+          OperatorExpression(or)
+            OperatorExpression(==)
+              AttributeExpression(uuid)
+              StringLiteralValueExpression(xyz)
+            OperatorExpression(!=)
+              AttributeExpression(samplingRate)
+              Float64LiteralValueExpression(1.23)
+
+===== Same As Above, But Nested =====
+
+Original RowData:
+Epoch | None
+  Epoch | nextEpoch.nextEpoch.prevEpoch.responses None have None
+    Response | uuid == "xyz"
+    Response | samplingRate != "1.23"
+
+Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        OperatorExpression(.)
+          OperatorExpression(.)
+            OperatorExpression(.)
+              AttributeExpression(nextEpoch)
+              AttributeExpression(nextEpoch)
+            AttributeExpression(prevEpoch)
+          AttributeExpression(responses)
+        OperatorExpression(not)
+          OperatorExpression(or)
+            OperatorExpression(==)
+              AttributeExpression(uuid)
+              StringLiteralValueExpression(xyz)
+            OperatorExpression(!=)
+              AttributeExpression(samplingRate)
+              Float64LiteralValueExpression(1.23)
 
 ===== Compound Row Nested Classes =====
 
 Original RowData:
 Epoch | All
-  Epoch | responses All
-    Response | resources Any
+  Epoch | responses All have Any
+    Response | resources Any have Any
       Resource | uuid != "ID 27"
 
 Translated To Expression:
@@ -127,17 +183,19 @@ rootExpression:
 OperatorExpression(and)
   OperatorExpression(all)
     AttributeExpression(responses)
-    OperatorExpression(any)
-      AttributeExpression(resources)
-      OperatorExpression(!=)
-        AttributeExpression(uuid)
-        StringLiteralValueExpression(ID 27)
+    OperatorExpression(or)
+      OperatorExpression(any)
+        AttributeExpression(resources)
+        OperatorExpression(or)
+          OperatorExpression(!=)
+            AttributeExpression(uuid)
+            StringLiteralValueExpression(ID 27)
 
 ===== Compound Row ALL COUNT =====
 
 Original RowData:
 Epoch | All
-  Epoch | responses All
+  Epoch | responses All have Any
     Response | resources Count <= "5"
 
 Translated To Expression:
@@ -146,16 +204,17 @@ rootExpression:
 OperatorExpression(and)
   OperatorExpression(all)
     AttributeExpression(responses)
-    OperatorExpression(<=)
-      OperatorExpression(count)
-        AttributeExpression(resources)
-      Int32LiteralValueExpression(5)
+    OperatorExpression(or)
+      OperatorExpression(<=)
+        OperatorExpression(count)
+          AttributeExpression(resources)
+        Int32LiteralValueExpression(5)
 
 ===== Compound Row ANY ANY =====
 
 Original RowData:
 Epoch | Any
-  Epoch | responses Any
+  Epoch | responses Any have Any
     Response | uuid == "xyz"
 
 Translated To Expression:
@@ -164,15 +223,16 @@ rootExpression:
 OperatorExpression(or)
   OperatorExpression(any)
     AttributeExpression(responses)
-    OperatorExpression(==)
-      AttributeExpression(uuid)
-      StringLiteralValueExpression(xyz)
+    OperatorExpression(or)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
 
 ===== Compound Row NONE NONE =====
 
 Original RowData:
 Epoch | None
-  Epoch | responses None
+  Epoch | responses None have Any
     Response | uuid == "xyz"
 
 Translated To Expression:
@@ -183,15 +243,16 @@ OperatorExpression(not)
     OperatorExpression(not)
       OperatorExpression(any)
         AttributeExpression(responses)
-        OperatorExpression(==)
-          AttributeExpression(uuid)
-          StringLiteralValueExpression(xyz)
+        OperatorExpression(or)
+          OperatorExpression(==)
+            AttributeExpression(uuid)
+            StringLiteralValueExpression(xyz)
 
 ===== PER_USER =====
 
 Original RowData:
 Epoch | All
-  Epoch | My Keywords None
+  Epoch | My Keywords None have Any
     KeywordTag | uuid == "xyz"
 
 Translated To Expression:
@@ -202,9 +263,10 @@ OperatorExpression(and)
     OperatorExpression(any)
       OperatorExpression(mykeywords)
         AttributeExpression(this)
-      OperatorExpression(==)
-        AttributeExpression(uuid)
-        StringLiteralValueExpression(xyz)
+      OperatorExpression(or)
+        OperatorExpression(==)
+          AttributeExpression(uuid)
+          StringLiteralValueExpression(xyz)
 
 ===== PER_USER CollectionOperator.COUNT =====
 
@@ -226,7 +288,7 @@ OperatorExpression(and)
 
 Original RowData:
 Epoch | Any
-  Epoch | nextEpoch.All Keywords Any
+  Epoch | nextEpoch.All Keywords Any have Any
     KeywordTag | uuid == "xyz"
 
 Translated To Expression:
@@ -236,15 +298,16 @@ OperatorExpression(or)
   OperatorExpression(any)
     OperatorExpression(keywords)
       AttributeExpression(nextEpoch)
-    OperatorExpression(==)
-      AttributeExpression(uuid)
-      StringLiteralValueExpression(xyz)
+    OperatorExpression(or)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
 
 ===== PER_USER Nested Twice CollectionOperator.NONE =====
 
 Original RowData:
 Epoch | None
-  Epoch | nextEpoch.nextEpoch.All Keywords None
+  Epoch | nextEpoch.nextEpoch.All Keywords None have All
     KeywordTag | uuid == "xyz"
 
 Translated To Expression:
@@ -258,15 +321,16 @@ OperatorExpression(not)
           OperatorExpression(.)
             AttributeExpression(nextEpoch)
             AttributeExpression(nextEpoch)
-        OperatorExpression(==)
-          AttributeExpression(uuid)
-          StringLiteralValueExpression(xyz)
+        OperatorExpression(and)
+          OperatorExpression(==)
+            AttributeExpression(uuid)
+            StringLiteralValueExpression(xyz)
 
 ===== PER_USER Nested Thrice CollectionOperator.ALL =====
 
 Original RowData:
 Epoch | All
-  Epoch | nextEpoch.nextEpoch.prevEpoch.All Keywords All
+  Epoch | nextEpoch.nextEpoch.prevEpoch.All Keywords All have Any
     KeywordTag | uuid == "xyz"
 
 Translated To Expression:
@@ -280,9 +344,10 @@ OperatorExpression(and)
           AttributeExpression(nextEpoch)
           AttributeExpression(nextEpoch)
         AttributeExpression(prevEpoch)
-    OperatorExpression(==)
-      AttributeExpression(uuid)
-      StringLiteralValueExpression(xyz)
+    OperatorExpression(or)
+      OperatorExpression(==)
+        AttributeExpression(uuid)
+        StringLiteralValueExpression(xyz)
 
 ===== PARAMETERS_MAP Type Date =====
 
@@ -495,7 +560,7 @@ OperatorExpression(not)
 
 Original RowData:
 Epoch | Any
-  Epoch | nextEpoch.My DerivedResponses None
+  Epoch | nextEpoch.My DerivedResponses None have Any
     DerivedResponse | derivationParameters.someKey(boolean) is true
     DerivedResponse | My Keywords Count == "5"
 
@@ -507,26 +572,27 @@ OperatorExpression(or)
     OperatorExpression(any)
       OperatorExpression(myderivedResponses)
         AttributeExpression(nextEpoch)
-      OperatorExpression(is true)
-        OperatorExpression(.)
-          OperatorExpression(as)
-            OperatorExpression(parameter)
-              AttributeExpression(derivationParameters)
-              StringLiteralValueExpression(someKey)
-            ClassLiteralValueExpression(ovation.BooleanValue)
-          AttributeExpression(value)
-        BooleanLiteralValueExpression(true)
-      OperatorExpression(==)
-        OperatorExpression(count)
-          OperatorExpression(mykeywords)
-            AttributeExpression(this)
-        Int32LiteralValueExpression(5)
+      OperatorExpression(or)
+        OperatorExpression(is true)
+          OperatorExpression(.)
+            OperatorExpression(as)
+              OperatorExpression(parameter)
+                AttributeExpression(derivationParameters)
+                StringLiteralValueExpression(someKey)
+              ClassLiteralValueExpression(ovation.BooleanValue)
+            AttributeExpression(value)
+          BooleanLiteralValueExpression(true)
+        OperatorExpression(==)
+          OperatorExpression(count)
+            OperatorExpression(mykeywords)
+              AttributeExpression(this)
+          Int32LiteralValueExpression(5)
 
 ===== Nested PER_USER With PM, PU, and PUPM Children =====
 
 Original RowData:
 Epoch | Any
-  Epoch | nextEpoch.My DerivedResponses None
+  Epoch | nextEpoch.My DerivedResponses None have Any
     DerivedResponse | derivationParameters.someKey(boolean) is true
     DerivedResponse | My Keywords Count == "5"
     DerivedResponse | externalDevice.My Property.someKey2(float) == "34.5"
@@ -539,35 +605,36 @@ OperatorExpression(or)
     OperatorExpression(any)
       OperatorExpression(myderivedResponses)
         AttributeExpression(nextEpoch)
-      OperatorExpression(is true)
-        OperatorExpression(.)
-          OperatorExpression(as)
-            OperatorExpression(parameter)
-              AttributeExpression(derivationParameters)
-              StringLiteralValueExpression(someKey)
-            ClassLiteralValueExpression(ovation.BooleanValue)
-          AttributeExpression(value)
-        BooleanLiteralValueExpression(true)
-      OperatorExpression(==)
-        OperatorExpression(count)
-          OperatorExpression(mykeywords)
-            AttributeExpression(this)
-        Int32LiteralValueExpression(5)
-      OperatorExpression(any)
-        OperatorExpression(elementsOfType)
-          OperatorExpression(myproperties)
-            AttributeExpression(externalDevice)
-            StringLiteralValueExpression(someKey2)
-          ClassLiteralValueExpression(ovation.FloatingPointValue)
+      OperatorExpression(or)
+        OperatorExpression(is true)
+          OperatorExpression(.)
+            OperatorExpression(as)
+              OperatorExpression(parameter)
+                AttributeExpression(derivationParameters)
+                StringLiteralValueExpression(someKey)
+              ClassLiteralValueExpression(ovation.BooleanValue)
+            AttributeExpression(value)
+          BooleanLiteralValueExpression(true)
         OperatorExpression(==)
-          AttributeExpression(value)
-          Float64LiteralValueExpression(34.5)
+          OperatorExpression(count)
+            OperatorExpression(mykeywords)
+              AttributeExpression(this)
+          Int32LiteralValueExpression(5)
+        OperatorExpression(any)
+          OperatorExpression(elementsOfType)
+            OperatorExpression(myproperties)
+              AttributeExpression(externalDevice)
+              StringLiteralValueExpression(someKey2)
+            ClassLiteralValueExpression(ovation.FloatingPointValue)
+          OperatorExpression(==)
+            AttributeExpression(value)
+            Float64LiteralValueExpression(34.5)
 
 ===== Compound Row, Class Change Between Parent And Child =====
 
 Original RowData:
 Epoch | None
-  Epoch | responses None
+  Epoch | responses None have Any
     Response | None
       Response | samplingRate >= "55.2"
 
@@ -579,10 +646,11 @@ OperatorExpression(not)
     OperatorExpression(not)
       OperatorExpression(any)
         AttributeExpression(responses)
-        OperatorExpression(not)
-          OperatorExpression(or)
-            OperatorExpression(>=)
-              AttributeExpression(samplingRate)
-              Float64LiteralValueExpression(55.2)
+        OperatorExpression(or)
+          OperatorExpression(not)
+            OperatorExpression(or)
+              OperatorExpression(>=)
+                AttributeExpression(samplingRate)
+                Float64LiteralValueExpression(55.2)
 
 ExpressionTranslator test is ending.

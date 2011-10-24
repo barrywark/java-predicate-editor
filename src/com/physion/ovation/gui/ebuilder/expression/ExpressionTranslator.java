@@ -1034,14 +1034,10 @@ public class ExpressionTranslator {
                 lastOperator.addOperand(op);
 
                 lastOperator = getLastOperator(op);
-                /*
-                lastOperator.addOperand(createExpressionPath(
-                    rowData.getAttributePath(), rowData));
-                */
 
                 for (RowData childRow : rowData.getChildRows()) {
                     //System.out.println("Add an operand");
-                    op.addOperand(createExpression(childRow));
+                    lastOperator.addOperand(createExpression(childRow));
                 } 
         }
         else if (rowData.getCollectionOperator() != null) {
@@ -1794,7 +1790,7 @@ public class ExpressionTranslator {
          * Test a compound row:
          *
          *      Epoch | All
-         *        Epoch | responses None
+         *        Epoch | responses All have Any
          *          Response | uuid == "xyz"
          */
         rootRow = new RowData();
@@ -1803,7 +1799,8 @@ public class ExpressionTranslator {
 
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("responses"));
-        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rowData.setCollectionOperator(CollectionOperator.ALL);
+        rowData.setCollectionOperator2(CollectionOperator.ANY);
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();
@@ -1815,11 +1812,79 @@ public class ExpressionTranslator {
         printResults("Compound Row", rootRow);
 
         /**
+         * Test a compound row with lots of None collection operators:
+         *
+         *      Epoch | None
+         *        Epoch | responses None have None
+         *          Response | uuid == "xyz"
+         *          Response | samplingRate != 1.23
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.NONE);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("responses"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rowData.setCollectionOperator2(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(responseCD.getAttribute("uuid"));
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue("xyz");
+        rowData.addChildRow(rowData2);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(responseCD.getAttribute("samplingRate"));
+        rowData2.setAttributeOperator(Operator.NOT_EQUALS);
+        rowData2.setAttributeValue(new Double(1.23));
+        rowData.addChildRow(rowData2);
+
+        printResults("Compound Row With Lots Of None Collection Operators",
+                     rootRow);
+
+        /**
+         * Test a compound row with lots of None collection operators:
+         *
+         *      Epoch | None
+         *        Epoch | responses None have None
+         *          Response | uuid == "xyz"
+         *          Response | samplingRate != 1.23
+         */
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.NONE);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("responses"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rowData.setCollectionOperator2(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(responseCD.getAttribute("uuid"));
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue("xyz");
+        rowData.addChildRow(rowData2);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(responseCD.getAttribute("samplingRate"));
+        rowData2.setAttributeOperator(Operator.NOT_EQUALS);
+        rowData2.setAttributeValue(new Double(1.23));
+        rowData.addChildRow(rowData2);
+
+        printResults("Same As Above, But Nested", rootRow);
+
+        /**
          * Test a compound row:
          *
          *      Epoch | All
-         *        Epoch | responses All
-         *          Response | resources Any
+         *        Epoch | responses All have Any
+         *          Response | resources Any have Any
          *            Epoch | protocolID != "Test 27"
          */
         rootRow = new RowData();
@@ -1848,7 +1913,7 @@ public class ExpressionTranslator {
          * Test a compound row that uses the Count collection operator:
          *
          *      Epoch | All
-         *        Epoch | responses All
+         *        Epoch | responses All have Any
          *          Response | resources Count <= 5
          */
         rootRow = new RowData();
@@ -1873,7 +1938,7 @@ public class ExpressionTranslator {
          * Test a compound row:
          *
          *      Epoch | Any
-         *        Epoch | responses Any
+         *        Epoch | responses Any have Any
          *          Response | uuid == "xyz"
          */
         rootRow = new RowData();
@@ -1897,7 +1962,7 @@ public class ExpressionTranslator {
          * Test a compound row:
          *
          *      Epoch | None
-         *        Epoch | responses None
+         *        Epoch | responses None have Any
          *          Response | uuid == "xyz"
          */
         rootRow = new RowData();
@@ -1921,7 +1986,7 @@ public class ExpressionTranslator {
          * Test a PER_USER attribute type.
          *
          *      Epoch | All
-         *        Epoch | My keywords None
+         *        Epoch | My keywords None have Any
          *          KeywordTag | uuid == "xyz"
          */
         rootRow = new RowData();
@@ -1963,8 +2028,8 @@ public class ExpressionTranslator {
         /**
          * Test a nested PER_USER attribute type.
          *
-         *      Epoch | All
-         *        Epoch | nextEpoch.All keywords All
+         *      Epoch | Any
+         *        Epoch | nextEpoch.All keywords Any have Any
          *          KeywordTag | uuid == "xyz"
          */
         rootRow = new RowData();
@@ -1975,6 +2040,7 @@ public class ExpressionTranslator {
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("keywords"));
         rowData.setCollectionOperator(CollectionOperator.ANY);
+        rowData.setCollectionOperator2(CollectionOperator.ANY);
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();
@@ -1988,8 +2054,8 @@ public class ExpressionTranslator {
         /**
          * Test a nested PER_USER attribute type.
          *
-         *      Epoch | All
-         *        Epoch | nextEpoch.All keywords All
+         *      Epoch | None
+         *        Epoch | nextEpoch.All keywords None have All
          *          KeywordTag | uuid == "xyz"
          */
         rootRow = new RowData();
@@ -2001,6 +2067,7 @@ public class ExpressionTranslator {
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("keywords"));
         rowData.setCollectionOperator(CollectionOperator.NONE);
+        rowData.setCollectionOperator2(CollectionOperator.ALL);
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();
@@ -2014,9 +2081,9 @@ public class ExpressionTranslator {
         /**
          * Test a nested PER_USER attribute type.
          *
-         *      Epoch | All
-         *        Epoch | nextEpoch.nextEpoch.prevEpoch.All keywords All
-         *          KeywordTag | uuid == "xyz"
+         *     Epoch | All
+         *       Epoch | nextEpoch.nextEpoch.prevEpoch.All keywords All have Any
+         *         KeywordTag | uuid == "xyz"
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
@@ -2028,6 +2095,7 @@ public class ExpressionTranslator {
         rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
         rowData.addAttribute(epochCD.getAttribute("keywords"));
         rowData.setCollectionOperator(CollectionOperator.ALL);
+        rowData.setCollectionOperator2(CollectionOperator.ANY);
         rootRow.addChildRow(rowData);
 
         rowData2 = new RowData();
@@ -2406,8 +2474,6 @@ public class ExpressionTranslator {
 
         /**
          * Test compound row where class changes between parent and child.
-         *
-         *                                                               "34.5"
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
