@@ -22,7 +22,6 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
  */
 public class ExpressionTranslator {
 
-
     public static final String AE_VALUE = "value";
     public static final String AE_THIS = "this";
 
@@ -351,11 +350,11 @@ public class ExpressionTranslator {
 
     /**
      * Set the value of the rowData's attributePath to be the
-     * equivalent of the value in the Expression.
+     * equivalent of the value in the IExpression.
      *
      * @param rowData The RowData object whose attributePath we will set.
      *
-     * @param ex The Expression that is the left operand of an operator.
+     * @param ex The IExpression that is the left operand of an operator.
      */
     private static void setAttributePath(RowData rowData, IExpression ex,
         ClassDescription classDescription) {
@@ -399,8 +398,8 @@ public class ExpressionTranslator {
 
 
     /**
-     * Append the passed in Expression to the passed in attributePath.
-     * It converts the passed in Expression tree into Attributes
+     * Append the passed in IExpression to the passed in attributePath.
+     * It converts the passed in IExpression tree into Attributes
      * and adds them to the attributePath.
      *
      * Please note, this method calls itself recursively.
@@ -470,6 +469,11 @@ public class ExpressionTranslator {
                 return(appendToAttributePath(attributePath, op,
                                              classDescription));
             }
+            /*
+            else if (OE_IS_NULL.equals(oe.getOperatorName())) {
+                System.exit(1);
+            }
+            */
             /*
             else if (OE_ANY.equals(oe.getOperatorName())) {
             }
@@ -2508,6 +2512,7 @@ public class ExpressionTranslator {
         RowData rootRow;
         ExpressionTree expression;
 
+        /*
         ClassDescription epochCD = DataModel.getClassDescription("Epoch");
         ClassDescription epochGroupCD = DataModel.getClassDescription(
             "EpochGroup");
@@ -2519,18 +2524,25 @@ public class ExpressionTranslator {
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
         rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("owner"));
+        rowData.addAttribute(epochCD.getAttribute("epochGroup"));
+        rowData.addAttribute(epochGroupCD.getAttribute("source"));
+        //rowData.addAttribute(epochCD.getAttribute("owner"));
         rowData.addAttribute(Attribute.IS_NULL);
         rowData.setAttributeOperator(Operator.IS_NULL);
         rootRow.addChildRow(rowData);
+        */
+        rootRow = RowData.createTestRowData();
+        System.out.println("\nRowData:\n"+rootRow);
 
+        rootRow.testSerialization();
+
+        /*
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionTranslator.createExpressionTree(rootRow);
         System.out.println("\nExpression:\n"+expression);
         rootRow = ExpressionTranslator.createRowData(expression);
         System.out.println("\nExpression Translated To RowData:\n"+rootRow);
+        */
     }
 
 
@@ -2551,6 +2563,8 @@ public class ExpressionTranslator {
             rootRow);
         System.out.println("\nTranslated To Expression:\n"+expression);
 
+        rootRow.testSerialization();
+
         //rootRow = ExpressionTranslator.createRowData(expression);
         //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
     }
@@ -2563,8 +2577,8 @@ public class ExpressionTranslator {
 
         System.out.println("ExpressionTranslator test is starting...");
 
-        runAllTests();
-        //runOneTest();
+        //runAllTests();
+        runOneTest();
 
         System.out.println("\nExpressionTranslator test is ending.");
     }
