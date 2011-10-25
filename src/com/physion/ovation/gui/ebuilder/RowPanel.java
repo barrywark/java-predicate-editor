@@ -868,18 +868,34 @@ class RowPanel
             rowData.setCollectionOperator((CollectionOperator)selectedItem);
         }
         else if (comboBox == collectionOperator2ComboBox) {
-            /**
-             * User has changed the second collection operator
-             * of a row that ends with an Attribute that has
-             * a TO_MANY relationship.  (And the first collection
-             * operator was not set to Count.)
-             *
-             * For example, the change the value of the "All"
-             * comboBox in the example below:
-             *
-             *      epochGroup.epochs Any have All of the following
-             */
-            rowData.setCollectionOperator2((CollectionOperator)selectedItem);
+            if (rowData.isSimpleCompoundRow()) {
+                /**
+                 * User has changed the one and only collection operator
+                 * comboBox in this row.
+                 *
+                 * For example, the change the value of the "All"
+                 * comboBox in the example below:
+                 *
+                 *      Any of the following
+                 *
+                 * So, set the collection operator for this row.
+                 */
+                rowData.setCollectionOperator((CollectionOperator)selectedItem);
+            }
+            else {
+                /**
+                 * User has changed the second collection operator
+                 * of a row that ends with an Attribute that has
+                 * a TO_MANY relationship.  (And the first collection
+                 * operator was not set to Count.)
+                 *
+                 * For example, the change the value of the "All"
+                 * comboBox in the example below:
+                 *
+                 *      epochGroup.epochs Any have All of the following
+                 */
+                rowData.setCollectionOperator2((CollectionOperator)selectedItem);
+            }
         }
         else if (selectedItem instanceof Attribute) {
             /**
@@ -1100,7 +1116,7 @@ class RowPanel
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
         gc.insets = LEFT_INSETS;
-        add(getComboBox(0), gc);
+        add(collectionOperator2ComboBox, gc);
 
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
@@ -1114,8 +1130,8 @@ class RowPanel
          * the Collection Operator comboBox in it.
          * Set the comboBox model.
          */
-        setComboBoxModel(getComboBox(0), CollectionOperator.
-                         getCompoundCollectionOperators(),
+        setComboBoxModel(collectionOperator2ComboBox,
+                         CollectionOperator.getCompoundCollectionOperators(),
                          rowData.getCollectionOperator());
     }
 

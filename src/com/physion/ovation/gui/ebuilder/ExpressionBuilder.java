@@ -64,7 +64,8 @@ public class ExpressionBuilder
 	 */
 	private static final long serialVersionUID = 1L;
 
-    private static final String SAVE_FILE_NAME = "saved.ExpTree";
+    private static final String SAVE_FILE_NAME_EXP_TREE = "saved.ExpTree";
+    private static final String SAVE_FILE_NAME_ROW_DATA = "saved.RDTree";
 
 	/**
      * Number of pixels used as a spacer.
@@ -899,14 +900,29 @@ public class ExpressionBuilder
          * to a file last time this application was run.
          */
         ExpressionTree expressionTree = ExpressionTree.readExpressionTree(
-            SAVE_FILE_NAME);
+            SAVE_FILE_NAME_EXP_TREE);
         if (expressionTree != null) {
             System.out.println("\nSerialized ExpressionTree Read In:\n"+
                                expressionTree);
         }
 
-        //RowData rootRow = null;
-        RowData rootRow = RowData.createTestRowData();
+        /**
+         * Read in the RowData that we serialized out
+         * to a file last time this application was run.
+         */
+        RowData rootRow = RowData.readRowData(SAVE_FILE_NAME_ROW_DATA);
+        if (rootRow != null) {
+            System.out.println("\nSerialized RowData Read In:\n"+rootRow);
+        }
+        else {
+            /**
+             * No serialized RowData object existed, or there
+             * was an error while reading it in, so create a
+             * RowData tree with some data already in it.
+             */
+            rootRow = RowData.createTestRowData();
+        }
+
         RowData originalRootRow = rootRow;
         returnValue = ExpressionBuilder.editExpression(rootRow);
         while (true) {
@@ -927,7 +943,7 @@ public class ExpressionBuilder
             }
 
             /**
-             * User pressed the OK button.
+             * If we get here, the user pressed the OK button.
              *
              * Write out the serialized version of the 
              * ExpressionTree.  We will read it in when
@@ -936,7 +952,11 @@ public class ExpressionBuilder
              * This is just for testing the serialization.
              */
             if (returnValue.expressionTree != null)
-                returnValue.expressionTree.writeExpressionTree(SAVE_FILE_NAME);
+                returnValue.expressionTree.writeExpressionTree(
+                    SAVE_FILE_NAME_EXP_TREE);
+
+            if (returnValue.rootRow != null)
+                returnValue.rootRow.writeRowData(SAVE_FILE_NAME_ROW_DATA);
 
             originalRootRow = returnValue.rootRow;
 
