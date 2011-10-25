@@ -74,7 +74,7 @@ public class ExpressionBuilder
     /**
      * Maximum number of expression tree "states" that are
      * saved.  I.e. the user can "undo" up to this many
-     * prevsious states of the tree.
+     * previous states of the tree.
      */
     private int MAX_NUM_STATES_SAVED = 50;
 
@@ -895,14 +895,12 @@ public class ExpressionBuilder
          * Read in the ExpressionTree that we serialized out
          * to a file last time this application was run.
          */
-        /*
         ExpressionTree expressionTree = ExpressionTree.readExpressionTree(
             SAVE_FILE_NAME);
         if (expressionTree != null) {
             System.out.println("\nSerialized ExpressionTree Read In:\n"+
                                expressionTree);
         }
-        */
 
         //RowData rootRow = null;
         RowData rootRow = RowData.createTestRowData();
