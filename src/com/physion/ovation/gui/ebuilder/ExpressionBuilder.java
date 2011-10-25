@@ -817,6 +817,9 @@ public class ExpressionBuilder
          */
         lookAndFeel = UIManager.getSystemLookAndFeelClassName();
 
+        if (convert == true)
+            lookAndFeel = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+
         try {
             System.out.println("\nSetting look and feel to:\n    "+lookAndFeel);
             UIManager.setLookAndFeel(lookAndFeel);
