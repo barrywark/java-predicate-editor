@@ -730,12 +730,10 @@ public class RowData
             setAttributeOperator(null);
             setAttributeValue(null);
 
-            Attribute childmostAttribute = getChildmostAttribute();
-            if ((childmostAttribute != null) &&
-                (childmostAttribute.getCardinality() ==
+            Attribute childmost = getChildmostAttribute();
+            if ((childmost != null) && (childmost.getCardinality() ==
                  Cardinality.TO_MANY) &&
-                (childmostAttribute.getType() !=
-                 Type.PER_USER_PARAMETERS_MAP)) {
+                (childmost.getType() != Type.PER_USER_PARAMETERS_MAP)) {
 
                 /**
                  * Set collectionOperator2 to a default value if
@@ -814,19 +812,24 @@ public class RowData
             setAttributeValue(null);
         }
 
-        /**
-         * Try and help the engineer who is creating a RowData
-         * object by adding the proper Attribute to the end of
-         * this RowData's attributePath if it is not already
-         * there.
-         */
-        if ((attributeOperator == Operator.IS_NULL) &&
-            !Attribute.IS_NULL.equals(getChildmostAttribute())) {
-            addAttribute(Attribute.IS_NULL);
-        }
-        if ((attributeOperator == Operator.IS_NOT_NULL) &&
-            !Attribute.IS_NOT_NULL.equals(getChildmostAttribute())) {
-            addAttribute(Attribute.IS_NOT_NULL);
+        Attribute childmost = getChildmostAttribute();
+
+        if ((childmost.getType() != Type.PARAMETERS_MAP) &&
+            (childmost.getType() != Type.PER_USER_PARAMETERS_MAP)) {
+            /**
+             * Try and help the engineer who is creating a RowData
+             * object by adding the proper Attribute.IS_NULL or
+             * Attribute.IS_NOT_NULL to the end of this RowData's
+             * attributePath if it is not already there.
+             */
+            if ((attributeOperator == Operator.IS_NULL) &&
+                !Attribute.IS_NULL.equals(childmost)) {
+                addAttribute(Attribute.IS_NULL);
+            }
+            else if ((attributeOperator == Operator.IS_NOT_NULL) &&
+                     !Attribute.IS_NOT_NULL.equals(childmost)) {
+                addAttribute(Attribute.IS_NOT_NULL);
+            }
         }
 
         /**
@@ -904,15 +907,15 @@ public class RowData
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_UNDEFINED);
-        Attribute childmostAttribute = getChildmostAttribute();
+        Attribute childmost = getChildmostAttribute();
 
         /**
          * If the row is not a per-user parameters map or a parameters map,
          * the propType and propName values have no meaning for this row.
          * So, set them to null.
          */
-        if ((childmostAttribute.getType() != Type.PER_USER_PARAMETERS_MAP) &&
-            (childmostAttribute.getType() != Type.PARAMETERS_MAP)) {
+        if ((childmost.getType() != Type.PER_USER_PARAMETERS_MAP) &&
+            (childmost.getType() != Type.PARAMETERS_MAP)) {
             setPropType(null);
             setPropName(null);
         }
@@ -923,8 +926,8 @@ public class RowData
          * a collection operator, or set it to Count if it does
          * use a collection operator.
          */
-        if ((childmostAttribute.getCardinality() != Cardinality.TO_MANY) ||
-            (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
+        if ((childmost.getCardinality() != Cardinality.TO_MANY) ||
+            (childmost.getType() == Type.PER_USER_PARAMETERS_MAP)) {
             setCollectionOperator(null);
         }
         else {
@@ -935,8 +938,8 @@ public class RowData
             */
         }
 
-        if ((childmostAttribute.getCardinality() != Cardinality.TO_MANY) ||
-            (childmostAttribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
+        if ((childmost.getCardinality() != Cardinality.TO_MANY) ||
+            (childmost.getType() == Type.PER_USER_PARAMETERS_MAP)) {
             /**
              * A row of this type does not display a second collection
              * operator.
@@ -962,14 +965,14 @@ public class RowData
          * Also make sure the attributeValue contains a value of
          * the appropriate type.
          */
-        if (childmostAttribute.equals(Attribute.SELECT_ATTRIBUTE)) {
+        if (childmost.equals(Attribute.SELECT_ATTRIBUTE)) {
             setCollectionOperator(null);
             setCollectionOperator2(null);
             setAttributeOperator(null);
             setAttributeValue(null);
         }
-        else if (childmostAttribute.equals(Attribute.IS_NULL) ||
-                 childmostAttribute.equals(Attribute.IS_NOT_NULL)) {
+        else if (childmost.equals(Attribute.IS_NULL) ||
+                 childmost.equals(Attribute.IS_NOT_NULL)) {
 
             /**
              * The selectedAttribute is one of our special
@@ -978,19 +981,17 @@ public class RowData
              * "is not null".
              */
             setAttributeOperator(Operator.fromString(
-                childmostAttribute.getDisplayName()));
+                childmost.getDisplayName()));
         }
-        else if ((childmostAttribute.getType() ==
-                  Type.PER_USER_PARAMETERS_MAP) ||
-                 (childmostAttribute.getType() ==
-                  Type.PARAMETERS_MAP)) {
+        else if ((childmost.getType() == Type.PER_USER_PARAMETERS_MAP) ||
+                 (childmost.getType() == Type.PARAMETERS_MAP)) {
 
             setPropType(Type.INT_32);
             setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
             setPropName(null);
             setAttributeValue(new Integer(0));
         }
-        else if (childmostAttribute.isPrimitive()) {
+        else if (childmost.isPrimitive()) {
 
             /**
              * The user set the value of a primitive type,
@@ -1002,13 +1003,12 @@ public class RowData
              * Also make sure the attributeValue contains a value of
              * the appropriate type.
              */
-            possiblyAdjustOperatorAndValue(childmostAttribute.getType());
+            possiblyAdjustOperatorAndValue(childmost.getType());
         }
 
-        if (!childmostAttribute.isPrimitive() &&
-            !childmostAttribute.isSpecial() &&
-            (childmostAttribute.getType() != Type.PER_USER_PARAMETERS_MAP) &&
-            (childmostAttribute.getType() != Type.PARAMETERS_MAP) &&
+        if (!childmost.isPrimitive() && !childmost.isSpecial() &&
+            (childmost.getType() != Type.PER_USER_PARAMETERS_MAP) &&
+            (childmost.getType() != Type.PARAMETERS_MAP) &&
             (getCollectionOperator() == null)) {
 
             /**
@@ -1030,7 +1030,7 @@ public class RowData
          * are appropriate for the childmost attribute
          * of this row.  If they aren't, remove them.
          */
-        if ((childmostAttribute.getClassDescription() == null) ||
+        if ((childmost.getClassDescription() == null) ||
             (getCollectionOperator() == null) ||
             !getCollectionOperator().isCompoundOperator()) {
 
@@ -1060,7 +1060,7 @@ public class RowData
                 Attribute attribute = null;
                 if (firstChildRow.getAttributePath().size() > 0) {
                     attribute = firstChildRow.getAttribute(0);
-                    if (!childmostAttribute.getClassDescription().
+                    if (!childmost.getClassDescription().
                         containsAttribute(attribute)) {
                         clearChildRows();
                     }
@@ -2224,7 +2224,7 @@ public class RowData
         boolean same = rowData.toString(true, "").equals(
             this.toString(true, ""));
 
-        System.out.println("rowData:\n"+rowData);
+        //System.out.println("rowData:\n"+rowData);
 
         if (same)
             System.out.println("Written and read versions are the same.");
@@ -2243,7 +2243,30 @@ public class RowData
 
         System.out.println("RowData test is starting...");
 
-        RowData rootRow = createTestRowData();
+        RowData rootRow;
+
+        /*
+        ClassDescription epochCD = DataModel.getClassDescription("Epoch");
+        ClassDescription epochGroupCD = DataModel.getClassDescription(
+            "EpochGroup");
+        ClassDescription sourceCD = DataModel.getClassDescription("Source");
+        ClassDescription responseCD = DataModel.getClassDescription("Response");
+
+
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        RowData rowData = new RowData();
+        rootRow.addChildRow(rowData);
+        rowData.addAttribute(epochCD.getAttribute("properties"));
+        rowData.setPropName("someKey");
+        rowData.setPropType(Type.DATE_TIME);
+        rowData.setAttributeOperator(Operator.IS_NULL);
+        System.out.println("rowData: "+rowData.getRowString());
+        */
+
+        rootRow = createTestRowData();
         System.out.println(rootRow);
         rootRow.testSerialization();
 
