@@ -635,10 +635,13 @@ class RowPanel
                                   Object selectedItem) {
 
         ArrayList<Attribute> attributes;
-        if (classDescription.getAllAttributes() != null)
+        if ((classDescription != null) &&
+            (classDescription.getAllAttributes() != null)) { 
             attributes = classDescription.getAllAttributes();
-        else
+        }
+        else {
             attributes = new ArrayList<Attribute>();
+        }
 
         ArrayList<Attribute> copy = new ArrayList<Attribute>();
 
