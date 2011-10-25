@@ -1,6 +1,8 @@
 package com.physion.ovation.gui.ebuilder.datatypes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+
 
 /**
  * This is the description of a class.  The DataModel object creates
@@ -9,7 +11,8 @@ import java.util.ArrayList;
  * TODO: Would it be useful to engineers to have a method to get an
  * Attribute of a class via its name?
  */
-public class ClassDescription {
+public class ClassDescription
+    implements Serializable {
 
     /**
      * The name of this class.  E.g. "Epoch", "Response".

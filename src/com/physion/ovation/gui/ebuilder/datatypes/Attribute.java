@@ -1,5 +1,7 @@
 package com.physion.ovation.gui.ebuilder.datatypes;
 
+import java.io.Serializable;
+
 
 /**
  * This class describes an attribute of a class.
@@ -22,7 +24,8 @@ package com.physion.ovation.gui.ebuilder.datatypes;
  * This makes the code a bit more simple, but does
  * make the Attribute class a bit less "clean".
  */
-public class Attribute {
+public class Attribute
+    implements Serializable {
 
     /**
      * These are special values that appear in comboBoxes that
@@ -203,12 +206,24 @@ public class Attribute {
         if (this.cardinality != other.cardinality)
             return(false);
 
-        if ((this.classDescription == null) &&
-            (other.classDescription != null))
-            return(false);
+        /**
+         * See if the two Attributes share the same classDescription.
+         * Note, we don't use the ClassDescription class's equals()
+         * method because that method ends up calling this Attribute
+         * equals() method, which would cause an infinite loop.
+         * We assume that no one is going to name a class the empty
+         * string.
+         */
+        String thisCDName = "";
+        String otherCDName = "";
 
-        if ((this.classDescription != null) &&
-            (!this.classDescription.equals(other.classDescription)))
+        if (this.classDescription != null)
+            thisCDName = this.classDescription.getName();
+
+        if (other.classDescription != null)
+            otherCDName = other.classDescription.getName();
+
+        if (!thisCDName.equals(otherCDName))
             return(false);
 
         return(true);

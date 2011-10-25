@@ -1,5 +1,15 @@
 package com.physion.ovation.gui.ebuilder.datamodel;
 
+import java.lang.ClassNotFoundException;
+import java.io.InvalidClassException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -47,7 +57,12 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
  * throw Exceptions when the code is final.
  */
 public class RowData
-    implements RowDataListener {
+    implements RowDataListener, Serializable {
+
+    /**
+     * Just for testing.
+     */
+    public static final String SAVE_FILE_NAME = "saved.RDTree";
 
     public static final CollectionOperator DEFAULT_COLLECTION_OPERATOR2 =
         CollectionOperator.ANY;
@@ -2062,6 +2077,166 @@ public class RowData
 
 
     /**
+     * Write out this RowData to the passed in outputStream.
+     *
+     * @param outputStream The ObjectOutputStream into which this
+     * RowData will be written.
+     *
+     * @throws IOException This will be whatever exception was generated
+     * by the call to outputStream.writeObject().
+     */
+    public void writeRowData(ObjectOutputStream outputStream)
+        throws IOException {
+
+        /**
+         * "Sterilize" the RowData object by creating a copy.
+         * This gets rid of information such as GUI component
+         * listeners and other things like that.  We just want
+         * the data values.
+         */
+        RowData rowData = new RowData(this);
+        outputStream.writeObject(rowData);
+    }
+
+
+    /**
+     * Write out this RowData to the passed in file.
+     * This method is only being used for development/testing
+     * purposes currently.
+     *
+     * @param fileName The name of the file into which this
+     * RowData will be written.
+     */
+    public void writeRowData(String fileName) {
+
+        try {
+            FileOutputStream outputFile = new FileOutputStream(fileName);
+            ObjectOutputStream outputStream = new ObjectOutputStream(
+                outputFile);
+            writeRowData(outputStream);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Read a RowData object from the passed in inputStream.
+     *
+     * TODO:  How should errors be handled?  Hide them and just
+     * return null, or throw them up to the caller?
+     *
+     * @param inputStream The ObjectInputStream from which an
+     * RowData will be read.
+     *
+     * @param The read in RowData.  Returns null if there
+     * was an error.
+     *
+     * @throws IOException This will be whatever exception was generated
+     * by the call to inputStream.readObject().
+     *
+     * @throws ClassNotFoundException This will be thrown if the
+     * call to inputStream.readObject() did not know what class
+     * was read in.  This should never happen.  If it does, the
+     * file that was read in is probably corrupted or of an incorrect
+     * version if you see an InvalidClassException.
+     */
+    public static RowData readRowData(ObjectInputStream inputStream)
+        throws IOException, ClassNotFoundException {
+
+        Object obj = null;
+        try {
+            obj = inputStream.readObject();
+        }
+        catch (InvalidClassException e) {
+
+            String s = "The object that was read in was a RowData "+
+                "object, but it, or one of the classes it contains, "+
+                "might be of the wrong version.  For example, you are "+
+                "using an input file that was written using an old "+
+                "version of one of the classes.  If so, delete the old "+
+                "input file.";
+            throw(new IOException(s, e));
+        }
+
+        if (obj instanceof RowData) {
+            return((RowData)obj);
+        }
+        else {
+            /**
+             * The object we read in was not a RowData.
+             * This should never happen.
+             */
+            String s = "The object that was read in was not a "+
+                "RowData object but it was some sort of "+
+                "object that we know about: "+obj.getClass().getName()+".  "+
+                "There is some sort of bug/inconsistency in the code.";
+            throw(new IOException(s));
+        }
+    }
+
+
+    /**
+     * Read a RowData object from the passed in file.
+     * This method is only being used for development/testing
+     * purposes currently.
+     *
+     * @param fileName The name of the file from which an
+     * RowData will be read.
+     *
+     * @param The read in RowData.  Returns null if there
+     * was an error.
+     */
+    public static RowData readRowData(String fileName) {
+
+        Object obj = null;
+
+        try {
+            FileInputStream inputFile = new FileInputStream(fileName);
+            ObjectInputStream inputStream = new ObjectInputStream(inputFile);
+            return(readRowData(inputStream));
+        }
+        catch (FileNotFoundException e) {
+            /**
+             * Ignore it.  The first time we are run, no output
+             * file will have been written.
+             */
+            System.err.println("File not found: "+fileName);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return(null);
+    }
+
+
+    /**
+     * Test the serialization of this object by writing it out
+     * and reading it in and seeing if the read in value is the
+     * same as the written out value.
+     */
+    public boolean testSerialization() {
+
+        writeRowData(SAVE_FILE_NAME);
+        RowData rowData = readRowData(SAVE_FILE_NAME);
+        boolean same = rowData.toString(true, "").equals(
+            this.toString(true, ""));
+
+        System.out.println("rowData:\n"+rowData);
+
+        if (same)
+            System.out.println("Written and read versions are the same.");
+        else
+            System.out.println("ERROR:  Written and read versions are "+
+                               "different.");
+
+        return(same);
+    }
+
+
+    /**
      * This is a simple test program for this class.
      */
     public static void main(String[] args) {
@@ -2070,6 +2245,7 @@ public class RowData
 
         RowData rootRow = createTestRowData();
         System.out.println(rootRow);
+        rootRow.testSerialization();
 
         System.out.println("RowData test is ending.");
     }
