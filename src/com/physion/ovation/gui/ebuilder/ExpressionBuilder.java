@@ -925,7 +925,7 @@ public class ExpressionBuilder
 
         RowData originalRootRow = rootRow;
         returnValue = ExpressionBuilder.editExpression(rootRow);
-        while (true) {
+        //while (true) {
 
             System.out.println("\nstatus = "+returnValue.status);
             System.out.println("\nOriginal rootRow:\n"+originalRootRow);
@@ -958,6 +958,7 @@ public class ExpressionBuilder
             if (returnValue.rootRow != null)
                 returnValue.rootRow.writeRowData(SAVE_FILE_NAME_ROW_DATA);
 
+        /*
             originalRootRow = returnValue.rootRow;
 
             if (convert == true) {
@@ -969,5 +970,8 @@ public class ExpressionBuilder
                     returnValue.rootRow);
             } 
         }
+        */
+        System.out.println("Calling System.exit().");
+        System.exit(returnValue.status);
     }
 }
