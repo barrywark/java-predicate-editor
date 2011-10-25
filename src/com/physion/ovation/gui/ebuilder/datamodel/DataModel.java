@@ -574,6 +574,12 @@ public class DataModel {
      * list, so don't mess with it.
      */
     public static ArrayList<ClassDescription> getAllClassDescriptions() {
+
+        /**
+         * Be sure the ClassDescription singleton has been initialized.
+         */
+        getInstance();
+
         return(allClassDescriptions);
     }
 
@@ -586,6 +592,13 @@ public class DataModel {
      * list, so don't mess with it.
      */
     public static ArrayList<ClassDescription> getPossibleCUQs() {
+
+        /**
+         * Be sure the ClassDescription singleton has been initialized.
+         */
+        getInstance();
+
+
         return(possibleCUQs);
     }
 
