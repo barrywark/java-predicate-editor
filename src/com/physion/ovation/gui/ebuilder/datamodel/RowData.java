@@ -814,7 +814,8 @@ public class RowData
 
         Attribute childmost = getChildmostAttribute();
 
-        if ((childmost.getType() != Type.PARAMETERS_MAP) &&
+        if ((childmost != null) &&
+            (childmost.getType() != Type.PARAMETERS_MAP) &&
             (childmost.getType() != Type.PER_USER_PARAMETERS_MAP)) {
             /**
              * Try and help the engineer who is creating a RowData
@@ -1742,14 +1743,17 @@ public class RowData
 
     /**
      * Get the class that this RowData considers its "parent" class.
+     * I.e. this is the class whose list of attributes will be the
+     * leftmost comboBox's selections in THIS row.
+     *
      * If our parent row has an attributePath, this will will be
      * the class of the last, (rightmost), attribute on the attributePath.
      *
      * If our parent row does not have an attributePath, then this
      * will be the parent class of our parent row.
      *
-     * I.e. this is the class whose list of attributes will be the
-     * leftmost comboBox's selections in this row.
+     * If this is the root row, then our "parent" class is the
+     * classUnderQualification.
      */
     public ClassDescription getParentClass() {
 
@@ -1757,7 +1761,6 @@ public class RowData
             return(classUnderQualification);
         }
         else if (parentRow.getChildmostAttribute() == null) {
-                //return(getClassUnderQualification());
                 return(parentRow.getParentClass());
         }
         else {
@@ -1765,6 +1768,23 @@ public class RowData
         }
     }
 
+
+/*
+    public ClassDescription getChildmostClass() {
+
+        Attribute childmostAttribute = getChildmostAttribute();
+
+        if (childmostAttribute == null) {
+            return(classUnderQualification);
+        }
+        else if (parentRow.getChildmostAttribute() == null) {
+                return(parentRow.getParentClass());
+        }
+        else {
+            return(parentRow.getChildmostAttribute().getClassDescription());
+        }
+    }
+*/
 
     /**
      * This method returns a list of RowData objects that contain
