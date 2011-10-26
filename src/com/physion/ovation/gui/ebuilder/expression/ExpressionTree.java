@@ -22,9 +22,18 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 public class ExpressionTree
     implements Serializable {
 
-    //private ClassDescription classUnderQualification;
+    /**
+     * This is a the name of the class.  E.g. "Epoch", "EpochGroup",
+     * "Source".
+     */
     private String classUnderQualification;
-    private Expression rootExpression;
+
+    /**
+     * This is the root of the Expression tree.  It will be
+     * a collection operator such as: OperatorExpression(any),
+     * OperatorExpression(all), or OperatorExpression(not).
+     */
+    private IExpression rootExpression;
 
 
     /**

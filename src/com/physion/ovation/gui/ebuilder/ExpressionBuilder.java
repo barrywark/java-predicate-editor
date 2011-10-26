@@ -49,6 +49,11 @@ import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
  * If returnValue.status is RETURN_STATUS_CANCEL, then
  * returnValue.rootRow is null.
  *
+ * The editExpression() methods will soon be changed to
+ * take an ExpressionTree instead of a RowData object.
+ * That way the code that interfaces with the ExpressionBuilder
+ * GUI will never need to know anything about a RowData object.
+ *
  * Please see the class's main() method to see example code
  * you can use to create and display the GUI.
  */
@@ -773,6 +778,8 @@ public class ExpressionBuilder
 
     /**
      * Set the look and feel to something specific.
+     * Currently, this is really only to test out some
+     * different look and feels.
      * You need to comment/uncomment the setting of the
      * "lookAndFeel" variable below to what you want. 
      */
@@ -837,21 +844,11 @@ public class ExpressionBuilder
      * A simple example test program to test this class and show
      * how the editExpression() methods are used.
      *
-     * This example first displays a GUI that is empty.  After
-     * the user Oks or Cancels out of that GUI, we display a
-     * GUI filled with an existing expression tree.
-     *
      * Currently, if there is any argument on the command line
      * we will try to convert Expression objects into RowData
      * objects.  This is just for Steve's testing currently.
      */
     public static void main(String[] args) {
-
-        /**
-         * Create a default ReturnValue.
-         */
-        ExpressionBuilder.ReturnValue returnValue;
-
 
         if (args.length > 0) {
             convert = true;
@@ -864,9 +861,13 @@ public class ExpressionBuilder
         }
 
         /**
+         * Create a default ReturnValue.
+         */
+        ExpressionBuilder.ReturnValue returnValue =
+            new ExpressionBuilder.ReturnValue();
+
+        /**
          * Set the look and feel to something.
-         * Currently, this is really only to test out some
-         * different look and feels.
          */
         setLookAndFeel();
 
@@ -886,7 +887,6 @@ public class ExpressionBuilder
             System.exit(returnValue.status);
         }
         */
-
         /**
          * After the user Oks or Cancels out of the window
          * created above, create another window.  This time
@@ -923,9 +923,28 @@ public class ExpressionBuilder
             rootRow = RowData.createTestRowData();
         }
 
-        RowData originalRootRow = rootRow;
-        returnValue = ExpressionBuilder.editExpression(rootRow);
-        //while (true) {
+        returnValue.rootRow = rootRow;
+        returnValue.expressionTree = null;
+
+        /**
+         * Stay in a loop, displaying the GUI every time the
+         * user hits the OK button.
+         * Please note, the last line of this loop, which sets
+         * the keepRunning flag to false, can be uncommented
+         * to cause the GUI to only display once.
+         */
+        boolean keepRunning = true;
+        while (keepRunning) {
+
+            RowData originalRootRow = returnValue.rootRow;
+            if (convert == true) {
+                returnValue = ExpressionBuilder.editExpression(
+                    returnValue.expressionTree, returnValue.rootRow);
+            }
+            else {
+                returnValue = ExpressionBuilder.editExpression(
+                    returnValue.rootRow);
+            } 
 
             System.out.println("\nstatus = "+returnValue.status);
             System.out.println("\nOriginal rootRow:\n"+originalRootRow);
@@ -941,10 +960,11 @@ public class ExpressionBuilder
                 System.out.println("User pressed Cancel or closed the window.");
                 System.exit(returnValue.status);
             }
-
             /**
              * If we get here, the user pressed the OK button.
-             *
+             */
+
+            /**
              * Write out the serialized version of the 
              * ExpressionTree.  We will read it in when
              * this program is run again.
@@ -955,22 +975,23 @@ public class ExpressionBuilder
                 returnValue.expressionTree.writeExpressionTree(
                     SAVE_FILE_NAME_EXP_TREE);
 
+            /**
+             * Write out the serialized version of the 
+             * RowData.  We will read it in when
+             * this program is run again.
+             *
+             * This is just for testing the serialization.
+             */
             if (returnValue.rootRow != null)
                 returnValue.rootRow.writeRowData(SAVE_FILE_NAME_ROW_DATA);
 
-        /*
-            originalRootRow = returnValue.rootRow;
-
-            if (convert == true) {
-                returnValue = ExpressionBuilder.editExpression(
-                    returnValue.expressionTree, returnValue.rootRow);
-            }
-            else {
-                returnValue = ExpressionBuilder.editExpression(
-                    returnValue.rootRow);
-            } 
+            /**
+             * Comment this line out if you want to keep running
+             * in an infinite loop until the user presses Cancel.
+             */
+            keepRunning = false;
         }
-        */
+
         System.out.println("Calling System.exit().");
         System.exit(returnValue.status);
     }
