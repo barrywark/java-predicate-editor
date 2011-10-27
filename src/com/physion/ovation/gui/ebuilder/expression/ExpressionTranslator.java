@@ -55,6 +55,9 @@ public class ExpressionTranslator {
     /**
      * This method turns the passed in ExpressionTree into a
      * RowData object.
+     *
+     * To turn a a RowData object into an ExpressionTree, use
+     * the createExpressionTree() method.
      */
     public static RowData createRowData(ExpressionTree expressionTree) {
 
@@ -90,12 +93,40 @@ public class ExpressionTranslator {
          * add them to the rootRow.
          */
          /*
-        ArrayList<RowData> childRows = getChildRows(getFirstChildOE(oe),
+        ArrayList<RowData> childRows = createChildRows(getFirstChildOE(oe),
             expressionTree.getClassUnderQualification());
         rootRow.addChildRows(childRows);
         */
-        createAndAddChildRows(rootRow, getFirstChildOE(oe),
-            expressionTree.getClassUnderQualification());
+        //createAndAddChildRows(rootRow, getFirstChildOE(oe),
+        //    expressionTree.getClassUnderQualification());
+
+        if (OE_NOT.equals(oe.getOperatorName())) {
+            if ((oe.getOperandList().size() < 1) ||
+                (!(oe.getOperandList().get(0) instanceof
+                   IOperatorExpression))) {
+
+                String s = "IOperatorExpression(not) without an operand "+
+                    "that is an IOperatorExpression.  A \"not\" operator "+
+                    "at the root of an expression tree should have a single "+
+                    "operand that is an IOperatorExpression of with an "+
+                    "operator name of:  \"or\" or \"and\".";
+                throw(new IllegalArgumentException(s));
+            }
+
+            oe = (IOperatorExpression)oe.getOperandList().get(0);
+        }
+
+        ArrayList<IExpression> operandList = oe.getOperandList();
+        for (IExpression ex : operandList) {
+            if (!(ex instanceof IOperatorExpression)) {
+                String s = "Root IOperatorExpression("+oe.getOperatorName()+
+                    ") had an operand that was not an IOperatorExpression().";
+                throw(new IllegalArgumentException(s));
+            }
+
+            createAndAddChildRows(rootRow, (IOperatorExpression)ex,
+                                  expressionTree.getClassUnderQualification());
+        }
 
         return(rootRow);
     }
@@ -134,6 +165,7 @@ public class ExpressionTranslator {
      * one or two of the first operators in the Expression tree,
      * as demonstrated in the examples above.
      */
+/*
     private static IOperatorExpression getFirstChildOE(IOperatorExpression oe) {
         
         if (oe.getOperandList().size() < 1)
@@ -149,10 +181,10 @@ public class ExpressionTranslator {
             return((IOperatorExpression)(oe.getOperandList().get(0)));
         }
     }
-
+*/
 
     /**
-     * Get the list of child RowData objects that describe the passed
+     * Create the list of child RowData objects that describe the passed
      * in expression tree.  This method calls itself recursively to
      * generate the sub-tree of RowData objects.
      *
@@ -170,14 +202,12 @@ public class ExpressionTranslator {
      * are creating child rows for the topmost row in the GUI, this
      * would be the Class Under Qualification.
      */
-    private static ArrayList<RowData> getChildRows(IOperatorExpression oe,
+    private static ArrayList<RowData> createChildRows(IOperatorExpression oe,
         ClassDescription classDescription) {
 
-        /*
-        System.out.println("\nEnter getChildRows()");
+        System.out.println("\nEnter createChildRows()");
         System.out.println("oe: "+(Expression)oe);
         System.out.println("classDescription: "+classDescription);
-        */
         ArrayList<RowData> childRows = new ArrayList<RowData>();
 
         /**
@@ -206,7 +236,7 @@ public class ExpressionTranslator {
                 }
             }
         }
-        //System.out.println("collectionOperator = "+collectionOperator);
+        System.out.println("collectionOperator = "+collectionOperator);
 
         if (collectionOperator == CollectionOperator.NONE) {
             /**
@@ -221,7 +251,7 @@ public class ExpressionTranslator {
         }
 
         Operator attributeOperator = getAOForOE(oe);
-        //System.out.println("attributeOperator = "+attributeOperator);
+        System.out.println("attributeOperator = "+attributeOperator);
 
         if (collectionOperator != null) {
             rowData.setCollectionOperator(collectionOperator);
@@ -295,6 +325,7 @@ public class ExpressionTranslator {
                  */
                 setAttributeOperatorPathAndValue(rowData, ol, classDescription,
                                                  attributeOperator);
+                //rowData.setAttributeOperator(attributeOperator);
             }
         }
 
@@ -313,13 +344,23 @@ public class ExpressionTranslator {
         ArrayList<IExpression> operandList, ClassDescription classDescription,
         Operator attributeOperator) {
 
-        rowData.setAttributeOperator(attributeOperator);
+        System.out.println("Enter setAttributeOperatorPathAndValue");
+        System.out.println("attributeOperator: "+attributeOperator);
 
         /**
          * Convert the first (left) operand into a RowData
          * attributePath.
          */
         IExpression ex = operandList.get(0);
+        if (ex instanceof IOperatorExpression) {
+
+            String operatorName = ((IOperatorExpression)ex).getOperatorName();
+            if (OE_IS_NULL.equals(operatorName)) {
+
+                // TODO: Throw exception if no operand.
+                ex = ((IOperatorExpression)ex).getOperandList().get(0);
+            }
+        }
         setAttributePath(rowData, ex, classDescription);
 
         /**
@@ -337,13 +378,24 @@ public class ExpressionTranslator {
                 lve, attribute.getType());
             rowData.setAttributeValue(attributeValue);
         }
+
+        System.out.println("Calling rowData.setAttributeOperator");
+        rowData.setAttributeOperator(attributeOperator);
     }
 
 
+    /**
+     * @param rowData The row whose child rows we will create.
+     * We also use this to get the "parent" class used to interpret
+     * values in the oe's operand list.
+     *
+     * @param oe The IOperatorExpression whose list of operands will
+     * define the RowData children we create.
+     */
     private static void createAndAddChildRows(RowData rowData,
         IOperatorExpression oe, ClassDescription classDescription) {
 
-        ArrayList<RowData> childRows = getChildRows(oe, classDescription);
+        ArrayList<RowData> childRows = createChildRows(oe, classDescription);
         rowData.addChildRows(childRows);
     }
 
@@ -359,11 +411,10 @@ public class ExpressionTranslator {
     private static void setAttributePath(RowData rowData, IExpression ex,
         ClassDescription classDescription) {
 
-        /*
-        System.out.println("Enter setAttributePath");
+        System.out.println("Enter ExpressionTranslator.setAttributePath");
         System.out.println("rowData: "+rowData.getRowString());
         System.out.println("classDescription: "+classDescription);
-        */
+
         ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
 
         appendToAttributePath(attributePath, ex, classDescription);
@@ -415,6 +466,9 @@ public class ExpressionTranslator {
     private static ClassDescription appendToAttributePath(
         ArrayList<Attribute> attributePath, IExpression ex,
         ClassDescription classDescription) {
+
+        System.out.println("Enter appendToAttributePath");
+        System.out.println("ex"+((Expression)ex));
 
         if ((ex instanceof IAttributeExpression) ||
             (isPerUserOperator(ex, classDescription))) {
@@ -469,11 +523,15 @@ public class ExpressionTranslator {
                 return(appendToAttributePath(attributePath, op,
                                              classDescription));
             }
-            /*
             else if (OE_IS_NULL.equals(oe.getOperatorName())) {
-                System.exit(1);
+                /**
+                 * Do nothing because the later call to
+                 * RowData.setAttributeOperator() calls
+                 * addAttribute() with the correct
+                 * Attribute.IS_NULL or Attribute.IS_NOT_NULL
+                 * value.
+                 */
             }
-            */
             /*
             else if (OE_ANY.equals(oe.getOperatorName())) {
             }
@@ -2512,7 +2570,6 @@ public class ExpressionTranslator {
         RowData rootRow;
         ExpressionTree expression;
 
-        /*
         ClassDescription epochCD = DataModel.getClassDescription("Epoch");
         ClassDescription epochGroupCD = DataModel.getClassDescription(
             "EpochGroup");
@@ -2523,18 +2580,37 @@ public class ExpressionTranslator {
         rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
+/*
+        rowData = new RowData();
+        //rowData.addAttribute(epochCD.getAttribute("epochGroup"));
+        //rowData.addAttribute(epochGroupCD.getAttribute("source"));
+        //rowData.addAttribute(epochCD.getAttribute("owner"));
+        rowData.addAttribute(epochCD.getAttribute("protocolID"));
+        //rowData.addAttribute(Attribute.IS_NULL);
+        //rowData.setAttributeOperator(Operator.IS_NULL);
+        rowData.setAttributeOperator(Operator.EQUALS);
+        rowData.setAttributeValue("xyz");
+        rootRow.addChildRow(rowData);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("protocolID"));
+        rowData.setAttributeOperator(Operator.NOT_EQUALS);
+        rowData.setAttributeValue("abc");
+        rootRow.addChildRow(rowData);
+*/
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("epochGroup"));
         rowData.addAttribute(epochGroupCD.getAttribute("source"));
-        //rowData.addAttribute(epochCD.getAttribute("owner"));
-        rowData.addAttribute(Attribute.IS_NULL);
         rowData.setAttributeOperator(Operator.IS_NULL);
         rootRow.addChildRow(rowData);
-        */
+
+        testTranslation(rootRow);
+
+        /*
         rootRow = RowData.createTestRowData();
         System.out.println("\nRowData:\n"+rootRow);
-
         rootRow.testSerialization();
+        */
 
         /*
         System.out.println("\nRowData:\n"+rootRow);
@@ -2543,6 +2619,98 @@ public class ExpressionTranslator {
         rootRow = ExpressionTranslator.createRowData(expression);
         System.out.println("\nExpression Translated To RowData:\n"+rootRow);
         */
+    }
+
+
+    /**
+     * This is just a convenience method to call the other
+     * testTranslation() method with the verbose flag set
+     * to true and the exitOnFirstError flag set to true.
+     */
+    private static boolean testTranslation(Object someKindOfTree) {
+        return(testTranslation(someKindOfTree, true, true));
+    }
+
+
+    /**
+     * Test the translation of a RowData expression tree to
+     * an ExpressionTree, AND test the translation of an
+     * ExpressionTree to a RowData expression tree.
+     *
+     * You pass either a RowData root row object or
+     * pass an ExpressionTree object.  The code will translate
+     * from one class to the other and then back again, checking
+     * that the results match.  If they don't match, an error
+     * message is printed.
+     *
+     * @param someKindOfTree Pass either a RowData root row object
+     * or pass an ExpressionTree object.
+     *
+     * @param verbose Pass true if you want the trees to be printed.
+     * Pass false if all you want to see is the success or fail message.
+     *
+     * @param exitOnFirstError Pass true if you want this method to
+     * call System.exit(1) if it will return false.
+     *
+     * @return Returns true if the translation worked.  False otherwise.
+     */
+    private static boolean testTranslation(Object someKindOfTree,
+                                           boolean verbose,
+                                           boolean exitOnFirstError) {
+
+        RowData rootRow = null;
+        ExpressionTree expressionTree = null;
+
+        if (someKindOfTree instanceof RowData)
+            rootRow = (RowData)someKindOfTree;
+        else if (someKindOfTree instanceof ExpressionTree)
+            expressionTree = (ExpressionTree)someKindOfTree;
+        else {
+            String s = "You must pass an Object of type RowData or "+
+                "ExpressionTree.  You passed: "+someKindOfTree;
+            throw(new IllegalArgumentException(s));
+        }
+
+        boolean same;
+        if (rootRow != null) {
+            System.out.println("\nStarting With RowData:\n"+rootRow);
+            expressionTree = ExpressionTranslator.createExpressionTree(rootRow);
+            System.out.println("\nRowData Translated To Expression:\n"+
+                expressionTree);
+            RowData newRowData = ExpressionTranslator.createRowData(
+                expressionTree);
+            System.out.println("\nExpressionTree Translated Back To RowData:\n"+
+                newRowData);
+
+            same = rootRow.toString(true, "").equals(
+                newRowData.toString(true, ""));
+        }
+        else {
+            System.out.println("\nStarting With ExpressionTree:\n"+
+                expressionTree);
+            rootRow = ExpressionTranslator.createRowData(expressionTree);
+            System.out.println("\nExpressionTree Translated To RowData:\n"+
+                rootRow);
+            ExpressionTree newExpressionTree = ExpressionTranslator.
+                createExpressionTree(rootRow);
+            System.out.println("\nRowData Translated Back To Expression:\n"+
+                newExpressionTree);
+
+            same = expressionTree.toString().equals(
+                newExpressionTree.toString());
+        }
+
+        if (same)
+            System.out.println("\nOriginal and translated versions are "+
+                               "the same.");
+        else
+            System.out.println("\nERROR:  Original and translated versions "+
+                               "are different.");
+
+        if (exitOnFirstError && !same)
+            System.exit(1);
+
+        return(same);
     }
 
 
@@ -2563,7 +2731,9 @@ public class ExpressionTranslator {
             rootRow);
         System.out.println("\nTranslated To Expression:\n"+expression);
 
+        System.out.print("\nTest RowData Serialization: ");
         rootRow.testSerialization();
+        //testTranslation(rootRow, true, true);
 
         //rootRow = ExpressionTranslator.createRowData(expression);
         //System.out.println("\nExpression Translated To RowData:\n"+rootRow);
@@ -2577,8 +2747,8 @@ public class ExpressionTranslator {
 
         System.out.println("ExpressionTranslator test is starting...");
 
-        //runAllTests();
-        runOneTest();
+        runAllTests();
+        //runOneTest();
 
         System.out.println("\nExpressionTranslator test is ending.");
     }

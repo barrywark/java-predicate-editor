@@ -18,6 +18,8 @@ OperatorExpression(or)
     AttributeExpression(protocolID)
     StringLiteralValueExpression(xyz)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== Attribute Boolean Operator.IS_TRUE =====
 
 Original RowData:
@@ -31,6 +33,8 @@ OperatorExpression(and)
   OperatorExpression(==)
     AttributeExpression(incomplete)
     BooleanLiteralValueExpression(true)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Attribute Path Nested Twice =====
 
@@ -48,6 +52,8 @@ OperatorExpression(not)
         AttributeExpression(epochGroup)
         AttributeExpression(label)
       StringLiteralValueExpression(Test 27)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Attribute Path Nested Thrice =====
 
@@ -68,6 +74,8 @@ OperatorExpression(not)
         AttributeExpression(label)
       StringLiteralValueExpression(Test 27)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== Reference Value Operator.IS_NULL =====
 
 Original RowData:
@@ -80,6 +88,8 @@ rootExpression:
 OperatorExpression(and)
   OperatorExpression(isnull)
     AttributeExpression(owner)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Reference Value Operator.IS_NOT_NULL =====
 
@@ -94,6 +104,8 @@ OperatorExpression(and)
   OperatorExpression(not)
     OperatorExpression(isnull)
       AttributeExpression(owner)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Compound Row =====
 
@@ -112,6 +124,8 @@ OperatorExpression(and)
       OperatorExpression(==)
         AttributeExpression(uuid)
         StringLiteralValueExpression(xyz)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Compound Row With Lots Of None Collection Operators =====
 
@@ -137,6 +151,8 @@ OperatorExpression(not)
             OperatorExpression(!=)
               AttributeExpression(samplingRate)
               Float64LiteralValueExpression(1.23)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Same As Above, But Nested =====
 
@@ -169,6 +185,8 @@ OperatorExpression(not)
               AttributeExpression(samplingRate)
               Float64LiteralValueExpression(1.23)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== Compound Row Nested Classes =====
 
 Original RowData:
@@ -191,6 +209,8 @@ OperatorExpression(and)
             AttributeExpression(uuid)
             StringLiteralValueExpression(ID 27)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== Compound Row ALL COUNT =====
 
 Original RowData:
@@ -210,6 +230,8 @@ OperatorExpression(and)
           AttributeExpression(resources)
         Int32LiteralValueExpression(5)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== Compound Row ANY ANY =====
 
 Original RowData:
@@ -227,6 +249,8 @@ OperatorExpression(or)
       OperatorExpression(==)
         AttributeExpression(uuid)
         StringLiteralValueExpression(xyz)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Compound Row NONE NONE =====
 
@@ -248,6 +272,8 @@ OperatorExpression(not)
             AttributeExpression(uuid)
             StringLiteralValueExpression(xyz)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== PER_USER =====
 
 Original RowData:
@@ -268,6 +294,8 @@ OperatorExpression(and)
           AttributeExpression(uuid)
           StringLiteralValueExpression(xyz)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== PER_USER CollectionOperator.COUNT =====
 
 Original RowData:
@@ -283,6 +311,8 @@ OperatorExpression(and)
       OperatorExpression(mykeywords)
         AttributeExpression(this)
     Int32LiteralValueExpression(5)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== PER_USER Nested Once CollectionOperator.ANY =====
 
@@ -302,6 +332,8 @@ OperatorExpression(or)
       OperatorExpression(==)
         AttributeExpression(uuid)
         StringLiteralValueExpression(xyz)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== PER_USER Nested Twice CollectionOperator.NONE =====
 
@@ -326,6 +358,8 @@ OperatorExpression(not)
             AttributeExpression(uuid)
             StringLiteralValueExpression(xyz)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== PER_USER Nested Thrice CollectionOperator.ALL =====
 
 Original RowData:
@@ -349,6 +383,8 @@ OperatorExpression(and)
         AttributeExpression(uuid)
         StringLiteralValueExpression(xyz)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== PARAMETERS_MAP Type Date =====
 
 Original RowData:
@@ -368,6 +404,8 @@ OperatorExpression(and)
         ClassLiteralValueExpression(ovation.DateValue)
       AttributeExpression(value)
     TimeLiteralValueExpression(Fri Jan 01 13:00:00 NZDT 2010)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== PARAMETERS_MAP Nested =====
 
@@ -395,6 +433,8 @@ OperatorExpression(and)
       AttributeExpression(value)
     Float64LiteralValueExpression(12.3)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== PER_USER_PARAMETERS_MAP =====
 
 Original RowData:
@@ -414,6 +454,8 @@ OperatorExpression(and)
     OperatorExpression(!=)
       AttributeExpression(value)
       Int32LiteralValueExpression(34)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== PER_USER_PARAMETERS_MAP Nested =====
 
@@ -439,6 +481,8 @@ OperatorExpression(or)
       AttributeExpression(value)
       Int32LiteralValueExpression(34)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== Reference isnull() =====
 
 Original RowData:
@@ -453,6 +497,8 @@ OperatorExpression(and)
     OperatorExpression(.)
       AttributeExpression(nextEpoch)
       AttributeExpression(nextEpoch)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Compound Operators Nested =====
 
@@ -470,6 +516,8 @@ OperatorExpression(and)
       OperatorExpression(=~~)
         AttributeExpression(protocolID)
         StringLiteralValueExpression(xyz)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Compound Operators In Different Positions =====
 
@@ -491,6 +539,8 @@ OperatorExpression(and)
           OperatorExpression(=~~)
             AttributeExpression(protocolID)
             StringLiteralValueExpression(xyz)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Compound Operators In Different Positions =====
 
@@ -513,6 +563,8 @@ OperatorExpression(and)
             AttributeExpression(protocolID)
             StringLiteralValueExpression(xyz)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== Compound Operators In Different Positions =====
 
 Original RowData:
@@ -533,6 +585,8 @@ OperatorExpression(or)
           OperatorExpression(=~~)
             AttributeExpression(protocolID)
             StringLiteralValueExpression(xyz)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Compound Operators In Different Positions =====
 
@@ -555,6 +609,8 @@ OperatorExpression(not)
             OperatorExpression(=~~)
               AttributeExpression(protocolID)
               StringLiteralValueExpression(xyz)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Nested PER_USER With PARAMETERS_MAP & PER_USER Children =====
 
@@ -587,6 +643,8 @@ OperatorExpression(or)
             OperatorExpression(mykeywords)
               AttributeExpression(this)
           Int32LiteralValueExpression(5)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ===== Nested PER_USER With PM, PU, and PUPM Children =====
 
@@ -630,6 +688,8 @@ OperatorExpression(or)
             AttributeExpression(value)
             Float64LiteralValueExpression(34.5)
 
+Test RowData Serialization: Written and read versions are the same.
+
 ===== Compound Row, Class Change Between Parent And Child =====
 
 Original RowData:
@@ -652,5 +712,7 @@ OperatorExpression(not)
               OperatorExpression(>=)
                 AttributeExpression(samplingRate)
                 Float64LiteralValueExpression(55.2)
+
+Test RowData Serialization: Written and read versions are the same.
 
 ExpressionTranslator test is ending.

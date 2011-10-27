@@ -795,6 +795,8 @@ public class RowData
      */
     public void setAttributeOperator(Operator attributeOperator) {
 
+        //System.out.println("Enter RowData.setAttributeOperator("+
+        //                   attributeOperator+")");
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE_OPERATOR);
         this.attributeOperator = attributeOperator;
@@ -813,6 +815,8 @@ public class RowData
         }
 
         Attribute childmost = getChildmostAttribute();
+        //System.out.println("attributeOperator = "+attributeOperator);
+        //System.out.println("childmost = "+childmost);
 
         if ((childmost != null) &&
             (childmost.getType() != Type.PARAMETERS_MAP) &&
@@ -1124,13 +1128,12 @@ public class RowData
      */
     public void addAttribute(Attribute attribute) {
 
-        //System.out.println("Enter addAttribute("+attribute+")");
+        //System.out.println("Enter RowData.addAttribute("+attribute+")");
 
         if (attribute == null) {
             String s = "Bad call to RowData.addAttribute() with a "+
                 "null attribute parameter.";
-            (new Exception(s)).printStackTrace();
-            return;
+            throw(new IllegalArgumentException(s));
         }
 
         if (attributePath == null)
@@ -1146,8 +1149,16 @@ public class RowData
                     "setAttributeOperator(Operator.IS_NULL), for example, "+
                     "can add the Attribute.IS_NULL automatically if it is "+
                     "not already at the end of the attributePath.";
-                (new Exception(s)).printStackTrace();
-                return;
+                throw(new IllegalArgumentException(s));
+                /**
+                 * Please note, we could just "fix" the above
+                 * described problem by doing this:
+                 *
+                 *      attributePath.remove(attributePath.size()-1);
+                 *
+                 * I.e. just remove the Attribute that is no longer
+                 * valid.  That might be better.
+                 */
             }
         }
 
@@ -2236,6 +2247,9 @@ public class RowData
      * Test the serialization of this object by writing it out
      * and reading it in and seeing if the read in value is the
      * same as the written out value.
+     *
+     * @return Returns true if the value that we read in
+     * matched the original value that we wrote out.
      */
     public boolean testSerialization() {
 
