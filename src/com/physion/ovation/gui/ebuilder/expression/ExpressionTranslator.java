@@ -259,7 +259,160 @@ public class ExpressionTranslator {
         Operator attributeOperator = getAOForOE(oe);
         System.out.println("attributeOperator = "+attributeOperator);
 
-        if (collectionOperator != null) {
+        IExpression tempEx = ol.get(0);
+        if ((collectionOperator != null) &&
+            isElementsOfTypeOperator(tempEx, classDescription)) {
+            /**
+             * We got a collection operator whose first operand
+             * is IOperatorExpression(elementsOfType).  That means
+             * it is the start of a PER_USER_PARAMETERS_MAP Attribute 
+             * such as "My Property" (myproperties) or
+             * "Any Property" (properties).
+             *
+             * For example:
+             *
+             *      OperatorExpression(and)
+             *        OperatorExpression(any)
+             *          OperatorExpression(elementsOfType)
+             *            OperatorExpression(properties)
+             *              AttributeExpression(this)
+             *              StringLiteralValueExpression(someKey)
+             *            ClassLiteralValueExpression(ovation.IntegerValue)
+             *          OperatorExpression(!=)
+             *            AttributeExpression(value)
+             *            Int32LiteralValueExpression(34)
+             *
+             * Note, as of October 2011, the collectionOperator will
+             * always be "any".  It will have two operands.  The first
+             * is IOperatorExpression(elementsOfType), which will have
+             * the "properties" or "myproperties" IOperatorExpression
+             * as its first operand and IClassLiteralValueExpression
+             * as its second.
+             *
+             * The second operand for the "any" collectionOperator
+             * will be an IOperatorExpression with AttributeExpression(value)
+             * as its first operand and some LiteralValueExpression as its
+             * second operand.
+             */
+            System.out.println("This is a PER_USER_PARAMETERS_MAP expression.");
+
+            /**
+             * If we get here, tempEx is IOperatorExpression(elementsOfType).
+             * It should have two operands.  The first is the Attribute (and
+             * the path to the Attribute).  The second is a
+             * IClassLiteralValueExpression(ovation.<someType>.
+             * Where <someType> is a value like: ovation.DateValue,
+             * ovation.FloatingPointValue, ovation.IntegerValue, etc.
+             */
+
+            /**
+             * First, because it is simple and easy, handle
+             * the IOperatorExpression(elementsOfType) node's second
+             * operand which gives us the property type.
+             */
+            
+            IOperatorExpression oeElementsOfType = (IOperatorExpression)tempEx;
+            IExpression exTemp = oeElementsOfType.getOperandList().get(1);
+            if (!(exTemp instanceof IClassLiteralValueExpression)) {
+                String s = "IOperatorExpression(elementsOfType)'s second "+
+                    "operand is not of type "+
+                    "IClassLiteralValueExpression.";
+                throw(new IllegalArgumentException(s));
+            }
+
+            IClassLiteralValueExpression clve =
+                (IClassLiteralValueExpression)exTemp;
+            Type type = getTypeForCLVE(clve);
+            rowData.setPropType(type);
+
+            /**
+             * Now deal with the IOperatorExpression(elementsOfType) node's
+             * first operand.
+             */
+
+            exTemp = oeElementsOfType.getOperandList().get(0);
+            if (!(exTemp instanceof IOperatorExpression)) {
+                String s = "IOperatorExpression(elementsOfType) does not have "+
+                    "an IOperatorExpression as its first "+
+                    "operand.";
+                throw(new IllegalArgumentException(s));
+            }
+
+            IOperatorExpression oeAttributePath = (IOperatorExpression)exTemp;
+
+            /**
+             * At this point, oeAttributePath tells us the
+             * name of the Attribute, the "path" to it, and
+             * the key that it uses.
+             * 
+             * oeAttributePath contains the name of the Attribute.
+             * Its first operand is the "path" to the attribute.
+             *
+             * Its second operand is the property "key".
+             */
+
+            if (oeAttributePath.getOperandList().size() != 2) {
+                String s = "PER_USER_PARAMETERS_MAP IOperatorExpression("+
+                    oeAttributePath.getOperatorName()+
+                    ") does not have two operands.";
+                throw(new IllegalArgumentException(s));
+            }
+
+            exTemp = oeAttributePath.getOperandList().get(0);
+            appendToAttributePath(rowData, oeAttributePath, classDescription);
+
+            /**
+             * Now turn the second operand into the property name/key
+             * for the row.
+             */
+
+            exTemp = oeAttributePath.getOperandList().get(1);
+            if (!(exTemp instanceof IStringLiteralValueExpression)) {
+                String s = "PER_USER_PARAMETERS_MAP "+
+                    "IOperatorExpression("+
+                    oeAttributePath.getOperatorName()+
+                    ") is not of type IStringLiteralValueExpression.";
+                throw(new IllegalArgumentException(s));
+            }
+
+            IStringLiteralValueExpression slve =
+                (IStringLiteralValueExpression)exTemp;
+            rowData.setPropName(slve.getValue().toString());
+
+            /**
+             * Set the attributeOperator and (possibly) the
+             * attributeValue.
+             */
+
+            tempEx = ol.get(1);
+            if (!(tempEx instanceof IOperatorExpression)) {
+                String s = "Operand after the IOperatorExpression("+
+                    "elementsOfType) operand is not of type "+
+                    "IOperatorExpression. It is: "+tempEx;
+                throw(new IllegalArgumentException(s));
+            }
+
+            oe = (IOperatorExpression)tempEx;
+            attributeOperator = getAOForOE(oe);
+            if ((attributeOperator != Operator.IS_NULL) &&
+                (attributeOperator != Operator.IS_NOT_NULL) &&
+                (attributeOperator != Operator.IS_TRUE) &&
+                (attributeOperator != Operator.IS_FALSE)) {
+
+                ArrayList<IExpression> operandList = oe.getOperandList();
+                ILiteralValueExpression lve;
+                lve = (ILiteralValueExpression)operandList.get(1);
+                Attribute attribute = rowData.getChildmostAttribute();
+                Object attributeValue = createAttributeValue(
+                    lve, attribute.getType());
+                rowData.setAttributeValue(attributeValue);
+            }
+
+            System.out.println("Calling rowData.setAttributeOperator");
+            rowData.setAttributeOperator(attributeOperator);
+        }
+        else if (collectionOperator != null) {
+
             rowData.setCollectionOperator(collectionOperator);
 
             if (attributeOperator != null) {
@@ -354,14 +507,6 @@ public class ExpressionTranslator {
                     /**
                      * Type 1 described above.
                      */
-                    /*
-                    for (; olIndex < ol.size(); olIndex++) {
-
-                        IOperatorExpression operand =
-                            (IOperatorExpression)ol.get(olIndex);
-                        createAndAddChildRows(rowData, operand, childClass);
-                    }
-                    */
                 }
                 else if ((childmost != null) &&
                          ((childmost.getType() != Type.PARAMETERS_MAP) &&
@@ -387,28 +532,12 @@ public class ExpressionTranslator {
                     }
                     ol = oe2.getOperandList();
                     olIndex = 0;
-                    /*
-                    for (; olIndex < ol.size(); olIndex++) {
-
-                        IOperatorExpression operand =
-                            (IOperatorExpression)ol.get(olIndex);
-                        createAndAddChildRows(rowData, operand, childClass);
-                    }
-                    */
                 }
                 else {
                     System.out.println("Type 3");
                     /**
                      * Type 3 described above.
                      */
-                    /*
-                    for (; olIndex < ol.size(); olIndex++) {
-
-                        IOperatorExpression operand =
-                            (IOperatorExpression)ol.get(olIndex);
-                        createAndAddChildRows(rowData, operand, childClass);
-                    }
-                    */
                 }
 
                 /**
@@ -562,6 +691,63 @@ public class ExpressionTranslator {
 
 
     /**
+     * This returns true if the passed in IExpression is
+     * a PER_USER_PARAMETERS_MAP Attribute like "properties",
+     * "myproperties", etc.
+     */
+    private static boolean isPerUserParametersMapOperator(IExpression ex,
+                                                          ClassDescription cd) {
+
+        if (ex instanceof IOperatorExpression) {
+
+            IOperatorExpression oe = (IOperatorExpression)ex;
+            String name = oe.getOperatorName();
+
+            Attribute attribute = cd.getAttribute(name);
+            if ((attribute != null) &&
+                (attribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
+                return(true);
+            }
+        }
+
+        return(false);
+    }
+
+
+    /**
+     * This returns true if the passed in IExpression is
+     * the parent of a PER_USER_PARAMETERS_MAP Attribute like "properties"
+     * or "myproperties".
+     *
+     * Note, we know that this IExpression tree is a
+     * PER_USER_PARAMETERS_MAP tree if it is an
+     * IOperatorExpression(elementsOfType).  If that is
+     * the case, then the IOperatorExpression that is its
+     * first operand, (e.g. IOperatorExpression(myproperties)),
+     * is an Attribute of type PER_USER_PARAMETERS_MAP.
+     * So, we don't actually check the child at this point.
+     *
+     * Note, as of October 2011, the only Attributes of
+     * Type.PER_USER_PARAMETERS_MAP are "properties" and
+     * "myproperties".
+     */
+    private static boolean isElementsOfTypeOperator(IExpression ex,
+                                                    ClassDescription cd) {
+
+        if (ex instanceof IOperatorExpression) {
+
+            IOperatorExpression oe = (IOperatorExpression)ex;
+            String name = oe.getOperatorName();
+
+            if (OE_ELEMENTS_OF_TYPE.equals(name))
+                return(true);
+        }
+
+        return(false);
+    }
+
+
+    /**
      * Append the passed in IExpression to the passed in attributePath.
      * It converts the passed in IExpression tree into Attributes
      * and adds them to the attributePath.
@@ -588,11 +774,13 @@ public class ExpressionTranslator {
         IExpression ex, ClassDescription classDescription) {
 
         System.out.println("Enter appendToAttributePath");
+        System.out.println("rowData: "+rowData.getRowString());
         System.out.println("ex: "+((Expression)ex));
         System.out.println("classDescription: "+classDescription);
 
         if ((ex instanceof IAttributeExpression) ||
-            (isPerUserOperator(ex, classDescription))) {
+            (isPerUserOperator(ex, classDescription)) ||
+            (isPerUserParametersMapOperator(ex, classDescription))) {
 
             String name;
             if (ex instanceof IAttributeExpression) {
@@ -601,8 +789,11 @@ public class ExpressionTranslator {
             }
             else {
                 /**
-                 * This is a PER_USER "operator" such as "keywords"
-                 * or "mykeywords".  It will have an attribute
+                 * ex is a PER_USER "operator" such as "keywords"
+                 * or "mykeywords", or it is a PER_USER_PARAMETERS_MAP
+                 * "operator" such as "properties" or "myproperties.
+                 *
+                 * In either case, it will have an attribute
                  * path as a subtree.  If so, we need to parse it
                  * and prepend it to the attribute path.
                  * For example:
@@ -624,7 +815,8 @@ public class ExpressionTranslator {
                  *
                  *      nextEpoch.nextEpoch.prevEpoch.All Keywords All have Any
                  *
-                 * Note that if there is no "path", the subtree will
+                 * Note that if there is no "path", the subtree
+                 * under OperatorExpression(keywords) will
                  * be just the AttributeExpression(this).
                  */
                 IOperatorExpression oe = (IOperatorExpression)ex;
@@ -2999,6 +3191,7 @@ public class ExpressionTranslator {
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
 */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ALL);
@@ -3009,6 +3202,21 @@ public class ExpressionTranslator {
         rowData.setPropType(Type.DATE_TIME);
         rowData.setAttributeOperator(Operator.EQUALS);
         rowData.setAttributeValue(new Date(1262304000000L));
+        rootRow.addChildRow(rowData);
+*/
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("properties"));
+        rowData.setPropName("someKey");
+        rowData.setPropType(Type.INT_32);
+        rowData.setAttributeOperator(Operator.NOT_EQUALS);
+        rowData.setAttributeValue(new Integer(34));
         rootRow.addChildRow(rowData);
 
         testTranslation(rootRow);
