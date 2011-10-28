@@ -22,6 +22,12 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
  */
 public class ExpressionTranslator {
 
+    public static final String CLVE_BOOLEAN = "ovation.BooleanValue";
+    public static final String CLVE_STRING = "ovation.StringValue";
+    public static final String CLVE_INTEGER = "ovation.IntegerValue";
+    public static final String CLVE_FLOAT = "ovation.FloatingPointValue";
+    public static final String CLVE_DATE = "ovation.DateValue";
+
     public static final String AE_VALUE = "value";
     public static final String AE_THIS = "this";
 
@@ -506,6 +512,8 @@ public class ExpressionTranslator {
      * Set the value of the rowData's attributePath to be the
      * equivalent of the value in the IExpression.
      *
+     * TODO: Get rid of this method.
+     *
      * @param rowData The RowData object whose attributePath we will set.
      *
      * @param ex The IExpression that is the left operand of an operator.
@@ -517,13 +525,16 @@ public class ExpressionTranslator {
         System.out.println("rowData: "+rowData.getRowString());
         System.out.println("classDescription: "+classDescription);
 
+        /*
         ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
 
-        appendToAttributePath(attributePath, ex, classDescription);
+        appendToAttributePath(rowData, attributePath, ex, classDescription);
 
         for (Attribute attribute : attributePath) {
             rowData.addAttribute(attribute);
         }
+        */
+        appendToAttributePath(rowData, ex, classDescription);
     }
 
 
@@ -572,9 +583,9 @@ public class ExpressionTranslator {
      * on which this method is currently working.  If the
      * Attribute is a primitive, (e.g. int, string), this returns null.
      */
-    private static ClassDescription appendToAttributePath(
-        ArrayList<Attribute> attributePath, IExpression ex,
-        ClassDescription classDescription) {
+    private static ClassDescription appendToAttributePath(RowData rowData,
+        //ArrayList<Attribute> attributePath,
+        IExpression ex, ClassDescription classDescription) {
 
         System.out.println("Enter appendToAttributePath");
         System.out.println("ex: "+((Expression)ex));
@@ -650,7 +661,7 @@ public class ExpressionTranslator {
                      * nextEpoch.nextEpoch.prevEpoch of the
                      * example attribute path described above.
                      */
-                    appendToAttributePath(attributePath, ex2, classDescription);
+                    appendToAttributePath(rowData, ex2, classDescription);
                 }
             }
 
@@ -664,7 +675,8 @@ public class ExpressionTranslator {
             }
 
             System.out.println("Adding attribute \""+attribute+"\" to path.");
-            attributePath.add(attribute);
+            //attributePath.add(attribute);
+            rowData.addAttribute(attribute);
             return(attribute.getClassDescription());
         }
         else if (ex instanceof IOperatorExpression) {
@@ -672,27 +684,167 @@ public class ExpressionTranslator {
             IOperatorExpression oe = (IOperatorExpression)ex;
             if (OE_DOT.equals(oe.getOperatorName())) {
 
-                IExpression op = oe.getOperandList().get(0);
-                ClassDescription childClass;
-                childClass = appendToAttributePath(attributePath, op,
-                                                   classDescription);
+                /**
+                 * The operator is a ".", so this could be a
+                 * "normal" attribute path or this could
+                 * be a PARAMETERS_MAP attribute path.
+                 */
 
-                if (oe.getOperandList().size() > 1) {
-                    op = oe.getOperandList().get(1);
-                    return(appendToAttributePath(attributePath, op,
-                                                 childClass));
+                IExpression op = oe.getOperandList().get(0);
+
+                if ((op instanceof IOperatorExpression) &&
+                    OE_AS.equals(((IOperatorExpression)op).getOperatorName())) {
+
+                    /**
+                     * This is a PARAMETERS_MAP attribute path.
+                     *
+                     * Here is an example that is not "nested" after
+                     * other attributes:
+                     *
+                     * protocolParameters.someTimeKey(time) == "Fri Jan 01 2010"
+                     *
+                     * OperatorExpression(and)
+                     *   OperatorExpression(==)
+                     *     OperatorExpression(.)
+                     *       OperatorExpression(as)
+                     *         OperatorExpression(parameter)
+                     *           AttributeExpression(protocolParameters)
+                     *           StringLiteralValueExpression(someTimeKey)
+                     *         ClassLiteralValueExpression(ovation.DateValue)
+                     *       AttributeExpression(value)
+                     *     TimeLiteralValueExpression(Fri Jan 01 2010)
+                     *
+                     * Here is an example that is "nested":
+                     *
+                     * nextEpoch.nextEpoch.prevEpoch.protocolParameters.key(float) == "12.3"
+                     *
+                     * OperatorExpression(and)
+                     *   OperatorExpression(==)
+                     *     OperatorExpression(.)
+                     *       OperatorExpression(as)
+                     *         OperatorExpression(parameter)
+                     *           OperatorExpression(.)
+                     *             OperatorExpression(.)
+                     *               OperatorExpression(.)
+                     *                 AttributeExpression(nextEpoch)
+                     *                 AttributeExpression(nextEpoch)
+                     *               AttributeExpression(prevEpoch)
+                     *             AttributeExpression(protocolParameters)
+                     *           StringLiteralValueExpression(key)
+                     *         ClassLiteralValueExpression(ovation.FloatingPointValue)
+                     *       AttributeExpression(value)
+                     *     Float64LiteralValueExpression(12.3)
+                     *
+                     * The other operand should be AttributeExpression(value).
+                     * TODO:  Do we need to check that that is the case?
+                     *
+                     * The OperatorExpression(as) node should have two
+                     * operands:  OperatorExpression(parameter) and
+                     * ClassLiteralValueExpression(ovation.<someType>).
+                     * Where <someType> is a value like: ovation.DateValue,
+                     * ovation.FloatingPointValue, ovation.IntegerValue, etc.
+                     */
+                    IOperatorExpression oeAs = (IOperatorExpression)op;
+                    if (oeAs.getOperandList().size() != 2) {
+                        String s = "IOperatorExpression(as) does not have "+
+                            "two operands.";
+                        throw(new IllegalArgumentException(s));
+                    }
+
+                    /**
+                     * First, because it is simple and easy, handle
+                     * the IOperatorExpression(as) node's second
+                     * operand which gives us the property type.
+                     */
+                    
+                    IExpression exTemp = oeAs.getOperandList().get(1);
+                    if (!(exTemp instanceof IClassLiteralValueExpression)) {
+                        String s = "IOperatorExpression(as)'s second "+
+                            "operand is not of type "+
+                            "IClassLiteralValueExpression.";
+                        throw(new IllegalArgumentException(s));
+                    }
+
+                    IClassLiteralValueExpression clve =
+                        (IClassLiteralValueExpression)exTemp;
+                    Type type = getTypeForCLVE(clve);
+                    rowData.setPropType(type);
+
+                    /**
+                     * Now deal with the IOperatorExpression(as) node's
+                     * first operand.
+                     */
+
+                    exTemp = oeAs.getOperandList().get(0);
+                    if ((!(exTemp instanceof IOperatorExpression)) ||
+                        !OE_PARAMETER.equals(((IOperatorExpression)exTemp).
+                                             getOperatorName())) {
+                        String s = "IOperatorExpression(as) does not have "+
+                            "IOperatorExpression(parameter) as its first "+
+                            "operand.";
+                        throw(new IllegalArgumentException(s));
+                    }
+
+                    IOperatorExpression oeParameter =
+                        (IOperatorExpression)exTemp;
+
+                    /**
+                     * The OperatorExpression(parameter) node should have
+                     * two operands.  The first is an IExpression
+                     * node/tree that is the path to the attribute
+                     * name.  For example, protocolParameters, or
+                     * nextEpoch.nextEpoch.prevEpoch.protocolParameter.
+                     * The second operand is a StringLiteralValueExpression
+                     * that gives key.  The string "someTimeKey" or "key"
+                     * in the examples in the comments above.
+                     *
+                     * Turn the first operand into an attribute path.
+                     * Use the second operand to set the property name
+                     * field in the RowData.
+                     */
+                    
+                    if (oeParameter.getOperandList().size() != 2) {
+                        String s = "IOperatorExpression(parameter) does not "+
+                            "have two operands.";
+                        throw(new IllegalArgumentException(s));
+                    }
+
+                    exTemp = oeParameter.getOperandList().get(0);
+                    appendToAttributePath(rowData, exTemp, classDescription);
+
+                    exTemp = oeParameter.getOperandList().get(1);
+                    if (!(exTemp instanceof IStringLiteralValueExpression)) {
+                        String s = "IOperatorExpression(parameter)'s second "+
+                            "operand is not of type "+
+                            "IStringLiteralValueExpression.";
+                        throw(new IllegalArgumentException(s));
+                    }
+
+                    IStringLiteralValueExpression slve =
+                        (IStringLiteralValueExpression)exTemp;
+                    rowData.setPropName(slve.getValue().toString());
                 }
                 else {
-                    /**
-                     * This should never happen.  A dot operator must
-                     * always have two operands.
-                     */
+
+                    ClassDescription childClass;
+                    childClass = appendToAttributePath(rowData, op,
+                                                       classDescription);
+
+                    if (oe.getOperandList().size() > 1) {
+                        op = oe.getOperandList().get(1);
+                        return(appendToAttributePath(rowData, op, childClass));
+                    }
+                    else {
+                        /**
+                         * This should never happen.  A dot operator must
+                         * always have two operands.
+                         */
+                    }
                 }
             }
             else if (OE_COUNT.equals(oe.getOperatorName())) {
                 IExpression op = oe.getOperandList().get(0);
-                return(appendToAttributePath(attributePath, op,
-                                             classDescription));
+                return(appendToAttributePath(rowData, op, classDescription));
             }
             else if (OE_IS_NULL.equals(oe.getOperatorName())) {
                 /**
@@ -1404,8 +1556,7 @@ public class ExpressionTranslator {
         Attribute attribute = rowData.getChildmostAttribute();
         pupmOperator = new OperatorExpression(attribute.getQueryName());
         elementsOfTypeOperator.addOperand(pupmOperator);
-        elementsOfTypeOperator.addOperand(createClassLiteralValueExpression(
-                                          rowData.getPropType()));
+        elementsOfTypeOperator.addOperand(createCLVEForType(rowData.getPropType()));
 
         /**
          * Create the two operands for the pupmOperator.
@@ -1546,45 +1697,70 @@ public class ExpressionTranslator {
     }
 
 
-    private static IClassLiteralValueExpression
-        createClassLiteralValueExpression(Type type) {
+    private static Type getTypeForCLVE(IClassLiteralValueExpression clve) {
 
-        String name = "ovation.";
+        if ((clve == null) || (clve.getValue() == null))
+            return(null);
+
+        String name = clve.getValue().toString();
+
+        /**
+         * At this point, name should be something like:
+         *
+         *      ovation.DateValue
+         */
+
+        if (CLVE_BOOLEAN.equals(name))
+            return(Type.BOOLEAN);
+        else if (CLVE_STRING.equals(name))
+            return(Type.UTF_8_STRING);
+        else if (CLVE_INTEGER.equals(name))
+            return(Type.INT_32);
+        else if (CLVE_FLOAT.equals(name))
+            return(Type.FLOAT_64);
+        else if (CLVE_DATE.equals(name))
+            return(Type.DATE_TIME);
+        else {
+            String s = "Bad IClassLiteralValue parameter clve: \""+name+"\"";
+            throw(new IllegalArgumentException(s));
+        }
+    }
+
+
+    /**
+     * Create and return a ClassLiteralValueExpression for the passed
+     * in Type.
+     *
+     * TODO:  Perhaps create a set of static final ClassLiteralValueExpression
+     * objects instead of the set of strings I currently have?  Then we
+     * would not be creating new objects all the time.
+     */
+    private static ClassLiteralValueExpression createCLVEForType(Type type) {
 
         switch (type) {
 
             case BOOLEAN:
-                name += "BooleanValue";
-            break;
+                return(new ClassLiteralValueExpression(CLVE_BOOLEAN));
 
             case UTF_8_STRING:
-                name += "StringValue";
-            break;
+                return(new ClassLiteralValueExpression(CLVE_STRING));
 
             case INT_16:
-                name += "IntegerValue";
-            break;
+                return(new ClassLiteralValueExpression(CLVE_INTEGER));
 
             case INT_32:
-                name += "IntegerValue";
-            break;
+                return(new ClassLiteralValueExpression(CLVE_INTEGER));
 
             case FLOAT_64:
-                name += "FloatingPointValue";
-            break;
+                return(new ClassLiteralValueExpression(CLVE_FLOAT));
 
             case DATE_TIME:
-                name += "DateValue";
-            break;
+                return(new ClassLiteralValueExpression(CLVE_DATE));
 
             default:
-                System.err.println("ERROR:  ExpressionTranslator."+
-                    "createClassLiteralValueExpression().  Unhandled type.\n"+
-                    "Type = "+type);
-                return(null);
+                String s = "Unhandled type parameter: "+type;
+                throw(new IllegalArgumentException(s));
         }
-
-        return(new ClassLiteralValueExpression(name));
     }
 
 
@@ -1658,8 +1834,7 @@ public class ExpressionTranslator {
         OperatorExpression parameterOperator = new OperatorExpression(
             OE_PARAMETER);
         asOperator.addOperand(parameterOperator);
-        asOperator.addOperand(createClassLiteralValueExpression(
-                              rowData.getPropType()));
+        asOperator.addOperand(createCLVEForType(rowData.getPropType()));
 
         /**
          * Create the left (i.e. first) operand for the 
@@ -2749,11 +2924,11 @@ public class ExpressionTranslator {
         ClassDescription sourceCD = DataModel.getClassDescription("Source");
         ClassDescription responseCD = DataModel.getClassDescription("Response");
 
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ALL);
 
-/*
         rowData = new RowData();
         //rowData.addAttribute(epochCD.getAttribute("epochGroup"));
         //rowData.addAttribute(epochGroupCD.getAttribute("source"));
@@ -2806,6 +2981,7 @@ public class ExpressionTranslator {
 
         testTranslation(rootRow);
 */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ANY);
@@ -2822,6 +2998,18 @@ public class ExpressionTranslator {
         rowData2.setAttributeOperator(Operator.EQUALS);
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
+*/
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
+        rowData.setPropName("someTimeKey");
+        rowData.setPropType(Type.DATE_TIME);
+        rowData.setAttributeOperator(Operator.EQUALS);
+        rowData.setAttributeValue(new Date(1262304000000L));
+        rootRow.addChildRow(rowData);
 
         testTranslation(rootRow);
 
