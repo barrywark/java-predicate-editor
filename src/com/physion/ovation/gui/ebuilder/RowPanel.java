@@ -136,14 +136,18 @@ class RowPanel
     /**
      * This spinner is used to enter the value of a "primitive"
      * attribute that is an INT_16.
+     *
+     * Please note, although we create this JSpinner using
+     * Short values passed to the constructor, the values
+     * that a JSpinner returns are of type "Number".  I.e.
+     * we are not going to get back Short values from it.
      */
     private JSpinner valueSpinnerInt16;
 
     /**
      * This spinner is used to enter the value of a "primitive"
      * attribute that is an INT_32.  It is also used for other
-     * integer values in a row.  For example, the value of a Count
-     * in a TO_MANY relationship.
+     * integer values in a row.
      */
     private JSpinner valueSpinnerInt32;
 
@@ -1342,10 +1346,11 @@ class RowPanel
                 Object attributeValue = rowData.getAttributeValue();
                 if ((attributeValue == null) ||
                     attributeValue.toString().isEmpty()) {
-                    attributeValue = new Short((short)0);
+                    attributeValue = new Integer((short)0);
                 }
                 else {
-                    attributeValue = new Short(attributeValue.toString());
+                    attributeValue = new Integer(Short.parseShort(
+                        attributeValue.toString()));
                 }
                 valueSpinnerInt16.setValue(attributeValue);
             }

@@ -23,6 +23,11 @@ public class ExpressionTree
     implements Serializable {
 
     /**
+     * Just for testing.
+     */
+    public static final String SAVE_FILE_NAME = "testSaved.ExpTree";
+
+    /**
      * This is a the name of the class.  E.g. "Epoch", "EpochGroup",
      * "Source".
      */
@@ -219,6 +224,31 @@ public class ExpressionTree
         }
 
         return(null);
+    }
+
+
+    /**
+     * Test the serialization of this object by writing it out
+     * and reading it in and seeing if the read in value is the
+     * same as the written out value.
+     *
+     * @return Returns true if the value that we read in
+     * matched the original value that we wrote out.
+     */
+    public boolean testSerialization() {
+
+        writeExpressionTree(SAVE_FILE_NAME);
+        ExpressionTree expressionTree = readExpressionTree(SAVE_FILE_NAME);
+        boolean same = expressionTree.toString().equals(this.toString());
+
+        if (same)
+            System.out.println("ExpressionTree written and read versions are "+
+                               "the same.");
+        else
+            System.out.println("ERROR:  ExpressionTree written and read "+
+                               "versions are different.");
+
+        return(same);
     }
 
 

@@ -211,9 +211,12 @@ public class ExpressionTranslator {
     private static ArrayList<RowData> createChildRows(IOperatorExpression oe,
         ClassDescription classDescription) {
 
+        /*
         System.out.println("\nEnter createChildRows()");
         System.out.println("oe: "+(Expression)oe);
         System.out.println("classDescription: "+classDescription);
+        */
+
         ArrayList<RowData> childRows = new ArrayList<RowData>();
 
         /**
@@ -227,7 +230,7 @@ public class ExpressionTranslator {
         RowData rowData = new RowData();
 
         CollectionOperator collectionOperator = getCOForOE(oe);
-        System.out.println("collectionOperator = "+collectionOperator);
+        //System.out.println("collectionOperator = "+collectionOperator);
 
         /**
          * Handle the special case of the Count collection operator.
@@ -257,7 +260,7 @@ public class ExpressionTranslator {
         }
 
         Operator attributeOperator = getAOForOE(oe);
-        System.out.println("attributeOperator = "+attributeOperator);
+        //System.out.println("attributeOperator = "+attributeOperator);
 
         IExpression tempEx = ol.get(0);
         if ((collectionOperator != null) &&
@@ -269,7 +272,11 @@ public class ExpressionTranslator {
              * such as "My Property" (myproperties) or
              * "Any Property" (properties).
              *
-             * For example:
+             * For example, the RowData below:
+             *
+             *      Any Property.someKey(int) != "34"
+             *
+             * is equivalent to the Expression:
              *
              *      OperatorExpression(and)
              *        OperatorExpression(any)
@@ -281,6 +288,27 @@ public class ExpressionTranslator {
              *          OperatorExpression(!=)
              *            AttributeExpression(value)
              *            Int32LiteralValueExpression(34)
+             *
+             * A more complicated RowData example with nesting:
+             *
+             *  nextEpoch.nextEpoch.prevEpoch.Any Property.someKey(int) != "34"
+             *
+             * is equivalent to the Expression:
+             *
+             *  OperatorExpression(and)
+             *    OperatorExpression(any)
+             *      OperatorExpression(elementsOfType)
+             *        OperatorExpression(properties)
+             *          OperatorExpression(.)
+             *            OperatorExpression(.)
+             *              AttributeExpression(nextEpoch)
+             *              AttributeExpression(nextEpoch)
+             *            AttributeExpression(prevEpoch)
+             *          StringLiteralValueExpression(someKey)
+             *        ClassLiteralValueExpression(ovation.IntegerValue)
+             *      OperatorExpression(!=)
+             *        AttributeExpression(value)
+             *        Int32LiteralValueExpression(34)
              *
              * Note, as of October 2011, the collectionOperator will
              * always be "any".  It will have two operands.  The first
@@ -294,7 +322,7 @@ public class ExpressionTranslator {
              * as its first operand and some LiteralValueExpression as its
              * second operand.
              */
-            System.out.println("This is a PER_USER_PARAMETERS_MAP expression.");
+            //System.out.println("This is a PER_USER_PARAMETERS_MAP exp.");
 
             /**
              * If we get here, tempEx is IOperatorExpression(elementsOfType).
@@ -408,7 +436,7 @@ public class ExpressionTranslator {
                 rowData.setAttributeValue(attributeValue);
             }
 
-            System.out.println("Calling rowData.setAttributeOperator");
+            //System.out.println("Calling rowData.setAttributeOperator");
             rowData.setAttributeOperator(attributeOperator);
         }
         else if (collectionOperator != null) {
@@ -418,7 +446,6 @@ public class ExpressionTranslator {
             if (attributeOperator != null) {
                 setAttributeOperatorPathAndValue(rowData, ol, classDescription,
                                                  attributeOperator);
-                System.out.println("Back from setAttributeOperatorPathAndValue()");
             }
 
             if (collectionOperator.isCompoundOperator()) {
@@ -432,13 +459,13 @@ public class ExpressionTranslator {
                      */
                     IExpression firstOperand = ol.get(olIndex++);
                     setAttributePath(rowData, firstOperand, classDescription);
-                    System.out.println("rowData so far: "+
-                        rowData.getRowString());
+                    //System.out.println("rowData so far: "+
+                    //    rowData.getRowString());
                     Attribute childmostAttribute =
                         rowData.getChildmostAttribute();
                     childClass = childmostAttribute.getClassDescription();
                 }
-                System.out.println("childClass: "+childClass);
+                //System.out.println("childClass: "+childClass);
 
                 /**
                  * When we get here, we know that the row is one
@@ -484,8 +511,8 @@ public class ExpressionTranslator {
                  *      children of this Any/All/None collection operator.
                  */
                 IExpression secondOperand = ol.get(olIndex);
-                System.out.println("Second operand = "+
-                    ((Expression)secondOperand).toString(""));
+                //System.out.println("Second operand = "+
+                //    ((Expression)secondOperand).toString(""));
 
                 if (!(secondOperand instanceof IOperatorExpression)) {
                     String s = "Second operand is "+secondOperand+
@@ -494,27 +521,27 @@ public class ExpressionTranslator {
                 }
 
                 IOperatorExpression oe2 = (IOperatorExpression)secondOperand;
-                System.out.println("oe2 = "+oe.getOperatorName());
+                //System.out.println("oe2 = "+oe.getOperatorName());
                 CollectionOperator collectionOperator2 = getCOForOE(oe2);
-                System.out.println("collectionOperator2 = "+
-                                   collectionOperator2);
+                //System.out.println("collectionOperator2 = "+
+                //                   collectionOperator2);
 
                 Attribute childmost = rowData.getChildmostAttribute();
-                System.out.println("childmost = "+childmost);
+                //System.out.println("childmost = "+childmost);
 
                 if (collectionOperator2 == null) {
-                    System.out.println("Type 1");
                     /**
                      * Type 1 described above.
                      */
+                    //System.out.println("Type 1");
                 }
                 else if ((childmost != null) &&
                          ((childmost.getType() != Type.PARAMETERS_MAP) &&
                           (childmost.getType() != Type.PER_USER_PARAMETERS_MAP))) {
-                    System.out.println("Type 2");
                     /**
                      * Type 2 described above.
                      */
+                    //System.out.println("Type 2");
                     rowData.setCollectionOperator2(collectionOperator2);
 
                     if (OE_NOT.equals(oe2.getOperatorName())) {
@@ -534,14 +561,15 @@ public class ExpressionTranslator {
                     olIndex = 0;
                 }
                 else {
-                    System.out.println("Type 3");
                     /**
                      * Type 3 described above.
                      */
+                    //System.out.println("Type 3");
                 }
 
                 /**
-                 * For all three types, process the operands.
+                 * For all three types described above,
+                 * process the operands.
                  * Note that the olIndex has been set above
                  * somewhere to either 0 or 1.
                  */
@@ -581,8 +609,8 @@ public class ExpressionTranslator {
         ArrayList<IExpression> operandList, ClassDescription classDescription,
         Operator attributeOperator) {
 
-        System.out.println("Enter setAttributeOperatorPathAndValue");
-        System.out.println("attributeOperator: "+attributeOperator);
+        //System.out.println("Enter setAttributeOperatorPathAndValue");
+        //System.out.println("attributeOperator: "+attributeOperator);
 
         /**
          * Convert the first (left) operand into a RowData
@@ -616,7 +644,7 @@ public class ExpressionTranslator {
             rowData.setAttributeValue(attributeValue);
         }
 
-        System.out.println("Calling rowData.setAttributeOperator");
+        //System.out.println("Calling rowData.setAttributeOperator");
         rowData.setAttributeOperator(attributeOperator);
     }
 
@@ -650,9 +678,11 @@ public class ExpressionTranslator {
     private static void setAttributePath(RowData rowData, IExpression ex,
         ClassDescription classDescription) {
 
+        /*
         System.out.println("Enter ExpressionTranslator.setAttributePath");
         System.out.println("rowData: "+rowData.getRowString());
         System.out.println("classDescription: "+classDescription);
+        */
 
         /*
         ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
@@ -748,17 +778,18 @@ public class ExpressionTranslator {
 
 
     /**
-     * Append the passed in IExpression to the passed in attributePath.
-     * It converts the passed in IExpression tree into Attributes
-     * and adds them to the attributePath.
+     * Append the passed in IExpression to the passed in
+     * rowData's attributePath.
+     * This method converts the passed in IExpression tree
+     * into Attributes and adds them to the rowData's attributePath.
      *
      * Please note, this method calls itself recursively.
-     * So, for each RowData object, this method is only called once
-     * by another function, but after that initial call with
-     * the "top" expression, this method calls itself recursively
-     * to create the entire path.
-     *
-     * @param attributePath We will append Attributes to this list.
+     * So, for each RowData object, (i.e. each row in the GUI),
+     * this method is only called once by another function,
+     * but after that initial call with the node that is
+     * the "top" of the attribute path part of the expression
+     * passed in as the "ex" parameter, this method calls itself
+     * recursively to create the entire path.
      *
      * @param ex This is the subtree that defines the attribute path.
      *
@@ -770,13 +801,14 @@ public class ExpressionTranslator {
      * Attribute is a primitive, (e.g. int, string), this returns null.
      */
     private static ClassDescription appendToAttributePath(RowData rowData,
-        //ArrayList<Attribute> attributePath,
         IExpression ex, ClassDescription classDescription) {
 
+        /*
         System.out.println("Enter appendToAttributePath");
         System.out.println("rowData: "+rowData.getRowString());
         System.out.println("ex: "+((Expression)ex));
         System.out.println("classDescription: "+classDescription);
+        */
 
         if ((ex instanceof IAttributeExpression) ||
             (isPerUserOperator(ex, classDescription)) ||
@@ -866,8 +898,7 @@ public class ExpressionTranslator {
                 throw(new IllegalArgumentException(s));
             }
 
-            System.out.println("Adding attribute \""+attribute+"\" to path.");
-            //attributePath.add(attribute);
+            //System.out.println("Adding attribute \""+attribute+"\" to path.");
             rowData.addAttribute(attribute);
             return(attribute.getClassDescription());
         }
@@ -1327,6 +1358,16 @@ public class ExpressionTranslator {
                 return(Operator.IS_NOT_NULL);
             }
             // What if we get here?
+        }
+        /**
+         * This is wrong.
+         * TODO: Ask Barry how this should be handled.
+         */
+        else if ("is true".equals(oe.getOperatorName())) {
+            return(Operator.IS_TRUE);
+        }
+        else if ("is false".equals(oe.getOperatorName())) {
+            return(Operator.IS_FALSE);
         }
 
         /**
@@ -3115,6 +3156,10 @@ public class ExpressionTranslator {
             "EpochGroup");
         ClassDescription sourceCD = DataModel.getClassDescription("Source");
         ClassDescription responseCD = DataModel.getClassDescription("Response");
+        ClassDescription derivedResponseCD = DataModel.getClassDescription(
+            "DerivedResponse");
+        ClassDescription externalDeviceCD = DataModel.getClassDescription(
+            "ExternalDevice");
 
 /*
         rootRow = new RowData();
@@ -3125,19 +3170,21 @@ public class ExpressionTranslator {
         //rowData.addAttribute(epochCD.getAttribute("epochGroup"));
         //rowData.addAttribute(epochGroupCD.getAttribute("source"));
         //rowData.addAttribute(epochCD.getAttribute("owner"));
-        rowData.addAttribute(epochCD.getAttribute("protocolID"));
+        rowData.addAttribute(epochCD.getAttribute("incomplete"));
         //rowData.addAttribute(Attribute.IS_NULL);
         //rowData.setAttributeOperator(Operator.IS_NULL);
-        rowData.setAttributeOperator(Operator.EQUALS);
-        rowData.setAttributeValue("xyz");
+        rowData.setAttributeOperator(Operator.IS_TRUE);
+        //rowData.setAttributeOperator(Operator.EQUALS);
+        //rowData.setAttributeValue("xyz");
         rootRow.addChildRow(rowData);
-
+*/
+        /*
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("protocolID"));
         rowData.setAttributeOperator(Operator.NOT_EQUALS);
         rowData.setAttributeValue("abc");
         rootRow.addChildRow(rowData);
-*/
+        */
 
 /*
         rowData = new RowData();
@@ -3204,6 +3251,7 @@ public class ExpressionTranslator {
         rowData.setAttributeValue(new Date(1262304000000L));
         rootRow.addChildRow(rowData);
 */
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
         rootRow.setCollectionOperator(CollectionOperator.ALL);
@@ -3218,16 +3266,53 @@ public class ExpressionTranslator {
         rowData.setAttributeOperator(Operator.NOT_EQUALS);
         rowData.setAttributeValue(new Integer(34));
         rootRow.addChildRow(rowData);
+*/
+/*
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
 
-        testTranslation(rootRow);
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("myderivedResponses"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
 
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute(
+                              "derivationParameters"));
+        rowData2.setPropName("someKey");
+        rowData2.setPropType(Type.BOOLEAN);
+        rowData2.setAttributeOperator(Operator.IS_TRUE);
+        rowData.addChildRow(rowData2);
+*/
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(derivedResponseCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+/*
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("myderivedResponses"));
+        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rootRow.addChildRow(rowData);
+        */
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(derivedResponseCD.getAttribute("mykeywords"));
+        rowData2.setCollectionOperator2(CollectionOperator.ANY);
+        rowData2.setCollectionOperator(CollectionOperator.COUNT);
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue(new Integer(4));
+        rootRow.addChildRow(rowData2);
 /*
         rootRow = RowData.createTestRowData();
         System.out.println("\nRowData:\n"+rootRow);
-        rootRow.testSerialization();
 */
-
+        System.out.println("\nRowData:\n"+rootRow);
+        testTranslation(rootRow);
         /*
+        rootRow.testSerialization();
         System.out.println("\nRowData:\n"+rootRow);
         expression = ExpressionTranslator.createExpressionTree(rootRow);
         System.out.println("\nExpression:\n"+expression);
@@ -3348,7 +3433,12 @@ public class ExpressionTranslator {
 
         System.out.print("\nTest RowData Serialization: ");
         rootRow.testSerialization();
-        //testTranslation(rootRow, true, true);
+
+        System.out.print("\nTest ExpressionTree Serialization: ");
+        expression.testSerialization();
+
+        System.out.print("\nTest Translation: ");
+        testTranslation(rootRow, true, true);
 
         //rootRow = ExpressionTranslator.createRowData(expression);
         //System.out.println("\nExpression Translated To RowData:\n"+rootRow);

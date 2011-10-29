@@ -62,7 +62,7 @@ public class RowData
     /**
      * Just for testing.
      */
-    public static final String SAVE_FILE_NAME = "saved.RDTree";
+    public static final String SAVE_FILE_NAME = "testSaved.RDTree";
 
     public static final CollectionOperator DEFAULT_COLLECTION_OPERATOR2 =
         CollectionOperator.ANY;
@@ -815,7 +815,6 @@ public class RowData
         }
 
         Attribute childmost = getChildmostAttribute();
-        //System.out.println("attributeOperator = "+attributeOperator);
         //System.out.println("childmost = "+childmost);
 
         if ((childmost != null) &&
@@ -943,7 +942,8 @@ public class RowData
             */
         }
 
-        if ((childmost.getCardinality() != Cardinality.TO_MANY) ||
+        if ((getCollectionOperator() == CollectionOperator.COUNT) ||
+            (childmost.getCardinality() != Cardinality.TO_MANY) ||
             (childmost.getType() == Type.PER_USER_PARAMETERS_MAP)) {
             /**
              * A row of this type does not display a second collection
@@ -1288,6 +1288,8 @@ public class RowData
 
 
     public void setAttributeValue(Object attributeValue) {
+
+        //System.out.println("Enter setAttributeValue("+attributeValue+")");
 
         if (attributeValue instanceof Boolean) {
             String s = "Boolean values are handled with the operator.  "+
@@ -2261,9 +2263,10 @@ public class RowData
         //System.out.println("rowData:\n"+rowData);
 
         if (same)
-            System.out.println("Written and read versions are the same.");
+            System.out.println("RowData written and read versions are "+
+                               "the same.");
         else
-            System.out.println("ERROR:  Written and read versions are "+
+            System.out.println("ERROR:  RowData written and read versions are "+
                                "different.");
 
         return(same);

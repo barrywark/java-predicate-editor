@@ -25,7 +25,7 @@ import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
  * This is the class that engineers who want to display the
  * Expression Builder GUI should use.
  *
- * The static method:
+ * The public static method:
  *
  *      ExpressionBuilder.editExpression() 
  *
@@ -38,24 +38,21 @@ import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
  *      ExpressionBuilder.ReturnValue returnValue;
  *      returnValue = ExpressionBuilder.editExpression(null);
  *
- * The code below will create an expression tree that has
- * some rows already in it and display that in the GUI.
+ * The code below will display an already existing ExpressionTree
+ * in the GUI.
  *
- *      RowData rootRow = RowData.createTestRowData();
- *      returnValue = ExpressionBuilder.editExpression(rootRow);
+ *      ExpressionTree expressionTree = someMethodToCreateExpressionTree();
+ *      returnValue = ExpressionBuilder.editExpression(expressionTree);
  * 
  * The returned returnValue.status value tells the caller whether the
  * user pressed the Ok button or canceled out of the window.
  * If returnValue.status is RETURN_STATUS_CANCEL, then
- * returnValue.rootRow is null.
- *
- * The editExpression() methods will soon be changed to
- * take an ExpressionTree instead of a RowData object.
- * That way the code that interfaces with the ExpressionBuilder
- * GUI will never need to know anything about a RowData object.
+ * returnValue.expressionTree is null.
  *
  * Please see the class's main() method to see example code
- * you can use to create and display the GUI.
+ * you can use to create and display the GUI.  It is currently
+ * set up to serialize the ExpressionTree out to a file and
+ * then read it back in next time main() is run.
  */
 public class ExpressionBuilder
     extends JDialog 
@@ -70,7 +67,6 @@ public class ExpressionBuilder
 	private static final long serialVersionUID = 1L;
 
     private static final String SAVE_FILE_NAME_EXP_TREE = "saved.ExpTree";
-    private static final String SAVE_FILE_NAME_ROW_DATA = "saved.RDTree";
 
 	/**
      * Number of pixels used as a spacer.
@@ -118,11 +114,6 @@ public class ExpressionBuilder
      * at that index.
      */
     private int stateIndex = -1;
-
-    /**
-     * Flag for develoment work.  Delete these.
-     */
-    private static boolean convert = false;
 
     /**
      * Create an ExpressionBuilder dialog with its expression
@@ -393,22 +384,22 @@ public class ExpressionBuilder
      * An example of using this method is in this
      * class's main() method.
      */
-    private static ReturnValue editExpression() {
-        return(editExpression((RowData)null));
-    }
-    /*
     public static ReturnValue editExpression() {
         return(editExpression((ExpressionTree)null));
+    }
+    /*
+    private static ReturnValue editExpression() {
+        return(editExpression((RowData)null));
     }
     */
 
 
     /**
-     * This is the method you should use to display the GUI
-     * to edit/create an expression.
-     *
-     * An example of using this method is in this
-     * class's main() method.
+     * This is the private method that actually displays the GUI.
+     * Physion engineers probably should NOT be calling this method.
+     * The public editExpression(ExpressionTree) method is the one
+     * that other code will use to interface with this
+     * ExpressionBuilder GUI.
      *
      * @param rootRow This is the "root" RowData of the
      * expression you want the GUI to display and edit.
@@ -422,7 +413,7 @@ public class ExpressionBuilder
      * should look at.  Please see ExpressionBuilder.ReturnValue
      * for more information.
      */
-    public static ReturnValue editExpression(RowData rootRow) {
+    private static ReturnValue editExpression(RowData rootRow) {
 
         /**
          * Create a returnValue that is already initialized
@@ -468,6 +459,10 @@ public class ExpressionBuilder
             }
         }
         else {
+            /**
+             * User canceled out of the window in some way,
+             * so set the returned trees to be null.
+             */
             returnValue.rootRow = null;
             returnValue.expressionTree = null;
         }
@@ -477,7 +472,25 @@ public class ExpressionBuilder
 
 
     /**
-     * This will eventually be the API.
+     * This is the public method Physion engineers should use
+     * to display the ExpressionBuilder GUI to edit/create an
+     * expression.
+     *
+     * An example of using this method is in this
+     * class's main() method.
+     *
+     * @param expressionTree This tells us the Class Under Qualification
+     * and gives us the IExpression tree that will be displayed and
+     * edited.  Please note, this method creates a RowData expression
+     * tree from this value.  (RowData is what the GUI understands.)
+     * So this expressionTree parameter you passed in is not ever modified
+     * by the GUI.
+     * Pass null if you want to create a new expression from scratch.
+     *
+     * @return Returns an ExpressionBuilder.ReturnValue object that
+     * contains the "status" and "expressionTree" values that your
+     * code should look at.  Please see ExpressionBuilder.ReturnValue
+     * for more information.
      */
     public static ReturnValue editExpression(ExpressionTree expressionTree) {
 
@@ -485,45 +498,17 @@ public class ExpressionBuilder
             expressionTree = new ExpressionTree();
         }
 
-        RowData rootRow = ExpressionTranslator.createRowData(expressionTree);
-        return(editExpression(rootRow));
-    }
-
-
-    /**
-     * Temporary method until I get the Expression to RowData translation
-     * working.  It "tries" to convert the passed in ExpressionTree to
-     * a RowData object, but if that fails, it uses the passed in rootRow
-     * parameter.
-     */
-    private static ReturnValue editExpression(ExpressionTree expressionTree,
-        RowData rootRow) {
-
-        /*
-        if (expressionTree == null) {
-            expressionTree = new ExpressionTree();
+        /**
+         * Convert the passed in expressionTree into a RowData tree
+         * that the GUI will work with.
+         */
+        RowData rootRow = null;
+        try {
+            rootRow = ExpressionTranslator.createRowData(expressionTree);
         }
-        */
-
-        if (expressionTree != null) {
-            try {
-                RowData convertedRootRow;
-                convertedRootRow = ExpressionTranslator.createRowData(
-                    expressionTree);
-                rootRow = convertedRootRow;
-                System.out.println("\nConverted ExpressionTree rootRow:\n"+
-                    rootRow);
-            }
-            catch (Exception e) {
-                /**
-                 * An exception occurred doing the conversion
-                 * of the ExpressionTree to a RowData, so just
-                 * use the passed in rootRow.
-                 */
-                e.printStackTrace();
-            }
+        catch (Exception e) {
+            e.printStackTrace();
         }
-
         return(editExpression(rootRow));
     }
 
@@ -763,16 +748,24 @@ public class ExpressionBuilder
      * ExpressionBuilder.RETURN_STATUS_CANCEL if the user pressed the
      * Cancel button or closed the window another way.
      *
-     * rootRow - Is set to the new expression tree that was created
-     * and edited by the GUI.
+     * expressionTree - Is set to the new ExpressionTree that was created
+     * and edited by the GUI.  This is the value Physion engineers should
+     * use.
+     *
+     * rootRow - Is set to the RowData version of the expression tree
+     * that was created by translating the original ExpressionTree
+     * parameter that was passed to editExpression() into a RowData
+     * object and then edited by the GUI.  Physion engineers probably do
+     * NOT want this value for any reason.  It is returned for testing
+     * and debugging purposes.
      *
      * Please see ExpressionBuilder.main() for some examples of how
      * this class is used.
      */
     public static class ReturnValue {
         public int status = RETURN_STATUS_CANCEL;
-        public RowData rootRow = null;  // Delete this eventually?
         public ExpressionTree expressionTree = null;
+        public RowData rootRow = null;  // Delete this value eventually?
     }
 
 
@@ -825,9 +818,6 @@ public class ExpressionBuilder
          */
         lookAndFeel = UIManager.getSystemLookAndFeelClassName();
 
-        if (convert == true)
-            lookAndFeel = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
-
         try {
             System.out.println("\nSetting look and feel to:\n    "+lookAndFeel);
             UIManager.setLookAndFeel(lookAndFeel);
@@ -850,16 +840,6 @@ public class ExpressionBuilder
      */
     public static void main(String[] args) {
 
-        if (args.length > 0) {
-            convert = true;
-            System.out.println("Will convert RowData to Expression and\n"+
-                "will try to convert Expression to RowData.");
-        }
-        else {
-            System.out.println("Will convert RowData to Expression but\n"+
-                "will not try to convert Expression to RowData.");
-        }
-
         /**
          * Create a default ReturnValue.
          */
@@ -872,32 +852,10 @@ public class ExpressionBuilder
         setLookAndFeel();
 
         /**
-         * Display a GUI that is empty.  I.e. the user must
-         * create a new expression from scratch.
-         */
-        /*
-        returnValue = ExpressionBuilder.editExpression();
-        if (returnValue.status == ExpressionBuilder.RETURN_STATUS_OK) {
-            System.out.println("User pressed OK.");
-            System.out.println("\nrootRow:\n"+returnValue.rootRow);
-            System.out.println("\nExpression:\n"+returnValue.expressionTree);
-        }
-        else {
-            System.out.println("User pressed Cancel or closed the window.");
-            System.exit(returnValue.status);
-        }
-        */
-        /**
-         * After the user Oks or Cancels out of the window
-         * created above, create another window.  This time
-         * though, create an expression tree filled with
-         * some values and have the window initialized to that
-         * tree's value.
-         */
-
-        /**
          * Read in the ExpressionTree that we serialized out
          * to a file last time this application was run.
+         * If no file exists, use a null value for the
+         * expressionTree parameter.
          */
         ExpressionTree expressionTree = ExpressionTree.readExpressionTree(
             SAVE_FILE_NAME_EXP_TREE);
@@ -905,26 +863,7 @@ public class ExpressionBuilder
             System.out.println("\nSerialized ExpressionTree Read In:\n"+
                                expressionTree);
         }
-
-        /**
-         * Read in the RowData that we serialized out
-         * to a file last time this application was run.
-         */
-        RowData rootRow = RowData.readRowData(SAVE_FILE_NAME_ROW_DATA);
-        if (rootRow != null) {
-            System.out.println("\nSerialized RowData Read In:\n"+rootRow);
-        }
-        else {
-            /**
-             * No serialized RowData object existed, or there
-             * was an error while reading it in, so create a
-             * RowData tree with some data already in it.
-             */
-            rootRow = RowData.createTestRowData();
-        }
-
-        returnValue.rootRow = rootRow;
-        returnValue.expressionTree = null;
+        returnValue.expressionTree = expressionTree;
 
         /**
          * Stay in a loop, displaying the GUI every time the
@@ -936,24 +875,33 @@ public class ExpressionBuilder
         boolean keepRunning = true;
         while (keepRunning) {
 
-            RowData originalRootRow = returnValue.rootRow;
-            if (convert == true) {
-                returnValue = ExpressionBuilder.editExpression(
-                    returnValue.expressionTree, returnValue.rootRow);
-            }
-            else {
-                returnValue = ExpressionBuilder.editExpression(
-                    returnValue.rootRow);
-            } 
+            ExpressionTree originalExpressionTree = returnValue.expressionTree;
+
+            /**
+             * Here is where we create and display the GUI.
+             * The GUI is "modal", so this method will not return
+             * until the GUI is dismissed by the user OKing, Canceling,
+             * or closing the window in some other way.
+             */
+            returnValue = ExpressionBuilder.editExpression(
+                returnValue.expressionTree);
+
+            /**
+             * When we get here it means that the GUI has been
+             * dismissed.  Let's look at the values that were
+             * returned.
+             */
 
             System.out.println("\nstatus = "+returnValue.status);
-            System.out.println("\nOriginal rootRow:\n"+originalRootRow);
+            System.out.println("\nOriginal originalExpressionTree:\n"+
+                originalExpressionTree);
             System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
-            System.out.println("\nExpression:\n"+returnValue.expressionTree);
+            System.out.println("\nModified expressionTree:\n"+
+                returnValue.expressionTree);
 
             if (returnValue.status == RETURN_STATUS_CANCEL) {
                 /**
-                 * User canceled or closed out the window,
+                 * User canceled or closed out of the window,
                  * so exit the GUI without saving the current
                  * ExpressionTree.
                  */
@@ -971,19 +919,10 @@ public class ExpressionBuilder
              *
              * This is just for testing the serialization.
              */
-            if (returnValue.expressionTree != null)
+            if (returnValue.expressionTree != null) {
                 returnValue.expressionTree.writeExpressionTree(
                     SAVE_FILE_NAME_EXP_TREE);
-
-            /**
-             * Write out the serialized version of the 
-             * RowData.  We will read it in when
-             * this program is run again.
-             *
-             * This is just for testing the serialization.
-             */
-            if (returnValue.rootRow != null)
-                returnValue.rootRow.writeRowData(SAVE_FILE_NAME_ROW_DATA);
+            }
 
             /**
              * Comment this line out if you want to keep running
