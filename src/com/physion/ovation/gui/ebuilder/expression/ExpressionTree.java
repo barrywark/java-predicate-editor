@@ -88,7 +88,7 @@ public class ExpressionTree
          * Default to the "or", (which is displayed as "Any" in the GUI),
          * operator.
          */
-        rootExpression = new OperatorExpression(ExpressionTranslator.OE_OR);
+        rootExpression = new OperatorExpression(Translator.OE_OR);
     }
 
 

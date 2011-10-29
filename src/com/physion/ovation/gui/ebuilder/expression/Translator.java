@@ -1156,10 +1156,10 @@ public class Translator {
         boolean same;
         if (rootRow != null) {
             System.out.println("\nStarting With RowData:\n"+rootRow);
-            expressionTree = ExpressionTranslator.createExpressionTree(rootRow);
+            expressionTree = RowDataToExpressionTree.translate(rootRow);
             System.out.println("\nRowData Translated To Expression:\n"+
                 expressionTree);
-            RowData newRowData = ExpressionTranslator.createRowData(
+            RowData newRowData = ExpressionTreeToRowData.translate(
                 expressionTree);
             System.out.println("\nExpressionTree Translated Back To RowData:\n"+
                 newRowData);
@@ -1170,11 +1170,11 @@ public class Translator {
         else {
             System.out.println("\nStarting With ExpressionTree:\n"+
                 expressionTree);
-            rootRow = ExpressionTranslator.createRowData(expressionTree);
+            rootRow = ExpressionTreeToRowData.translate(expressionTree);
             System.out.println("\nExpressionTree Translated To RowData:\n"+
                 rootRow);
-            ExpressionTree newExpressionTree = ExpressionTranslator.
-                createExpressionTree(rootRow);
+            ExpressionTree newExpressionTree = RowDataToExpressionTree.
+                translate(rootRow);
             System.out.println("\nRowData Translated Back To Expression:\n"+
                 newExpressionTree);
 
@@ -1202,7 +1202,7 @@ public class Translator {
 
         System.out.println("\nOriginal RowData:\n"+rootRow);
 
-        ExpressionTree expression = ExpressionTranslator.createExpressionTree(
+        ExpressionTree expression = RowDataToExpressionTree.translate(
             rootRow);
         System.out.println("\nTranslated To Expression:\n"+expression);
 
