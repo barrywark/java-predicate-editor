@@ -18,6 +18,23 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
  * This class represents an "entire" expression tree.
  * I.e. it tells you the Class Under Qualification as
  * well as having a reference to the "root" Expression.
+ *
+ * An ExpressionTree object contains a rootExpression
+ * member data that is a reference to a class that
+ * implements the IExpression interface.
+ * (As of October 2011, the only class that does that is
+ * the Expression class.)
+ *
+ * An IExpression, and all of the interfaces that extend
+ * it, are used to represent a tree that can be easily
+ * parsed and turned into a PQL expression.
+ *
+ * The GUI translates an ExpressionTree into a RowData
+ * structure.  The RowData structure "looks" like what
+ * the user sees in the GUI.
+ *
+ * @see ExpressionTreeToRowData
+ * @see RowDataToExpressionTree
  */
 public class ExpressionTree
     implements Serializable {

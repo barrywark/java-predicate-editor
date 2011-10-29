@@ -17,7 +17,8 @@ import javax.swing.UIManager;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
-import com.physion.ovation.gui.ebuilder.expression.ExpressionTranslator;
+import com.physion.ovation.gui.ebuilder.expression.RowDataToExpressionTree;
+import com.physion.ovation.gui.ebuilder.expression.ExpressionTreeToRowData;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
 
 
@@ -449,8 +450,7 @@ public class ExpressionBuilder
 
             try {
                 returnValue.expressionTree =
-                    ExpressionTranslator.createExpressionTree(
-                        dialog.getRootRow());
+                    RowDataToExpressionTree.translate(dialog.getRootRow());
             }
             catch (Exception e) {
                 System.err.println(
@@ -504,7 +504,7 @@ public class ExpressionBuilder
          */
         RowData rootRow = null;
         try {
-            rootRow = ExpressionTranslator.createRowData(expressionTree);
+            rootRow = ExpressionTreeToRowData.translate(expressionTree);
         }
         catch (Exception e) {
             e.printStackTrace();
