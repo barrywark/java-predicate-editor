@@ -54,6 +54,9 @@ import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
  * you can use to create and display the GUI.  It is currently
  * set up to serialize the ExpressionTree out to a file and
  * then read it back in next time main() is run.
+ *
+ * Please see the documentation for the main() method for some
+ * example commands.
  */
 public class ExpressionBuilder
     extends JDialog 
@@ -456,6 +459,7 @@ public class ExpressionBuilder
                 System.err.println(
                     "ExpressionTranslator failed to translate "+
                     "the RowData tree into an ExpressionTree");
+                e.printStackTrace();
             }
         }
         else {
@@ -775,8 +779,31 @@ public class ExpressionBuilder
      * different look and feels.
      * You need to comment/uncomment the setting of the
      * "lookAndFeel" variable below to what you want. 
+     *
+     * The args parameter that tells what look and feel to
+     * use.  Give no parameter if you want to use the current
+     * system's look and feel.  E.g. WindowsLookAndFeel when
+     * running on the Windows platform.  If you use "nimbus"
+     * as the parameter, we will use the NimbusLookAndFeel.
+     *
+     * If you enter the full path to a look and feel that is on
+     * your system, we will use that.  Note, not all look and
+     * feels are installed on all systems.  E.g. The Mac "aqua"
+     * look and feel is only on Macs.
+     *
+     * @param args If args.length == 0, we use the
+     * current system's look and feel.
+     * If args[0] is "nimbus", (case is ignored),
+     * we will use the NimbusLookAndFeel.  Otherwise
+     * we will attempt to use the look and feel that
+     * is specified in args[0].  Some example values:
+     *
+     *      "com.sun.java.swing.plaf.windows.WindowsLookAndFeel"
+     *      "com.sun.java.swing.plaf.motif.MotifLookAndFeel"
+     *      "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+     *      "javax.swing.plaf.nimbus.NimbusLookAndFeel"
      */
-    public static void setLookAndFeel() {
+    public static void setLookAndFeel(String[] args) {
 
         String lookAndFeel;
 
@@ -818,6 +845,17 @@ public class ExpressionBuilder
          */
         lookAndFeel = UIManager.getSystemLookAndFeelClassName();
 
+        /**
+         * If the user specified a look and feel on the command
+         * line, use it.
+         */
+        if (args.length > 0) {
+            if ("nimbus".equalsIgnoreCase(args[0]))
+                lookAndFeel = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+            else
+                lookAndFeel = args[0];
+        }
+
         try {
             System.out.println("\nSetting look and feel to:\n    "+lookAndFeel);
             UIManager.setLookAndFeel(lookAndFeel);
@@ -834,9 +872,28 @@ public class ExpressionBuilder
      * A simple example test program to test this class and show
      * how the editExpression() methods are used.
      *
-     * Currently, if there is any argument on the command line
-     * we will try to convert Expression objects into RowData
-     * objects.  This is just for Steve's testing currently.
+     * The ExpressionBuilder.main() method optionally takes one
+     * command line parameter that tells what look and feel to
+     * use.  Give no parameter if you want to use the current
+     * system's look and feel.  E.g. WindowsLookAndFeel when
+     * running on the Windows platform.  If you use "nimbus"
+     * as the parameter, we will use the NimbusLookAndFeel.
+     * If you enter the full path to a look and feel that is on
+     * your system, we will use that.  Note, not all look and
+     * feels are installed on all systems.  E.g. The Mac "aqua"
+     * look and feel is only on Macs.
+     *
+     * To run the main() method you can use one of these example
+     * commands:
+     *
+     *      java com.physion.ovation.gui.ebuilder.ExpressionBuilder
+     *
+     *      java com.physion.ovation.gui.ebuilder.ExpressionBuilder nimbus
+     *
+     *      java com.physion.ovation.gui.ebuilder.ExpressionBuilder \
+     *      com.sun.java.swing.plaf.gtk.GTKLookAndFeel
+     *
+     * @see #setLookAndFeel(String[] args)
      */
     public static void main(String[] args) {
 
@@ -849,7 +906,7 @@ public class ExpressionBuilder
         /**
          * Set the look and feel to something.
          */
-        setLookAndFeel();
+        setLookAndFeel(args);
 
         /**
          * Read in the ExpressionTree that we serialized out
