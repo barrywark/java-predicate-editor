@@ -47,19 +47,6 @@ public class ExpressionPanel
 
         super(new GridLayout(1,1));
         setRootRow(rootRow);
-
-        /*
-        final RowData temp = rootRow;
-        (new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(6000);
-                }
-                catch (Exception e) {
-                }
-                ensureRowPanelVisible(getRowPanel(4));
-            }})).start();
-        */
     }
 
 
@@ -112,11 +99,12 @@ public class ExpressionPanel
         }
 
         /**
-         * Make the scrollpane layout things again.
-         * Temp hack.
+         * Make the scrollpane layout things now so that when
+         * we need to figure out where the row is it is in its
+         * final location.
          */
-        //if ((getParent() != null) && (getParent().getParent() != null))
-        //    getParent().getParent().validate();
+        if (getScrollPane() != null)
+            getScrollPane().validate();
     }
     
 
@@ -187,6 +175,7 @@ public class ExpressionPanel
                  */
                 RowPanel rowPanel = getRowPanel(rowData);
                 rowPanel.setFocusToFirstFocusableComponent();
+                ensureRowPanelVisible(rowPanel);
             }
             else if ((event.getChangeType() ==
                       RowDataEvent.TYPE_CHILD_DELETE) ||
@@ -201,12 +190,13 @@ public class ExpressionPanel
                  */
                 RowPanel rowPanel = getRowPanel(rootRow);
                 rowPanel.setFocusToFirstFocusableComponent();
+                ensureRowPanelVisible(rowPanel);
             }
         }
     }
 
 
-    public void ensureRowPanelVisible(RowPanel rowPanel) {
+    private JScrollPane getScrollPane() {
 
         JScrollPane scrollPane = null;
         Container parent = getParent();
@@ -218,6 +208,19 @@ public class ExpressionPanel
             parent = parent.getParent();
         }
 
+        return(scrollPane);
+    }
+
+
+    /**
+     * This method ensures that the passed in RowPanel is visible in
+     * the scrolling window.  If the passed rowPanel is not visible,
+     * the scrolling window will be scrolled by the minimal amount
+     * to make it visible.
+     */
+    public void ensureRowPanelVisible(RowPanel rowPanel) {
+
+        JScrollPane scrollPane = getScrollPane();
         if (scrollPane == null)
             return;
 
@@ -245,7 +248,7 @@ public class ExpressionPanel
 
             int rowBottomPixel = rowPanel.getY() + rowPanel.getHeight()-1;
 
-            int viewportTopPixel = rowBottomPixel - viewRect.height; 
+            int viewportTopPixel = rowBottomPixel - viewRect.height + 1; 
 
             viewport.setViewPosition(new Point(viewRect.x, viewportTopPixel));
         }
