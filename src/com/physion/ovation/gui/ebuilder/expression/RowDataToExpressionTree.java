@@ -128,9 +128,6 @@ public class RowDataToExpressionTree
      */
     private static OperatorExpression createOperators(RowData rowData) {
 
-        OperatorExpression op1;
-        OperatorExpression op2;
-
         Attribute childmostAttribute = rowData.getChildmostAttribute();
         CollectionOperator co = rowData.getCollectionOperator();
         Operator ao = rowData.getAttributeOperator();
@@ -148,7 +145,8 @@ public class RowDataToExpressionTree
                 return(new OperatorExpression(OE_ANY));
             }
             else if (childmostAttribute.getType() == Type.PARAMETERS_MAP) {
-                return(new OperatorExpression(ao.toString()));
+                //return(new OperatorExpression(ao.toString()));
+                return(getOEForAO(co, ao));
             }
         }
 
@@ -156,6 +154,44 @@ public class RowDataToExpressionTree
          * If we get here, rowData is not a Compound Row, but
          * it still could have a CollectionOperator.
          */
+        return(getOEForAO(co, ao));
+    }
+
+
+    /**
+     * Get the IOperatorExpression for the passed in
+     * RowData's collectionOperator and attributeOperator.
+     *
+     * Most of the time, the translation is straight forward,
+     * e.g. (==, !=, <, >, <=, etc.), but for a few Operators
+     * that are presented differently in the GUI's RowData object
+     * than they are in the ExpressionTree, it gets a little
+     * more complicated.  For example:
+     * 
+     *      Operator.IS_NOT_NULL
+     *
+     * becomes:
+     *
+     *      OperatorExpression(not)
+     *        OperatorExpression(is null)
+     *          <thing being tested to see if it is null>
+     *
+     * For example:
+     *
+     *      Operator.IS_TRUE 
+     *
+     * becomes:
+     *
+     *      OperatorExpression(==)
+     *        <thing being tested to see if it is true>
+     *        BooleanLiteralValueExpression(true)
+     *
+     */
+    private static OperatorExpression getOEForAO(CollectionOperator co,
+                                                 Operator ao) {
+
+        OperatorExpression op1;
+        OperatorExpression op2;
 
         if (ao == Operator.IS_TRUE) {
             /**

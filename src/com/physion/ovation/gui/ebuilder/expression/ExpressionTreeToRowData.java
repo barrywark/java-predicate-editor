@@ -1208,12 +1208,14 @@ public class ExpressionTreeToRowData
          * This is wrong.
          * TODO: Ask Barry how this should be handled.
          */
+        /*
         else if ("is true".equals(oe.getOperatorName())) {
             return(Operator.IS_TRUE);
         }
         else if ("is false".equals(oe.getOperatorName())) {
             return(Operator.IS_FALSE);
         }
+        */
 
         /**
          * The passed in IOperatorExpression cannot be mapped to an

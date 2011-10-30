@@ -1049,25 +1049,25 @@ public class Translator {
         rowData.setAttributeValue(new Integer(34));
         rootRow.addChildRow(rowData);
 */
-/*
         rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setClassUnderQualification(derivedResponseCD);
         rootRow.setCollectionOperator(CollectionOperator.ANY);
 
+/*
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("myderivedResponses"));
         rowData.setCollectionOperator(CollectionOperator.NONE);
         rootRow.addChildRow(rowData);
-
+*/
         rowData2 = new RowData();
         rowData2.addAttribute(derivedResponseCD.getAttribute(
                               "derivationParameters"));
         rowData2.setPropName("someKey");
         rowData2.setPropType(Type.BOOLEAN);
         rowData2.setAttributeOperator(Operator.IS_TRUE);
-        rowData.addChildRow(rowData2);
-*/
+        rootRow.addChildRow(rowData2);
+/*
         rootRow = new RowData();
         rootRow.setClassUnderQualification(derivedResponseCD);
         rootRow.setCollectionOperator(CollectionOperator.ANY);
@@ -1080,6 +1080,7 @@ public class Translator {
         rootRow.addChildRow(rowData);
         */
 
+/*
         rowData2 = new RowData();
         rowData2.addAttribute(derivedResponseCD.getAttribute("mykeywords"));
         rowData2.setCollectionOperator2(CollectionOperator.ANY);
