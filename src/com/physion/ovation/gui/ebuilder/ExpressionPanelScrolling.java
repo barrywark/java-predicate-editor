@@ -41,10 +41,15 @@ public class ExpressionPanelScrolling
 
         expressionPanel = new ExpressionPanel(rootRow);
 
+        /*
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(expressionPanel, BorderLayout.NORTH);
 
         JScrollPane scrollPane = new JScrollPane(panel,
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        */
+        JScrollPane scrollPane = new JScrollPane(expressionPanel,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 

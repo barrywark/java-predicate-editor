@@ -1,8 +1,12 @@
 package com.physion.ovation.gui.ebuilder;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.GridLayout;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.Scrollable;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
@@ -18,7 +22,7 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
  */
 public class ExpressionPanel
     extends JPanel
-    implements RowDataListener {
+    implements RowDataListener, Scrollable {
 	
 	/**
 	 * We never serialize this class, so this declaration is
@@ -92,9 +96,10 @@ public class ExpressionPanel
 
         /**
          * Make the scrollpane layout things again.
+         * Temp hack.
          */
-        if ((getParent() != null) && (getParent().getParent() != null))
-            getParent().getParent().validate();
+        //if ((getParent() != null) && (getParent().getParent() != null))
+        //    getParent().getParent().validate();
     }
     
 
@@ -172,9 +177,157 @@ public class ExpressionPanel
 
                 /**
                  * Set the focus to the first row.
+                 *
+                 * TODO:  Figure out a more user friendly rule as
+                 * to what row and component should get the focus
+                 * when a row is deleted.
                  */
                 RowPanel rowPanel = getRowPanel(rootRow);
                 rowPanel.setFocusToFirstFocusableComponent();
+            }
+        }
+    }
+
+
+    @Override
+    public boolean getScrollableTracksViewportHeight() {
+        return(false);
+    }
+
+
+    /**
+     * Make the RowPanels stretch to fill the width of the
+     * scrollpane that contains us.
+     */
+    @Override
+    public boolean getScrollableTracksViewportWidth() {
+        return(true);
+    }
+
+
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        return(getPreferredSize());
+    }
+
+
+    /**
+     * TODO:  Write this.  Currently just defaulting to one row.
+     */
+    @Override
+    public int getScrollableBlockIncrement(Rectangle visibleRect,
+                                           int orientation, int direction) {
+
+        int unitIncrement = getScrollableUnitIncrement(visibleRect,
+                                                       orientation, direction);
+
+        /**
+         */
+        return(unitIncrement);
+    }
+
+
+    /**
+     * Return the number of pixels the JScrollPane that contains us
+     * should scroll when the user clicks on a scrolling arrow.
+     * When scrolling vertically, this is the height of one row, or
+     * a lesser amount necessary to get a row aligned with the top or
+     * bottom of the scrollpane.
+     *
+     * When scrolling horizontally, there isn't really a good
+     * answer for how much scrolling one "unit" is.
+     * Note, we don't currently scroll horizontally.
+     */
+    @Override
+    public int getScrollableUnitIncrement(Rectangle visibleRect,
+                                          int orientation, int direction) {
+
+        if (orientation == SwingConstants.HORIZONTAL) {
+            /**
+             * When scrolling horizontally, there isn't really a good
+             * answer for how much scrolling one "unit" is.
+             * Note, we don't currently scroll horizontally.
+             */
+            return(50);
+        }
+
+        /**
+         * If we get here, the user is scrolling the window vertically.
+         */
+
+        /**
+         * Get the first RowPanel to use to calculate
+         * the height of a "unit", (i.e. one row), increment.
+         */
+        RowPanel rowPanel = getRowPanel(getRootRow());
+
+        /**
+         * If we don't have any rows yet, just return a number.
+         * This number will never get used for scrolling because
+         * the GUI will always have at least one row in it when it
+         * is displayed.
+         */
+        if (rowPanel == null)
+            return(10);
+
+        Dimension size = rowPanel.getPreferredSize();
+
+        if (direction > 0) {
+            /**
+             * When scrolling down, i.e. clicking the down arrow which
+             * moves the scrollpane contents up, we want to make the
+             * bottommost visible row align with the bottom of the
+             * scrollpane.  If the bottommost visible row is already
+             * aligned with the bottom of the scrollpane then that
+             * means the number we return will be the height of one row.
+             *
+             * If the bottommost row is NOT aligned with the bottom
+             * of the scrollpane, return the number of pixels that
+             * WILL make it aligned with the bottom of the scrollpane.
+             */
+
+            int bottomPixel = visibleRect.height + visibleRect.y;
+            int leftOver = bottomPixel % size.height;
+
+            if (leftOver == 0) {
+                /**
+                 * The bottommost row is aligned with the bottom of the
+                 * scrollpane, so return the height of one row as the
+                 * amount to scroll one unit.
+                 */
+                return(size.height);
+            }
+            else {
+                return(size.height - leftOver);
+            }
+        }
+        else {  // direction < 0
+            /**
+             * When scrolling up, i.e. clicking the up arrow which
+             * moves the scrollpane contents down, we want to make the
+             * topmost visible row align with the top of the
+             * scrollpane.  If the topmost visible row is already
+             * aligned with the top of the scrollpane then that
+             * means the number we return will be the height of one row.
+             *
+             * If the topmost row is NOT aligned with the top
+             * of the scrollpane, return the number of pixels that
+             * WILL make it aligned with the top of the scrollpane.
+             */
+
+            int topPixel = visibleRect.y;
+            int leftOver = topPixel % size.height;
+
+            if (leftOver == 0) {
+                /**
+                 * The topmost row is aligned with the top of the
+                 * scrollpane, so return the height of one row as the
+                 * amount to scroll one unit.
+                 */
+                return(size.height);
+            }
+            else {
+                return(leftOver);
             }
         }
     }
