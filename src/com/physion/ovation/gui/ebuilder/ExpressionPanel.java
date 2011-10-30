@@ -212,18 +212,31 @@ public class ExpressionPanel
 
 
     /**
-     * TODO:  Write this.  Currently just defaulting to one row.
+     * Return the number of pixels the JScrollPane that contains us
+     * should scroll when the user does a "block" scroll.  E.g. the
+     * user clicks above or below the scroll "thumb" or uses the
+     * page up/down keys.
+     *
+     * This should scroll an entire "page" of rows.  Note, I think
+     * it is unlikely that a user will have that many rows worth
+     * of data in a real use case, but we should implement the
+     * behavior anyway.
      */
     @Override
     public int getScrollableBlockIncrement(Rectangle visibleRect,
                                            int orientation, int direction) {
 
-        int unitIncrement = getScrollableUnitIncrement(visibleRect,
-                                                       orientation, direction);
-
-        /**
-         */
-        return(unitIncrement);
+        if (orientation == SwingConstants.HORIZONTAL) {
+            /**
+             * When scrolling horizontally, scroll sideways
+             * by the width of the viewport.
+             * Note, the GUI doesn't currently scroll horizontally.
+             */
+            return(visibleRect.width);
+        }
+        else {
+            return(visibleRect.height);
+        }
     }
 
 
@@ -246,9 +259,10 @@ public class ExpressionPanel
             /**
              * When scrolling horizontally, there isn't really a good
              * answer for how much scrolling one "unit" is.
-             * Note, we don't currently scroll horizontally.
+             * So, just scroll by a percentage of the viewport width.
+             * Note, the GUI doesn't currently scroll horizontally.
              */
-            return(50);
+            return((int)(visibleRect.width * 0.25));
         }
 
         /**
