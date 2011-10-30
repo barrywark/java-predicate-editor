@@ -1,12 +1,16 @@
 package com.physion.ovation.gui.ebuilder;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Point;
 import java.awt.GridLayout;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Scrollable;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
@@ -43,6 +47,19 @@ public class ExpressionPanel
 
         super(new GridLayout(1,1));
         setRootRow(rootRow);
+
+        /*
+        final RowData temp = rootRow;
+        (new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(6000);
+                }
+                catch (Exception e) {
+                }
+                ensureRowPanelVisible(getRowPanel(4));
+            }})).start();
+        */
     }
 
 
@@ -185,6 +202,52 @@ public class ExpressionPanel
                 RowPanel rowPanel = getRowPanel(rootRow);
                 rowPanel.setFocusToFirstFocusableComponent();
             }
+        }
+    }
+
+
+    public void ensureRowPanelVisible(RowPanel rowPanel) {
+
+        JScrollPane scrollPane = null;
+        Container parent = getParent();
+        while (parent != null) {
+            if (parent instanceof JScrollPane) {
+                scrollPane = (JScrollPane)parent;
+                break;
+            }
+            parent = parent.getParent();
+        }
+
+        if (scrollPane == null)
+            return;
+
+        JViewport viewport = scrollPane.getViewport();
+
+        Rectangle viewRect = viewport.getViewRect();
+        //System.out.println("viewRect: "+viewRect);
+
+        Point location = rowPanel.getLocation();
+        //System.out.println("location: "+location);
+
+        if (location.y < viewRect.y) {
+            /**
+             * The top of the rowPanel is scrolled above the top of the
+             * scrollPane.
+             */
+            viewport.setViewPosition(new Point(location.y, location.y));
+        }
+        else if ((location.y + rowPanel.getHeight()) >
+                 (viewRect.y + viewRect.height)) {
+            /**
+             * The bottom of the rowPanel is scrolled below the bottom
+             * of the scrollPane.
+             */
+
+            int rowBottomPixel = rowPanel.getY() + rowPanel.getHeight()-1;
+
+            int viewportTopPixel = rowBottomPixel - viewRect.height; 
+
+            viewport.setViewPosition(new Point(viewRect.x, viewportTopPixel));
         }
     }
 
