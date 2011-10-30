@@ -37,7 +37,6 @@ public class Translator {
     public static final String OE_COUNT = "count";
     public static final String OE_AS = "as";
     public static final String OE_PARAMETER = "parameter";
-    //public static final String OE_MY = "my";
     public static final String OE_ANY = "any";
     public static final String OE_ELEMENTS_OF_TYPE = "elementsOfType";
 

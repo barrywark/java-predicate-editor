@@ -309,7 +309,7 @@ public class ExpressionTreeToRowData
             }
 
             exTemp = oeAttributePath.getOperandList().get(0);
-            appendToAttributePath(rowData, oeAttributePath, classDescription);
+            setAttributePath(rowData, oeAttributePath, classDescription);
 
             /**
              * Now turn the second operand into the property name/key
@@ -588,38 +588,6 @@ public class ExpressionTreeToRowData
 
 
     /**
-     * Set the value of the rowData's attributePath to be the
-     * equivalent of the value in the IExpression.
-     *
-     * TODO: Get rid of this method.
-     *
-     * @param rowData The RowData object whose attributePath we will set.
-     *
-     * @param ex The IExpression that is the left operand of an operator.
-     */
-    private static void setAttributePath(RowData rowData, IExpression ex,
-        ClassDescription classDescription) {
-
-        /*
-        System.out.println("Enter ExpressionTranslator.setAttributePath");
-        System.out.println("rowData: "+rowData.getRowString());
-        System.out.println("classDescription: "+classDescription);
-        */
-
-        /*
-        ArrayList<Attribute> attributePath = new ArrayList<Attribute>();
-
-        appendToAttributePath(rowData, attributePath, ex, classDescription);
-
-        for (Attribute attribute : attributePath) {
-            rowData.addAttribute(attribute);
-        }
-        */
-        appendToAttributePath(rowData, ex, classDescription);
-    }
-
-
-    /**
      * This returns true if the passed in IExpression is
      * a PER_USER Attribute like "keywords", "mykeywords", etc.
      */
@@ -700,8 +668,8 @@ public class ExpressionTreeToRowData
 
 
     /**
-     * Append the passed in IExpression to the passed in
-     * rowData's attributePath.
+     * Set the value of the rowData's attributePath to be the
+     * equivalent of the value in the IExpression.
      * This method converts the passed in IExpression tree
      * into Attributes and adds them to the rowData's attributePath.
      *
@@ -713,7 +681,10 @@ public class ExpressionTreeToRowData
      * passed in as the "ex" parameter, this method calls itself
      * recursively to create the entire path.
      *
+     * @param rowData The RowData object whose attributePath we will set.
+     *
      * @param ex This is the subtree that defines the attribute path.
+     * This is probably the "left" (i.e. first) operand of an operator.
      *
      * @param classDescription This is the "parent" class that
      * is the class of the leftmost Attribute of the path.
@@ -722,11 +693,14 @@ public class ExpressionTreeToRowData
      * on which this method is currently working.  If the
      * Attribute is a primitive, (e.g. int, string), this returns null.
      */
-    private static ClassDescription appendToAttributePath(RowData rowData,
+    /**
+     * @param ex The IExpression that is the left operand of an operator.
+     */
+    private static ClassDescription setAttributePath(RowData rowData,
         IExpression ex, ClassDescription classDescription) {
 
         /*
-        System.out.println("Enter appendToAttributePath");
+        System.out.println("Enter setAttributePath");
         System.out.println("rowData: "+rowData.getRowString());
         System.out.println("ex: "+((Expression)ex));
         System.out.println("classDescription: "+classDescription);
@@ -807,7 +781,7 @@ public class ExpressionTreeToRowData
                      * nextEpoch.nextEpoch.prevEpoch of the
                      * example attribute path described above.
                      */
-                    appendToAttributePath(rowData, ex2, classDescription);
+                    setAttributePath(rowData, ex2, classDescription);
                 }
             }
 
@@ -955,7 +929,7 @@ public class ExpressionTreeToRowData
                     }
 
                     exTemp = oeParameter.getOperandList().get(0);
-                    appendToAttributePath(rowData, exTemp, classDescription);
+                    setAttributePath(rowData, exTemp, classDescription);
 
                     exTemp = oeParameter.getOperandList().get(1);
                     if (!(exTemp instanceof IStringLiteralValueExpression)) {
@@ -972,12 +946,12 @@ public class ExpressionTreeToRowData
                 else {
 
                     ClassDescription childClass;
-                    childClass = appendToAttributePath(rowData, op,
-                                                       classDescription);
+                    childClass = setAttributePath(rowData, op,
+                                                  classDescription);
 
                     if (oe.getOperandList().size() > 1) {
                         op = oe.getOperandList().get(1);
-                        return(appendToAttributePath(rowData, op, childClass));
+                        return(setAttributePath(rowData, op, childClass));
                     }
                     else {
                         /**
@@ -989,7 +963,7 @@ public class ExpressionTreeToRowData
             }
             else if (OE_COUNT.equals(oe.getOperatorName())) {
                 IExpression op = oe.getOperandList().get(0);
-                return(appendToAttributePath(rowData, op, classDescription));
+                return(setAttributePath(rowData, op, classDescription));
             }
             else if (OE_IS_NULL.equals(oe.getOperatorName())) {
                 /**

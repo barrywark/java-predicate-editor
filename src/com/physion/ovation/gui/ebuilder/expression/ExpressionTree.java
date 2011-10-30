@@ -59,8 +59,9 @@ public class ExpressionTree
 
 
     /**
-     * This constructor is NOT public because no other classes
-     * will interface with the ExpressionTree class like this.
+     * This constructor is NOT public because no classes
+     * outside of this package will interface with the
+     * ExpressionTree class like this.
      */
     ExpressionTree(String classUnderQualification,
                    Expression rootExpression) {
@@ -152,9 +153,6 @@ public class ExpressionTree
 
     /**
      * Read an ExpressionTree object from the passed in inputStream.
-     *
-     * TODO:  How should errors be handled?  Hide them and just
-     * return null, or throw them up to the caller?
      *
      * @param inputStream The ObjectInputStream from which an
      * ExpressionTree will be read.
