@@ -574,15 +574,15 @@ public class RowDataToExpressionTree
                  * Int16LiteralValueExpression.
                  */
                 return(new Int32LiteralValueExpression(
-                       ((Integer)rowData.getAttributeValue()).intValue()));
+                       ((Number)rowData.getAttributeValue()).intValue()));
 
             case INT_32:
                 return(new Int32LiteralValueExpression(
-                       ((Integer)rowData.getAttributeValue()).intValue()));
+                       ((Number)rowData.getAttributeValue()).intValue()));
 
             case FLOAT_64:
                 return(new Float64LiteralValueExpression(
-                       ((Double)rowData.getAttributeValue()).doubleValue()));
+                       ((Number)rowData.getAttributeValue()).doubleValue()));
 
             case DATE_TIME:
                 return(new TimeLiteralValueExpression(
