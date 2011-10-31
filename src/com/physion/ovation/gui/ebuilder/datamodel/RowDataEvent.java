@@ -26,15 +26,28 @@ public class RowDataEvent {
     public static final int TYPE_UNDEFINED = 0; // Undefined change(s).
     public static final int TYPE_CHILD_ADD = 1;
     public static final int TYPE_CHILD_DELETE = 2;
+
+    /**
+     * The attributePath is being changed via a call
+     * to addAttribute() or trimAttributePath().
+     */
     public static final int TYPE_ATTRIBUTE_PATH = 3;
+
     public static final int TYPE_ATTRIBUTE_VALUE = 4;
     public static final int TYPE_PROP_NAME = 5;
     public static final int TYPE_PROP_TYPE = 6;
     public static final int TYPE_CUQ = 7; // Class Under Qualification
-    public static final int TYPE_PARENT = 8; // Parent is being set.
+    public static final int TYPE_PARENT = 8; // Row's parent row is being set.
     public static final int TYPE_COLLECTION_OPERATOR = 9;
     public static final int TYPE_ATTRIBUTE_OPERATOR = 10;
-    public static final int TYPE_ATTRIBUTE = 11; // Single Attribute being set.
+
+    /**
+     * A single attribute value being set via the
+     * setAttribute() method.  Please note, this might
+     * cause the number of attributes in the attributePath
+     * to change.
+     */
+    public static final int TYPE_ATTRIBUTE = 11;
 
     /**
      * This is the RowData object that changed.

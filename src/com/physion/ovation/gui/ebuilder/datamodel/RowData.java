@@ -659,6 +659,15 @@ public class RowData
                 "I will assume that is what you meant to do, and do that.");
         }
 
+        if (getClassUnderQualification() == classUnderQualification) {
+            return;
+        }
+
+        if ((getClassUnderQualification() != null) &&
+            getClassUnderQualification().equals(classUnderQualification)) {
+            return;
+        }
+
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE, RowDataEvent.TYPE_CUQ);
         getRootRow().classUnderQualification = classUnderQualification;
 
@@ -797,6 +806,10 @@ public class RowData
 
         //System.out.println("Enter RowData.setAttributeOperator("+
         //                   attributeOperator+")");
+
+        if (this.attributeOperator == attributeOperator)
+            return;
+
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE_OPERATOR);
         this.attributeOperator = attributeOperator;
@@ -863,8 +876,32 @@ public class RowData
 
     public void setAttribute(int index, Attribute attribute) {
 
+        /**
+         * Check if the new value is different from the current value.
+         */
+        if (index < getAttributeCount()) {
+            Attribute currentValue = getAttribute(index);
+            if (currentValue == attribute) {
+                return;
+            }
+            if ((currentValue != null) && currentValue.equals(attribute)) {
+                return;
+            }
+        }
+
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
                          RowDataEvent.TYPE_ATTRIBUTE);
+
+        /**
+         * Possibly trim the attributePath.
+         * I.e. remove Attributes that are "after" the one being changed.
+         *
+         * TODO: Perhaps change the code so if we actually need to trim
+         * the attributePath, we send a TYPE_ATTRIBUTE_PATH event
+         * instead of a TYPE_ATTRIBUTE event.
+         */
+        trimAttributePath(index);
+
         /**
          * Make sure the attributePath is long enough.
          */

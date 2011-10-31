@@ -102,6 +102,12 @@ public class ExpressionPanel
          * Make the scrollpane layout things now so that when
          * we need to figure out where the row is it is in its
          * final location.
+         *
+         * Another way to do this is to make the call
+         * to ensureRowPanelVisible() inside of an invokeLater()
+         * call.  That way the ensureRowPanelVisible() call
+         * would get made after the "normal" layout validation
+         * had occurred.
          */
         if (getScrollPane() != null)
             getScrollPane().validate();
@@ -255,6 +261,10 @@ public class ExpressionPanel
     }
 
 
+    /**
+     * Tell any JScrollPane that contains us that it should NOT
+     * stretch us to fill the scrollPane.
+     */
     @Override
     public boolean getScrollableTracksViewportHeight() {
         return(false);
@@ -262,11 +272,54 @@ public class ExpressionPanel
 
 
     /**
+     * This method is required by the Scrollable interface
+     * we implement, and is called by the JScrollPane that
+     * contains us to decide whether it should stretch/shrink
+     * us to fit the viewport (i.e. the visible portion), or
+     * whether it should display a horizontal scrollbar.
+     *
      * Make the RowPanels stretch to fill the width of the
-     * scrollpane that contains us.
+     * scrollPane that contains us if the scrollPane is
+     * larger than this ExpressionPanel would like to be.
+     *
+     * But, if the scrollPane's viewport is smaller than 
+     * this ExpressionPanel would like to be, tell the
+     * scrollPane to scroll us horizontally.
      */
     @Override
     public boolean getScrollableTracksViewportWidth() {
+
+        JScrollPane scrollPane = getScrollPane();
+        if (scrollPane == null) {
+            /**
+             * This should never happen, because no one should
+             * call this method if we are not in a JScrollPane.
+             */
+            return(false);
+        }
+
+        JViewport viewport = scrollPane.getViewport();
+
+        Rectangle viewRect = viewport.getViewRect();
+        Dimension preferredSize = getPreferredSize();
+        if (viewRect.width < preferredSize.width) {
+            /**
+             * The viewport is no wide enough for us, so
+             * tell the scrollPane that it should NOT shrink
+             * us to fit the viewport.  Instead, the scrollpane
+             * will end up displaying a horizontal scrollbar so
+             * the user can scroll us horizontally.
+             */
+            return(false);
+        }
+
+        /**
+         * The viewport is larger than we need to be,
+         * (or exactly the right size), so tell the
+         * scrollPane to stretch us to fill the viewport.
+         * (I.e. this ExpressionPanel, which is the "scrollable",
+         * should "track" the viewport width.)
+         */
         return(true);
     }
 
@@ -296,7 +349,6 @@ public class ExpressionPanel
             /**
              * When scrolling horizontally, scroll sideways
              * by the width of the viewport.
-             * Note, the GUI doesn't currently scroll horizontally.
              */
             return(visibleRect.width);
         }
@@ -325,10 +377,10 @@ public class ExpressionPanel
             /**
              * When scrolling horizontally, there isn't really a good
              * answer for how much scrolling one "unit" is.
-             * So, just scroll by a percentage of the viewport width.
-             * Note, the GUI doesn't currently scroll horizontally.
+             * So, just scroll by a percentage, (e.g. 25% =  0.25),
+             * of the viewport width.
              */
-            return((int)(visibleRect.width * 0.25));
+            return((int)(visibleRect.width * 0.15));
         }
 
         /**
