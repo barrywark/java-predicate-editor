@@ -802,6 +802,7 @@ public class ExpressionBuilder
      *      "com.sun.java.swing.plaf.motif.MotifLookAndFeel"
      *      "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
      *      "javax.swing.plaf.nimbus.NimbusLookAndFeel"
+     *      "javax.swing.plaf.metal.MetalLookAndFeel"
      */
     public static void setLookAndFeel(String[] args) {
 
@@ -833,9 +834,11 @@ public class ExpressionBuilder
         //lookAndFeel = "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
         //lookAndFeel = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
         //lookAndFeel = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+        //lookAndFeel = "javax.swing.plaf.metal.MetalLookAndFeel";
 
         /**
-         * Below is the default Swing MetalLookAndFeel that you do not like.
+         * The "cross platform" L&F is the default Swing MetalLookAndFeel.
+         * I.e. "javax.swing.plaf.metal.MetalLookAndFeel"
          */
         //lookAndFeel = UIManager.getCrossPlatformLookAndFeelClassName();
 
