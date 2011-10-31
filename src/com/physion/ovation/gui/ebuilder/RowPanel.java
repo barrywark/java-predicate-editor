@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
+import javax.swing.SwingUtilities;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.FocusManager;
@@ -207,8 +208,14 @@ class RowPanel
     /**
      * This is simply a "spacer" that we put on the left side of
      * the row to indent the widgets to the right of it.
+     * Currently, I am simply using a JLabel
+     * filled with an adustible number of spaces to do this.
+     * Simple, and it works.  There are many other ways to do
+     * this though:  A JPanel with a minimum size, A JLabel or
+     * JPanel that is empty, but has an EmptyBorder whose size
+     * you change.
      */
-    private JLabel indentWidget;
+    private JLabel indentWidget = new JLabel();
 
     /**
      * This holds all the buttons on the right side of the row.
@@ -285,17 +292,12 @@ class RowPanel
         setLayout(layout);
 
         /**
-         * Create a component we will use on the left side of this
-         * RowPanel to indent all the other widgets to the right
-         * by some amount.  Currently, I am simply using a JLabel
-         * filled with an adustible number of spaces to do this.
-         * Simple, and it works.  There are many other ways to do
-         * this though:  A JPanel with a minimum size, A JLabel or
-         * JPanel that is empty, but has an EmptyBorder whose size
-         * you change.
+         * Make sure the JLabels are not part of the focus
+         * traversal.
          */
-        indentWidget = new JLabel();
         indentWidget.setFocusable(false);
+        ofTheFollowingLabel.setFocusable(false);
+        haveLabel.setFocusable(false);
 
         deleteRowButton = new InvisibleButton("-");
         deleteRowButton.addActionListener(this);
@@ -729,15 +731,6 @@ class RowPanel
 
         if (event.getTiming() == RowDataEvent.TIMING_AFTER) {
             adjustBackgroundColor();
-
-            if (event.getChangeType() == RowDataEvent.TYPE_ATTRIBUTE) {
-                /**
-                 * Set the focus to the last attribute comboBox.
-                 */
-                //setFocusToLastFocusableAttributeComboBox();
-
-                //ensureComponentVisible(comboBox);  Write this method
-            }
         }
     }
 
@@ -938,6 +931,56 @@ class RowPanel
         */
 
         initializeComponents();
+
+        /**
+         * Move the focus to the component to the right of the
+         * comboBox in which the user just selected a value.
+         *
+         * TODO:  Ask Physion if they want this feature.
+         * People that use the keyboard alot might like it.
+         * It shouldn't bother people who use the mouse.
+         */
+        boolean setFocusToNextComponent = false;
+        Component[] components = comboBox.getParent().getComponents();
+        for (int index = 0; index < components.length; index++) {
+            if (components[index] == comboBox) {
+
+                /**
+                 * Tell this loop that we should set the focus
+                 * to the next focusable component after the
+                 * comboBox we just found.
+                 */
+                setFocusToNextComponent = true;
+                continue;
+            }
+
+            if (setFocusToNextComponent && components[index].isFocusable()) {
+                //System.out.println("comp = "+components[index]);
+
+                if (!(components[index] == buttonPanel)) {
+                    components[index].requestFocusInWindow();
+                }
+                else {
+                    /**
+                     * The next focusable component is the JPanel we use
+                     * to hold the +/-/++ buttons.  So we've come to the
+                     * end of the editable widgets in this row, so don't
+                     * automatically progress the focus any further.
+                     */
+                 }
+                break;
+            }
+        }
+
+        /**
+         * Make sure that the component that now has the focus is
+         * visible in the scrollPane.  If it isn't scroll the scrollPane
+         * so it is.  Actually, we probably want to have some sort of
+         * focus listener that always does this when the focus changes.
+         *
+         * TODO:  Write this method.
+         */
+        //ensureComponentVisible(<componentWithFocus>);
     }
 
 
@@ -1812,12 +1855,12 @@ class RowPanel
 
 
     /**
-     * TODO: Finish this method and use it.
+     * Set the focus to the last, (i.e. rightmost), attribute
+     * comboBox in this row.
      */
     /*
     void setFocusToLastFocusableAttributeComboBox() {
 
-        System.out.println("Enter setFocusToLastFocusableAttributeComboBox()");
         JComboBox lastComboBox = null;
         for (JComboBox comboBox : comboBoxes) {
             if (comboBox.isFocusable()) {
@@ -1828,7 +1871,6 @@ class RowPanel
             }
         }
 
-        System.out.println("lastComboBox: "+lastComboBox);
         if (lastComboBox != null)
             lastComboBox.requestFocusInWindow();
     }

@@ -50,7 +50,16 @@ public class RowDataEvent {
     public static final int TYPE_ATTRIBUTE = 11;
 
     /**
-     * This is the RowData object that changed.
+     * This is the "original" RowData object that changed.
+     */
+    private RowData originalRowData;
+
+    /**
+     * This is the RowData object that the listener is listening
+     * to and is sending the event to the listener.
+     * Note, this is not necessarily the RowData that actually
+     * generated the original event.  For example, the root
+     * RowData is notified about changes in its children.
      */
     private RowData rowData;
 
@@ -76,7 +85,10 @@ public class RowDataEvent {
     private int changeType;
 
 
-    public RowDataEvent(RowData rowData, int timing, int changeType) {
+    public RowDataEvent(RowData originalRowData, RowData rowData,
+                        int timing, int changeType) {
+
+        this.originalRowData = originalRowData;
         this.rowData = rowData;
         this.timing = timing;
         this.changeType = changeType;
@@ -90,6 +102,16 @@ public class RowDataEvent {
 
     public void setRowData(RowData rowData) {
         this.rowData = rowData;
+    }
+
+
+    public RowData getOriginalRowData() {
+        return(originalRowData);
+    }
+
+
+    public void setOriginalRowData(RowData originalRowData) {
+        this.originalRowData = originalRowData;
     }
 
 
@@ -131,5 +153,13 @@ public class RowDataEvent {
      */
     public void setChangeType(int changeType) {
         this.changeType = changeType;
+    }
+
+
+    public String toString() {
+
+        String s = originalRowData.getRowString()+"~"+
+            rowData.getRowString()+"~"+timing+"~"+changeType;
+        return(s);
     }
 }

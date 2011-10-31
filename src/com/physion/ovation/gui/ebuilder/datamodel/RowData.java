@@ -378,11 +378,12 @@ public class RowData
 
 
     /**
-     * Fire a RowDataEvent for THIS RowData object.
-     * See RowDataEvent for information about timing and changeType.
+     * Fire a RowDataEvent that originated with THIS RowData object.
+     * See RowDataEvent for information about originalRowData,
+     * timing and changeType.
      */
     private void fireRowDataEvent(int timing, int changeType) {
-        fireRowDataEvent(new RowDataEvent(this, timing, changeType));
+        fireRowDataEvent(new RowDataEvent(this, this, timing, changeType));
     }
 
 
@@ -455,19 +456,19 @@ public class RowData
      * objects is changed.  Please note, because each row listens
      * to its children, the message eventually gets passed up to
      * the root row that the GUI is listening to.
-     *
-     * If, at some point in the future, the GUI will need to keep
-     * track of individual rows, we might want to restructure the
-     * way RowDataEvents are passed up the listener "tree" in order
-     * to tell the root listener the "topmost" RowData that is
-     * handing him the event along with which RowData actually changed.
-     * Perhaps "chain" the RowDataEvents together as a list.
-     * No need for this sort of granularity/complication at the
-     * present time.
      */
     @Override
     public void rowDataChanged(RowDataEvent event) {
-        fireRowDataEvent(event);
+
+        /**
+         * Create a new RowDataEvent that keeps the "originalRowData"
+         * value, but updates the "rowData" value to be this.
+         */
+        RowDataEvent newEvent = new RowDataEvent(event.getOriginalRowData(),
+                                                 this,
+                                                 event.getTiming(),
+                                                 event.getChangeType());
+        fireRowDataEvent(newEvent);
     }
 
 
@@ -542,9 +543,9 @@ public class RowData
 
         /**
          * Figure out what the ClassDescription should be
-         * for this Attribute Row.  I.e. this is the class
-         * that will be used for the leftmost attribute comboBox
-         * in this row.
+         * for the Attribute Row we will create.  I.e. this is
+         * the class that will be used for the leftmost
+         * attribute comboBox in this row.
          */
         if ((this != getRootRow()) && isSimpleCompoundRow()) {
             /**

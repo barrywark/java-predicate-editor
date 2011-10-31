@@ -155,23 +155,46 @@ public class ExpressionPanel
      */
     public void rowDataChanged(RowDataEvent event) {
 
-        //System.out.println("event.getChangeType() = "+event.getChangeType());
+        /**
+         * Until I write more clever code, recreate all the
+         * rows when the number of rows are changed.
+         *
+         * In order to improve GUI performance, we really
+         * should be clever about creating or deleting
+         * just the one row involved in the change, and
+         * then moving the rows below the newly created
+         * row down, (or moving the rows below the deleted
+         * row up).  But, that is not yet the case.
+         */
+        if ((event.getTiming() == RowDataEvent.TIMING_AFTER) &&
+            ((event.getChangeType() == RowDataEvent.TYPE_CHILD_ADD) ||
+             (event.getChangeType() == RowDataEvent.TYPE_CHILD_DELETE) ||
+             (event.getChangeType() == RowDataEvent.TYPE_CUQ))) {
+
+            createRowPanels();
+        }
+
+        /**
+         * Set the focus appropriately.  For example, if we created
+         * a new row, set the focus to the first component in that
+         * row.
+         */
         if ((event.getTiming() == RowDataEvent.TIMING_AFTER) &&
             ((event.getChangeType() == RowDataEvent.TYPE_CHILD_ADD) ||
              (event.getChangeType() == RowDataEvent.TYPE_CHILD_DELETE) ||
              (event.getChangeType() == RowDataEvent.TYPE_ATTRIBUTE) ||
              (event.getChangeType() == RowDataEvent.TYPE_CUQ))) {
 
-            createRowPanels();
-
             if (event.getChangeType() == RowDataEvent.TYPE_CHILD_ADD) {
                 /**
                  * Set the focus to the new row.  Rows are always
                  * added to the end of the parent row's list of children.
                  * So, simply set the focus to the last child row of the
-                 * row that sent the event.
+                 * row that caused the event.  I.e. the row that
+                 * had the child added to it, which is the "originalRowData"
+                 * member data of the RowDataEvent.
                  */
-                RowData rowData = event.getRowData();
+                RowData rowData = event.getOriginalRowData();
                 rowData = rowData.getChildRows().get(
                     rowData.getChildRows().size()-1);
 
