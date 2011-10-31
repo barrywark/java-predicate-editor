@@ -454,7 +454,7 @@ class RowPanel
         /**
          * Change default keyboard behavior of the comboBox so
          * it does NOT select the value when using the keyboard
-         * to travers values in the list.
+         * to traverse values in the list.
          * Details about this behavior can be googled.
          * For example:  http://tinyurl.com/cbkeyboardtrav
          */
