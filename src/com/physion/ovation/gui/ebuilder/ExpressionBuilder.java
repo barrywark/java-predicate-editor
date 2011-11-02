@@ -439,11 +439,13 @@ public class ExpressionBuilder
         ExpressionBuilder dialog = new ExpressionBuilder(rootRow);
 
         /**
-         * Make the dialog visible.  It is modal, so
-         * execution along this path stops at this point.
+         * Make the dialog visible in the center of the
+         * screen.  It is modal, so execution along this
+         * path stops at this point.
          * Only when the user hits Ok or Cancel will this
          * call to the setVisible() method return.
          */
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
 
         returnValue.status = dialog.getReturnStatus();
