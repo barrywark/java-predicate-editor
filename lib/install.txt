@@ -1,0 +1,32 @@
+There are three ways to install/distribute datetimepicker.jar. Look into
+all three of them and then decide which is best for you.
+
+Method 1: Include this jar file in your classpath.
+    You can copy this jar file under any directory
+    and include the jar file in your class path. 
+    E.g.
+        java -classpath "MyApp/myapp.jar;installdir/datetimepicker.jar" MyApp
+
+Method 2: Jar this along with your classes 
+    You can unjar this file under your classes directory and jar 
+    the classes along with your class files into a single .jar file.
+    This is best suited for Applet.
+
+    E.g.
+        cd MyApp/classes
+        jar xvf datetimepicker.jar
+        jar cvf MyApp.jar com myapp
+
+Method 3: Install the jar file in the Java Runtime Extension Directory.
+
+    Copy the datetimepicker.jar to the jre/lib/ext directory. 
+    Java by default includes all .jar file under jre/lib/ext directory
+    in its classpath, so you don't have to include the .jar file
+    in the classpath when you compile or run an application. 
+    This won't work for applet, since you can't install the file on 
+    client machine's jre/lib/ext directory. This is best when you
+    distrubute the jre along with your application.
+
+NetBeans Installation (Only for Version 2.0 and above)
+To install in NetBeans, Select Tools Menu -> Install New JavaBeans, Select the datetimepicker.jar
+and select "Swing" palette.
