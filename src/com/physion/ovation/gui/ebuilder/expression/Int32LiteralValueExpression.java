@@ -19,7 +19,7 @@ public class Int32LiteralValueExpression
     }
 
 
-    Int32LiteralValueExpression(int value) {
+    public Int32LiteralValueExpression(int value) {
         this.value = value;
     }
 

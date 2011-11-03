@@ -21,7 +21,7 @@ public class AttributeExpression
     }
 
 
-    AttributeExpression(String attributeName) {
+    public AttributeExpression(String attributeName) {
         this.attributeName = attributeName;
     }
 

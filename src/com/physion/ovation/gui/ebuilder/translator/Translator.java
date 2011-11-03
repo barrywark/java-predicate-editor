@@ -13,6 +13,7 @@ import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.Operator;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
+import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
 
 
 /**

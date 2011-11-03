@@ -18,7 +18,7 @@ public class Float64LiteralValueExpression
     }
 
 
-    Float64LiteralValueExpression(double value) {
+    public Float64LiteralValueExpression(double value) {
         this.value = value;
     }
 

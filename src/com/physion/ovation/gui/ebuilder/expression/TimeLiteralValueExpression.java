@@ -19,7 +19,7 @@ public class TimeLiteralValueExpression
     }
 
 
-    TimeLiteralValueExpression(Date value) {
+    public TimeLiteralValueExpression(Date value) {
         this.value = value;
     }
 

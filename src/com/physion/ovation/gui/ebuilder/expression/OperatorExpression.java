@@ -59,7 +59,7 @@ public class OperatorExpression
      * to set the operatorName and add some operands
      * to the operandList.
      */
-    OperatorExpression() {
+    public OperatorExpression() {
         operatorName = null;
         operandList = new ArrayList<IExpression>();
     }
@@ -68,11 +68,6 @@ public class OperatorExpression
     /**
      * Create an OperatorExpressionImp with the
      * specified operatorName.
-     *
-     * Please note, the only reason this method is public
-     * is so the ExpressionBuilder class can create an
-     * OperatorExpression as a default value for a
-     * ExpressionTree constructor.
      */
     public OperatorExpression(String operatorName) {
         this();
@@ -80,7 +75,7 @@ public class OperatorExpression
     }
 
 
-    void addOperand(IExpression expression) {
+    public void addOperand(IExpression expression) {
 
         if (expression == null) {
             (new Exception("expression == null")).printStackTrace();

@@ -22,7 +22,7 @@ public class ClassLiteralValueExpression
     }
 
 
-    ClassLiteralValueExpression(String value) {
+    public ClassLiteralValueExpression(String value) {
         this.value = value;
     }
 

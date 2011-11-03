@@ -19,7 +19,7 @@ public class BooleanLiteralValueExpression
     }
 
 
-    BooleanLiteralValueExpression(Boolean value) {
+    public BooleanLiteralValueExpression(Boolean value) {
         this.value = value;
     }
 

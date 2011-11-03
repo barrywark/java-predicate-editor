@@ -18,7 +18,7 @@ public class StringLiteralValueExpression
     }
 
 
-    StringLiteralValueExpression(String value) {
+    public StringLiteralValueExpression(String value) {
         this.value = value;
     }
 
