@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
-import com.physion.ovation.gui.ebuilder.ExpressionBuilder;
 import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
@@ -59,8 +58,9 @@ public class ExpressionTreeToRowData
          *      "not(or)" -> CollectionOperator.NONE
          */
         RowData rootRow = RowData.createRootRow();
-        rootRow.setClassUnderQualification(
-            expressionTree.getClassUnderQualification());
+        String name = expressionTree.getClassUnderQualification();
+        ClassDescription cuq = DataModel.getClassDescription(name);
+        rootRow.setClassUnderQualification(cuq);
 
         IOperatorExpression oe = (IOperatorExpression)expressionTree.
             getRootExpression();
@@ -71,13 +71,6 @@ public class ExpressionTreeToRowData
          * Convert the oe into a list of child RowData objects and
          * add them to the rootRow.
          */
-         /*
-        ArrayList<RowData> childRows = createChildRows(getFirstChildOE(oe),
-            expressionTree.getClassUnderQualification());
-        rootRow.addChildRows(childRows);
-        */
-        //createAndAddChildRows(rootRow, getFirstChildOE(oe),
-        //    expressionTree.getClassUnderQualification());
 
         if (OE_NOT.equals(oe.getOperatorName())) {
             if ((oe.getOperandList().size() < 1) ||
@@ -103,8 +96,7 @@ public class ExpressionTreeToRowData
                 throw(new IllegalArgumentException(s));
             }
 
-            createAndAddChildRows(rootRow, (IOperatorExpression)ex,
-                                  expressionTree.getClassUnderQualification());
+            createAndAddChildRows(rootRow, (IOperatorExpression)ex, cuq);
         }
 
         return(rootRow);

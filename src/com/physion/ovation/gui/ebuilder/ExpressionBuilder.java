@@ -14,12 +14,15 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.UIManager;
 
+import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
+import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
 import com.physion.ovation.gui.ebuilder.expression.RowDataToExpressionTree;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTreeToRowData;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
+import com.physion.ovation.gui.ebuilder.expression.OperatorExpression;
 
 
 /**
@@ -70,6 +73,26 @@ public class ExpressionBuilder
 	 */
 	private static final long serialVersionUID = 1L;
 
+    /**
+     * This is the default Class Under Qualification class name
+     * that will be used when a "default" ExpressionTree is
+     * created because editExpression(null) is called.
+     */
+    public static final String DEFAULT_CUQ = "Epoch";
+
+    /**
+     * This is the default OperatorExpression
+     * that will be used when a "default" ExpressionTree is
+     * created because editExpression(null) is called.
+     */
+    public static final String DEFAULT_OE = ExpressionTreeToRowData.OE_OR;
+
+    /**
+     * Name of the file where we will save the ExpressionTree.
+     * This is just for testing purposes.  The deployed version
+     * of the software will store the file somewhere else
+     * most likely.
+     */
     private static final String SAVE_FILE_NAME_EXP_TREE = "saved.ExpTree";
 
 	/**
@@ -500,13 +523,35 @@ public class ExpressionBuilder
      */
     public static ReturnValue editExpression(ExpressionTree expressionTree) {
 
+        /**
+         * If the caller did not hand us an ExpressionTree, create
+         * a default one.
+         */
         if (expressionTree == null) {
-            expressionTree = new ExpressionTree();
+
+            /**
+             * Default to whatever the first class is in the list of
+             * possible CUQs.
+             */
+            String classUnderQualification;
+            classUnderQualification = DataModel.getPossibleCUQs().get(0).
+                getName();
+
+            /**
+             * Default to the "or" operator, (which is displayed as
+             * "Any" in the GUI).
+             */
+            OperatorExpression rootExpression;
+            rootExpression = new OperatorExpression(
+                ExpressionTreeToRowData.OE_OR);
+
+            expressionTree = new ExpressionTree(classUnderQualification,
+                                                rootExpression);
         }
 
         /**
          * Convert the passed in expressionTree into a RowData tree
-         * that the GUI will work with.
+         * that the GUI will display and edit.
          */
         RowData rootRow = null;
         try {

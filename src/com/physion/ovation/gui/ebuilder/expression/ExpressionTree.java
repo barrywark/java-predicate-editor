@@ -10,9 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.io.IOException;
 
-import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
-import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
-
 
 /**
  * This class represents an "entire" expression tree.
@@ -45,59 +42,53 @@ public class ExpressionTree
     public static final String SAVE_FILE_NAME = "testSaved.ExpTree";
 
     /**
-     * This is a the name of the class.  E.g. "Epoch", "EpochGroup",
-     * "Source".
+     * This is a the name of the Class Under Qualification for the
+     * root of the tree.  This is a String, not a ClassDescription
+     * object.  E.g. "Epoch", "EpochGroup", "Source".
      */
     private String classUnderQualification;
 
     /**
      * This is the root of the Expression tree.  It will be
-     * a collection operator such as: OperatorExpression(any),
-     * OperatorExpression(all), or OperatorExpression(not).
+     * a collection operator such as: OperatorExpression(or),
+     * OperatorExpression(and), or OperatorExpression(not).
      */
-    private IExpression rootExpression;
+    private IOperatorExpression rootExpression;
 
 
     /**
-     * This constructor is NOT public because no classes
-     * outside of this package will interface with the
-     * ExpressionTree class like this.
+     * Create an ExpressionTree with the passed in values.
+     *
+     * @param classUnderQualification The name of the class that
+     * is the "root" class of the tree.
+     *
+     * @param rootExpression This is the root of the Expression tree.
+     * It will be a collection operator such as: IOperatorExpression(or),
+     * IOperatorExpression(and), or IOperatorExpression(not).
      */
-    ExpressionTree(String classUnderQualification,
-                   Expression rootExpression) {
+    public ExpressionTree(String classUnderQualification,
+                          IOperatorExpression rootExpression) {
+
         this.classUnderQualification = classUnderQualification;
         this.rootExpression = rootExpression;
     }
 
 
     /**
-     * Create a default ExpressionTree.
-     * As of October 2011, by default we set the classUnderQualification
-     * to the first class in the list of "possible" CUQs in the DataModel.
-     * We default the root collection operator to be the "or" operator.
-     * Note, in the GUI, the "or" operator is displayed as "Any".
+     * Get the name of the Class Under Qualification for the
+     * root of the tree.
+     *
+     * Please note, if you want to turn the returned String
+     * into a ClassDescription object, you will need to use
+     * the DataModel class and do something like this:
+     *
+     *      String className = someExpressionTree.getClassUnderQualification();
+     *      ClassDescription cd;
+     *      cd = DataModel.getClassDescription(className);
+     * 
      */
-    public ExpressionTree() {
-
-        /**
-         * Default to whatever the first class is in the list of
-         * possible CUQs.
-         */
-        classUnderQualification = DataModel.getPossibleCUQs().get(0).getName();
-
-        /**
-         * Default to the "or", (which is displayed as "Any" in the GUI),
-         * operator.
-         */
-        rootExpression = new OperatorExpression(Translator.OE_OR);
-    }
-
-
-    /**
-     * Get the Class Under Qualification for the root of the tree.
-     */
-    public ClassDescription getClassUnderQualification() {
-        return(DataModel.getClassDescription(classUnderQualification));
+    public String getClassUnderQualification() {
+        return(classUnderQualification);
     }
 
 
@@ -235,6 +226,7 @@ public class ExpressionTree
             System.err.println("File not found: "+fileName);
         }
         catch (Exception e) {
+            System.err.println("\nInput File: \""+fileName+"\"\n");
             e.printStackTrace();
         }
 

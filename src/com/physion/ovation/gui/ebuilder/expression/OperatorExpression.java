@@ -68,8 +68,13 @@ public class OperatorExpression
     /**
      * Create an OperatorExpressionImp with the
      * specified operatorName.
+     *
+     * Please note, the only reason this method is public
+     * is so the ExpressionBuilder class can create an
+     * OperatorExpression as a default value for a
+     * ExpressionTree constructor.
      */
-    OperatorExpression(String operatorName) {
+    public OperatorExpression(String operatorName) {
         this();
         this.operatorName = operatorName;
     }
