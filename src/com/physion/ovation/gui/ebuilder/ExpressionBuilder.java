@@ -19,8 +19,8 @@ import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
-import com.physion.ovation.gui.ebuilder.expression.RowDataToExpressionTree;
-import com.physion.ovation.gui.ebuilder.expression.ExpressionTreeToRowData;
+import com.physion.ovation.gui.ebuilder.translator.RowDataToExpressionTree;
+import com.physion.ovation.gui.ebuilder.translator.ExpressionTreeToRowData;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
 import com.physion.ovation.gui.ebuilder.expression.OperatorExpression;
 
