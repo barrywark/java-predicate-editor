@@ -309,34 +309,34 @@ class RowPanel
 
         deleteRowButton = new InvisibleButton("-");
         deleteRowButton.addActionListener(this);
-        setupAutoScrolling(deleteRowButton);
+        Util.setupAutoScrolling(deleteRowButton);
 
         createAttributeRowButton = new InvisibleButton("+");
         createAttributeRowButton.addActionListener(this);
-        setupAutoScrolling(createAttributeRowButton);
+        Util.setupAutoScrolling(createAttributeRowButton);
 
         createCompoundRowButton = new InvisibleButton("++");
         createCompoundRowButton.addActionListener(this);
-        setupAutoScrolling(createCompoundRowButton);
+        Util.setupAutoScrolling(createCompoundRowButton);
 
         valueTextField = new JTextField();
         valueTextField.setColumns(MIN_TEXT_COLUMNS);
         valueTextField.getDocument().addDocumentListener(this);
-        setupAutoScrolling(valueTextField);
+        Util.setupAutoScrolling(valueTextField);
 
         valueSpinnerInt16 = new JSpinner(new SpinnerNumberModel(
             0, Short.MIN_VALUE, Short.MAX_VALUE, 1));
         valueSpinnerInt16.addChangeListener(this);
         ((JSpinner.NumberEditor)valueSpinnerInt16.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
-        setupAutoScrolling(valueSpinnerInt16);
+        Util.setupAutoScrolling(valueSpinnerInt16);
 
         valueSpinnerInt32 = new JSpinner(new SpinnerNumberModel(
             0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
         valueSpinnerInt32.addChangeListener(this);
         ((JSpinner.NumberEditor)valueSpinnerInt32.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
-        setupAutoScrolling(valueSpinnerInt32);
+        Util.setupAutoScrolling(valueSpinnerInt32);
 
         /**
          * This spinner is used when we are setting the Count for
@@ -347,7 +347,7 @@ class RowPanel
         countSpinnerInt32.addChangeListener(this);
         ((JSpinner.NumberEditor)countSpinnerInt32.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
-        setupAutoScrolling(countSpinnerInt32);
+        Util.setupAutoScrolling(countSpinnerInt32);
 
         /**
          * This text field is used to display/edit the name of
@@ -356,13 +356,13 @@ class RowPanel
         propNameTextField = new JTextField();
         propNameTextField.setColumns(MIN_TEXT_COLUMNS);
         propNameTextField.getDocument().addDocumentListener(this);
-        setupAutoScrolling(propNameTextField);
+        Util.setupAutoScrolling(propNameTextField);
 
         dateTimePicker = new DateTimePicker();
         TimePanel timePanel = dateTimePicker.getTimePanel();
         timePanel.setSecDisplayed(false);
         dateTimePicker.addActionListener(this);
-        setupAutoScrolling(dateTimePicker);
+        Util.setupAutoScrolling(dateTimePicker);
 
         /**
          * Create the comboBox used to choose the type of a "keyed"
@@ -460,7 +460,7 @@ class RowPanel
             comboBox = new JComboBox(model);
 
         comboBox.setEditable(false);
-        setupAutoScrolling(comboBox);
+        Util.setupAutoScrolling(comboBox);
 
         /**
          * Set the number of items that the dropdown will
@@ -1959,72 +1959,5 @@ class RowPanel
     public void paint(Graphics g) {
         super.paint(g);
         g.drawLine(0, getHeight()-1, getWidth()-1, getHeight()-1);
-    }
-
-
-    /**
-     * Get the JScrollPane that contains the passed in component.
-     * Returns null if the component is not in a JScrollPane.
-     *
-     * TODO:  Perhaps turn this into a utility.
-     */
-    public static JScrollPane getScrollPane(Component component) {
-
-        JScrollPane scrollPane = null;
-        Container parent = component.getParent();
-        while (parent != null) {
-            if (parent instanceof JScrollPane) {
-                scrollPane = (JScrollPane)parent;
-                break;
-            }
-            parent = parent.getParent();
-        }
-
-        return(scrollPane);
-    }
-
-
-    /**
-     * Set up a focus listener on the passed in component that
-     * will tell the scrollpane that contains it to make sure
-     * the component is visible when the component gets the focus.
-     */
-    public static void setupAutoScrolling(JComponent component) {
-
-        component.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-
-                JComponent component = (JComponent)e.getSource();
-
-                /**
-                 * Note, this single line of code works for every
-                 * component except JTextFields, which interpret the
-                 * call to scrollRectToVisible() as a command to
-                 * scroll their own contents.
-                 * So, instead of this one line of code, we have to
-                 * explicitly make the scrollRectToVisible() call
-                 * on the GUI's viewport.
-                 */
-                //component.scrollRectToVisible(new Rectangle(0, 0,
-                //    component.getWidth(), component.getHeight());
-
-                Point location = component.getLocation();
-
-                JScrollPane scrollPane = getScrollPane(component);
-
-                JViewport viewport = scrollPane.getViewport();
-                location = SwingUtilities.convertPoint(component.getParent(),
-                    location, viewport);
-
-                Rectangle rect = new Rectangle(location.x, location.y,
-                    component.getWidth(), component.getHeight());
-
-                /**
-                 * Tell the viewport that contains the component to
-                 * make sure the specified rectangle is visible.
-                 */
-                viewport.scrollRectToVisible(rect);
-            }
-        });
     }
 }

@@ -20,14 +20,11 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
  * This is the panel that contains a list of RowPanels.
  * Each RowPanel handles one row in the expression tree.
  * Each RowPanel displays/edits one RowData object.
- *
- * TODO: Remove the commented out "zebra striping" code if
- * Physion decides it does not want to do something like that.
  */
 public class ExpressionPanel
     extends JPanel
     implements RowDataListener, Scrollable {
-	
+
 	/**
 	 * We never serialize this class, so this declaration is
 	 * just to stop the compiler warning.
@@ -83,34 +80,31 @@ public class ExpressionPanel
         GridLayout layout = (GridLayout)getLayout();
         layout.setRows(rootRow.getDescendentCount()+1);
 
-        //int count = 0;
+        //int zebraCount = 0;
         for (RowData rowData : rootRow.getRows()) {
             RowPanel rowPanel = new RowPanel(rowData);
             add(rowPanel);
 
             /**
              * Zebra stripe the rows.
+             *
+             * TODO: Delete the zebra stripe code if Physion
+             * is sure they don't want to do something like this.
              */
             /*
-            if ((count % 2) == 0)
+            if ((zebraCount % 2) == 0)
                 rowPanel.setBackground(rowPanel.getBackground().darker());
             count++;
             */
         }
 
         /**
-         * Make the scrollpane layout things now so that when
-         * we need to figure out where the row is it is in its
-         * final location.
-         *
-         * Another way to do this is to make the call
-         * to ensureRowPanelVisible() inside of an invokeLater()
-         * call.  That way the ensureRowPanelVisible() call
-         * would get made after the "normal" layout validation
-         * had occurred.
+         * Make the scrollpane layout things NOW so that when
+         * we need to figure out where the row is, or any of its
+         * child components are, it/they will be laid out already.
          */
-        if (getScrollPane() != null)
-            getScrollPane().validate();
+        if (Util.getScrollPane(this) != null)
+            Util.getScrollPane(this).validate();
     }
     
 
@@ -118,6 +112,9 @@ public class ExpressionPanel
      * Get the RowPanel at the passed in index.
      * The root RowPanel, which is the one that is used
      * to select the Class Under Qualification, is at index 0.
+     *
+     * This method is not currently used, but just uncomment it
+     * if you need it in the future.
      */
     /*
     private RowPanel getRowPanel(int index) {
@@ -149,9 +146,6 @@ public class ExpressionPanel
      *
      * If the change is one that changes the number of rows
      * in the GUI, recreate the RowPanels.
-     *
-     * TODO: Handle focus traversal properly if we want to have
-     * the GUI usable from the keyboard.
      */
     public void rowDataChanged(RowDataEvent event) {
 
@@ -204,7 +198,19 @@ public class ExpressionPanel
                  */
                 RowPanel rowPanel = getRowPanel(rowData);
                 rowPanel.setFocusToFirstFocusableComponent();
-                ensureRowPanelVisible(rowPanel);
+
+                /**
+                 * By default, the Util.setupAutoScrolling()
+                 * method will make sure the first component
+                 * on this row will be visible because we set
+                 * the focus to it above.  But we really
+                 * would like the whole height of the row to
+                 * be visible, not just the minimum amount
+                 * needed to make the first component within
+                 * the row visible.  So, let's explicitly make
+                 * the rowPanel visible.
+                 */
+                Util.ensureComponentVisible(rowPanel);
             }
             else if ((event.getChangeType() ==
                       RowDataEvent.TYPE_CHILD_DELETE) ||
@@ -213,73 +219,27 @@ public class ExpressionPanel
                 /**
                  * Set the focus to the first row.
                  *
-                 * TODO:  Figure out a more user friendly rule as
-                 * to what row and component should get the focus
-                 * when a row is deleted.
+                 * TODO:  Possibly figure out a more "logical" rule
+                 * as to what row and component should get the focus
+                 * when a row is deleted.  What would make more
+                 * sense than setting it to the first row?
                  */
                 RowPanel rowPanel = getRowPanel(rootRow);
                 rowPanel.setFocusToFirstFocusableComponent();
-                ensureRowPanelVisible(rowPanel);
+
+                /**
+                 * By default, the Util.setupAutoScrolling()
+                 * method will make sure the first component
+                 * on this row will be visible because we set
+                 * the focus to it above.  But we really
+                 * would like the whole height of the row to
+                 * be visible, not just the minimum amount
+                 * needed to make the first component within
+                 * the row visible.  So, let's explicitly make
+                 * the rowPanel visible.
+                 */
+                Util.ensureComponentVisible(rowPanel);
             }
-        }
-    }
-
-
-    private JScrollPane getScrollPane() {
-
-        JScrollPane scrollPane = null;
-        Container parent = getParent();
-        while (parent != null) {
-            if (parent instanceof JScrollPane) {
-                scrollPane = (JScrollPane)parent;
-                break;
-            }
-            parent = parent.getParent();
-        }
-
-        return(scrollPane);
-    }
-
-
-    /**
-     * This method ensures that the passed in RowPanel is visible in
-     * the scrolling window.  If the passed rowPanel is not visible,
-     * the scrolling window will be scrolled by the minimal amount
-     * to make it visible.
-     */
-    public void ensureRowPanelVisible(RowPanel rowPanel) {
-
-        JScrollPane scrollPane = getScrollPane();
-        if (scrollPane == null)
-            return;
-
-        JViewport viewport = scrollPane.getViewport();
-
-        Rectangle viewRect = viewport.getViewRect();
-        //System.out.println("viewRect: "+viewRect);
-
-        Point location = rowPanel.getLocation();
-        //System.out.println("location: "+location);
-
-        if (location.y < viewRect.y) {
-            /**
-             * The top of the rowPanel is scrolled above the top of the
-             * scrollPane.
-             */
-            viewport.setViewPosition(new Point(location.y, location.y));
-        }
-        else if ((location.y + rowPanel.getHeight()) >
-                 (viewRect.y + viewRect.height)) {
-            /**
-             * The bottom of the rowPanel is scrolled below the bottom
-             * of the scrollPane.
-             */
-
-            int rowBottomPixel = rowPanel.getY() + rowPanel.getHeight()-1;
-
-            int viewportTopPixel = rowBottomPixel - viewRect.height + 1; 
-
-            viewport.setViewPosition(new Point(viewRect.x, viewportTopPixel));
         }
     }
 
@@ -312,10 +272,10 @@ public class ExpressionPanel
     @Override
     public boolean getScrollableTracksViewportWidth() {
 
-        JScrollPane scrollPane = getScrollPane();
+        JScrollPane scrollPane = Util.getScrollPane(this);
         if (scrollPane == null) {
             /**
-             * This should never happen, because no one should
+             * This should never happen, because no one will
              * call this method if we are not in a JScrollPane.
              */
             return(false);
