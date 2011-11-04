@@ -10,7 +10,11 @@ public class TimeLiteralValueExpression
     extends Expression
     implements ITimeLiteralValueExpression, Serializable {
 
-    private Date value;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Date value;
 
 
     @Override

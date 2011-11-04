@@ -60,6 +60,11 @@ public class RowData
     implements RowDataListener, Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Just for testing.
      */
     public static final String SAVE_FILE_NAME = "testSaved.RDTree";
@@ -2006,10 +2011,10 @@ public class RowData
             DataModel.getClassDescription("EpochGroup");
         ClassDescription sourceCD =
             DataModel.getClassDescription("Source");
-        ClassDescription resourceCD =
-            DataModel.getClassDescription("Resource");
-        ClassDescription derivedResponseCD =
-            DataModel.getClassDescription("DerivedResponse");
+        //ClassDescription resourceCD =
+        //    DataModel.getClassDescription("Resource");
+        //ClassDescription derivedResponseCD =
+        //    DataModel.getClassDescription("DerivedResponse");
 
         /**
          * Now create some RowData values.
@@ -2260,8 +2265,6 @@ public class RowData
      * was an error.
      */
     public static RowData readRowData(String fileName) {
-
-        Object obj = null;
 
         try {
             FileInputStream inputFile = new FileInputStream(fileName);

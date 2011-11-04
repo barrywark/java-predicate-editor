@@ -15,6 +15,11 @@ public class ClassDescription
     implements Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * The name of this class.  E.g. "Epoch", "Response".
      */
     private String name = "ERROR: name not set.";

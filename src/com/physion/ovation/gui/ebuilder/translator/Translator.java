@@ -1,18 +1,14 @@
 package com.physion.ovation.gui.ebuilder.translator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
 
-import com.physion.ovation.gui.ebuilder.ExpressionBuilder;
-import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
-import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
-import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
-import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
-import com.physion.ovation.gui.ebuilder.datatypes.Type;
-import com.physion.ovation.gui.ebuilder.datatypes.Operator;
-import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
+import com.physion.ovation.gui.ebuilder.datamodel.RowData;
+import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
+import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
+import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
+import com.physion.ovation.gui.ebuilder.datatypes.Operator;
+import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
 
 
@@ -67,7 +63,6 @@ public class Translator {
         RowData rowData2;
         RowData rowData3;
         RowData rowData4;
-        ExpressionTree expression;
 
         ClassDescription epochCD = DataModel.getClassDescription("Epoch");
         ClassDescription epochGroupCD = DataModel.getClassDescription(
@@ -929,171 +924,34 @@ public class Translator {
     public static void runOneTest() {
 
         RowData rowData;
-        RowData rowData2;
         RowData rootRow;
-        ExpressionTree expression;
+        //ExpressionTree expression;
 
-        ClassDescription epochCD = DataModel.getClassDescription("Epoch");
-        ClassDescription epochGroupCD = DataModel.getClassDescription(
-            "EpochGroup");
-        ClassDescription sourceCD = DataModel.getClassDescription("Source");
-        ClassDescription responseCD = DataModel.getClassDescription("Response");
+        //ClassDescription epochCD = DataModel.getClassDescription("Epoch");
+        //ClassDescription epochGroupCD = DataModel.getClassDescription(
+        //    "EpochGroup");
+        //ClassDescription sourceCD = DataModel.getClassDescription("Source");
+        //ClassDescription responseCD = DataModel.getClassDescription("Response");
         ClassDescription derivedResponseCD = DataModel.getClassDescription(
             "DerivedResponse");
-        ClassDescription externalDeviceCD = DataModel.getClassDescription(
-            "ExternalDevice");
+        //ClassDescription externalDeviceCD = DataModel.getClassDescription(
+        //    "ExternalDevice");
 
-/*
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ALL);
-
-        rowData = new RowData();
-        //rowData.addAttribute(epochCD.getAttribute("epochGroup"));
-        //rowData.addAttribute(epochGroupCD.getAttribute("source"));
-        //rowData.addAttribute(epochCD.getAttribute("owner"));
-        rowData.addAttribute(epochCD.getAttribute("incomplete"));
-        //rowData.addAttribute(Attribute.IS_NULL);
-        //rowData.setAttributeOperator(Operator.IS_NULL);
-        rowData.setAttributeOperator(Operator.IS_TRUE);
-        //rowData.setAttributeOperator(Operator.EQUALS);
-        //rowData.setAttributeValue("xyz");
-        rootRow.addChildRow(rowData);
-*/
-        /*
-        rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("protocolID"));
-        rowData.setAttributeOperator(Operator.NOT_EQUALS);
-        rowData.setAttributeValue("abc");
-        rootRow.addChildRow(rowData);
-        */
-
-/*
-        rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("epochGroup"));
-        rowData.addAttribute(epochGroupCD.getAttribute("source"));
-        rowData.setAttributeOperator(Operator.IS_NULL);
-        rootRow.addChildRow(rowData);
-
-        testTranslation(rootRow);
-*/
-/*
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.NONE);
-
-        rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("responses"));
-        rowData.setCollectionOperator(CollectionOperator.ALL);
-        rowData.setCollectionOperator2(CollectionOperator.ANY);
-        rootRow.addChildRow(rowData);
-
-        rowData2 = new RowData();
-        rowData2.addAttribute(responseCD.getAttribute("uuid"));
-        rowData2.setAttributeOperator(Operator.EQUALS);
-        rowData2.setAttributeValue("xyz");
-        rowData.addChildRow(rowData2);
-
-        rowData2 = new RowData();
-        rowData2.addAttribute(responseCD.getAttribute("samplingRate"));
-        rowData2.setAttributeOperator(Operator.NOT_EQUALS);
-        rowData2.setAttributeValue(new Double(1.23));
-        rowData.addChildRow(rowData2);
-
-        testTranslation(rootRow);
-*/
-/*
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ANY);
-
-        rowData = new RowData();
-        //rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("keywords"));
-        rowData.setCollectionOperator(CollectionOperator.ANY);
-        rowData.setCollectionOperator2(CollectionOperator.ANY);
-        rootRow.addChildRow(rowData);
-
-        rowData2 = new RowData();
-        rowData2.addAttribute(epochCD.getAttribute("uuid"));
-        rowData2.setAttributeOperator(Operator.EQUALS);
-        rowData2.setAttributeValue("xyz");
-        rowData.addChildRow(rowData2);
-*/
-/*
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ALL);
-
-        rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
-        rowData.setPropName("someTimeKey");
-        rowData.setPropType(Type.DATE_TIME);
-        rowData.setAttributeOperator(Operator.EQUALS);
-        rowData.setAttributeValue(new Date(1262304000000L));
-        rootRow.addChildRow(rowData);
-*/
-/*
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ALL);
-
-        rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("properties"));
-        rowData.setPropName("someKey");
-        rowData.setPropType(Type.INT_32);
-        rowData.setAttributeOperator(Operator.NOT_EQUALS);
-        rowData.setAttributeValue(new Integer(34));
-        rootRow.addChildRow(rowData);
-*/
         rootRow = new RowData();
         rootRow.setClassUnderQualification(derivedResponseCD);
         rootRow.setCollectionOperator(CollectionOperator.ANY);
 
-/*
         rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("myderivedResponses"));
-        rowData.setCollectionOperator(CollectionOperator.NONE);
-        rootRow.addChildRow(rowData);
-*/
-        rowData2 = new RowData();
-        rowData2.addAttribute(derivedResponseCD.getAttribute(
+        rowData.addAttribute(derivedResponseCD.getAttribute(
                               "derivationParameters"));
-        rowData2.setPropName("someKey");
-        rowData2.setPropType(Type.BOOLEAN);
-        rowData2.setAttributeOperator(Operator.IS_TRUE);
-        rootRow.addChildRow(rowData2);
-/*
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(derivedResponseCD);
-        rootRow.setCollectionOperator(CollectionOperator.ANY);
-
-/*
-        rowData = new RowData();
-        rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("myderivedResponses"));
-        rowData.setCollectionOperator(CollectionOperator.NONE);
+        rowData.setPropName("someKey");
+        rowData.setPropType(Type.BOOLEAN);
+        rowData.setAttributeOperator(Operator.IS_TRUE);
         rootRow.addChildRow(rowData);
-        */
-
-/*
-        rowData2 = new RowData();
-        rowData2.addAttribute(derivedResponseCD.getAttribute("mykeywords"));
-        rowData2.setCollectionOperator2(CollectionOperator.ANY);
-        rowData2.setCollectionOperator(CollectionOperator.COUNT);
-        rowData2.setAttributeOperator(Operator.EQUALS);
-        rowData2.setAttributeValue(new Integer(4));
-        rootRow.addChildRow(rowData2);
-/*
-        rootRow = RowData.createTestRowData();
-        System.out.println("\nRowData:\n"+rootRow);
-*/
+        
         System.out.println("\nRowData:\n"+rootRow);
         testTranslation(rootRow);
+        
         /*
         rootRow.testSerialization();
         System.out.println("\nRowData:\n"+rootRow);

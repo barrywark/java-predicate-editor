@@ -10,7 +10,11 @@ public class Int32LiteralValueExpression
     extends Expression
     implements IInt32LiteralValueExpression, Serializable {
 
-    private int value;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int value;
 
 
     @Override

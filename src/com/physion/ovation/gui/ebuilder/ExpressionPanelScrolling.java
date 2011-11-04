@@ -2,7 +2,6 @@ package com.physion.ovation.gui.ebuilder;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.BorderLayout;
 import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;

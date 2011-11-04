@@ -13,7 +13,11 @@ public class ClassLiteralValueExpression
     extends Expression
     implements IClassLiteralValueExpression, Serializable {
 
-    private String value;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String value;
 
 
     @Override

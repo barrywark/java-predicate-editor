@@ -1,38 +1,24 @@
 package com.physion.ovation.gui.ebuilder.translator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
-import com.physion.ovation.gui.ebuilder.ExpressionBuilder;
-import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
-import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
-import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
-import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
-import com.physion.ovation.gui.ebuilder.datatypes.Type;
-import com.physion.ovation.gui.ebuilder.datatypes.Operator;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
-import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
-import com.physion.ovation.gui.ebuilder.expression.IOperatorExpression;
-import com.physion.ovation.gui.ebuilder.expression.IAttributeExpression;
-import com.physion.ovation.gui.ebuilder.expression.IStringLiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.IExpression;
-import com.physion.ovation.gui.ebuilder.expression.IClassLiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.IFloat64LiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.IInt32LiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.IBooleanLiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.ITimeLiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.ILiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.OperatorExpression;
+import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
+import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
+import com.physion.ovation.gui.ebuilder.datatypes.Operator;
+import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.expression.AttributeExpression;
-import com.physion.ovation.gui.ebuilder.expression.StringLiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.Expression;
-import com.physion.ovation.gui.ebuilder.expression.ClassLiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.Float64LiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.Int32LiteralValueExpression;
 import com.physion.ovation.gui.ebuilder.expression.BooleanLiteralValueExpression;
-import com.physion.ovation.gui.ebuilder.expression.TimeLiteralValueExpression;
+import com.physion.ovation.gui.ebuilder.expression.ClassLiteralValueExpression;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
+import com.physion.ovation.gui.ebuilder.expression.Float64LiteralValueExpression;
+import com.physion.ovation.gui.ebuilder.expression.IExpression;
+import com.physion.ovation.gui.ebuilder.expression.ILiteralValueExpression;
+import com.physion.ovation.gui.ebuilder.expression.Int32LiteralValueExpression;
+import com.physion.ovation.gui.ebuilder.expression.OperatorExpression;
+import com.physion.ovation.gui.ebuilder.expression.StringLiteralValueExpression;
+import com.physion.ovation.gui.ebuilder.expression.TimeLiteralValueExpression;
 
 
 /**

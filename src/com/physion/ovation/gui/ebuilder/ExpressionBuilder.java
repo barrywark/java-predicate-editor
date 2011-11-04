@@ -1,34 +1,28 @@
 package com.physion.ovation.gui.ebuilder;
 
-import java.util.ArrayList;
-import java.awt.Frame;
-import java.awt.Point;
-import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusAdapter;
+import java.util.ArrayList;
+
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JButton;
 import javax.swing.UIManager;
 
-import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
-import com.physion.ovation.gui.ebuilder.translator.RowDataToExpressionTree;
-import com.physion.ovation.gui.ebuilder.translator.ExpressionTreeToRowData;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
 import com.physion.ovation.gui.ebuilder.expression.OperatorExpression;
+import com.physion.ovation.gui.ebuilder.translator.ExpressionTreeToRowData;
+import com.physion.ovation.gui.ebuilder.translator.RowDataToExpressionTree;
 
 
 /**

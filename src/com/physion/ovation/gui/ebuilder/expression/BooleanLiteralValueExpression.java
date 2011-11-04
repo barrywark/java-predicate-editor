@@ -10,7 +10,11 @@ public class BooleanLiteralValueExpression
     extends Expression
     implements IBooleanLiteralValueExpression, Serializable {
 
-    private boolean value;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private boolean value;
 
 
     @Override

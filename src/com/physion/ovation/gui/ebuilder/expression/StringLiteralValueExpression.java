@@ -9,7 +9,11 @@ public class StringLiteralValueExpression
     extends Expression
     implements IStringLiteralValueExpression, Serializable {
 
-    private String value;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String value;
 
 
     @Override

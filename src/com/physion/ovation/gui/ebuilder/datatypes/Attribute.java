@@ -28,6 +28,11 @@ public class Attribute
     implements Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	/**
      * These are special values that appear in comboBoxes that
      * display a list of attributes.  They are not really attributes
      * though.  See notes at the start of this class.

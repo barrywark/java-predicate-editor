@@ -9,7 +9,11 @@ public class Float64LiteralValueExpression
     extends Expression
     implements IFloat64LiteralValueExpression, Serializable {
 
-    private double value;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private double value;
 
 
     @Override

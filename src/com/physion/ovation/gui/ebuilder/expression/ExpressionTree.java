@@ -37,6 +37,11 @@ public class ExpressionTree
     implements Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Just for testing.
      */
     public static final String SAVE_FILE_NAME = "testSaved.ExpTree";
@@ -210,8 +215,6 @@ public class ExpressionTree
      * was an error.
      */
     public static ExpressionTree readExpressionTree(String fileName) {
-
-        Object obj = null;
 
         try {
             FileInputStream inputFile = new FileInputStream(fileName);

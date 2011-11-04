@@ -12,6 +12,11 @@ public class OperatorExpression
     implements IOperatorExpression, Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * The indent amount to use for each level of nesting
      * when displaying this object as a string value meant
      * to be sent to a console window.  E.g. for debugging.

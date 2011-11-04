@@ -9,7 +9,11 @@ public class AttributeExpression
     extends Expression
     implements IAttributeExpression, Serializable {
 
-    private String attributeName;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String attributeName;
 
 
     /**

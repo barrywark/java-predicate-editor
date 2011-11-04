@@ -9,6 +9,11 @@ public class Expression
     implements IExpression, Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Required by Expression interface, but not needed for
      * current work.
      */
