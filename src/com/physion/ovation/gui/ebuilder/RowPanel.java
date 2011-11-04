@@ -6,20 +6,29 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusAdapter;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.swing.JComponent;
 import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.FocusManager;
 import javax.swing.JComboBox;
+import javax.swing.JViewport;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
@@ -301,28 +310,34 @@ class RowPanel
 
         deleteRowButton = new InvisibleButton("-");
         deleteRowButton.addActionListener(this);
+        setupAutoScrolling(deleteRowButton);
 
         createAttributeRowButton = new InvisibleButton("+");
         createAttributeRowButton.addActionListener(this);
+        setupAutoScrolling(createAttributeRowButton);
 
         createCompoundRowButton = new InvisibleButton("++");
         createCompoundRowButton.addActionListener(this);
+        setupAutoScrolling(createCompoundRowButton);
 
         valueTextField = new JTextField();
         valueTextField.setColumns(MIN_TEXT_COLUMNS);
         valueTextField.getDocument().addDocumentListener(this);
+        setupAutoScrolling(valueTextField);
 
         valueSpinnerInt16 = new JSpinner(new SpinnerNumberModel(
             0, Short.MIN_VALUE, Short.MAX_VALUE, 1));
         valueSpinnerInt16.addChangeListener(this);
         ((JSpinner.NumberEditor)valueSpinnerInt16.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
+        setupAutoScrolling(valueSpinnerInt16);
 
         valueSpinnerInt32 = new JSpinner(new SpinnerNumberModel(
             0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
         valueSpinnerInt32.addChangeListener(this);
         ((JSpinner.NumberEditor)valueSpinnerInt32.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
+        setupAutoScrolling(valueSpinnerInt32);
 
         /**
          * This spinner is used when we are setting the Count for
@@ -333,6 +348,7 @@ class RowPanel
         countSpinnerInt32.addChangeListener(this);
         ((JSpinner.NumberEditor)countSpinnerInt32.getEditor()).getTextField().
             setColumns(MIN_SPINNER_COLUMNS);
+        setupAutoScrolling(countSpinnerInt32);
 
         /**
          * This text field is used to display/edit the name of
@@ -341,11 +357,13 @@ class RowPanel
         propNameTextField = new JTextField();
         propNameTextField.setColumns(MIN_TEXT_COLUMNS);
         propNameTextField.getDocument().addDocumentListener(this);
+        setupAutoScrolling(propNameTextField);
 
         dateTimePicker = new DateTimePicker();
         TimePanel timePanel = dateTimePicker.getTimePanel();
         timePanel.setSecDisplayed(false);
         dateTimePicker.addActionListener(this);
+        setupAutoScrolling(dateTimePicker);
 
         /**
          * Create the comboBox used to choose the type of a "keyed"
@@ -443,6 +461,7 @@ class RowPanel
             comboBox = new JComboBox(model);
 
         comboBox.setEditable(false);
+        setupAutoScrolling(comboBox);
 
         /**
          * Set the number of items that the dropdown will
@@ -971,16 +990,6 @@ class RowPanel
                 break;
             }
         }
-
-        /**
-         * Make sure that the component that now has the focus is
-         * visible in the scrollPane.  If it isn't scroll the scrollPane
-         * so it is.  Actually, we probably want to have some sort of
-         * focus listener that always does this when the focus changes.
-         *
-         * TODO:  Write this method.
-         */
-        //ensureComponentVisible(<componentWithFocus>);
     }
 
 
@@ -1005,15 +1014,6 @@ class RowPanel
                 "comboBoxIndex = "+comboBoxIndex+
                 ".  This should never happen.");
         }
-
-        /**
-         * Remove Attributes that are "after" the one being changed.
-         * This logic probably should be in the RowData class
-         * and not in this RowPanel GUI code.  (Data model work, not view.)
-         *
-         * Moved now.  Delete this block if it works.
-         */
-        //rowData.trimAttributePath(comboBoxIndex);
 
         rowData.setAttribute(comboBoxIndex, selectedAttribute);
     }
@@ -1938,7 +1938,6 @@ class RowPanel
             return;
 
         if (document == valueTextField.getDocument())
-            //rowData.setAttributeValue(valueTextField.getText());
             rowData.setAttributeValueUsingString(valueTextField.getText());
         else if (document == propNameTextField.getDocument())
             rowData.setPropName(propNameTextField.getText());
@@ -1947,19 +1946,86 @@ class RowPanel
 
     /**
      * This is a quick and dirty way to put a line between rows.
-     * A more proper solution is to create a Border subclass that
-     * draws the line.
+     * Perhaps a more proper, but more complicated, solution is
+     * to create a Border subclass that draws the line.
      *
      * All this method does is call our superclass's normal paint()
      * method and then draws a line at the bottom of this panel.
      *
      * If/when we decide whether we want to have lines between rows
-     * and/or do "zebra" striping of rows, cleanup or remove this
-     * code.
+     * and/or do "zebra" striping of rows, possibly remove this
+     * method.
      */
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         g.drawLine(0, getHeight()-1, getWidth()-1, getHeight()-1);
+    }
+
+
+    /**
+     * Get the JScrollPane that contains the passed in component.
+     * Returns null if the component is not in a JScrollPane.
+     *
+     * TODO:  Perhaps turn this into a utility.
+     */
+    public static JScrollPane getScrollPane(Component component) {
+
+        JScrollPane scrollPane = null;
+        Container parent = component.getParent();
+        while (parent != null) {
+            if (parent instanceof JScrollPane) {
+                scrollPane = (JScrollPane)parent;
+                break;
+            }
+            parent = parent.getParent();
+        }
+
+        return(scrollPane);
+    }
+
+
+    /**
+     * Set up a focus listener on the passed in component that
+     * will tell the scrollpane that contains it to make sure
+     * the component is visible when the component gets the focus.
+     */
+    public static void setupAutoScrolling(JComponent component) {
+
+        component.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+
+                JComponent component = (JComponent)e.getSource();
+
+                /**
+                 * Note, this single line of code works for every
+                 * component except JTextFields, which interpret the
+                 * call to scrollRectToVisible() as a command to
+                 * scroll their own contents.
+                 * So, instead of this one line of code, we have to
+                 * explicitly make the scrollRectToVisible() call
+                 * on the GUI's viewport.
+                 */
+                //component.scrollRectToVisible(new Rectangle(0, 0,
+                //    component.getWidth(), component.getHeight());
+
+                Point location = component.getLocation();
+
+                JScrollPane scrollPane = getScrollPane(component);
+
+                JViewport viewport = scrollPane.getViewport();
+                location = SwingUtilities.convertPoint(component.getParent(),
+                    location, viewport);
+
+                Rectangle rect = new Rectangle(location.x, location.y,
+                    component.getWidth(), component.getHeight());
+
+                /**
+                 * Tell the viewport that contains the component to
+                 * make sure the specified rectangle is visible.
+                 */
+                viewport.scrollRectToVisible(rect);
+            }
+        });
     }
 }
