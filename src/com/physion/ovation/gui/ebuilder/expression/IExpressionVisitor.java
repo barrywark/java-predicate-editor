@@ -1,6 +1,8 @@
+/**
+ * Copyright (c) 2011. Physion Consulting LLC
+ * All rights reserved.
+ */
 package com.physion.ovation.gui.ebuilder.expression;
-
-//import java.util.ArrayList;
 
 
 /**
@@ -10,11 +12,6 @@ package com.physion.ovation.gui.ebuilder.expression;
  *
  * Physion will be finalizing this interface and
  * writing the class that implements this interface.
- * More information about this interface can be found
- * in the ExpressionTree.java file that Barry Wark
- * wrote in October 2011.  The file ExpressionTree.java
- * is currently, (October 12, 2011), in the directory
- * physion/trunk.
  */
 public interface IExpressionVisitor {
 
