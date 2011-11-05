@@ -1,3 +1,28 @@
+/**
+ * Please note, this is not a compilable file.
+ * It is not code in the application.
+ * This file was written by Barry Wark and is based on the C++ API that
+ * currently exists.  It is assumed that eventually Objectivity,
+ * or someone else, will write code to implement an API like this.
+ * This file was merely meant as a rough guide to give Steve Ford an
+ * idea of how the Java API will eventually look.
+ * 
+ * Steve Ford took the example code in this file and used it to create
+ * the package that is in the directory:
+ *
+ *      trunk/src/com/physion/ovation/gui/ebuilder/expression
+ *
+ * That directory contains the set of Java interfaces that are modeled
+ * on the rough code in this file.  That directory also contains
+ * a set of classes that implement the interfaces.  Eventually, we
+ * assume that the code in that package will be thrown away and
+ * the "real" Java version of the code written by Objectivity will
+ * be used.
+ *
+ * Please note, you can probably delete this file because it is
+ * not really needed any more.
+ */
+
 package com.physion.ovation.gui.ebuilder.expression;
 
 
