@@ -1,0 +1,27 @@
+===== CollectionOperator.ANY With Two Operands =====
+Original RowData:
+Epoch | Any
+  Epoch | protocolID == "abc"
+  Epoch | protocolID =~~ "xyz"
+Test Translation: 
+Starting With RowData:
+Epoch | Any
+  Epoch | protocolID == "abc"
+  Epoch | protocolID =~~ "xyz"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(==)
+    AttributeExpression(protocolID)
+    StringLiteralValueExpression(abc)
+  OperatorExpression(=~~)
+    AttributeExpression(protocolID)
+    StringLiteralValueExpression(xyz)
+ExpressionTree Translated Back To RowData:
+Epoch | Any
+  Epoch | protocolID == "abc"
+  Epoch | protocolID =~~ "xyz"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.
