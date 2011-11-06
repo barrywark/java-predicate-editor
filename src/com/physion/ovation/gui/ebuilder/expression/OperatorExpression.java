@@ -10,14 +10,22 @@ import java.util.ArrayList;
 
 
 /**
+ * The com.physion.ovation.gui.ebuilder.expression package consists
+ * of a set of interfaces and a set of classes that implement those
+ * interfaces.  There is almost a one-to-one mapping between interface
+ * files and class files.  For example, there is an interface
+ * IAttributeExpression and a class that implements that interface
+ * called AttributeExpression.
+ *
+ * The set of interfaces are based on the already existing C++
+ * interface to the Objectivity library.  It is assumed that at
+ * some point in the future, this ...ebuilder.expression package
+ * will be replaced with a Java version of the Objectivity library.
  */
 public class OperatorExpression 
     extends Expression
     implements IOperatorExpression, Serializable {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -27,7 +35,17 @@ public class OperatorExpression
      */
     private static final String INDENT = "  ";
 
+    /**
+     * This will be a value like "or", "and", ".".
+     * Please see the ...ebuilder.translator.Translator
+     * class for some of the constants we have defined
+     * like:  OE_AND, OE_OR, OE_DOT.
+     */
     private String operatorName;
+
+    /**
+     * This is the list of operands for this operator.
+     */
     private ArrayList<IExpression> operandList;
 
 
@@ -77,6 +95,8 @@ public class OperatorExpression
     /**
      * Create an OperatorExpressionImp with the
      * specified operatorName.
+     *
+     * @param operatorName This is a String such as "and", "or", ".", "==".
      */
     public OperatorExpression(String operatorName) {
         this();
@@ -84,9 +104,16 @@ public class OperatorExpression
     }
 
 
+    /**
+     * Add an operand to our list of operands.
+     */
     public void addOperand(IExpression expression) {
 
         if (expression == null) {
+            /**
+             * This will only happen if there is a bug in the code.
+             * We might want to throw an IllegalArgumentException here.
+             */
             (new Exception("expression == null")).printStackTrace();
         }
 
@@ -96,7 +123,7 @@ public class OperatorExpression
 
     /**
      * Get a string version of this class that can be used
-     * for debugging purposes.
+     * for testing/debugging purposes.
      */
     public String toString() {
         return(toString(""));
@@ -105,7 +132,7 @@ public class OperatorExpression
 
     /**
      * Get a string version of this class that can be used
-     * for debugging purposes.
+     * for testing/debugging purposes.
      *
      * @param indent The lines of the returned string will
      * all be indented by (at least) this amount.
@@ -115,9 +142,7 @@ public class OperatorExpression
         String string = indent;
         string += "OperatorExpression("+getOperatorName()+")";
 
-        //System.out.println("string = "+string);
         for (IExpression expression : getOperandList()) {
-            //System.out.println("expression = "+expression);
             string += "\n"+((Expression)expression).toString(indent+INDENT);
         }
         return(string);

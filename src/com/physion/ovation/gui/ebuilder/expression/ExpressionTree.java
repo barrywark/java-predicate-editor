@@ -40,9 +40,6 @@ import java.io.IOException;
 public class ExpressionTree
     implements Serializable {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -256,10 +253,10 @@ public class ExpressionTree
         boolean same = expressionTree.toString().equals(this.toString());
 
         if (same)
-            System.out.println("ExpressionTree written and read versions are "+
+            System.err.println("ExpressionTree written and read versions are "+
                                "the same.");
         else
-            System.out.println("ERROR:  ExpressionTree written and read "+
+            System.err.println("ERROR:  ExpressionTree written and read "+
                                "versions are different.");
 
         return(same);
@@ -277,4 +274,3 @@ public class ExpressionTree
         return(string);
     }
 }
-

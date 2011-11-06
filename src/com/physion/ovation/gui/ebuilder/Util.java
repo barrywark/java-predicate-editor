@@ -4,54 +4,16 @@
  */
 package com.physion.ovation.gui.ebuilder;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Point;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.util.ArrayList;
-import java.util.Date;
 
-import javax.swing.BorderFactory;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.FocusManager;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
 import javax.swing.JViewport;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.Document;
-
-import com.lavantech.gui.comp.DateTimePicker;
-import com.lavantech.gui.comp.TimePanel;
-import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
-import com.physion.ovation.gui.ebuilder.datamodel.RowData;
-import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
-import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;
-import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
-import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
-import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
-import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
-import com.physion.ovation.gui.ebuilder.datatypes.Operator;
-import com.physion.ovation.gui.ebuilder.datatypes.Type;
 
 
 /**

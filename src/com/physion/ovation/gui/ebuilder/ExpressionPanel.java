@@ -5,16 +5,16 @@
 package com.physion.ovation.gui.ebuilder;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Point;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
+
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.Scrollable;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
+
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataEvent;
 import com.physion.ovation.gui.ebuilder.datamodel.RowDataListener;

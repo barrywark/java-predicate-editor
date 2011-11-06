@@ -7,11 +7,10 @@ package com.physion.ovation.gui.ebuilder.translator.test;
 import java.util.Date;
 
 import junit.framework.TestCase;
+
 import org.approvaltests.Approvals;
 import org.approvaltests.UseReporter;
-import org.approvaltests.reporters.QuietReporter;
 import org.approvaltests.reporters.JunitReporter;
-
 
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
@@ -21,8 +20,8 @@ import com.physion.ovation.gui.ebuilder.datatypes.CollectionOperator;
 import com.physion.ovation.gui.ebuilder.datatypes.Operator;
 import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.expression.ExpressionTree;
-import com.physion.ovation.gui.ebuilder.translator.RowDataToExpressionTree;
 import com.physion.ovation.gui.ebuilder.translator.ExpressionTreeToRowData;
+import com.physion.ovation.gui.ebuilder.translator.RowDataToExpressionTree;
 
 
 /**
