@@ -39,9 +39,10 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
  * that we are looking for Epochs whose label attribute is "Test 21".
  *
  * You can ask a RowData object whether it contains a legal value
- * by calling the containsLegalValue() method.  As of October 2011,
- * this method is pretty simple, and rows that don't make sense
- * are "legal".  We can make this code more clever in the future.
+ * by calling the containsLegalValue() method.  We can make the
+ * containsLegalValue() code more clever if we want to catch more
+ * user errors before the user attempts to use the PQL string that
+ * s/he is creating.
  * 
  * TODO: Perhaps change the structure a bit so the root row is NOT a
  * RowData object?  It really is a bit of a different thing given that
@@ -55,24 +56,21 @@ import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
  * the path in order to have the comboBox that holds "is null" etc. be created.
  * So, maybe we should not also store that information in the attributeOperator
  * member data?
- *
- * TODO:  During development, the code creates exceptions and displays
- * them in the console.  We might want to change the code to actually
- * throw Exceptions when the code is final.
  */
 public class RowData
     implements RowDataListener, Serializable {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
-     * Just for testing.
+     * File name used just for testing.
      */
     public static final String SAVE_FILE_NAME = "testSaved.RDTree";
 
+    /**
+     * If a row has a second collection operator, this is the default
+     * value for it.
+     */
     public static final CollectionOperator DEFAULT_COLLECTION_OPERATOR2 =
         CollectionOperator.ANY;
 
@@ -86,11 +84,11 @@ public class RowData
     private ClassDescription classUnderQualification;
 
     /**
-     * This RowData object is a child row of the parentRow.
+     * This RowData object is a child row of its parentRow.
      *
      * If our parentRow member data is null, then this RowData instance
      * is the "root" row for the whole tree.  I.e. it defines the
-     * "Class Under Qualification".
+     * "Class Under Qualification" and the topmost operator.
      *
      * All rows except the root row have a non-null parentRow.
      * The class of the root row is stored in the root row's member
@@ -99,7 +97,7 @@ public class RowData
     private RowData parentRow;
 
     /**
-     * This is the path to the childmost attribute that
+     * This is the path to the childmost (i.e. rightmost) attribute that
      * this row is specifying.
      *
      * For example, if this row's starting class, (i.e. the rightmost
@@ -284,7 +282,7 @@ public class RowData
     /**
      * Get the number of descendents from this RowData.  I.e. this is returns
      * the count of our direct children, PLUS all their children, and all
-     * our their children, and so on.
+     * their children, and so on.
      * This is NOT the same thing as getting the number of this RowData's
      * "immediate" children.
      */
@@ -306,6 +304,7 @@ public class RowData
      * If the first child has a child, then that child is at index 2.
      * If the first child does not have a child, then the second child
      * is at index 2.  (I.e. the first child's sibling.)
+     * This sounds confusing, but a picture should clear up the confusion.
      *
      * A simple "picture" of RowData objects and their "indexes" as
      * far as a List widget is concerned, makes this more obvious:
@@ -329,7 +328,6 @@ public class RowData
 
         if (index == 0)
             return(this);
-
 
         for (RowData childRow : childRows) {
 
@@ -656,6 +654,8 @@ public class RowData
 
 
     /**
+     * Set the topmost class that is being qualified.  I.e. this is
+     * the class selected in the first row in the GUI.
      */
     public void setClassUnderQualification(
         ClassDescription classUnderQualification) {
@@ -689,6 +689,10 @@ public class RowData
     }
 
 
+    /**
+     * Get the topmost class that is being qualified.  I.e. this is
+     * the class selected in the first row in the GUI.
+     */
     public ClassDescription getClassUnderQualification() {
         return(getRootRow().classUnderQualification);
     }
@@ -706,11 +710,19 @@ public class RowData
     }
 
 
+    /**
+     * Returns true if this RowData object is the root of the tree.
+     * I.e. it returns true if this is the first row that contains
+     * the Class Under Qualification selection.
+     */
     public boolean isRootRow() {
         return(this == getRootRow());
     }
 
 
+    /**
+     * Set the parent of this row.
+     */
     public void setParentRow(RowData parentRow) {
 
         if (this.parentRow == parentRow)
@@ -722,11 +734,18 @@ public class RowData
     }
 
 
+    /**
+     * Get the RowData object that is the parent of this RowData object.
+     * If this is the root row, this will be null.
+     */
     private RowData getParentRow() {
         return(parentRow);
     }
 
 
+    /**
+     * Set the first, (possibly only), collection operator for this row.
+     */
     public void setCollectionOperator(CollectionOperator collectionOperator) {
 
         if (this.collectionOperator == collectionOperator)
@@ -781,11 +800,35 @@ public class RowData
     }
 
 
+    /**
+     * Get the first, (possibly only), collection operator for this row.
+     */
     public CollectionOperator getCollectionOperator() {
         return(collectionOperator);
     }
 
 
+    /**
+     * Set the second collection operator for this row.
+     * Not all rows that have a collection operator will have two
+     * collection operators.
+     *
+     * For example, a row whose childmost/rightmost Attribute 
+     * has a to-many relationship will have a second collection
+     * operator that the user needs to set.  Below is an example
+     * of the Epoch class's response Attribute:
+     *
+     *      Epoch | None
+     *        Epoch | responses None have Any
+     *          Response | uuid == "xyz"
+     *
+     * Below is an example of the Epoch class's mykeywords Attribute:
+     *
+     *      Epoch | All
+     *        Epoch | My Keywords None have Any
+     *          KeywordTag | uuid == "xyz"
+     *
+     */
     public void setCollectionOperator2(CollectionOperator collectionOperator2) {
 
         if (this.collectionOperator2 == collectionOperator2)
@@ -801,6 +844,9 @@ public class RowData
     }
 
     
+    /**
+     * Get the second collection operator for this row.
+     */
     public CollectionOperator getCollectionOperator2() {
         return(collectionOperator2);
     }
@@ -879,11 +925,24 @@ public class RowData
     }
 
 
+    /**
+     * Get the attributeOperator of this row.
+     *
+     * @return An Operator object such as, but not limited to:
+     * Operator.EQUALS, Operator.LESS_THAN, Operator.IS_NULL,
+     * Operator.IS_TRUE.
+     */
     public Operator getAttributeOperator() {
         return(attributeOperator);
     }
 
 
+    /**
+     * Set the Attribute at the passed in index.
+     * Note, setting a Attribute that is to the left of the row's
+     * current rightmost Attribute will "trim" off Attributes
+     * to the right of the Attribute being set.
+     */
     public void setAttribute(int index, Attribute attribute) {
 
         /**
@@ -983,10 +1042,6 @@ public class RowData
         }
         else {
             setCollectionOperator(CollectionOperator.COUNT);
-            /*
-            setAttributeOperator(Operator.OPERATORS_ARITHMATIC[0]);
-            setAttributeValue(new Integer(0));
-            */
         }
 
         if ((getCollectionOperator() == CollectionOperator.COUNT) ||
@@ -1155,7 +1210,7 @@ public class RowData
 
     /**
      * Returns the number of Attribute objects in the attributePath.
-     * Please note, a "special" Attribute such as the "is null" Attribute
+     * Please note, a "special" Attribute such as Attribute.IS_NULL
      * is part of this count.
      */
     public int getAttributeCount() {
@@ -1257,16 +1312,6 @@ public class RowData
 
 
     /**
-     * Get the number of Attribute objects in the attributePath.
-     */
-    /*
-    public int getAttributeCount() {
-        return(getAttributePath().size());
-    }
-    */
-
-
-    /**
      * This is simply a convenience method that calls the
      * other version of this method with the debugVersion
      * flag set to false.
@@ -1278,15 +1323,15 @@ public class RowData
 
     /**
      * Get a string that represents this RowData's attributePath
-     * that can be used in a query string.
-     * The returned value is in the format that the Objectivity
-     * software would like.
+     * that can be used in a query string, OR as a string useful
+     * for testing/debugging.
      *
      * @param debugVersion Set this to true if you want a 
      * "debug" version of the attribute path that has the
      * isMine flag shown in it.  Set this to false if you
      * want a version of this string that can be used for
-     * a query.
+     * a query.  The returned value is in the format that
+     * the Objectivity software would like.
      */
     public String getAttributePathString(boolean debugVersion) {
 
@@ -1325,6 +1370,10 @@ public class RowData
                 }
             }
             else {
+                /**
+                 * If this happens, the code has a bug.
+                 * Perhaps throw an IllegalArgumentException?
+                 */
                 System.err.println("ERROR:  null Attribute in attributePath.");
                 string += "ERROR: attribute == null";
             }
@@ -1334,6 +1383,14 @@ public class RowData
     }
 
 
+    /**
+     * Set the attributeValue for this row.
+     *
+     * @param attributeValue An object of the proper type that will
+     * be the attributeValue.  Note, Boolean values are not legal.
+     * Boolean values are handled by the attributeOperator being
+     * set to Operator.IS_TRUE or Operator.IS_FALSE.
+     */
     public void setAttributeValue(Object attributeValue) {
 
         //System.out.println("Enter setAttributeValue("+attributeValue+")");
@@ -1355,6 +1412,15 @@ public class RowData
     }
 
 
+    /**
+     * Set the value of attributeValue using a String.
+     * The GUI currently has widgets that let the user enter
+     * an Integer or Date value, so the only thing this method
+     * really needs to handle is converting a user entered String
+     * into a floating point value.
+     *
+     * @param stringValue A String such as "43.2", or null.
+     */
     public void setAttributeValueUsingString(String stringValue) {
 
         Object value = null;
@@ -1406,6 +1472,9 @@ public class RowData
     }
 
 
+    /**
+     * Convert the passed in stringValue to an Object of the passed in type.
+     */
     private Object convertStringToAttributeValue(String stringValue,
                                                  Type type) {
 
@@ -1464,11 +1533,21 @@ public class RowData
     }
 
 
+    /**
+     * Get the attributeValue.  Note, an Object is returned.  The caller
+     * needs to look at other information about the RowData to know
+     * what type of object it is.  For example, use getPropType() if
+     * the row is a parameters map type of value.
+     */
     public Object getAttributeValue() {
         return(attributeValue);
     }
 
 
+    /**
+     * Set the property name, "key", for the user defined Attribute
+     * this row describes.
+     */
     public void setPropName(String propName) {
 
         if (this.propName == propName)
@@ -1482,11 +1561,19 @@ public class RowData
     }
 
 
+    /**
+     * Get the property name, "key", for the user defined Attribute
+     * this row describes.
+     */
     public String getPropName() {
         return(propName);
     }
 
 
+    /**
+     * Set the property type for the user defined Attribute
+     * this row describes.  E.g. Type.INT_16, Type.DATE_TIME.
+     */
     public void setPropType(Type propType) {
 
         if (this.propType == propType)
@@ -1501,6 +1588,10 @@ public class RowData
     }
 
 
+    /**
+     * Get the property type for the user defined Attribute
+     * this row describes.  E.g. Type.INT_16, Type.DATE_TIME.
+     */
     public Type getPropType() {
         return(propType);
     }
@@ -1608,6 +1699,11 @@ public class RowData
     }
 
 
+    /**
+     * Add a child RowData object to this RowData's list of children.
+     * Note that this method automatically sets the childRow's parent
+     * to be this RowData.
+     */
     public void addChildRow(RowData childRow) {
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
@@ -1621,6 +1717,9 @@ public class RowData
     }
 
 
+    /**
+     * Add multiple childRows to this RowData's list of children.
+     */
     public void addChildRows(ArrayList<RowData> childRows) {
 
         for (RowData rowData : childRows) {
@@ -1645,6 +1744,7 @@ public class RowData
 
     /**
      * Get the number of "levels" that this row is indented.
+     * I.e. this is the number of ancestors it has.
      */
     public int getIndentCount() {
 
@@ -1788,7 +1888,7 @@ public class RowData
 
 
     /**
-     * Get the "childmost" or "leaf" Attribute that is specified
+     * Get the "childmost" or "rightmost" Attribute that is specified
      * by this row.
      */
     public Attribute getChildmostAttribute() {
@@ -1885,8 +1985,6 @@ public class RowData
          * First check that the values in this row are valid.
          */
         if (containsLegalValue() == false) {
-            //System.out.println("Adding this("+this.getRowString()+
-            //    " to illegalRows.");
             illegalRows.add(this);
         }
 
@@ -2149,14 +2247,6 @@ public class RowData
 
 
     /**
-     * Delete this method when done with development.
-     */
-    public int getChangeLevel() {
-        return(changeLevel);
-    }
-
-
-    /**
      * Write out this RowData to the passed in outputStream.
      *
      * @param outputStream The ObjectOutputStream into which this
@@ -2203,9 +2293,6 @@ public class RowData
 
     /**
      * Read a RowData object from the passed in inputStream.
-     *
-     * TODO:  How should errors be handled?  Hide them and just
-     * return null, or throw them up to the caller?
      *
      * @param inputStream The ObjectInputStream from which an
      * RowData will be read.
@@ -2320,33 +2407,13 @@ public class RowData
 
     /**
      * This is a simple test program for this class.
+     * Full testing is done as part of the TranslatorTests class.
      */
     public static void main(String[] args) {
 
         System.out.println("RowData test is starting...");
 
         RowData rootRow;
-
-        /*
-        ClassDescription epochCD = DataModel.getClassDescription("Epoch");
-        ClassDescription epochGroupCD = DataModel.getClassDescription(
-            "EpochGroup");
-        ClassDescription sourceCD = DataModel.getClassDescription("Source");
-        ClassDescription responseCD = DataModel.getClassDescription("Response");
-
-
-        rootRow = new RowData();
-        rootRow.setClassUnderQualification(epochCD);
-        rootRow.setCollectionOperator(CollectionOperator.ALL);
-
-        RowData rowData = new RowData();
-        rootRow.addChildRow(rowData);
-        rowData.addAttribute(epochCD.getAttribute("properties"));
-        rowData.setPropName("someKey");
-        rowData.setPropType(Type.DATE_TIME);
-        rowData.setAttributeOperator(Operator.IS_NULL);
-        System.out.println("rowData: "+rowData.getRowString());
-        */
 
         rootRow = createTestRowData();
         System.out.println(rootRow);

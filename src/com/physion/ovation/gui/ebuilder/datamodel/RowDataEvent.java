@@ -55,6 +55,8 @@ public class RowDataEvent {
 
     /**
      * This is the "original" RowData object that changed.
+     * For example, if a row nested deeply in the tree got
+     * changed, this is a reference to that RowData.
      */
     private RowData originalRowData;
 
@@ -98,7 +100,13 @@ public class RowDataEvent {
         this.changeType = changeType;
     }
 
-
+    
+    /**
+     * Get the RowData object that is sending you this event.
+     * I.e. this is the RowData object that you are listening to.
+     * This specific row might not be the RowData that actually
+     * changed.  It might be an ancestor of the RowData that changed.
+     */
     public RowData getRowData() {
         return(rowData);
     }
@@ -109,6 +117,12 @@ public class RowDataEvent {
     }
 
 
+    /**
+     * Get the specific RowData object that is changing.
+     * Note, this might not be the RowData object that you
+     * are listening to.  It might be a child of the RowData
+     * object you are listening to.
+     */
     public RowData getOriginalRowData() {
         return(originalRowData);
     }
@@ -120,7 +134,9 @@ public class RowDataEvent {
 
 
     /**
-     * Get the timing of this event.
+     * Get the timing of this event.  I.e. are you being
+     * notified of a change BEFORE or AFTER the change takes
+     * place.
      *
      * @return Returns Either RowDataEvent.TIMING_BEFORE or
      * RowDataEvent.TIMING_AFTER.
@@ -160,6 +176,9 @@ public class RowDataEvent {
     }
 
 
+    /**
+     * Get a string version of this object for testing/debugging purposes.
+     */
     public String toString() {
 
         String s = originalRowData.getRowString()+"~"+

@@ -5,10 +5,11 @@
 package com.physion.ovation.gui.ebuilder.datamodel;
 
 import java.util.ArrayList;
-import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
+
 import com.physion.ovation.gui.ebuilder.datatypes.Attribute;
-import com.physion.ovation.gui.ebuilder.datatypes.Type;
 import com.physion.ovation.gui.ebuilder.datatypes.Cardinality;
+import com.physion.ovation.gui.ebuilder.datatypes.ClassDescription;
+import com.physion.ovation.gui.ebuilder.datatypes.Type;
 
 
 /**
@@ -208,7 +209,6 @@ public class DataModel {
          */
 
         Attribute attribute;
-
 
         /**
          * Initialize values of the EntityBase class.
@@ -551,6 +551,11 @@ public class DataModel {
     /**
      * Get a ClassDescription object using its name member data.
      *
+     * If a ClassDescription with the passed in name does not
+     * exist, this method prints an error message and returns
+     * null.  We could instead throw an IllegalArgumentException.
+     * What would the caller prefer?
+     *
      * @param name The name of the ClassDescription.  For example,
      * "Epoch", "Source", "TaggableEntityBase".
      */
@@ -565,8 +570,12 @@ public class DataModel {
             if (classDescription.getName().equals(name))
                 return(classDescription);
 
-        System.out.println("ERROR:  In getClassDescription().  "+
+        System.err.println("ERROR:  In getClassDescription().  "+
             "Caller asked for unknown class with name \""+name+"\".");
+        /*
+        throw(new IllegalArgumentException("Caller asked for unknown
+                                           class with name \""+name+"\"."));
+        */
         return(null);
     }
 
@@ -601,7 +610,6 @@ public class DataModel {
          * Be sure the ClassDescription singleton has been initialized.
          */
         getInstance();
-
 
         return(possibleCUQs);
     }
