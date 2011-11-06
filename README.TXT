@@ -1,16 +1,8 @@
 
 There are two scripts you can use to checkout, build and run the
-GUI: "bandt" and "cbandt".
-
-"bandt" must be run from the physion/trunk directory.  It compiles
-whatever code you currently have checked out, and runs the program.
-For example, from your shell, while in this physion/trunk directory,
-run the command:
-
-./bandt
-
-to build and run the program.  (This assumes you already have
-the code checked out.)
+ApprovalTests based tests or the GUI: "cbandt" and "cbandg".
+"cbandt" is used to run the tests, and "cbandg" is used to run
+the GUI.  They are used the same way.
 
 "cbandt" checks out the latest, (or a specified revision),
 of the code, builds it and runs it.
@@ -38,6 +30,22 @@ to get the certificate set by running svn from the command line.  You
 will only need to do this once.  For example, do this:
 
     svn info https://svn.physionconsulting.com/ovpredicateui/trunk
+
+If you already have the code checked out and simply want to build
+whatever is already sitting on your machine, use "bandt" or "bandg".
+
+"bandt" builds and runs the ApprovalTests based test program.
+"bandt" must be run from the physion/trunk directory.  It compiles
+whatever code you currently have checked out, and runs the program.
+For example, from your shell, while in this physion/trunk directory,
+run the command:
+
+./bandt
+
+to build and run the program.  (This assumes you already have
+the code checked out.)
+
+"bandg" compiles and runs the GUI.
 
 The directory "src" and its subdirectories contain all the source code needed.
 The directory "lib" and its subdirectories contain libraries, i.e. .jar files,

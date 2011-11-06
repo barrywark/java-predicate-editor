@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# This is a quick and dirty script to build the test class, and run it.
+# This is a quick and dirty script to build the GUI, and run it.
 # It must be run from the physion/trunk directory.
 #
 
@@ -10,7 +10,7 @@ echo CLASSPATH=${CLASSPATH}
 
 # Build the source tree.
 echo pwd=`pwd`
-javac src/com/physion/ovation/gui/ebuilder/translator/test/*.java
+javac src/com/physion/ovation/gui/ebuilder/*.java
 
 # Run the test program.
-java com.physion.ovation.gui.ebuilder.translator.test.TranslatorTests
+java com.physion.ovation.gui.ebuilder.ExpressionBuilder
