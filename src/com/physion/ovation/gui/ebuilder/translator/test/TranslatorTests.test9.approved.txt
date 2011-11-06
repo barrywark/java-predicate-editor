@@ -1,0 +1,42 @@
+===== Nested Compound Row With Lots Of None Collection Operators =====
+Original RowData:
+Epoch | None
+  Epoch | nextEpoch.nextEpoch.prevEpoch.responses None have None
+    Response | uuid == "xyz"
+    Response | samplingRate != "1.23"
+Test Translation: 
+Starting With RowData:
+Epoch | None
+  Epoch | nextEpoch.nextEpoch.prevEpoch.responses None have None
+    Response | uuid == "xyz"
+    Response | samplingRate != "1.23"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        OperatorExpression(.)
+          OperatorExpression(.)
+            OperatorExpression(.)
+              AttributeExpression(nextEpoch)
+              AttributeExpression(nextEpoch)
+            AttributeExpression(prevEpoch)
+          AttributeExpression(responses)
+        OperatorExpression(not)
+          OperatorExpression(or)
+            OperatorExpression(==)
+              AttributeExpression(uuid)
+              StringLiteralValueExpression(xyz)
+            OperatorExpression(!=)
+              AttributeExpression(samplingRate)
+              Float64LiteralValueExpression(1.23)
+ExpressionTree Translated Back To RowData:
+Epoch | None
+  Epoch | nextEpoch.nextEpoch.prevEpoch.responses None have None
+    Response | uuid == "xyz"
+    Response | samplingRate != "1.23"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

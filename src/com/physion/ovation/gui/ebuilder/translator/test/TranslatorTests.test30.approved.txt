@@ -1,0 +1,55 @@
+===== Nested PER_USER With PM, PU, and PUPM Children =====
+Original RowData:
+Epoch | Any
+  Epoch | nextEpoch.My DerivedResponses None have Any
+    DerivedResponse | derivationParameters.someKey(boolean) is true
+    DerivedResponse | My Keywords Count == "5"
+    DerivedResponse | externalDevice.My Property.someKey2(float) == "34.5"
+Test Translation: 
+Starting With RowData:
+Epoch | Any
+  Epoch | nextEpoch.My DerivedResponses None have Any
+    DerivedResponse | derivationParameters.someKey(boolean) is true
+    DerivedResponse | My Keywords Count == "5"
+    DerivedResponse | externalDevice.My Property.someKey2(float) == "34.5"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(myderivedResponses)
+        AttributeExpression(nextEpoch)
+      OperatorExpression(or)
+        OperatorExpression(==)
+          OperatorExpression(.)
+            OperatorExpression(as)
+              OperatorExpression(parameter)
+                AttributeExpression(derivationParameters)
+                StringLiteralValueExpression(someKey)
+              ClassLiteralValueExpression(ovation.BooleanValue)
+            AttributeExpression(value)
+          BooleanLiteralValueExpression(true)
+        OperatorExpression(==)
+          OperatorExpression(count)
+            OperatorExpression(mykeywords)
+              AttributeExpression(this)
+          Int32LiteralValueExpression(5)
+        OperatorExpression(any)
+          OperatorExpression(elementsOfType)
+            OperatorExpression(myproperties)
+              AttributeExpression(externalDevice)
+              StringLiteralValueExpression(someKey2)
+            ClassLiteralValueExpression(ovation.FloatingPointValue)
+          OperatorExpression(==)
+            AttributeExpression(value)
+            Float64LiteralValueExpression(34.5)
+ExpressionTree Translated Back To RowData:
+Epoch | Any
+  Epoch | nextEpoch.My DerivedResponses None have Any
+    DerivedResponse | derivationParameters.someKey(boolean) is true
+    DerivedResponse | My Keywords Count == "5"
+    DerivedResponse | externalDevice.My Property.someKey2(float) == "34.5"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

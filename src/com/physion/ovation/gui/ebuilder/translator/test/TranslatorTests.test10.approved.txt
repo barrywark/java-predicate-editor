@@ -1,0 +1,33 @@
+===== Compound Row Nested Classes =====
+Original RowData:
+Epoch | All
+  Epoch | responses All have Any
+    Response | resources Any have Any
+      Resource | uuid != "ID 27"
+Test Translation: 
+Starting With RowData:
+Epoch | All
+  Epoch | responses All have Any
+    Response | resources Any have Any
+      Resource | uuid != "ID 27"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(all)
+    AttributeExpression(responses)
+    OperatorExpression(or)
+      OperatorExpression(any)
+        AttributeExpression(resources)
+        OperatorExpression(or)
+          OperatorExpression(!=)
+            AttributeExpression(uuid)
+            StringLiteralValueExpression(ID 27)
+ExpressionTree Translated Back To RowData:
+Epoch | All
+  Epoch | responses All have Any
+    Response | resources Any have Any
+      Resource | uuid != "ID 27"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

@@ -40,7 +40,7 @@ import com.physion.ovation.gui.ebuilder.expression.ITimeLiteralValueExpression;
  * @see RowDataToExpressionTree
  */
 public class ExpressionTreeToRowData
-    extends Translator {
+    implements Translator {
 
     /**
      * This method turns the passed in ExpressionTree into a

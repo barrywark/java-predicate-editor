@@ -1,0 +1,29 @@
+===== PER_USER =====
+Original RowData:
+Epoch | All
+  Epoch | My Keywords None have Any
+    KeywordTag | uuid == "xyz"
+Test Translation: 
+Starting With RowData:
+Epoch | All
+  Epoch | My Keywords None have Any
+    KeywordTag | uuid == "xyz"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(not)
+    OperatorExpression(any)
+      OperatorExpression(mykeywords)
+        AttributeExpression(this)
+      OperatorExpression(or)
+        OperatorExpression(==)
+          AttributeExpression(uuid)
+          StringLiteralValueExpression(xyz)
+ExpressionTree Translated Back To RowData:
+Epoch | All
+  Epoch | My Keywords None have Any
+    KeywordTag | uuid == "xyz"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.
