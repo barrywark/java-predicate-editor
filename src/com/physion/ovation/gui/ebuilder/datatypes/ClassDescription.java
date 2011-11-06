@@ -11,16 +11,10 @@ import java.util.ArrayList;
 /**
  * This is the description of a class.  The DataModel object creates
  * all of these for the system.
- *
- * TODO: Would it be useful to engineers to have a method to get an
- * Attribute of a class via its name?
  */
 public class ClassDescription
     implements Serializable {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -91,16 +85,29 @@ public class ClassDescription
     }
 
 
+    /**
+     * Get the name of this class.  E.g. "Epoch", "Response".
+     */
     public String getName() {
         return(name);
     }
 
 
+    /**
+     * Set the parent class of this class.
+     * As of November 2011, only the EntityBase class does
+     * not have a parent class.
+     */
     public void setParentClass(ClassDescription parentClass) {
         this.parentClass = parentClass;
     }
 
 
+    /**
+     * Get the parent class of this class.  Possibly null.
+     * As of November 2011, only the EntityBase class does
+     * not have a parent class.
+     */
     public ClassDescription getParentClass() {
         return(parentClass);
     }
@@ -122,13 +129,21 @@ public class ClassDescription
         return(false);
     }
     */
+
+
+    /**
+     * Add an Attribute to this class's list of attributes.
+     *
+     * Note, you do not need to add our parent class's attributes
+     * explicitly.  We get those from our parent.
+     */
     public void addAttribute(Attribute attribute) {
         attributes.add(attribute);
     }
 
 
     /**
-     * Returns the list of all the attributes that this class has.
+     * Returns the list of ALL the attributes that this class has.
      * I.e. it returns this class's direct attributes, plus all the
      * attributes of its ancestor classes.
      */
@@ -165,6 +180,10 @@ public class ClassDescription
     */
 
 
+    /**
+     * Returns true if this class, or any of its ancestors,
+     * contains the passed in attribute.
+     */
     public boolean containsAttribute(Attribute attribute) {
 
         for (Attribute att : getAllAttributes()) {
@@ -204,13 +223,17 @@ public class ClassDescription
     }
 
 
+    /**
+     * This returns the name of this Attribute.  This string is
+     * what is displayed in the GUI.
+     */
     public String toString() {
         return(name);
     }
 
 
     /**
-     * Get a String version of this class useful for debugging.
+     * Get a String version of this class useful for testing/debugging.
      */
     public String toStringDebug() {
         return(toStringDebug(""));
@@ -301,8 +324,10 @@ public class ClassDescription
          * Print out values.
          */
         //System.out.println("\nentityBaseCD.toString() below:\n"+entityBaseCD);
-        System.out.println("\nuserCD.toString() below:\n"+userCD.toStringDebug());
-        System.out.println("\nkeywordTagCD.toString() below:\n"+keywordTagCD.toStringDebug());
+        System.out.println("\nuserCD.toString() below:\n"+
+            userCD.toStringDebug());
+        System.out.println("\nkeywordTagCD.toString() below:\n"+
+            keywordTagCD.toStringDebug());
         //System.out.println("\ntaggableEntityBaseCD.toString() below:\n"+
         //                   taggableEntityBaseCD);
         System.out.println("ClassDescription test is ending.");

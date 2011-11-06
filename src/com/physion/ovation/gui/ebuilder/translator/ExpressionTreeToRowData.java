@@ -978,7 +978,7 @@ public class ExpressionTreeToRowData
                  * value.
                  */
             }
-            /*
+            /* Should not get any of these
             else if (OE_ANY.equals(oe.getOperatorName())) {
             }
             else if (OE_OR.equals(oe.getOperatorName())) {
@@ -1180,18 +1180,6 @@ public class ExpressionTreeToRowData
             }
             // What if we get here?
         }
-        /**
-         * This is wrong.
-         * TODO: Ask Barry how this should be handled.
-         */
-        /*
-        else if ("is true".equals(oe.getOperatorName())) {
-            return(Operator.IS_TRUE);
-        }
-        else if ("is false".equals(oe.getOperatorName())) {
-            return(Operator.IS_FALSE);
-        }
-        */
 
         /**
          * The passed in IOperatorExpression cannot be mapped to an

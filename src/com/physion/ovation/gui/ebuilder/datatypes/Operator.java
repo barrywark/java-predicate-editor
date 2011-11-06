@@ -98,6 +98,9 @@ public enum Operator {
         System.err.println("ERROR:  Illegal string passed to method\n"+
             "Operator.fromString().\n"+
             "If this happens, there is a bug in the code.");
+        /**
+         * We might want to throw an exception.
+         */
         return(null);
     }
 

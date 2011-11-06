@@ -22,7 +22,7 @@ import java.io.Serializable;
  * the user can select such as "is null" or
  * "is not null".  In order to make the code more
  * simple, I have made the Attribute class capable
- * of holding these "special" values also.  This way
+ * of holding these "special" values also.  This way we
  * can always treat the selected value in an attribute
  * comboBox as an instance of an Attribute object.
  * This makes the code a bit more simple, but does
@@ -31,15 +31,12 @@ import java.io.Serializable;
 public class Attribute
     implements Serializable {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	/**
      * These are special values that appear in comboBoxes that
      * display a list of attributes.  They are not really attributes
-     * though.  See notes at the start of this class.
+     * though.  See notes about this are at the start of this class.
      *
      * I have used the Operator.IS_NULL.toString() and
      * Operator.IS_NOT_NULL.toString() methods to get
@@ -121,6 +118,9 @@ public class Attribute
     private Cardinality cardinality;
 
 
+    /**
+     * Create an Attribute that is a copy of another Attribute.
+     */
     public Attribute(Attribute other) {
         this(other.queryName, other.displayName, other.type,
              other.classDescription, other.cardinality);
@@ -134,6 +134,7 @@ public class Attribute
     public Attribute(String queryName, String displayName, Type type,
                      ClassDescription classDescription,
                      Cardinality cardinality) {
+
         this.queryName = queryName;
         this.displayName = displayName;
         this.type = type;
@@ -152,9 +153,8 @@ public class Attribute
 
 
     /**
-     * A constructor with some values defaulted:
-     * 
-     *      displayName = null
+     * A constructor with the displayName defaulted to null.
+     * (I.e. the displayName will be the same as the queryName.)
      *
      * Use this constructor to create most Attributes that are
      * a reference to a class.
@@ -244,8 +244,8 @@ public class Attribute
      * in query strings.  E.g. "uuid", "owner", "properties".
      *
      * If you want to set the string that should be displayed in a
-     * comboBox dropdown list, you should use the setDisplayName()
-     * method.
+     * comboBox dropdown list to be different than the queryName,
+     * you should use the setDisplayName() method.
      */
     public void setQueryName(String queryName) {
         this.queryName = queryName;
@@ -258,7 +258,8 @@ public class Attribute
      * "myproperties", "keywords", "mykeywords".
      * 
      * If you want the string that should be displayed in a comboBox
-     * dropdown list, you should use the getDisplayName() method.
+     * dropdown list, you should use the getDisplayName() method instead
+     * of this method.
      */
     public String getQueryName() {
         return(queryName);
@@ -313,16 +314,34 @@ public class Attribute
     }
 
 
+    /**
+     * Get the type of this attribute.
+     */
     public Type getType() {
         return(type);
     }
 
 
+    /**
+     * If this Attribute is of type REFERENCE, this returns the
+     * class that we reference.  Otherwise, this returns null.
+     */
     public ClassDescription getClassDescription() {
         return(classDescription);
     }
 
 
+    /**
+     * This returns the "cardinality" of this Attribute.
+     * I.e. this defines the relationship this Attribute has
+     * with the class that contains it.  E.g. to-one, to-many.
+     *
+     * For some types, this is not applicable, so Cardinality.N_A
+     * is retutned in those cases.
+     *
+     * @return A value like:  Cardinality.TO_ONE, Cardinality.TO_MANY,
+     * Cardinality.N_A.
+     */
     public Cardinality getCardinality() {
         return(cardinality);
     }
@@ -362,7 +381,7 @@ public class Attribute
 
     /**
      * Get a String version of this Attribute that is useful for
-     * debugging.
+     * testing/debugging.
      */
     public String toStringDebug() {
 
