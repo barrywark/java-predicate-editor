@@ -1393,6 +1393,5 @@ public class TranslatorTests
      */
     public static void main(String[] args) {
         junit.textui.TestRunner.run(TranslatorTests.class);
-
     }
 }
