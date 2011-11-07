@@ -347,6 +347,33 @@ public class RowData
 
 
     /**
+     * Get the index of the passed in rowData.  The index is
+     * relative to this RowData.  So the first RowData below
+     * this RowData is at index 0.  The returned index is NOT
+     * simply the index of the passed in rowData relative to
+     * its parent RowData.
+     *
+     * Please read the comments for the getChild() method to
+     * understand how the index is calculated.
+     *
+     * @return The index of the passed in rowData.  Returns -1
+     * if the passed in rowData does not exist as a child of
+     * this RowData.
+     */
+    public int getIndex(RowData rowData) {
+
+        ArrayList<RowData> rows = getRows();
+        int index = 0;
+        for (RowData rd : rows) {
+            if (rd == rowData)
+                return(index);
+            index++;
+        }
+        return(-1);
+    }
+
+
+    /**
      * Get this RowData and all its descendents as an ArrayList of
      * RowData objects.
      */
@@ -386,11 +413,23 @@ public class RowData
 
     /**
      * Fire a RowDataEvent that originated with THIS RowData object.
-     * See RowDataEvent for information about originalRowData,
-     * timing and changeType.
+     * See RowDataEvent for information about timing and changeType.
      */
     private void fireRowDataEvent(int timing, int changeType) {
-        fireRowDataEvent(new RowDataEvent(this, this, timing, changeType));
+        fireRowDataEvent(new RowDataEvent(null, this, this,
+                                          timing, changeType));
+    }
+
+
+    /**
+     * Fire a RowDataEvent that originated with THIS RowData object.
+     * See RowDataEvent for information about childRowData,
+     * timing and changeType.
+     */
+    private void fireRowDataEvent(int timing, int changeType,
+                                  RowData childRowData) {
+        fireRowDataEvent(new RowDataEvent(childRowData, this, this,
+                                          timing, changeType));
     }
 
 
@@ -469,9 +508,11 @@ public class RowData
 
         /**
          * Create a new RowDataEvent that keeps the "originalRowData"
-         * value, but updates the "rowData" value to be this.
+         * and "childRowData" values, but updates the "rowData" value
+         * to be this.
          */
-        RowDataEvent newEvent = new RowDataEvent(event.getOriginalRowData(),
+        RowDataEvent newEvent = new RowDataEvent(event.getChildRowData(),
+                                                 event.getOriginalRowData(),
                                                  this,
                                                  event.getTiming(),
                                                  event.getChangeType());
@@ -490,11 +531,13 @@ public class RowData
     public void removeChildRow(RowData childRow) {
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
-                         RowDataEvent.TYPE_CHILD_DELETE);
+                         RowDataEvent.TYPE_CHILD_DELETE,
+                         childRow);
         childRows.remove(childRow);
         childRow.removeRowDataListener(this);
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
-                         RowDataEvent.TYPE_CHILD_DELETE);
+                         RowDataEvent.TYPE_CHILD_DELETE,
+                         childRow);
     }
 
 
@@ -1711,13 +1754,15 @@ public class RowData
     public void addChildRow(RowData childRow) {
 
         fireRowDataEvent(RowDataEvent.TIMING_BEFORE,
-                         RowDataEvent.TYPE_CHILD_ADD);
+                         RowDataEvent.TYPE_CHILD_ADD,
+                         childRow);
         childRow.setParentRow(this);
         childRows.add(childRow);
 
         childRow.addRowDataListener(this);
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
-                         RowDataEvent.TYPE_CHILD_ADD);
+                         RowDataEvent.TYPE_CHILD_ADD,
+                         childRow);
     }
 
 

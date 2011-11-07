@@ -63,6 +63,12 @@ public class RowDataEvent {
     public static final int TYPE_ATTRIBUTE = 11;
 
     /**
+     * If a RowData is added or removed to or from its parent,
+     * this is a reference to the RowData that was added or removed.
+     */
+    private RowData childRowData;
+
+    /**
      * This is the "original" RowData object that changed.
      * For example, if you are listening to the "root" of the
      * tree, and a row nested deeply in the tree had
@@ -102,9 +108,10 @@ public class RowDataEvent {
     private int changeType;
 
 
-    public RowDataEvent(RowData originalRowData, RowData rowData,
-                        int timing, int changeType) {
+    public RowDataEvent(RowData childRowData, RowData originalRowData,
+                        RowData rowData, int timing, int changeType) {
 
+        this.childRowData = childRowData;
         this.originalRowData = originalRowData;
         this.rowData = rowData;
         this.timing = timing;
@@ -131,7 +138,7 @@ public class RowDataEvent {
     /**
      * Get the specific RowData object that is changing.
      * Note, this might not be the RowData object that you
-     * are listening to.  It might be a child of the RowData
+     * are listening to.  It might be a descendent of the RowData
      * object you are listening to.
      */
     public RowData getOriginalRowData() {
@@ -141,6 +148,20 @@ public class RowDataEvent {
 
     public void setOriginalRowData(RowData originalRowData) {
         this.originalRowData = originalRowData;
+    }
+
+
+    /**
+     * If a RowData is added or removed to or from its parent,
+     * this is a reference to the RowData that was added or removed.
+     */
+    public RowData getChildRowData() {
+        return(childRowData);
+    }
+
+
+    public void setChildRowData(RowData childRowData) {
+        this.childRowData = childRowData;
     }
 
 

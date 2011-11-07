@@ -206,6 +206,13 @@ public class ExpressionPanel
 
 
     /**
+     * Our rowDataChanged method keeps the index of the row that
+     * was deleted, (assuming a row was deleted), using this value.
+     */
+    int deletedRowIndex = 0;
+
+
+    /**
      * This is called when the expression tree we are displaying
      * is modified.
      *
@@ -214,16 +221,23 @@ public class ExpressionPanel
      */
     public void rowDataChanged(RowDataEvent event) {
 
+        if ((event.getTiming() == RowDataEvent.TIMING_BEFORE) &&
+            (event.getChangeType() == RowDataEvent.TYPE_CHILD_DELETE)) {
+
+            /**
+             * Save the index of the row that is being deleted.
+             * We do this so that we can later set the focus to
+             * the delete button in the RowPanel that is
+             * currently below the row that is being deleted.
+             *
+             * (Seems to be the best place to set the focus
+             * to after deleting the row that had the focus.)
+             */
+            deletedRowIndex = rootRow.getIndex(event.getChildRowData());
+        }
+
         /**
-         * Until I write more clever code, recreate all the
-         * rows when the number of rows are changed.
-         *
-         * In order to improve GUI performance, we really
-         * should be clever about creating or deleting
-         * just the one row involved in the change, and
-         * then moving the rows below the newly created
-         * row down, (or moving the rows below the deleted
-         * row up).  But, that is not yet the case.
+         * Relayout the GUI because the number of rows have changed.
          */
         if ((event.getTiming() == RowDataEvent.TIMING_AFTER) &&
             ((event.getChangeType() == RowDataEvent.TYPE_CHILD_ADD) ||
@@ -263,47 +277,49 @@ public class ExpressionPanel
                  */
                 RowPanel rowPanel = getRowPanel(rowData);
                 rowPanel.setFocusToFirstFocusableComponent();
-
-                /**
-                 * By default, the Util.setupAutoScrolling()
-                 * method will make sure the first component
-                 * on this row will be visible because we set
-                 * the focus to it above.  But we really
-                 * would like the whole height of the row to
-                 * be visible, not just the minimum amount
-                 * needed to make the first component within
-                 * the row visible.  So, let's explicitly make
-                 * the rowPanel visible.
-                 */
-                Util.ensureComponentVisible(rowPanel);
             }
-            else if ((event.getChangeType() ==
-                      RowDataEvent.TYPE_CHILD_DELETE) ||
-                     (event.getChangeType() == RowDataEvent.TYPE_CUQ)) {
+            else if (event.getChangeType() == RowDataEvent.TYPE_CHILD_DELETE) {
 
                 /**
-                 * Set the focus to the first row.
-                 *
-                 * TODO:  Possibly figure out a more "logical" rule
-                 * as to what row and component should get the focus
-                 * when a row is deleted.  What would make more
-                 * sense than setting it to the first row?
+                 * Set the focus to the row below the row that was just
+                 * deleted.  (I.e. Set the focus to the row that got
+                 * "moved up" to fill the deleted row's location.)
+                 */
+                int indexOfRowToGetFocus = deletedRowIndex;
+
+                /**
+                 * If the user deleted the bottom row, then we need
+                 * to set the focus to the new bottom row.
+                 */
+                if (indexOfRowToGetFocus > rootRow.getDescendentCount())
+                    indexOfRowToGetFocus = rootRow.getDescendentCount();
+
+                /**
+                 * At this point we know which row we want to set the
+                 * focus to.  If we are setting the focus to the top
+                 * row, which has no delete button, "-", set the focus
+                 * to the create attribute row button, "+".
+                 * Otherwise, set the focus to the delete button.
+                 */
+                if (indexOfRowToGetFocus == 0) {
+                    RowPanel rowPanel = getRowPanel(rootRow);
+                    rowPanel.setFocusToCreateAttributeRowButton();
+                }
+                else {
+                    RowPanel rowPanel = getRowPanel(rootRow.getChild(
+                        indexOfRowToGetFocus));
+                    rowPanel.setFocusToDeleteButton();
+                }
+            }
+            else if (event.getChangeType() == RowDataEvent.TYPE_CUQ) {
+            
+                /**
+                 * User changed the Class Under Qualification, so
+                 * set the focus to the first component in the root
+                 * row.
                  */
                 RowPanel rowPanel = getRowPanel(rootRow);
                 rowPanel.setFocusToFirstFocusableComponent();
-
-                /**
-                 * By default, the Util.setupAutoScrolling()
-                 * method will make sure the first component
-                 * on this row will be visible because we set
-                 * the focus to it above.  But we really
-                 * would like the whole height of the row to
-                 * be visible, not just the minimum amount
-                 * needed to make the first component within
-                 * the row visible.  So, let's explicitly make
-                 * the rowPanel visible.
-                 */
-                Util.ensureComponentVisible(rowPanel);
             }
         }
     }

@@ -513,11 +513,6 @@ class RowPanel
      * It also sets the data models the comboBoxes will use
      * and sets the selected value in the comboBoxes to the
      * corresponding values in this RowPanel's rowData value.
-     *
-     * All this method does is set a flag that can be used to
-     * ignore GUI events while the GUI is being setup.
-     * The initializeComponentsProtected() method, that this
-     * method calls, does the real work.
      */
     private void initializeComponentsProtected() {
 
@@ -1855,6 +1850,22 @@ class RowPanel
                 return;
             }
         }
+    }
+
+
+    /**
+     * Set the focus to the deleteRowButton in this RowPanel.
+     */
+    void setFocusToDeleteButton() {
+        deleteRowButton.requestFocusInWindow();
+    }
+
+
+    /**
+     * Set the focus to the createAttributeRowButton in this RowPanel.
+     */
+    void setFocusToCreateAttributeRowButton() {
+        createAttributeRowButton.requestFocusInWindow();
     }
 
 

@@ -12,8 +12,11 @@ import java.awt.event.FocusEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
+
+import com.lavantech.gui.comp.DateTimePicker;
 
 
 /**
@@ -38,11 +41,38 @@ class Util {
      */
     public static void setupAutoScrolling(JComponent component) {
 
+        /**
+         * JSpinners have to be handled specially.
+         * The JSpinner does not get focus events.  The
+         * text field inside the editor that is inside
+         * the JSpinner gets the focus events.
+         *
+         * The up and down arrow buttons do not get the
+         * focus.  A keyboard user can use the up and
+         * down arrows on the keyboard to increment the
+         * value.
+         */
+        if (component instanceof JSpinner) {
+            JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor)
+                ((JSpinner)component).getEditor();
+            setupAutoScrolling(editor.getTextField());
+            return;
+        }
+
+        /**
+         * DateTimePickers have to be handled specially.
+         * They contain two components.
+         */
+        if (component instanceof DateTimePicker) {
+            setupAutoScrolling(((DateTimePicker)component).getRenderer());
+            setupAutoScrolling(((DateTimePicker)component).getDropDownButton());
+            return;
+        }
+
         component.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
 
                 final JComponent component = (JComponent)e.getSource();
-
 
                 /**
                  * Note, putting the call to 
@@ -75,6 +105,11 @@ class Util {
      * to scroll itself to make the component visible, if necessary.
      * I.e. if the component is already visible in the JScrollPane's
      * JViewport, this method does nothing.
+     *
+     * Please note, this method does a bit more than make sure the
+     * passed in component is visible.  If the passed in component
+     * is inside a RowPanel, we try to make the row's full height
+     * visible as well.
      */
     public static void ensureComponentVisible(JComponent component) {
 
@@ -102,6 +137,21 @@ class Util {
 
         Rectangle rect = new Rectangle(location.x, location.y,
             component.getWidth(), component.getHeight());
+
+        /**
+         * If the component is inside a RowPanel, make sure the whole
+         * row's height is visible, not just the height needed for
+         * the component in the row.  Just looks better this way.
+         */
+        RowPanel rowPanel = (RowPanel)SwingUtilities.getAncestorOfClass(
+            RowPanel.class, component);
+        if (rowPanel != null) {
+
+            Point rpLocation = SwingUtilities.convertPoint(
+                rowPanel.getParent(), rowPanel.getLocation(), viewport);
+            rect.y = rpLocation.y;
+            rect.height = rowPanel.getHeight();
+        }
 
         /**
          * Tell the viewport that contains the component to
