@@ -37,6 +37,11 @@ public class ExpressionPanel
 	 */
 	private static final long serialVersionUID = 1L;
 
+    /**
+     * This is the "root" RowData for the tree.  I.e. this is
+     * the very first row at the top of this ExpressionPanel
+     * that the user uses to select the Class Under Qualification.
+     */
 	private RowData rootRow;
 
 
@@ -65,6 +70,11 @@ public class ExpressionPanel
     }
 
 
+    /**
+     * Get the "root" RowData for the tree.  I.e. this is
+     * the very first row at the top of this ExpressionPanel
+     * that the user uses to select the Class Under Qualification.
+     */
     public RowData getRootRow() {
         return(rootRow);
     }
@@ -311,6 +321,12 @@ public class ExpressionPanel
     }
 
 
+    /**
+     * Tell the caller, (e.g. the JScrollPane that holds us),
+     * how large we would like the JViewport to be.  Ideally,
+     * the viewport is the same size this ExpressionPanel
+     * would like to be so that no scrolling is needed.
+     */
     @Override
     public Dimension getPreferredScrollableViewportSize() {
         return(getPreferredSize());
@@ -453,7 +469,7 @@ public class ExpressionPanel
 
 
     /**
-     * This is just for debugging purposes.
+     * This is just for testing/demo purposes.
      */
     public void print() {
         System.out.println("\nCurrent Value:\n"+rootRow.toString(false, ""));

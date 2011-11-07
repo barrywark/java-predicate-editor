@@ -9,6 +9,9 @@ import javax.swing.JButton;
 
 
 /**
+ * This subclass of JButton overrides the normal paint() method
+ * so that we can optionally NOT paint the button in the GUI.
+ *
  * This button takes up space in its parent layout, but if its
  * "draw" flag is set to false, it does not draw itself or
  * accept focus.
@@ -59,7 +62,7 @@ class InvisibleButton
     /**
      * If you pass false for the draw flag, then this button will
      * not draw itself or accept the focus.  But, it will still take
-     * up space in whatever container is its parent.
+     * up space in whatever Container is its parent.
      */
     public void setDraw(boolean draw) {
 

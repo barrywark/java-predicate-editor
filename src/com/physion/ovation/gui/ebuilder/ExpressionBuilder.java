@@ -318,7 +318,7 @@ public class ExpressionBuilder
         }
         else if (e.getSource() == okButton) {
             returnStatus = RETURN_STATUS_OK;
-            expressionPanelScrolling.print();
+            expressionPanelScrolling.print();  // Just for testing purposes.
             setVisible(false);
         }
         else if (e.getSource() == prevButton) {
@@ -419,11 +419,6 @@ public class ExpressionBuilder
     public static ReturnValue editExpression() {
         return(editExpression((ExpressionTree)null));
     }
-    /*
-    private static ReturnValue editExpression() {
-        return(editExpression((RowData)null));
-    }
-    */
 
 
     /**
@@ -597,11 +592,8 @@ public class ExpressionBuilder
         }
         else {
             /**
-             * Currently, (Oct 2011), there is no other event type,
-             * so there is nothing to do here.  But in the future,
-             * we might want to know about "indirect" changes to
-             * a RowData object.  E.g. changes caused by changes
-             * to a child or parent row.
+             * Currently, (Oct 2011), there is no other timing type,
+             * so there is nothing to do here.
              */
         }
     }
@@ -617,8 +609,8 @@ public class ExpressionBuilder
      * For example, if the user adds or deletes a row from the
      * expression tree, we want to save the state of the tree
      * in our stateList so that the user can use the Prev button
-     * to go back to the state of the expression tree at that
-     * time.
+     * to go back to the state of the expression tree before
+     * the row is deleted.
      *
      * But, if the user is typing a string value into an
      * attribute value text field, we don't want to save
@@ -748,7 +740,7 @@ public class ExpressionBuilder
 
 
     /**
-     * Enable/disable buttons.
+     * Enable/disable the buttons in this window.
      *
      * Enable/disable the Ok button depending on whether
      * the expression tree is currently a legal value.
@@ -762,6 +754,8 @@ public class ExpressionBuilder
      * go to.  The Next button is not enabled because there
      * is no state "after" the one stateIndex is
      * currently pointing to.
+     *
+     * The Cancel button is always enabled.
      */
     private void enableButtons() {
 

@@ -20,6 +20,7 @@ import com.physion.ovation.gui.ebuilder.datamodel.RowData;
  */
 public class ExpressionPanelScrolling
     extends JPanel {
+
 	/**
 	 * We never serialize this class, so this declaration is
 	 * just to stop the compiler warning.
@@ -28,6 +29,9 @@ public class ExpressionPanelScrolling
 	 */
 	private static final long serialVersionUID = 1L;
 	
+    /**
+     * This is the ExpressionPanel that our JScrollPane contains.
+     */
     private ExpressionPanel expressionPanel;
 
 
@@ -44,13 +48,10 @@ public class ExpressionPanelScrolling
 
         expressionPanel = new ExpressionPanel(rootRow);
 
-        /*
+        /* If we don't want to horizontally scroll, do this.
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(expressionPanel, BorderLayout.NORTH);
-
         JScrollPane scrollPane = new JScrollPane(panel,
-            ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         */
         JScrollPane scrollPane = new JScrollPane(expressionPanel,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
@@ -76,7 +77,8 @@ public class ExpressionPanelScrolling
 
 
     /**
-     * This is just for debugging.
+     * Print out the current tree we contain.
+     * This is just for testing/demo purposes.
      */
     public void print() {
         expressionPanel.print();
