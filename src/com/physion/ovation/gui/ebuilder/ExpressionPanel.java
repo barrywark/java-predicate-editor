@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -82,12 +83,58 @@ public class ExpressionPanel
 
     /**
      * Create all the RowPanels this ExpressionPanel contains.
-     *
-     * TODO: Make this code more clever so when rows are added
-     * or deleted we don't remove all the rows and recreate
-     * all the rows, but instead we only change what we need to.
+     * Please note, we try to reuse any already existing RowPanels
+     * that we can.
      */
     public void createRowPanels() {
+
+        /**
+         * Go through the list of RowData objects that we want
+         * to display and see how many RowPanels this
+         * ExpressionPanel already contains that are displaying
+         * these RowData objects.
+         * We will reuse as many of these RowPanels that we can
+         * by creating an array "rowPanels" that contains as
+         * many of the already existing RowPanels that we can
+         * reuse.
+         */
+        ArrayList<RowPanel> rowPanels = new ArrayList<RowPanel>();
+        for (RowData rowData : rootRow.getRows()) {
+
+            /**
+             * Get the RowPanel that is currently displaying the
+             * rowData we want to display.
+             */
+            RowPanel rowPanel = getRowPanel(rowData);
+            if (rowPanel == null) {
+                /**
+                 * This ExpressionPanel does NOT already have
+                 * a RowPanel displaying this rowData, so create
+                 * a new RowPanel for this rowData.
+                 */
+                rowPanel = new RowPanel(rowData);
+            }
+            else {
+                /**
+                 * This ExpressionPanel already has a RowPanel
+                 * that is displaying this rowData so we can
+                 * just reuse it.
+                 */
+            }
+
+            rowPanels.add(rowPanel);
+        }
+
+        /**
+         * At this point, rowPanels contains the list of
+         * all the RowPanels that we want to display.
+         *
+         * Remove all the RowPanels we are currently displaying
+         * and insert the new list of RowPanels.  Please note,
+         * in most cases, most of the RowPanels in the
+         * rowPanels array will be the same RowPanels we were
+         * already displaying.
+         */
 
         removeAll();
 
@@ -95,8 +142,8 @@ public class ExpressionPanel
         layout.setRows(rootRow.getDescendentCount()+1);
 
         //int zebraCount = 0;
-        for (RowData rowData : rootRow.getRows()) {
-            RowPanel rowPanel = new RowPanel(rowData);
+        for (RowPanel rowPanel : rowPanels) {
+
             add(rowPanel);
 
             /**
@@ -114,8 +161,12 @@ public class ExpressionPanel
 
         /**
          * Make the scrollpane layout things NOW so that when
-         * we need to figure out where the row is, or any of its
-         * child components are, it/they will be laid out already.
+         * we later need to figure out where a particular row
+         * or any of its child components are within the
+         * scrollpane they will be laid out already.
+         * This is so code that scrolls the scrollpane to make
+         * a particular row or component visible can figure
+         * out where a component is.
          */
         if (Util.getScrollPane(this) != null)
             Util.getScrollPane(this).validate();
