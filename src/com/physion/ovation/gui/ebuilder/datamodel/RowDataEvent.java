@@ -8,6 +8,15 @@ package com.physion.ovation.gui.ebuilder.datamodel;
 /**
  * This event is sent to RowDataListeners that are listening
  * to a RowData expression tree.
+ *
+ * Currently, this event is very detailed in the information
+ * it contains because the GUI doesn't really need to know
+ * that much about the events that occur.
+ *
+ * Please note, removing row "A" from its parent row "B" is NOT considered
+ * a change to row "A", (as far as notifying listeners is concerned),
+ * but is considered a change to the parent row "B".
+ * (Same for adding rows.)
  */
 public class RowDataEvent {
 
@@ -55,8 +64,10 @@ public class RowDataEvent {
 
     /**
      * This is the "original" RowData object that changed.
-     * For example, if a row nested deeply in the tree got
-     * changed, this is a reference to that RowData.
+     * For example, if you are listening to the "root" of the
+     * tree, and a row nested deeply in the tree had
+     * a child removed from it, this is a reference to the
+     * row that had the child removed.
      */
     private RowData originalRowData;
 

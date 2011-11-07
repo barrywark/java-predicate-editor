@@ -482,6 +482,10 @@ public class RowData
     /**
      * Remove the specified child RowData object from this RowData object's
      * list of direct children.
+     *
+     * Please note, removing row "A" from its parent row "B" is NOT considered
+     * a change to row "A", (as far as notifying listeners is concerned),
+     * but is considered a change to the parent row "B".
      */
     public void removeChildRow(RowData childRow) {
 
