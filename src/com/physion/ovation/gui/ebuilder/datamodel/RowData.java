@@ -841,6 +841,13 @@ public class RowData
             setAttributeValue(new Integer(0));
 
             setCollectionOperator2(null);
+
+            /**
+             * Empty this row's list of children.
+             * (Only rows with collection operator Any/All/None have
+             * child rows.)
+             */
+            clearChildRows();
         }
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
                          RowDataEvent.TYPE_COLLECTION_OPERATOR);
@@ -1223,7 +1230,7 @@ public class RowData
              * type.  If, in the future, a parent row
              * can have a heterogeneous set of child rows,
              * the code below will have to be changed
-             * to a for loop that looks at all the child
+             * to a for-loop that looks at all the child
              * rows.
              */
             if (getChildRows().size() > 0) {

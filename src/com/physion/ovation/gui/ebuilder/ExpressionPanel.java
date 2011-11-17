@@ -236,14 +236,18 @@ public class ExpressionPanel
             deletedRowIndex = rootRow.getIndex(event.getChildRowData());
         }
 
-        /**
-         * Relayout the GUI because the number of rows have changed.
-         */
         if ((event.getTiming() == RowDataEvent.TIMING_AFTER) &&
             ((event.getChangeType() == RowDataEvent.TYPE_CHILD_ADD) ||
              (event.getChangeType() == RowDataEvent.TYPE_CHILD_DELETE) ||
-             (event.getChangeType() == RowDataEvent.TYPE_CUQ))) {
+             (event.getChangeType() == RowDataEvent.TYPE_CUQ) ||
+             (event.getChangeType() ==
+              RowDataEvent.TYPE_COLLECTION_OPERATOR))) {
 
+            /**
+             * Relayout the GUI because the number of rows have changed,
+             * (in the case of CHILD_ADD/DELETE), or MIGHT have changed,
+             * (in the case of CUQ/COLLECTION_OPERATOR.)
+             */
             createRowPanels();
         }
 
