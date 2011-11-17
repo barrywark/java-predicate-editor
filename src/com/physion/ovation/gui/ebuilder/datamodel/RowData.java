@@ -933,11 +933,29 @@ public class RowData
         Attribute childmost = getChildmostAttribute();
         //System.out.println("childmost = "+childmost);
 
+        /**
+         * If the attributeOperator is being set to something
+         * other than Operator.IS_NULL and the last attribute
+         * is Attribute.IS_NULL, remove that last attribute
+         * because it is no longer appropriate.
+         *
+         * Do the same for IS_NOT_NULL.
+         */
+
+        if ((attributeOperator != Operator.IS_NULL) &&
+            Attribute.IS_NULL.equals(childmost)) {
+            attributePath.remove(attributePath.size()-1);
+        }
+        if ((attributeOperator != Operator.IS_NOT_NULL) &&
+            Attribute.IS_NOT_NULL.equals(childmost)) {
+            attributePath.remove(attributePath.size()-1);
+        }
+
         if ((childmost != null) &&
             (childmost.getType() != Type.PARAMETERS_MAP) &&
             (childmost.getType() != Type.PER_USER_PARAMETERS_MAP)) {
             /**
-             * Try and help the engineer who is creating a RowData
+             * Try to help the engineer who is creating a RowData
              * object by adding the proper Attribute.IS_NULL or
              * Attribute.IS_NOT_NULL to the end of this RowData's
              * attributePath if it is not already there.

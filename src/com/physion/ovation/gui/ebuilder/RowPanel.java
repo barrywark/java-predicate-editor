@@ -6,6 +6,7 @@ package com.physion.ovation.gui.ebuilder;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -867,6 +868,34 @@ class RowPanel
     @SuppressWarnings("unchecked")
 	private void handleChildRowChange(JComboBox comboBox) {
 
+        /**
+         * First, save the index of the comboBox that
+         * currently has the focus.  I.e. the comboBox
+         * in which the user just selected something.
+         * By "index" in this case, I don't mean the
+         * index of the comboBox in the comboBoxes
+         * ArrayList.  I mean the index of the comboBox
+         * in the parent Container's list of Components.
+         * (Note, the parent Container is this RowPanel.)
+         */
+        int focusedComboBoxIndex = -1;
+        Container parent = comboBox.getParent();
+        for (int index = 0; index < parent.getComponentCount(); index++) {
+
+            //System.out.println("parent.getComponent("+index+") = "+
+            //    parent.getComponent(index).getClass());
+            if (comboBox == parent.getComponent(index)) {
+                focusedComboBoxIndex = index;
+                break;
+            }
+        }
+
+        /**
+         * Now, depending upon which comboBox was changed,
+         * set the appropriate value in the RowData object
+         * this RowPanel is displaying/editing.
+         */
+
         Object selectedItem = comboBox.getSelectedItem();
         if (comboBox == propTypeComboBox) {
             /**
@@ -921,7 +950,8 @@ class RowPanel
                  *
                  *      epochGroup.epochs Any have All of the following
                  */
-                rowData.setCollectionOperator2((CollectionOperator)selectedItem);
+                rowData.setCollectionOperator2((CollectionOperator)
+                    selectedItem);
             }
         }
         else if (selectedItem instanceof Attribute) {
@@ -953,30 +983,61 @@ class RowPanel
          * People that use the keyboard alot might like it.
          * It shouldn't bother people who use the mouse.
          */
-        boolean setFocusToNextComponent = false;
-        Component[] components = comboBox.getParent().getComponents();
-        for (int index = 0; index < components.length; index++) {
-            if (components[index] == comboBox) {
 
-                /**
-                 * Tell this loop that we should set the focus
-                 * to the next focusable component after the
-                 * comboBox we just found.
-                 */
-                setFocusToNextComponent = true;
-                continue;
-            }
+        /**
+         * Get the list of components we contain.
+         * (Note, the parent Container is this RowPanel in
+         * current implementation.)
+         */
+        //Component[] components = parent.getComponents();
+        Component[] components = getComponents();
 
-            if (setFocusToNextComponent && components[index].isFocusable()) {
-                //System.out.println("comp = "+components[index]);
+        /**
+         * A quick review of the components in this RowPanel:
+         *
+         * The first component (at index 0) is the indentWidget.
+         * Next component will be a comboBox.
+         * The components after the comboBox will be more comboBoxes,
+         * text fields, etc.
+         * The last component we contain is the JPanel that holds
+         * the +/++/- buttons.
+         *
+         * So, make sure there is a component after the one that
+         * had the focus, but we don't want to move the focus to
+         * the JPanel that holds the buttons.
+         */
+        if ((focusedComboBoxIndex + 1) < (components.length - 1))
+            focusedComboBoxIndex++;
 
-                if (!(components[index] == buttonPanel)) {
-                    components[index].requestFocusInWindow();
+        for (int index = focusedComboBoxIndex;
+             index < components.length; index++) {
+
+            Component component = components[index];
+            if (component.isFocusable()) {
+
+                if (!(component == buttonPanel)) {
+                    /**
+                     * Set the focus to "component".
+                     * Note we have to handle the DateTimePicker
+                     * specially to get the focus into one of its
+                     * sub-components.
+                     */
+                    if (component == dateTimePicker) {
+                        dateTimePicker.getRenderer().requestFocusInWindow();
+                    }
+                    else {
+                        /**
+                         * It is an ordinary Component, so we
+                         * can simply call requestFocusInWindow()
+                         * to set the focus to it.
+                         */
+                        component.requestFocusInWindow();
+                    }
                 }
                 else {
                     /**
                      * The next focusable component is the JPanel we use
-                     * to hold the +/-/++ buttons.  So we've come to the
+                     * to hold the +/++/- buttons.  So we've come to the
                      * end of the editable widgets in this row, so don't
                      * automatically progress the focus any further.
                      */
@@ -1220,7 +1281,7 @@ class RowPanel
      * attribute row?  I.e. make each if/else block that is
      * part of the if-statement that begins with:
      *
-     *   if (rightmostAttribute.isPrimitive()) {
+     *   if (childmostAttribute.isPrimitive()) {
      *
      * into a separate method.  It won't reduce the amount
      * of code, but might make it a bit easier to understand.
@@ -1230,7 +1291,6 @@ class RowPanel
 
         GridBagConstraints gc;
 
-        //ArrayList<Attribute> attributes = rowData.getAttributePath();
         //System.out.println("Add comboBoxes for: "+rowData.getRowString());
 
         /**
@@ -1242,9 +1302,23 @@ class RowPanel
          * cause this loop to add two comboBoxes:
          *
          *      epochGroup.source isNull
+         *
+         * The leftmost comboBox holds "epochGroup" and the next
+         * one holds "source".
          */
         int index;
         for (index = 0; index < rowData.getAttributeCount(); index++) {
+
+            if (Attribute.IS_NULL.equals(rowData.getAttribute(index)) ||
+                Attribute.IS_NOT_NULL.equals(rowData.getAttribute(index))) {
+                /**
+                 * We have hit a special Attribute.IS_NULL or
+                 * Attribute.IS_NOT_NULL that is not really an Attribute.
+                 * So, ignore it.  (No other Attributes should be after
+                 * this one, so we can just break out of this for-loop.)
+                 */
+                break;
+            }
 
             //System.out.println("Adding comboBox at gridx "+gridx);
             gc = new GridBagConstraints();
@@ -1271,6 +1345,7 @@ class RowPanel
                                  false, rowData.getAttribute(index));
             }
             else {
+
                 /**
                  * This is NOT the leftmost comboBox.
                  * Each comboBox is filled with the attributes of
@@ -1287,13 +1362,34 @@ class RowPanel
         /**
          * We have inserted comboBoxes for every Attribute on this
          * RowData's attributePath.  Now insert any other widgets
-         * that are needed  based on what the childmost (i.e. rightmost)
+         * that are needed based on what the childmost (i.e. rightmost)
          * attribute is in this row.
          */
 
-        Attribute rightmostAttribute = rowData.getChildmostAttribute();
-        if (rightmostAttribute == null) {
-            System.err.println("ERROR: rightmostAttribute == null\n"+
+        /**
+         * Get the childmost/rightmost Attribute.
+         * If the childmost Attribute is the "special" Attribute.IS_NULL
+         * or Attribute.IS_NOT_NULL, get the Attribute to the left
+         * of that special Attribute.
+         */
+        Attribute childmostAttribute = rowData.getChildmostAttribute();
+        if (Attribute.IS_NULL.equals(childmostAttribute) ||
+            Attribute.IS_NOT_NULL.equals(childmostAttribute)) {
+
+            int indexToLeft = rowData.getAttributeCount()-2;
+            if (indexToLeft >= 0) {
+                childmostAttribute = rowData.getAttribute(indexToLeft);
+            }
+            else {
+                /**
+                 * This should never happen.
+                 */
+            }
+        }
+
+        //System.out.println("childmostAttribute = "+childmostAttribute);
+        if (childmostAttribute == null) {
+            System.err.println("ERROR: childmostAttribute == null\n"+
                 "This probably means the rowData for this row was not\n"+
                 "properly set up or initialized.  If this is the very\n"+
                 "first row in the tree, you probably should be calling\n"+
@@ -1301,16 +1397,14 @@ class RowPanel
             return;
         }
 
-        if (rightmostAttribute.isPrimitive()) {
+        if (childmostAttribute.isPrimitive()) {
 
-            //System.out.println("Rightmost attribute is a primitive type.");
             /**
              * The rightmost Attribute is a primitive Attribute
              * such as an int, float, string, date/time, so now
              * place the comboBox that will hold operators such
              * as ==, !=, >, is true.
              */
-            //System.out.println("Adding operator comboBox at gridx "+gridx);
             gc = new GridBagConstraints();
             gc.gridx = gridx++;
             gc.insets = LEFT_INSETS;
@@ -1321,7 +1415,7 @@ class RowPanel
              * for the Type (int, string, float, boolean) of the
              * Attribute.
              */
-            setOperatorComboBoxModel(rightmostAttribute.getType());
+            setOperatorComboBoxModel(childmostAttribute.getType());
 
             /**
              * Now add the widget the user can use to edit the
@@ -1329,7 +1423,7 @@ class RowPanel
              * a time/date picker.
              */
 
-            if ((rightmostAttribute.getType() == Type.DATE_TIME) &&
+            if ((childmostAttribute.getType() == Type.DATE_TIME) &&
                 (rowData.getAttributeOperator() != Operator.IS_NULL) &&
                 (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
                 /**
@@ -1342,7 +1436,7 @@ class RowPanel
                 gc.insets = LEFT_INSETS;
                 add(dateTimePicker, gc);
             }
-            else if (rightmostAttribute.getType() == Type.INT_16) {
+            else if (childmostAttribute.getType() == Type.INT_16) {
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
                 gc.weightx = 0.1;
@@ -1350,7 +1444,7 @@ class RowPanel
                 gc.insets = LEFT_INSETS;
                 add(valueSpinnerInt16, gc);
             }
-            else if (rightmostAttribute.getType() == Type.INT_32) {
+            else if (childmostAttribute.getType() == Type.INT_32) {
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
                 gc.weightx = 0.1;
@@ -1358,13 +1452,12 @@ class RowPanel
                 gc.insets = LEFT_INSETS;
                 add(valueSpinnerInt32, gc);
             }
-            else if ((rightmostAttribute.getType() == Type.UTF_8_STRING) ||
-                     (rightmostAttribute.getType() == Type.FLOAT_64)) {
+            else if ((childmostAttribute.getType() == Type.UTF_8_STRING) ||
+                     (childmostAttribute.getType() == Type.FLOAT_64)) {
                 /**
                  * Place a text field into which the user can enter an
                  * attribute value using a string.
                  */
-                //System.out.println("Adding text field at gridx "+gridx);
                 gc = new GridBagConstraints();
                 gc.gridx = gridx++;
                 gc.weightx = 1;
@@ -1373,7 +1466,7 @@ class RowPanel
                 gc.insets = LEFT_INSETS;
                 add(valueTextField, gc);
             }
-            else if (rightmostAttribute.getType() == Type.BOOLEAN) {
+            else if (childmostAttribute.getType() == Type.BOOLEAN) {
                 /**
                  * There is no "value" field to add because the
                  * operator comboBox values of "is true" and "is false"
@@ -1386,11 +1479,11 @@ class RowPanel
              * attribute value also.
              */
 
-            if (rightmostAttribute.getType() == Type.BOOLEAN) {
+            if (childmostAttribute.getType() == Type.BOOLEAN) {
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
             }
-            else if (rightmostAttribute.getType() == Type.DATE_TIME) {
+            else if (childmostAttribute.getType() == Type.DATE_TIME) {
 
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
@@ -1399,7 +1492,7 @@ class RowPanel
                     dateTimePicker.setDate((Date)rowData.getAttributeValue());
                 }
             }
-            else if (rightmostAttribute.getType() == Type.INT_16) {
+            else if (childmostAttribute.getType() == Type.INT_16) {
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
@@ -1413,7 +1506,7 @@ class RowPanel
                 }
                 valueSpinnerInt16.setValue(attributeValue);
             }
-            else if (rightmostAttribute.getType() == Type.INT_32) {
+            else if (childmostAttribute.getType() == Type.INT_32) {
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
@@ -1435,9 +1528,9 @@ class RowPanel
                 valueTextField.setText(attributeValue.toString());
             }
         }
-        else if ((rightmostAttribute.getType() ==
+        else if ((childmostAttribute.getType() ==
                   Type.PER_USER_PARAMETERS_MAP) ||
-                 (rightmostAttribute.getType() == Type.PARAMETERS_MAP)) {
+                 (childmostAttribute.getType() == Type.PARAMETERS_MAP)) {
 
             /**
              * The rightmost attribute is either "My Property" or
@@ -1718,7 +1811,7 @@ class RowPanel
          * If it does end in a TO_MANY relationship, initialize
          * the last one or two comboBox and value(s).
          */
-        Attribute childmostAttribute = rowData.getChildmostAttribute();
+        childmostAttribute = rowData.getChildmostAttribute();
         if (childmostAttribute.getCardinality() == Cardinality.TO_MANY) {
 
             /**
