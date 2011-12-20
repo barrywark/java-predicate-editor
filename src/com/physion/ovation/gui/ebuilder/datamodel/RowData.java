@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import javax.swing.event.EventListenerList;
@@ -111,7 +112,7 @@ public class RowData
      * So the above would be specifying the "label" attribute of the
      * "source" attribute of the "epochGroup" of the "Epoch" class.
      */
-    private ArrayList<Attribute> attributePath;
+    private List<Attribute> attributePath;
 
     /**
      * The operator the user selected for this attribute.
@@ -179,7 +180,7 @@ public class RowData
     /**
      * This is the list of this row's direct children.
      */
-    private ArrayList<RowData> childRows;
+    private List<RowData> childRows;
 
     /**
      * This is the list of listeners to changes in this RowData.
@@ -362,7 +363,7 @@ public class RowData
      */
     public int getIndex(RowData rowData) {
 
-        ArrayList<RowData> rows = getRows();
+        List<RowData> rows = getRows();
         int index = 0;
         for (RowData rd : rows) {
             if (rd == rowData)
@@ -377,11 +378,11 @@ public class RowData
      * Get this RowData and all its descendents as an ArrayList of
      * RowData objects.
      */
-    public ArrayList<RowData> getRows() {
+    public List<RowData> getRows() {
 
         int count = getDescendentCount()+1;
 
-        ArrayList<RowData> rows = new ArrayList<RowData>();
+        List<RowData> rows = new ArrayList<RowData>();
         for (int index = 0; index < count; index++)
             rows.add(getChild(index));
 
@@ -1374,7 +1375,7 @@ public class RowData
      * Instead of calling this method, you should probably
      * be calling the addAttribute() and getAttribute() methods.
      */
-    public ArrayList<Attribute> getAttributePath() {
+    public List<Attribute> getAttributePath() {
 
         if (attributePath == null)
             attributePath = new ArrayList<Attribute>();
@@ -1763,7 +1764,7 @@ public class RowData
      * This returns this RowData's list of child RowDatas.
      * It does NOT return a copy, so don't mess with it.
      */
-    public ArrayList<RowData> getChildRows() {
+    public List<RowData> getChildRows() {
 
         if (childRows == null)
             childRows = new ArrayList<RowData>();
@@ -1794,7 +1795,7 @@ public class RowData
     /**
      * Add multiple childRows to this RowData's list of children.
      */
-    public void addChildRows(ArrayList<RowData> childRows) {
+    public void addChildRows(List<RowData> childRows) {
 
         for (RowData rowData : childRows) {
             addChildRow(rowData);
@@ -2036,9 +2037,9 @@ public class RowData
      * This method never returns null, but will return an
      * empty list if there are no illegal rows.
      */
-    public ArrayList<RowData> getIllegalRows() {
+    public List<RowData> getIllegalRows() {
 
-        ArrayList<RowData> illegalRows = new ArrayList<RowData>();
+        List<RowData> illegalRows = new ArrayList<RowData>();
         getIllegalRows(illegalRows);
         return(illegalRows);
     }
@@ -2053,7 +2054,7 @@ public class RowData
      * Please see the containsLegalValue() method for information
      * about what constitutes an illegal RowData.
      */
-    private void getIllegalRows(ArrayList<RowData> illegalRows) {
+    private void getIllegalRows(List<RowData> illegalRows) {
 
         /**
          * First check that the values in this row are valid.

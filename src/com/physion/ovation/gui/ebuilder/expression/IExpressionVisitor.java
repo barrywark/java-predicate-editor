@@ -27,13 +27,14 @@ public interface IExpressionVisitor {
     /**
      * Return true to indicate visitor needs to see operands.
      */
-    //boolean visitOperator();
+    boolean visitOperator(IOperatorExpression e);
+    void endOperator(IOperatorExpression e);
 
-    //void visitAttributeValue();
-    //void visitIntLiteralValue();
-    //void visitUIntLiteralValue();
-    //void visitFloatLiteralValue();
-    //void visitStringLiteralValue();
-    //void visitBoolLiteralValue();
+    void visitAttributeValue();
+    void visitIntLiteralValue();
+    void visitUIntLiteralValue();
+    void visitFloatLiteralValue();
+    void visitStringLiteralValue();
+    void visitBoolLiteralValue();
     // visit methods for all expression types...
 }

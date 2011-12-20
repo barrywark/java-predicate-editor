@@ -5,6 +5,7 @@
 package com.physion.ovation.gui.ebuilder.translator;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.physion.ovation.gui.ebuilder.datamodel.DataModel;
 import com.physion.ovation.gui.ebuilder.datamodel.RowData;
@@ -100,7 +101,7 @@ public class ExpressionTreeToRowData
             oe = (IOperatorExpression)oe.getOperandList().get(0);
         }
 
-        ArrayList<IExpression> operandList = oe.getOperandList();
+        List<IExpression> operandList = oe.getOperandList();
         for (IExpression ex : operandList) {
             if (!(ex instanceof IOperatorExpression)) {
                 String s = "Root IOperatorExpression("+oe.getOperatorName()+
@@ -134,7 +135,7 @@ public class ExpressionTreeToRowData
      * are creating child rows for the topmost row in the GUI, this
      * would be the Class Under Qualification.
      */
-    private static ArrayList<RowData> createChildRows(IOperatorExpression oe,
+    private static List<RowData> createChildRows(IOperatorExpression oe,
         ClassDescription classDescription) {
 
         /*
@@ -143,7 +144,7 @@ public class ExpressionTreeToRowData
         System.out.println("classDescription: "+classDescription);
         */
 
-        ArrayList<RowData> childRows = new ArrayList<RowData>();
+        List<RowData> childRows = new ArrayList<RowData>();
 
         /**
          * If the oe is null, return an empty list.
@@ -151,7 +152,7 @@ public class ExpressionTreeToRowData
         if (oe == null)
             return(childRows);
 
-        ArrayList<IExpression> ol = oe.getOperandList();
+        List<IExpression> ol = oe.getOperandList();
 
         RowData rowData = new RowData();
 
@@ -353,7 +354,7 @@ public class ExpressionTreeToRowData
                 (attributeOperator != Operator.IS_TRUE) &&
                 (attributeOperator != Operator.IS_FALSE)) {
 
-                ArrayList<IExpression> operandList = oe.getOperandList();
+                List<IExpression> operandList = oe.getOperandList();
                 ILiteralValueExpression lve;
                 lve = (ILiteralValueExpression)operandList.get(1);
                 Attribute attribute = rowData.getChildmostAttribute();
@@ -532,7 +533,7 @@ public class ExpressionTreeToRowData
      * passed in values.
      */
     private static void setAttributeOperatorPathAndValue(RowData rowData,
-        ArrayList<IExpression> operandList, ClassDescription classDescription,
+        List<IExpression> operandList, ClassDescription classDescription,
         Operator attributeOperator) {
 
         //System.out.println("Enter setAttributeOperatorPathAndValue");
@@ -586,7 +587,7 @@ public class ExpressionTreeToRowData
     private static void createAndAddChildRows(RowData rowData,
         IOperatorExpression oe, ClassDescription classDescription) {
 
-        ArrayList<RowData> childRows = createChildRows(oe, classDescription);
+        List<RowData> childRows = createChildRows(oe, classDescription);
         rowData.addChildRows(childRows);
     }
 
