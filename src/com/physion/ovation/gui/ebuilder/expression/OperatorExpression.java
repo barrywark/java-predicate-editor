@@ -7,6 +7,7 @@ package com.physion.ovation.gui.ebuilder.expression;
 import java.io.Serializable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -46,7 +47,7 @@ public class OperatorExpression
     /**
      * This is the list of operands for this operator.
      */
-    private ArrayList<IExpression> operandList;
+    private List<IExpression> operandList;
 
 
     /**
@@ -75,7 +76,7 @@ public class OperatorExpression
      * interface.
      */
     @Override
-    public ArrayList<IExpression> getOperandList() {
+    public List<IExpression> getOperandList() {
         return(operandList);
     }
 
@@ -87,8 +88,7 @@ public class OperatorExpression
      * to the operandList.
      */
     public OperatorExpression() {
-        operatorName = null;
-        operandList = new ArrayList<IExpression>();
+        this(null);
     }
 
 
@@ -99,10 +99,20 @@ public class OperatorExpression
      * @param operatorName This is a String such as "and", "or", ".", "==".
      */
     public OperatorExpression(String operatorName) {
-        this();
-        this.operatorName = operatorName;
+        this(operatorName, new ArrayList<IExpression>());
     }
-
+    
+    /**
+    * Create an OperatorExpressionImp.
+    * @param operatorName This is a String such as "and", "or", ".", "==".
+    * @param operands list of operand expressions
+    */
+    public OperatorExpression(String operatorName, List<IExpression> operands)
+    {
+        this.operatorName = operatorName;
+        operandList = operands;
+    }
+    
 
     /**
      * Add an operand to our list of operands.

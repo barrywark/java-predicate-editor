@@ -4,7 +4,7 @@
  */
 package com.physion.ovation.gui.ebuilder.expression;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -39,5 +39,5 @@ public interface IOperatorExpression
      * Please note, the returned list might be empty,
      * but it is never null.
      */
-    public ArrayList<IExpression> getOperandList();
+    public List<IExpression> getOperandList();
 }
