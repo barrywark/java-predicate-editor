@@ -1,0 +1,34 @@
+===== Compound Operators In Different Positions =====
+Original RowData:
+Epoch | All
+  Epoch | Any
+    Epoch | All
+      Epoch | None
+        Epoch | protocolID =~~ "xyz"
+Test Translation: 
+Starting With RowData:
+Epoch | All
+  Epoch | Any
+    Epoch | All
+      Epoch | None
+        Epoch | protocolID =~~ "xyz"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(or)
+    OperatorExpression(and)
+      OperatorExpression(not)
+        OperatorExpression(or)
+          OperatorExpression(=~~)
+            AttributeExpression(protocolID)
+            StringLiteralValueExpression(xyz)
+ExpressionTree Translated Back To RowData:
+Epoch | All
+  Epoch | Any
+    Epoch | All
+      Epoch | None
+        Epoch | protocolID =~~ "xyz"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

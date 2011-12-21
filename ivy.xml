@@ -13,6 +13,6 @@
         <dependency org="net.sourceforge.cobertura" name="cobertura" rev="1.9"/>
 
         <!-- Unmanaged dependencies -->
-        <!-- jeldoclet -->
+        <!-- ApprovalTests, datetimepicker 3.3 -->
     </dependencies>
 </ivy-module>

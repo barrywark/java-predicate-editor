@@ -1,0 +1,31 @@
+===== PER_USER_PARAMETERS_MAP Nested =====
+Original RowData:
+Epoch | Any
+  Epoch | nextEpoch.nextEpoch.prevEpoch.Any Property.someKey(int) != "34"
+Test Translation: 
+Starting With RowData:
+Epoch | Any
+  Epoch | nextEpoch.nextEpoch.prevEpoch.Any Property.someKey(int) != "34"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(any)
+    OperatorExpression(elementsOfType)
+      OperatorExpression(properties)
+        OperatorExpression(.)
+          OperatorExpression(.)
+            AttributeExpression(nextEpoch)
+            AttributeExpression(nextEpoch)
+          AttributeExpression(prevEpoch)
+        StringLiteralValueExpression(someKey)
+      ClassLiteralValueExpression(ovation.IntegerValue)
+    OperatorExpression(!=)
+      AttributeExpression(value)
+      Int32LiteralValueExpression(34)
+ExpressionTree Translated Back To RowData:
+Epoch | Any
+  Epoch | nextEpoch.nextEpoch.prevEpoch.Any Property.someKey(int) != "34"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.
