@@ -19,6 +19,8 @@
     <property name="datetimepicker.jar.path" value="${lib.dir}/datetimepicker3.3.jar"/>
     <property name="jodatime.jar.path" value="${lib.dir}/joda-time-1.6.2.jar"/>
     <property name="log4j.jar.path" value="${lib.dir}/log4j-1.2.16.jar"/>
+    <property name="junit.jar.path" value="${lib.dir}/junit-4.10.jar"/>
+    <property name="approvaltests.jar.path" value="${lib.dir}/ApprovalTests.jar"/>
 
     <property name="artifacts.dir" value="${basedir}/artifacts"/>
 
@@ -70,8 +72,7 @@
 
         <javac srcdir="${production.src.dir}"
             destdir="${production.classes.dir}"
-            classpath="${datetimepicker.jar.path}:${jodatime.jar.path}:${log4j.jar.path}"
-            excludes="**/*Tests.java"
+            classpath="${datetimepicker.jar.path}:${jodatime.jar.path}:${log4j.jar.path}:${junit.jar.path}:${approvaltests.jar.path}"
             includeAntRuntime="no"
             debug="true"
             />
@@ -96,6 +97,8 @@
 
             <classpath>
                 <pathelement location="${output.jar.path}"/>
+                <pathelement location="${junit.jar.path}"/>
+                <pathelement location="${approvaltests.jar.path}"/>
                 <fileset dir="${lib.dir}">
                     <include name="**/*.jar"/>
                 </fileset>
