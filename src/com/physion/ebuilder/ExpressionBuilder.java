@@ -322,7 +322,7 @@ public class ExpressionBuilder
         }
         else if (e.getSource() == okButton) {
             returnStatus = RETURN_STATUS_OK;
-            expressionPanelScrolling.print();  // Just for testing purposes.
+            //expressionPanelScrolling.print();  // Just for testing purposes.
             setVisible(false);
         }
         else if (e.getSource() == prevButton) {
