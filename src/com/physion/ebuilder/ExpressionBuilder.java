@@ -148,7 +148,7 @@ public class ExpressionBuilder
      */
     private int stateIndex = -1;
 
-    private Logger logger = Logger.getLogger(getClass().getCanonicalName());
+    private transient Logger logger = Logger.getLogger(getClass().getCanonicalName());
 
     /**
      * Create an ExpressionBuilder dialog with its expression

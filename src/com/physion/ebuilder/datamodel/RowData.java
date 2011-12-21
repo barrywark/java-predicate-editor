@@ -1486,7 +1486,7 @@ public class RowData
     }
 
 
-    private Logger logger = Logger.getLogger(getClass().getCanonicalName());
+    private transient Logger logger = Logger.getLogger(getClass().getCanonicalName());
     /**
      * Set the value of attributeValue using a String.
      * The GUI currently has widgets that let the user enter
