@@ -4,6 +4,8 @@
  */
 package com.physion.ebuilder.expression;
 
+import org.joda.time.LocalDateTime;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -35,7 +37,12 @@ public class TimeLiteralValueExpression
      */
     @Override
     public Object getValue() {
-        return(value);
+        return getTimeValue();
+    }
+
+    @Override
+    public LocalDateTime getTimeValue() {
+        return(new LocalDateTime(value));
     }
 
 

@@ -5,6 +5,8 @@
 package com.physion.ebuilder.expression;
 
 
+import org.joda.time.LocalDateTime;
+
 /**
  * The com.physion.ebuilder.expression package consists
  * of a set of interfaces and a set of classes that implement those
@@ -20,4 +22,7 @@ package com.physion.ebuilder.expression;
  */
 public interface ITimeLiteralValueExpression
     extends ILiteralValueExpression {
+
+    //Retrieve the time value as a DateTime
+    LocalDateTime getTimeValue();
 }

@@ -12,12 +12,15 @@
     <property name="ivy.home" value="${basedir}/.ant"/>
     <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
     <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
-    
+
     <property name="build.dir" value="${basedir}/build"/>
     <property name="lib.dir" value="${basedir}/lib"/>
+
     <property name="datetimepicker.jar.path" value="${lib.dir}/datetimepicker3.3.jar"/>
+    <property name="jodatime.jar.path" value="${lib.dir}/joda-time-1.6.2.jar"/>
+
     <property name="artifacts.dir" value="${basedir}/artifacts"/>
-    
+
     <property name="production.classes.dir" value="${build.dir}/production/classes/"/>
     <property name="production.src.dir" value="${basedir}/src"/>
     <property name="output.jar.path" value="${artifacts.dir}/ovpredicate.jar"/>
@@ -27,8 +30,8 @@
         <delete dir="${build.dir}"/>
         <delete dir="${artifacts.dir}"/>
     </target>
-    
-    
+
+
     <target name="download-ivy" unless="offline">
 
         <mkdir dir="${ivy.jar.dir}"/>
@@ -36,8 +39,8 @@
         <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
             dest="${ivy.jar.file}" usetimestamp="true"/>
     </target>
-    
-    
+
+
     <target name="init-ivy" depends="download-ivy">
         <!-- try to load ivy here from ivy home, in case the user has not already dropped
         it into ant's lib dir (note that the latter copy will always take precedence).
@@ -63,7 +66,7 @@
 
         <javac srcdir="${production.src.dir}"
             destdir="${production.classes.dir}"
-            classpath="${datetimepicker.jar.path}"
+            classpath="${datetimepicker.jar.path}:${jodatime.jar.path}"
             excludes="**/*Tests.java"
             includeAntRuntime="no"
             debug="true"
@@ -75,6 +78,7 @@
         <jar destfile="${output.jar.path}">
             <fileset dir="${production.classes.dir}"/>
             <zipfileset includes="**/*" src="${datetimepicker.jar.path}"/>
+            <zipfileset includes="**/*" src="${jodatime.jar.path}"/>
         </jar>
     </target>
 </project>
