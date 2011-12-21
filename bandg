@@ -13,4 +13,4 @@ echo pwd=`pwd`
 javac src/com/physion/ovation/gui/ebuilder/*.java
 
 # Run the test program.
-java com.physion.ovation.gui.ebuilder.ExpressionBuilder
+java com.physion.ebuilder.ExpressionBuilder

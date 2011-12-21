@@ -6,7 +6,7 @@
  * or someone else, will write code to implement an API like this.
  * This file was merely meant as a rough guide to give Steve Ford an
  * idea of how the Java API will eventually look.
- * 
+ *
  * Steve Ford took the example code in this file and used it to create
  * the package that is in the directory:
  *
@@ -23,7 +23,7 @@
  * not really needed any more.
  */
 
-package com.physion.ovation.gui.ebuilder.expression;
+package com.physion.ebuilder.expression;
 
 
 /*
@@ -52,7 +52,7 @@ Epoch | Any
 AttributeExpression("protocolID")  StringLiteralValueExpression("abc")
 
 
-2. 
+2.
 Epoch | All
   Epoch | protocolID == "abc"
 
@@ -75,7 +75,7 @@ Epoch | All
 												/						\
 											OperatorExpression(".")		IntLiteralValueExpression(1)
 											/					\
-							OperatorExpression("as")		AttributeExpression("value")				
+							OperatorExpression("as")		AttributeExpression("value")
 										/		\
 			OperatorExpression("parameter") 	ClassLiteralValueExpression("IntValue")
 					/			\
@@ -83,7 +83,7 @@ Epoch | All
   				  |
 				 |
 StringLiteralValueExpression("protocolParameters")
-			
+
 4.
 Epoch | All
   Epoch | responses All
@@ -94,10 +94,10 @@ Epoch | All
 												|
 									OperatorExpression("all")
 										/		\
-			AttributeExpression("responses")	OperatorExpression("==")		
+			AttributeExpression("responses")	OperatorExpression("==")
 													/		\
 							AttributeExpression("uuid") 	StringLiteralValueExpression("xyz")
-							
+
 
 NOTE: per-user to-many associations would map like the above, with the exception that AttributeExpression("responses")
 would be replaced with OperatorExpression("keywords") [for "All keywords"], or OperatorExpression("mykeywords") for
@@ -113,7 +113,7 @@ Epoch | Any
 											/					\
 										   |				OperatorExpression("==")
 										   |					/					\
-				OperatorExpression("elementsOfType")  AttributeExpression("value")	IntLiteralValueExpression(1)		
+				OperatorExpression("elementsOfType")  AttributeExpression("value")	IntLiteralValueExpression(1)
 					/							\
 OperatorExpression("properties")		ClassLiteralValueExpression("IntValue")
 				|
@@ -121,7 +121,7 @@ OperatorExpression("properties")		ClassLiteralValueExpression("IntValue")
 */
 
 public interface Expression {
-	
+
     void accept(ExpressionVisitor visitor);
 
 }
@@ -136,7 +136,7 @@ Implmentations should implement the visitor pattern to traverse operands in orde
 the operator expression.
 */
 public interface OperatorExpression extends Expression {
-	
+
 	/*
 	The name of the operator (e.g. "=", "!=", ">=", "properties", "any", "all", etc.)
 	*/
@@ -160,12 +160,12 @@ public interface LiteralValueExpression extends Expression {
 }
 
 public interface ClassLiteralValueExpression extends LiteralValueExpression {
-	
+
 	//Not sure yet whether we want String or Class<? extends ooObj>
 	String getClassName();
 	//or
 	Class<? extends ooObj> getClass();
-	
+
 }
 
 /**
@@ -174,7 +174,7 @@ we may want to in the future. It's certainly both legal in PQL and as a concept 
 object graph.
 */
 public interface ReferenceLiteralValueExpression extends LiteralValueExpression {
-	
+
 	// This is the only place where it seems that Objectivity leaks through the Expression tree abstraction...
 	// we may need to discuss this one.
 	ooId getObjectId();

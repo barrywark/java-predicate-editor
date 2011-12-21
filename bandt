@@ -13,4 +13,4 @@ echo pwd=`pwd`
 javac src/com/physion/ovation/gui/ebuilder/translator/test/*.java
 
 # Run the test program.
-java com.physion.ovation.gui.ebuilder.translator.test.TranslatorTests
+java com.physion.ebuilder.translator.test.TranslatorTests

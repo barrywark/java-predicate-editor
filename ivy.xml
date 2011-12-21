@@ -1,0 +1,18 @@
+<ivy-module version="2.0">
+    <info organisation="com.physionconsulting" module="ebuilder"/>
+    <dependencies>
+
+        <!-- Production -->
+        <dependency org="joda-time" name="joda-time" rev="1.6.2"/>
+        <dependency org="log4j" name="log4j" rev="1.2.16"/>
+        <dependency org="com.google.guava" name="guava" rev="10.0.1"/>
+
+        <!-- Testing -->
+        <dependency org="junit" name="junit" rev="4.10"/>
+        <!--<dependency org="ant" name="ant-junit" rev="1.6"/>-->
+        <dependency org="net.sourceforge.cobertura" name="cobertura" rev="1.9"/>
+
+        <!-- Unmanaged dependencies -->
+        <!-- jeldoclet -->
+    </dependencies>
+</ivy-module>
