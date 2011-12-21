@@ -485,6 +485,9 @@ public class RowDataToExpressionTree
          * The second operand is the property key the user entered.
          */
 
+        pupmOperator.addOperand(new StringLiteralValueExpression(
+                rowData.getPropName()));
+
         if (rowData.getAttributeCount() < 2) {
             pupmOperator.addOperand(new AttributeExpression(AE_THIS));
         }
@@ -492,8 +495,6 @@ public class RowDataToExpressionTree
             createAndAddDotPath(pupmOperator, rowData);
         }
 
-        pupmOperator.addOperand(new StringLiteralValueExpression(
-            rowData.getPropName()));
     }
 
 
