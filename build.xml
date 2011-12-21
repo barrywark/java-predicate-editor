@@ -21,8 +21,11 @@
 
     <property name="artifacts.dir" value="${basedir}/artifacts"/>
 
+    <property name="junit.report.dir" value="${build.dir}/junit-reports"/>
+
     <property name="production.classes.dir" value="${build.dir}/production/classes/"/>
     <property name="production.src.dir" value="${basedir}/src"/>
+    <property name="test.src.dir" value="${basedir}/src"/>
     <property name="output.jar.path" value="${artifacts.dir}/ovpredicate.jar"/>
 
 
@@ -80,6 +83,30 @@
             <zipfileset includes="**/*" src="${datetimepicker.jar.path}"/>
             <zipfileset includes="**/*" src="${jodatime.jar.path}"/>
         </jar>
+    </target>
+
+    <target name="junit" depends="jar">
+        <mkdir dir="${junit.report.dir}"/>
+
+        <junit printsummary="yes" fork="yes" forkmode="once">
+            <sysproperty key="net.sourceforge.cobertura.datafile"
+                         file="${basedir}/cobertura.ser" />
+
+            <classpath>
+                <pathelement location="${output.jar.path}"/>
+                <fileset dir="${lib.dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+
+            <formatter type="xml"/>
+
+            <batchtest fork="yes" todir="${junit.report.dir}">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
     </target>
 </project>
 
