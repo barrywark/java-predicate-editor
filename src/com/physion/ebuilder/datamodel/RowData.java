@@ -26,6 +26,7 @@ import com.physion.ebuilder.datatypes.Operator;
 import com.physion.ebuilder.datatypes.CollectionOperator;
 import com.physion.ebuilder.datatypes.Type;
 import com.physion.ebuilder.datatypes.Cardinality;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -1485,6 +1486,7 @@ public class RowData
     }
 
 
+    private Logger logger = Logger.getLogger(getClass().getCanonicalName());
     /**
      * Set the value of attributeValue using a String.
      * The GUI currently has widgets that let the user enter
@@ -1536,7 +1538,7 @@ public class RowData
                 }
             }
             catch (Exception e) {
-                System.out.println("Field does not contain a legal value.");
+                logger.error("Field does not contain a legal value.");
                 e.printStackTrace();
             }
         }
@@ -2470,10 +2472,10 @@ public class RowData
         //System.out.println("rowData:\n"+rowData);
 
         if (same)
-            System.out.println("RowData written and read versions are "+
+            logger.debug("RowData written and read versions are "+
                                "the same.");
         else
-            System.out.println("ERROR:  RowData written and read versions are "+
+            logger.error("ERROR:  RowData written and read versions are "+
                                "different.");
 
         return(same);

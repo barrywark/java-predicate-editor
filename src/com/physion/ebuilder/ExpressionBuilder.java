@@ -28,6 +28,7 @@ import com.physion.ebuilder.expression.ExpressionTree;
 import com.physion.ebuilder.expression.OperatorExpression;
 import com.physion.ebuilder.translator.ExpressionTreeToRowData;
 import com.physion.ebuilder.translator.RowDataToExpressionTree;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -147,6 +148,8 @@ public class ExpressionBuilder
      */
     private int stateIndex = -1;
 
+    private Logger logger = Logger.getLogger(getClass().getCanonicalName());
+
     /**
      * Create an ExpressionBuilder dialog with its expression
      * tree initialized to a copy of the passed in expression.
@@ -163,10 +166,11 @@ public class ExpressionBuilder
         setModal(true);
 
         if (originalRootRow == null) {
-            System.out.println("ExpressionBuilder constructor was passed\n"+
-                "a null value for the originalRootRow parameter.\n"+
-                "That is not allowed.  Please see ExpressionBuilder.main() "+
-                "for some example code showing you how to use it.");
+            String msg = "ExpressionBuilder constructor was passed\n" +
+                    "a null value for the originalRootRow parameter.\n" +
+                    "That is not allowed.  Please see ExpressionBuilder.main() " +
+                    "for some example code showing you how to use it.";
+            logger.debug(msg);
             return;
         }
 
@@ -819,6 +823,8 @@ public class ExpressionBuilder
     }
 
 
+    private static Logger classLogger = Logger.getLogger(ExpressionBuilder.class.getCanonicalName());
+
     /**
      * Set the look and feel to something specific.
      * Currently, this is really only to test out some
@@ -858,8 +864,8 @@ public class ExpressionBuilder
          * Print out the name of the current look and feel.
          */
         lookAndFeel = UIManager.getLookAndFeel().toString();
-        System.out.println("\nCurrent default look and feel is:\n    "+
-                           lookAndFeel);
+        classLogger.debug("\nCurrent default look and feel is:\n    " +
+                lookAndFeel);
 
         /**
          * Below is a selection of look and feels that you can
@@ -906,7 +912,7 @@ public class ExpressionBuilder
         }
 
         try {
-            System.out.println("\nSetting look and feel to:\n    "+lookAndFeel);
+            classLogger.debug("\nSetting look and feel to:\n    " + lookAndFeel);
             UIManager.setLookAndFeel(lookAndFeel);
         }
         catch(Exception e) {
@@ -966,8 +972,8 @@ public class ExpressionBuilder
         ExpressionTree expressionTree = ExpressionTree.readExpressionTree(
             SAVE_FILE_NAME_EXP_TREE);
         if (expressionTree != null) {
-            System.out.println("\nSerialized ExpressionTree Read In:\n"+
-                               expressionTree);
+            classLogger.debug("\nSerialized ExpressionTree Read In:\n" +
+                    expressionTree);
         }
         returnValue.expressionTree = expressionTree;
 
@@ -998,12 +1004,12 @@ public class ExpressionBuilder
              * returned.
              */
 
-            System.out.println("\nstatus = "+returnValue.status);
-            System.out.println("\nOriginal originalExpressionTree:\n"+
-                originalExpressionTree);
-            System.out.println("\nModified rootRow:\n"+returnValue.rootRow);
-            System.out.println("\nModified expressionTree:\n"+
-                returnValue.expressionTree);
+            classLogger.debug("\nstatus = " + returnValue.status);
+            classLogger.debug("\nOriginal originalExpressionTree:\n" +
+                    originalExpressionTree);
+            classLogger.debug("\nModified rootRow:\n" + returnValue.rootRow);
+            classLogger.debug("\nModified expressionTree:\n" +
+                    returnValue.expressionTree);
 
             if (returnValue.status == RETURN_STATUS_CANCEL) {
                 /**
@@ -1011,7 +1017,7 @@ public class ExpressionBuilder
                  * so exit the GUI without saving the current
                  * ExpressionTree.
                  */
-                System.out.println("User pressed Cancel or closed the window.");
+                classLogger.debug("User pressed Cancel or closed the window.");
                 System.exit(returnValue.status);
             }
             /**
@@ -1037,7 +1043,7 @@ public class ExpressionBuilder
             keepRunning = false;
         }
 
-        System.out.println("Calling System.exit().");
+        classLogger.debug("Calling System.exit().");
         System.exit(returnValue.status);
     }
 }
