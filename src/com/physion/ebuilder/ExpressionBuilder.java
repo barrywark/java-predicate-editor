@@ -547,7 +547,7 @@ public class ExpressionBuilder
              */
             OperatorExpression rootExpression;
             rootExpression = new OperatorExpression(
-                ExpressionTreeToRowData.OE_OR);
+                ExpressionTreeToRowData.OE_AND);
 
             expressionTree = new ExpressionTree(classUnderQualification,
                                                 rootExpression);

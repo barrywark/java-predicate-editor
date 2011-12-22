@@ -171,8 +171,9 @@ public class DataModel {
          * Create the list of possible CUQ's now.
          */
         possibleCUQs.add(epochCD);
-        possibleCUQs.add(epochGroupCD);
         possibleCUQs.add(sourceCD);
+        possibleCUQs.add(analysisRecordCD);
+        possibleCUQs.add(epochGroupCD);
 
         /**
          * The ClassDescription objects we created above are
