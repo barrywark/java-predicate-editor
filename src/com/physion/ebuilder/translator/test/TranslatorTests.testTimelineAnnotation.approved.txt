@@ -1,0 +1,28 @@
+===== Note annotation on Epoch =====
+Original RowData:
+Epoch | All
+  Epoch | My Timeline Annotations Any have Any
+    TimelineAnnotation | startTimeZone == "America/Chicago"
+Test Translation: 
+Starting With RowData:
+Epoch | All
+  Epoch | My Timeline Annotations Any have Any
+    TimelineAnnotation | startTimeZone == "America/Chicago"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(any)
+    OperatorExpression(mytimelineannotations)
+      AttributeExpression(this)
+    OperatorExpression(or)
+      OperatorExpression(==)
+        AttributeExpression(startTimeZone)
+        StringLiteralValueExpression(America/Chicago)
+ExpressionTree Translated Back To RowData:
+Epoch | All
+  Epoch | My Timeline Annotations Any have Any
+    TimelineAnnotation | startTimeZone == "America/Chicago"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

@@ -95,9 +95,14 @@ public class DataModel {
             new ClassDescription("TaggableEntityBase", entityBaseCD);
         allClassDescriptions.add(taggableEntityBaseCD);
 
+        ClassDescription annotatableEntityBaseCD =
+                new ClassDescription("AnnotatableEntityBase", taggableEntityBaseCD);
+        allClassDescriptions.add(annotatableEntityBaseCD);
+
         ClassDescription timelineElementCD =
-            new ClassDescription("TimelineElement", taggableEntityBaseCD);
+            new ClassDescription("TimelineElement", annotatableEntityBaseCD);
         allClassDescriptions.add(timelineElementCD);
+
 
         ClassDescription purposeAndNotesEntityCD =
             new ClassDescription("PurposeAndNotesEntity", taggableEntityBaseCD);
@@ -162,6 +167,18 @@ public class DataModel {
         ClassDescription analysisRecordCD =
             new ClassDescription("AnalysisRecord", taggableEntityBaseCD);
         allClassDescriptions.add(analysisRecordCD);
+
+        ClassDescription annotationCD =
+                new ClassDescription("Note", taggableEntityBaseCD);
+        allClassDescriptions.add(annotationCD);
+
+        ClassDescription noteCD =
+                new ClassDescription("Note", annotationCD);
+        allClassDescriptions.add(noteCD);
+
+        ClassDescription timelineAnnotationCD =
+                new ClassDescription("TimelineAnnotation", annotationCD);
+        allClassDescriptions.add(timelineAnnotationCD);
 
         /**
          * Of the ClassDescriptions we created above,
@@ -249,6 +266,42 @@ public class DataModel {
                                   keywordTagCD, Cardinality.TO_MANY);
         taggableEntityBaseCD.addAttribute(attribute);
 
+
+        /**
+         * Initialize values of the AnnotatableEntityBase class
+         */
+
+        attribute = new Attribute("notes", "All Notes", Type.PER_USER,
+                noteCD, Cardinality.TO_MANY);
+        annotatableEntityBaseCD.addAttribute(attribute);
+
+        attribute = new Attribute("mynotes", "My Notes", Type.PER_USER,
+                noteCD, Cardinality.TO_MANY);
+        annotatableEntityBaseCD.addAttribute(attribute);
+
+        /**
+         * Initialize values for the Annotation class
+         */
+
+        attribute = new Attribute("text", Type.UTF_8_STRING);
+        annotationCD.addAttribute(attribute);
+
+        /**
+         * Initialize values for the TimelineAnnotation class
+         */
+
+        attribute = new Attribute("startTime", Type.DATE_TIME);
+        timelineAnnotationCD.addAttribute(attribute);
+
+        attribute = new Attribute("endTime", Type.DATE_TIME);
+        timelineAnnotationCD.addAttribute(attribute);
+
+        attribute = new Attribute("startTimeZone", Type.UTF_8_STRING);
+        timelineAnnotationCD.addAttribute(attribute);
+
+        attribute = new Attribute("endTimeZone", Type.UTF_8_STRING);
+        timelineAnnotationCD.addAttribute(attribute);
+
         /**
          * Initialize values of the TimelineElement class.
          */
@@ -262,6 +315,14 @@ public class DataModel {
         timelineElementCD.addAttribute(attribute);
 
         attribute = new Attribute("endTimeZone", Type.UTF_8_STRING);
+        timelineElementCD.addAttribute(attribute);
+
+        attribute = new Attribute("timelineannotations", "All Timeline Annotations", Type.PER_USER,
+                timelineAnnotationCD, Cardinality.TO_MANY);
+        timelineElementCD.addAttribute(attribute);
+
+        attribute = new Attribute("mytimelineannotations", "My Timeline Annotations", Type.PER_USER,
+                timelineAnnotationCD, Cardinality.TO_MANY);
         timelineElementCD.addAttribute(attribute);
 
         /**

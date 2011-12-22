@@ -1,0 +1,28 @@
+===== Note annotation on Epoch =====
+Original RowData:
+Epoch | All
+  Epoch | All Notes Any have Any
+    Note | text == "foo"
+Test Translation: 
+Starting With RowData:
+Epoch | All
+  Epoch | All Notes Any have Any
+    Note | text == "foo"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(any)
+    OperatorExpression(notes)
+      AttributeExpression(this)
+    OperatorExpression(or)
+      OperatorExpression(==)
+        AttributeExpression(text)
+        StringLiteralValueExpression(foo)
+ExpressionTree Translated Back To RowData:
+Epoch | All
+  Epoch | All Notes Any have Any
+    Note | text == "foo"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

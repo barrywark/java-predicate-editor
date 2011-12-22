@@ -56,22 +56,26 @@ import com.physion.ebuilder.translator.RowDataToExpressionTree;
  * demonstrates that the bug is fixed.
  */
 public class TranslatorTests
-    extends TestCase {
+        extends TestCase {
 
     private static ClassDescription epochCD =
-        DataModel.getClassDescription("Epoch");
+            DataModel.getClassDescription("Epoch");
     private static ClassDescription epochGroupCD =
-        DataModel.getClassDescription("EpochGroup");
+            DataModel.getClassDescription("EpochGroup");
     private static ClassDescription sourceCD =
-        DataModel.getClassDescription("Source");
+            DataModel.getClassDescription("Source");
     private static ClassDescription responseCD =
-        DataModel.getClassDescription("Response");
+            DataModel.getClassDescription("Response");
     private static ClassDescription resourceCD =
-        DataModel.getClassDescription("Resource");
+            DataModel.getClassDescription("Resource");
     private static ClassDescription derivedResponseCD =
-        DataModel.getClassDescription("DerivedResponse");
+            DataModel.getClassDescription("DerivedResponse");
     private static ClassDescription externalDeviceCD =
-        DataModel.getClassDescription("ExternalDevice");
+            DataModel.getClassDescription("ExternalDevice");
+    private static ClassDescription noteCD =
+            DataModel.getClassDescription("Note");
+    private static ClassDescription timelineAnnotationCD =
+            DataModel.getClassDescription("TimelineAnnotation");
 
 
     /**
@@ -92,7 +96,7 @@ public class TranslatorTests
     //@UseReporter(QuietReporter.class)
     @UseReporter(JunitReporter.class)
     public void test1()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -118,14 +122,14 @@ public class TranslatorTests
         rootRow.addChildRow(rowData);
 
         String s = getResultsString(
-            "CollectionOperator.ANY With Two Operands", rootRow);
+                "CollectionOperator.ANY With Two Operands", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test2()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -159,14 +163,14 @@ public class TranslatorTests
         rootRow.addChildRow(rowData);
 
         String s = getResultsString(
-            "Attribute Boolean Operator.IS_TRUE", rootRow);
+                "Attribute Boolean Operator.IS_TRUE", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test3()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -199,7 +203,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test4()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -228,7 +232,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test5()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -250,14 +254,14 @@ public class TranslatorTests
         rootRow.addChildRow(rowData);
 
         String s = getResultsString(
-            "Reference Value Operator.IS_NULL", rootRow);
+                "Reference Value Operator.IS_NULL", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test6()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -279,14 +283,14 @@ public class TranslatorTests
         rootRow.addChildRow(rowData);
 
         String s = getResultsString(
-            "Reference Value Operator.IS_NOT_NULL", rootRow);
+                "Reference Value Operator.IS_NOT_NULL", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test7()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -322,7 +326,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test8()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -359,14 +363,14 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-            "Compound Row With Lots Of None Collection Operators", rootRow);
+                "Compound Row With Lots Of None Collection Operators", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test9()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -406,15 +410,15 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-            "Nested Compound Row With Lots Of None Collection Operators",
-            rootRow);
+                "Nested Compound Row With Lots Of None Collection Operators",
+                rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test10()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -456,7 +460,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test11()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -492,7 +496,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test12()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -527,7 +531,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test13()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -562,7 +566,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test14()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -597,7 +601,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test15()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -620,14 +624,14 @@ public class TranslatorTests
         rootRow.addChildRow(rowData);
 
         String s = getResultsString(
-            "PER_USER CollectionOperator.COUNT", rootRow);
+                "PER_USER CollectionOperator.COUNT", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test16()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -658,14 +662,14 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-            "PER_USER Nested Once CollectionOperator.ANY", rootRow);
+                "PER_USER Nested Once CollectionOperator.ANY", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test17()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -697,14 +701,14 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-            "PER_USER Nested Twice CollectionOperator.NONE", rootRow);
+                "PER_USER Nested Twice CollectionOperator.NONE", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test18()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -737,14 +741,14 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-            "PER_USER Nested Thrice CollectionOperator.ALL", rootRow);
+                "PER_USER Nested Thrice CollectionOperator.ALL", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test19()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -771,7 +775,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test20()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -802,7 +806,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test21()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -831,7 +835,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test22()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -863,7 +867,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test23()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -890,7 +894,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test24()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -924,7 +928,7 @@ public class TranslatorTests
 
     @UseReporter(JunitReporter.class)
     public void test25()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -963,14 +967,14 @@ public class TranslatorTests
         rowData3.addChildRow(rowData4);
 
         String s = getResultsString(
-            "Compound Operators In Different Positions", rootRow);
+                "Compound Operators In Different Positions", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test26()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -1010,14 +1014,14 @@ public class TranslatorTests
         rowData3.addChildRow(rowData4);
 
         String s = getResultsString(
-            "Compound Operators In Different Positions", rootRow);
+                "Compound Operators In Different Positions", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test27()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -1057,14 +1061,14 @@ public class TranslatorTests
         rowData3.addChildRow(rowData4);
 
         String s = getResultsString(
-            "Compound Operators In Different Positions", rootRow);
+                "Compound Operators In Different Positions", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test28()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -1104,14 +1108,14 @@ public class TranslatorTests
         rowData3.addChildRow(rowData4);
 
         String s = getResultsString(
-            "Compound Operators In Different Positions", rootRow);
+                "Compound Operators In Different Positions", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test29()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -1138,7 +1142,7 @@ public class TranslatorTests
 
         rowData2 = new RowData();
         rowData2.addAttribute(derivedResponseCD.getAttribute(
-                              "derivationParameters"));
+                "derivationParameters"));
         rowData2.setPropName("someKey");
         rowData2.setPropType(Type.BOOLEAN);
         rowData2.setAttributeOperator(Operator.IS_TRUE);
@@ -1151,14 +1155,14 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-            "Nested PER_USER With PARAMETERS_MAP & PER_USER Children", rootRow);
+                "Nested PER_USER With PARAMETERS_MAP & PER_USER Children", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test30()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -1187,7 +1191,7 @@ public class TranslatorTests
 
         rowData2 = new RowData();
         rowData2.addAttribute(derivedResponseCD.getAttribute(
-                              "derivationParameters"));
+                "derivationParameters"));
         rowData2.setPropName("someKey");
         rowData2.setPropType(Type.BOOLEAN);
         rowData2.setAttributeOperator(Operator.IS_TRUE);
@@ -1209,14 +1213,14 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-            "Nested PER_USER With PM, PU, and PUPM Children", rootRow);
+                "Nested PER_USER With PM, PU, and PUPM Children", rootRow);
         Approvals.approve(s);
     }
 
 
     @UseReporter(JunitReporter.class)
     public void test31()
-        throws Exception {
+            throws Exception {
 
         RowData rootRow;
         RowData rowData;
@@ -1246,10 +1250,64 @@ public class TranslatorTests
         rowData2.addChildRow(rowData3);
 
         String s = getResultsString(
-            "Compound Row, Class Change Between Parent And Child", rootRow);
+                "Compound Row, Class Change Between Parent And Child", rootRow);
         Approvals.approve(s);
     }
 
+
+    @UseReporter(JunitReporter.class)
+    public void testNoteAnnotation() throws Exception
+    {
+        /**
+         * Test Note annotations operator
+         */
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("notes"));
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        RowData rowData1 = new RowData();
+        rowData1.addAttribute(noteCD.getAttribute("text"));
+        rowData1.setAttributeOperator(Operator.EQUALS);
+        rowData1.setAttributeValue("foo");
+        rowData.addChildRow(rowData1);
+
+        String s = getResultsString("Note annotation on Epoch", rootRow);
+        Approvals.approve(s);
+
+    }
+
+    @UseReporter(JunitReporter.class)
+    public void testTimelineAnnotation() throws Exception
+    {
+        /**
+         * Test Note annotations operator
+         */
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("mytimelineannotations"));
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        RowData rowData1 = new RowData();
+        rowData1.addAttribute(timelineAnnotationCD.getAttribute("startTimeZone"));
+        rowData1.setAttributeOperator(Operator.EQUALS);
+        rowData1.setAttributeValue("America/Chicago");
+        rowData.addChildRow(rowData1);
+
+        String s = getResultsString("Note annotation on Epoch", rootRow);
+        Approvals.approve(s);
+
+    }
 
     /*
     @UseReporter(JunitReporter.class)
@@ -1302,7 +1360,7 @@ public class TranslatorTests
             eTree = (ExpressionTree)someKindOfTree;
         else {
             String error = "You must pass an Object of type RowData or "+
-                "ExpressionTree.  You passed: "+someKindOfTree;
+                    "ExpressionTree.  You passed: "+someKindOfTree;
             throw(new IllegalArgumentException(error));
         }
 
@@ -1315,14 +1373,14 @@ public class TranslatorTests
             s += "\nExpressionTree Translated Back To RowData:\n"+newRowData;
 
             same = rootRow.toString(true, "").equals(
-                newRowData.toString(true, ""));
+                    newRowData.toString(true, ""));
         }
         else {
             s += "\nStarting With ExpressionTree:\n"+eTree;
             rootRow = ExpressionTreeToRowData.translate(eTree);
             s += "\nExpressionTree Translated To RowData:\n"+rootRow;
             ExpressionTree newETree = RowDataToExpressionTree.
-                translate(rootRow);
+                    translate(rootRow);
             s += "\nRowData Translated Back To Expression:\n"+newETree;
 
             same = eTree.toString().equals(newETree.toString());
