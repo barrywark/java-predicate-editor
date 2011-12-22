@@ -1,28 +1,28 @@
 ===== Note annotation on Epoch =====
 Original RowData:
 Epoch | All
-  Epoch | All Timeline Annotations Any have Any
-    TimelineAnnotation | startTimeZone == "America/Chicago"
+  Epoch | My Notes Any have Any
+    Note | text == "foo"
 Test Translation: 
 Starting With RowData:
 Epoch | All
-  Epoch | All Timeline Annotations Any have Any
-    TimelineAnnotation | startTimeZone == "America/Chicago"
+  Epoch | My Notes Any have Any
+    Note | text == "foo"
 RowData Translated To Expression:
 CUQ: Epoch
 rootExpression:
 OperatorExpression(and)
   OperatorExpression(any)
-    OperatorExpression(timelineannotations)
+    OperatorExpression(mynotes)
       AttributeExpression(this)
     OperatorExpression(or)
       OperatorExpression(==)
-        AttributeExpression(startTimeZone)
-        StringLiteralValueExpression(America/Chicago)
+        AttributeExpression(text)
+        StringLiteralValueExpression(foo)
 ExpressionTree Translated Back To RowData:
 Epoch | All
-  Epoch | All Timeline Annotations Any have Any
-    TimelineAnnotation | startTimeZone == "America/Chicago"
+  Epoch | My Notes Any have Any
+    Note | text == "foo"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.
 Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

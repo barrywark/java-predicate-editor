@@ -1283,7 +1283,34 @@ public class TranslatorTests
     }
 
     @UseReporter(JunitReporter.class)
-    public void testTimelineAnnotation() throws Exception
+    public void testMyNoteAnnotation() throws Exception
+    {
+        /**
+         * Test Note annotations operator
+         */
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("mynotes"));
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        RowData rowData1 = new RowData();
+        rowData1.addAttribute(noteCD.getAttribute("text"));
+        rowData1.setAttributeOperator(Operator.EQUALS);
+        rowData1.setAttributeValue("foo");
+        rowData.addChildRow(rowData1);
+
+        String s = getResultsString("Note annotation on Epoch", rootRow);
+        Approvals.approve(s);
+
+    }
+
+    @UseReporter(JunitReporter.class)
+    public void testMyTimelineAnnotation() throws Exception
     {
         /**
          * Test Note annotations operator
@@ -1295,6 +1322,33 @@ public class TranslatorTests
 
         RowData rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("mytimelineannotations"));
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        RowData rowData1 = new RowData();
+        rowData1.addAttribute(timelineAnnotationCD.getAttribute("startTimeZone"));
+        rowData1.setAttributeOperator(Operator.EQUALS);
+        rowData1.setAttributeValue("America/Chicago");
+        rowData.addChildRow(rowData1);
+
+        String s = getResultsString("Note annotation on Epoch", rootRow);
+        Approvals.approve(s);
+
+    }
+
+    @UseReporter(JunitReporter.class)
+    public void testTimelineAnnotation() throws Exception
+    {
+        /**
+         * Test Note annotations operator
+         */
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("timelineannotations"));
         rowData.setCollectionOperator(CollectionOperator.ANY);
         rootRow.addChildRow(rowData);
 
