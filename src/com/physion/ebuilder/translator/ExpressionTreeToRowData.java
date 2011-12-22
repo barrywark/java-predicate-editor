@@ -301,9 +301,9 @@ public class ExpressionTreeToRowData
              * the key that it uses.
              *
              * oeAttributePath contains the name of the Attribute.
-             * Its first operand is the "path" to the attribute.
+             * Its second operand is the "path" to the attribute.
              *
-             * Its second operand is the property "key".
+             * Its first operand is the property "key".
              */
 
             if (oeAttributePath.getOperandList().size() != 2) {
@@ -313,15 +313,13 @@ public class ExpressionTreeToRowData
                 throw(new IllegalArgumentException(s));
             }
 
-            exTemp = oeAttributePath.getOperandList().get(0);
-            setAttributePath(rowData, oeAttributePath, classDescription);
 
             /**
-             * Now turn the second operand into the property name/key
+             * Turn the first operand into the property name/key
              * for the row.
              */
 
-            exTemp = oeAttributePath.getOperandList().get(1);
+            exTemp = oeAttributePath.getOperandList().get(0);
             if (!(exTemp instanceof IStringLiteralValueExpression)) {
                 String s = "PER_USER_PARAMETERS_MAP "+
                     "IOperatorExpression("+
@@ -331,8 +329,15 @@ public class ExpressionTreeToRowData
             }
 
             IStringLiteralValueExpression slve =
-                (IStringLiteralValueExpression)exTemp;
+                    (IStringLiteralValueExpression)exTemp;
             rowData.setPropName(slve.getValue().toString());
+
+            /**
+             * Now the second operand into the target.
+             */
+            exTemp = oeAttributePath.getOperandList().get(1);
+            setAttributePath(rowData, oeAttributePath, classDescription);
+
 
             /**
              * Set the attributeOperator and (possibly) the
@@ -755,14 +760,26 @@ public class ExpressionTreeToRowData
                 IOperatorExpression oe = (IOperatorExpression)ex;
                 name = oe.getOperatorName();
 
-                if (oe.getOperandList().size() < 1) {
-                    String s = "A PER_USER IOperatorExpression("+name+") "+
-                        "does not have any operands.  It should have at "+
-                        "least one operand such as AttributeExpression(this).";
-                    throw(new IllegalArgumentException(s));
-                }
+                IExpression ex2;
+                if(isPerUserOperator(ex, classDescription)) {
+                    if (oe.getOperandList().size() < 1) {
+                        String s = "A PER_USER IOperatorExpression("+name+") "+
+                                "does not have any operands.  It should have at "+
+                                "least one operand such as AttributeExpression(this).";
+                        throw(new IllegalArgumentException(s));
+                    }
 
-                IExpression ex2 = oe.getOperandList().get(0);
+                    ex2 = oe.getOperandList().get(0);
+                } else {
+                    if (oe.getOperandList().size() < 1) {
+                        String s = "A PER_USER IOperatorExpression("+name+") "+
+                                "does not have any operands.  It should have at "+
+                                "least two operands such as (key,AttributeExpression(this)).";
+                        throw(new IllegalArgumentException(s));
+                    }
+
+                    ex2 = oe.getOperandList().get(1);
+                }
 
                 /**
                  * Check whether the operand is the special
