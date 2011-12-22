@@ -190,6 +190,7 @@ public class DataModel {
         possibleCUQs.add(epochCD);
         possibleCUQs.add(sourceCD);
         possibleCUQs.add(analysisRecordCD);
+        possibleCUQs.add(projectCD);
         possibleCUQs.add(epochGroupCD);
 
         /**
