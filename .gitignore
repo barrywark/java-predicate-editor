@@ -9,3 +9,7 @@
 /checkouts
 /.lein-deps-sum
 .DS_Store
+.ant
+temp.expTree
+temp.rowData
+build/
