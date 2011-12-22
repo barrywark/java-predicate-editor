@@ -1,11 +1,11 @@
 ===== PARAMETERS_MAP Nested =====
 Original RowData:
 Epoch | All
-  Epoch | nextEpoch.nextEpoch.prevEpoch.protocolParameters.someKey(float) == "12.3"
+  Epoch | nextEpoch.nextEpoch.previousEpoch.protocolParameters.someKey(float) == "12.3"
 Test Translation: 
 Starting With RowData:
 Epoch | All
-  Epoch | nextEpoch.nextEpoch.prevEpoch.protocolParameters.someKey(float) == "12.3"
+  Epoch | nextEpoch.nextEpoch.previousEpoch.protocolParameters.someKey(float) == "12.3"
 RowData Translated To Expression:
 CUQ: Epoch
 rootExpression:
@@ -19,7 +19,7 @@ OperatorExpression(and)
               OperatorExpression(.)
                 AttributeExpression(nextEpoch)
                 AttributeExpression(nextEpoch)
-              AttributeExpression(prevEpoch)
+              AttributeExpression(previousEpoch)
             AttributeExpression(protocolParameters)
           StringLiteralValueExpression(someKey)
         ClassLiteralValueExpression(ovation.FloatingPointValue)
@@ -27,7 +27,7 @@ OperatorExpression(and)
     Float64LiteralValueExpression(12.3)
 ExpressionTree Translated Back To RowData:
 Epoch | All
-  Epoch | nextEpoch.nextEpoch.prevEpoch.protocolParameters.someKey(float) == "12.3"
+  Epoch | nextEpoch.nextEpoch.previousEpoch.protocolParameters.someKey(float) == "12.3"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.
 Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

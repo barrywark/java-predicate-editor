@@ -506,7 +506,7 @@ public class DataModel {
                                   epochCD, Cardinality.TO_ONE);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("prevEpoch", Type.REFERENCE,
+        attribute = new Attribute("previousEpoch", Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         epochCD.addAttribute(attribute);
 

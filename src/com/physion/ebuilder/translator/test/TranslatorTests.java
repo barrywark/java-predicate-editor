@@ -391,7 +391,7 @@ public class TranslatorTests
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("previousEpoch"));
         rowData.addAttribute(epochCD.getAttribute("responses"));
         rowData.setCollectionOperator(CollectionOperator.NONE);
         rowData.setCollectionOperator2(CollectionOperator.NONE);
@@ -718,7 +718,7 @@ public class TranslatorTests
          * Test a nested PER_USER attribute type.
          *
          *     Epoch | All
-         *       Epoch | nextEpoch.nextEpoch.prevEpoch.All keywords All have Any
+         *       Epoch | nextEpoch.nextEpoch.previousEpoch.All keywords All have Any
          *         KeywordTag | uuid == "xyz"
          */
         rootRow = new RowData();
@@ -728,7 +728,7 @@ public class TranslatorTests
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("previousEpoch"));
         rowData.addAttribute(epochCD.getAttribute("keywords"));
         rowData.setCollectionOperator(CollectionOperator.ALL);
         rowData.setCollectionOperator2(CollectionOperator.ANY);
@@ -791,7 +791,7 @@ public class TranslatorTests
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("previousEpoch"));
         rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
         rowData.setPropName("someKey");
         rowData.setPropType(Type.FLOAT_64);
@@ -843,7 +843,7 @@ public class TranslatorTests
         /**
          * Test a PER_USER_PARAMETERS_MAP row.
          *
-         * nextEpoch.nextEpoch.prevEpoch.Any properties.someKey(int) != "34"
+         * nextEpoch.nextEpoch.previousEpoch.Any properties.someKey(int) != "34"
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
@@ -852,7 +852,7 @@ public class TranslatorTests
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
         rowData.addAttribute(epochCD.getAttribute("nextEpoch"));
-        rowData.addAttribute(epochCD.getAttribute("prevEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("previousEpoch"));
         rowData.addAttribute(epochCD.getAttribute("properties"));
         rowData.setPropName("someKey");
         rowData.setPropType(Type.INT_32);

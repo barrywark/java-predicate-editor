@@ -1,12 +1,12 @@
 ===== PER_USER Nested Thrice CollectionOperator.ALL =====
 Original RowData:
 Epoch | All
-  Epoch | nextEpoch.nextEpoch.prevEpoch.All Keywords All have Any
+  Epoch | nextEpoch.nextEpoch.previousEpoch.All Keywords All have Any
     KeywordTag | uuid == "xyz"
 Test Translation: 
 Starting With RowData:
 Epoch | All
-  Epoch | nextEpoch.nextEpoch.prevEpoch.All Keywords All have Any
+  Epoch | nextEpoch.nextEpoch.previousEpoch.All Keywords All have Any
     KeywordTag | uuid == "xyz"
 RowData Translated To Expression:
 CUQ: Epoch
@@ -18,14 +18,14 @@ OperatorExpression(and)
         OperatorExpression(.)
           AttributeExpression(nextEpoch)
           AttributeExpression(nextEpoch)
-        AttributeExpression(prevEpoch)
+        AttributeExpression(previousEpoch)
     OperatorExpression(or)
       OperatorExpression(==)
         AttributeExpression(uuid)
         StringLiteralValueExpression(xyz)
 ExpressionTree Translated Back To RowData:
 Epoch | All
-  Epoch | nextEpoch.nextEpoch.prevEpoch.All Keywords All have Any
+  Epoch | nextEpoch.nextEpoch.previousEpoch.All Keywords All have Any
     KeywordTag | uuid == "xyz"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.

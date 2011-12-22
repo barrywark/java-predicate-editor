@@ -1,13 +1,13 @@
 ===== Nested Compound Row With Lots Of None Collection Operators =====
 Original RowData:
 Epoch | None
-  Epoch | nextEpoch.nextEpoch.prevEpoch.responses None have None
+  Epoch | nextEpoch.nextEpoch.previousEpoch.responses None have None
     Response | uuid == "xyz"
     Response | samplingRate != "1.23"
 Test Translation: 
 Starting With RowData:
 Epoch | None
-  Epoch | nextEpoch.nextEpoch.prevEpoch.responses None have None
+  Epoch | nextEpoch.nextEpoch.previousEpoch.responses None have None
     Response | uuid == "xyz"
     Response | samplingRate != "1.23"
 RowData Translated To Expression:
@@ -22,7 +22,7 @@ OperatorExpression(not)
             OperatorExpression(.)
               AttributeExpression(nextEpoch)
               AttributeExpression(nextEpoch)
-            AttributeExpression(prevEpoch)
+            AttributeExpression(previousEpoch)
           AttributeExpression(responses)
         OperatorExpression(not)
           OperatorExpression(or)
@@ -34,7 +34,7 @@ OperatorExpression(not)
               Float64LiteralValueExpression(1.23)
 ExpressionTree Translated Back To RowData:
 Epoch | None
-  Epoch | nextEpoch.nextEpoch.prevEpoch.responses None have None
+  Epoch | nextEpoch.nextEpoch.previousEpoch.responses None have None
     Response | uuid == "xyz"
     Response | samplingRate != "1.23"
 Original and translated versions are the same.
