@@ -82,11 +82,17 @@
         <mkdir dir="${artifacts.dir}"/>
         <jar destfile="${output.jar.path}">
             <fileset dir="${production.classes.dir}"/>
+            <manifest>
+                <attribute name="Main-Class"
+                    value="com.physion.ebuilder.ExpressionBuilder"/>
+            </manifest>
             <zipfileset includes="**/*" src="${datetimepicker.jar.path}"/>
             <zipfileset includes="**/*" src="${jodatime.jar.path}"/>
             <zipfileset includes="**/*" src="${log4j.jar.path}"/>
         </jar>
     </target>
+    
+    <target name="test" depends="junit"/>
 
     <target name="junit" depends="jar">
         <mkdir dir="${junit.report.dir}"/>
@@ -112,6 +118,16 @@
                 </fileset>
             </batchtest>
         </junit>
+    </target>
+    
+    <target name="run" depends="jar">
+        <java jar="${output.jar.path}"
+                dir="${basedir}"
+               fork="true">
+             <classpath>
+               <pathelement location="${output.jar.path}"/>
+             </classpath>
+        </java>
     </target>
 </project>
 

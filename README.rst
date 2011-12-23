@@ -1,6 +1,30 @@
 Java Predicate UI
 =================
 
+Project structure
+-----------------
+
+The directory "src" and its subdirectories contain all the source code needed.
+The directory "lib" and its subdirectories contain libraries, i.e. .jar files,
+that are needed.
+
+
+Build/test/run
+--------------
+
+To build the project's JAR::
+
+    $ ant resolve # To download IVY dependencies
+    $ ant jar # To build the ebuilder JAR
+
+To run the project acceptance tests::
+
+    $ ant test
+
+To run the Ebuilder UI::
+
+    $ ant run
+
 
 License
 -------
