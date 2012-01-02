@@ -4,25 +4,15 @@
  */
 package com.physion.ebuilder.translator;
 
-import java.util.Date;
-import java.util.List;
-
 import com.physion.ebuilder.datamodel.RowData;
 import com.physion.ebuilder.datatypes.Attribute;
 import com.physion.ebuilder.datatypes.CollectionOperator;
 import com.physion.ebuilder.datatypes.Operator;
 import com.physion.ebuilder.datatypes.Type;
-import com.physion.ebuilder.expression.AttributeExpression;
-import com.physion.ebuilder.expression.BooleanLiteralValueExpression;
-import com.physion.ebuilder.expression.ClassLiteralValueExpression;
-import com.physion.ebuilder.expression.ExpressionTree;
-import com.physion.ebuilder.expression.Float64LiteralValueExpression;
-import com.physion.ebuilder.expression.IExpression;
-import com.physion.ebuilder.expression.ILiteralValueExpression;
-import com.physion.ebuilder.expression.Int32LiteralValueExpression;
-import com.physion.ebuilder.expression.OperatorExpression;
-import com.physion.ebuilder.expression.StringLiteralValueExpression;
-import com.physion.ebuilder.expression.TimeLiteralValueExpression;
+import com.physion.ebuilder.expression.*;
+
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -399,6 +389,33 @@ public class RowDataToExpressionTree
      *          uuid == "xyz"
      */
     private static OperatorExpression createPerUserExpression(RowData rowData) {
+
+        Attribute childmostAttribute = rowData.getChildmostAttribute();
+        OperatorExpression oe;
+        oe = new OperatorExpression(childmostAttribute.getQueryName());
+
+        if (rowData.getAttributeCount() < 2) {
+            oe.addOperand(new AttributeExpression(AE_THIS));
+        }
+        else {
+            /**
+             * Add the expression that represents the
+             * "nextEpoch.nextEpoch.prevEpoch" path.
+             */
+            createAndAddDotPath(oe, rowData);
+        }
+        return(oe);
+    }
+
+    /**
+     * Create the operands for a REFERENCE_CUSTOM_OPERATOR expression.
+     *
+     * The comments use these example rowData values:
+     *
+     *      nextEpoch.epochGroup.source.containing_experiments None
+     *          uuid == "xyz"
+     */
+    private static OperatorExpression createReferenceCustomOperatorExpression(RowData rowData) {
 
         Attribute childmostAttribute = rowData.getChildmostAttribute();
         OperatorExpression oe;
@@ -847,6 +864,8 @@ public class RowDataToExpressionTree
         }
         else if (lastAttribute.getType() == Type.PER_USER) {
             return(createPerUserExpression(rowData));
+        } else if(lastAttribute.getType() == Type.REFERENCE_CUSTOM_OPERATOR) {
+            return(createReferenceCustomOperatorExpression(rowData));
         }
 
         /**
@@ -873,7 +892,8 @@ public class RowDataToExpressionTree
                 return(null);
             }
 
-            if (attribute.getType() == Type.PER_USER) {
+            if (attribute.getType() == Type.PER_USER ||
+                    attribute.getType() == Type.REFERENCE_CUSTOM_OPERATOR) {
                 /**
                  * TODO:  I don't think we get here any more.
                  */

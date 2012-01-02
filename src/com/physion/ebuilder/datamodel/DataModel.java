@@ -440,7 +440,7 @@ public class DataModel {
         sourceCD.addAttribute(attribute);
 
         attribute = new Attribute("containing_experiments",
-                                  Type.PER_USER, //should be REFERENCE_CUSTOM_OPERATOR
+                                  Type.REFERENCE_CUSTOM_OPERATOR,
                                   experimentCD,
                                   Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
@@ -657,15 +657,15 @@ public class DataModel {
      * list, so don't mess with it.
      * @return List of all known class descriptions
      */
-    public static ArrayList<ClassDescription> getAllClassDescriptions() {
-
-        /**
-         * Be sure the ClassDescription singleton has been initialized.
-         */
-        getInstance();
-
-        return(allClassDescriptions);
-    }
+//    public static ArrayList<ClassDescription> getAllClassDescriptions() {
+//
+//        /**
+//         * Be sure the ClassDescription singleton has been initialized.
+//         */
+//        getInstance();
+//
+//        return(allClassDescriptions);
+//    }
 
 
     /**

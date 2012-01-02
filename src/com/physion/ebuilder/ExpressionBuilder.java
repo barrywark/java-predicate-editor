@@ -5,21 +5,6 @@
 package com.physion.ebuilder;
 
 
-import java.awt.BorderLayout;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.UIManager;
-
 import com.physion.ebuilder.datamodel.DataModel;
 import com.physion.ebuilder.datamodel.RowData;
 import com.physion.ebuilder.datamodel.RowDataEvent;
@@ -29,6 +14,12 @@ import com.physion.ebuilder.expression.OperatorExpression;
 import com.physion.ebuilder.translator.ExpressionTreeToRowData;
 import com.physion.ebuilder.translator.RowDataToExpressionTree;
 import org.apache.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 
 /**
@@ -1010,6 +1001,8 @@ public class ExpressionBuilder
             classLogger.debug("\nModified rootRow:\n" + returnValue.rootRow);
             classLogger.debug("\nModified expressionTree:\n" +
                     returnValue.expressionTree);
+            
+            System.out.println(returnValue.expressionTree);
 
             if (returnValue.status == RETURN_STATUS_CANCEL) {
                 /**

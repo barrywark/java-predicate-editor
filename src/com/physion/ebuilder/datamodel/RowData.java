@@ -1590,6 +1590,7 @@ public class RowData
             case PER_USER:
             case PARAMETERS_MAP:
             case PER_USER_PARAMETERS_MAP:
+            case REFERENCE_CUSTOM_OPERATOR:
                 value = convertStringToAttributeValue(stringValue,
                                                       getPropType());
             break;

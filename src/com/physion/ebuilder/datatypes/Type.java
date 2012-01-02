@@ -47,6 +47,15 @@ public enum Type {
     PER_USER,
 
     /**
+     * This is a reference type, with a custom operator.
+     * For example, the attributes:
+     *
+     *   Source.CONTAINING_EXPERIMENTS
+     *   EpochGroup.EG_CONTAINING_EXPERIMENTS
+     */
+    REFERENCE_CUSTOM_OPERATOR,
+
+    /**
      * This is "per-user parameters map" reference type.
      * As of September 2011, the only attribute of this
      * type is the attribute:
@@ -90,6 +99,8 @@ public enum Type {
             case DATE_TIME:
                 return("time");
             case REFERENCE:
+                return("reference");
+            case REFERENCE_CUSTOM_OPERATOR:
                 return("reference");
             case PER_USER:
                 return("per-user");

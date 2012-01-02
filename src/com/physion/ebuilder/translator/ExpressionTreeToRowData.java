@@ -4,27 +4,13 @@
  */
 package com.physion.ebuilder.translator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.physion.ebuilder.datamodel.DataModel;
 import com.physion.ebuilder.datamodel.RowData;
-import com.physion.ebuilder.datatypes.Attribute;
-import com.physion.ebuilder.datatypes.ClassDescription;
-import com.physion.ebuilder.datatypes.CollectionOperator;
-import com.physion.ebuilder.datatypes.Operator;
-import com.physion.ebuilder.datatypes.Type;
-import com.physion.ebuilder.expression.ExpressionTree;
-import com.physion.ebuilder.expression.IAttributeExpression;
-import com.physion.ebuilder.expression.IBooleanLiteralValueExpression;
-import com.physion.ebuilder.expression.IClassLiteralValueExpression;
-import com.physion.ebuilder.expression.IExpression;
-import com.physion.ebuilder.expression.IFloat64LiteralValueExpression;
-import com.physion.ebuilder.expression.IInt32LiteralValueExpression;
-import com.physion.ebuilder.expression.ILiteralValueExpression;
-import com.physion.ebuilder.expression.IOperatorExpression;
-import com.physion.ebuilder.expression.IStringLiteralValueExpression;
-import com.physion.ebuilder.expression.ITimeLiteralValueExpression;
+import com.physion.ebuilder.datatypes.*;
+import com.physion.ebuilder.expression.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -49,6 +35,9 @@ public class ExpressionTreeToRowData
      *
      * To turn a RowData into an ExpressionTree, use
      * the RowDataToExpressionTree.translate() class and method.
+     *
+     * @return translated RowData
+     * @param expressionTree ExpressionTree to translate
      */
     public static RowData translate(ExpressionTree expressionTree) {
 
@@ -134,6 +123,9 @@ public class ExpressionTreeToRowData
      * class for all the child rows that will be created.  So, if we
      * are creating child rows for the topmost row in the GUI, this
      * would be the Class Under Qualification.
+     *
+     * @return child rows
+     * @param oe operator expression
      */
     private static List<RowData> createChildRows(IOperatorExpression oe,
         ClassDescription classDescription) {
@@ -335,7 +327,6 @@ public class ExpressionTreeToRowData
             /**
              * Now the second operand into the target.
              */
-            exTemp = oeAttributePath.getOperandList().get(1);
             setAttributePath(rowData, oeAttributePath, classDescription);
 
 
@@ -536,6 +527,11 @@ public class ExpressionTreeToRowData
      * This method will set the attributeOperator, attributePath,
      * and attributeValue of the passed in rowData based on the
      * passed in values.
+     *
+     * @param rowData RowData
+     * @param operandList list of operands
+     *                    @param classDescription DataModel class description
+     *                                            @param attributeOperator operator
      */
     private static void setAttributeOperatorPathAndValue(RowData rowData,
         List<IExpression> operandList, ClassDescription classDescription,
@@ -588,6 +584,8 @@ public class ExpressionTreeToRowData
      *
      * @param oe The IOperatorExpression whose list of operands will
      * define the RowData children we create.
+     * @param rowData
+     * @param classDescription
      */
     private static void createAndAddChildRows(RowData rowData,
         IOperatorExpression oe, ClassDescription classDescription) {
@@ -600,6 +598,10 @@ public class ExpressionTreeToRowData
     /**
      * This returns true if the passed in IExpression is
      * a PER_USER Attribute like "keywords", "mykeywords", etc.
+     *
+     * @return true if the given expression is a per-user operator
+     * @param ex
+     * @param cd
      */
     private static boolean isPerUserOperator(IExpression ex,
                                              ClassDescription cd) {
@@ -619,11 +621,43 @@ public class ExpressionTreeToRowData
         return(false);
     }
 
+    /**
+     * This returns true if the passed in IExpression is
+     * a REFERENCE_CUSTOM_OPERATOR attribute like
+     * containing_experiments
+     *
+     * @return true if the given expression is a reference with custom operator
+     * @param ex
+     * @param cd
+     */
+    private static boolean isReferenceCustomOperator(IExpression ex,
+                                                     ClassDescription cd)
+    {
+
+        if (ex instanceof IOperatorExpression) {
+
+            IOperatorExpression oe = (IOperatorExpression)ex;
+            String name = oe.getOperatorName();
+
+            Attribute attribute = cd.getAttribute(name);
+            if ((attribute != null) &&
+                    (attribute.getType() == Type.REFERENCE_CUSTOM_OPERATOR)) {
+                return(true);
+            }
+        }
+
+        return(false);
+    }
+
 
     /**
      * This returns true if the passed in IExpression is
      * a PER_USER_PARAMETERS_MAP Attribute like "properties",
      * "myproperties", etc.
+     *
+     * @return true if the given expression is a per-user parameters map operator
+     * @param ex
+     * @param cd
      */
     private static boolean isPerUserParametersMapOperator(IExpression ex,
                                                           ClassDescription cd) {
@@ -718,7 +752,8 @@ public class ExpressionTreeToRowData
 
         if ((ex instanceof IAttributeExpression) ||
             (isPerUserOperator(ex, classDescription)) ||
-            (isPerUserParametersMapOperator(ex, classDescription))) {
+            (isPerUserParametersMapOperator(ex, classDescription)) ||
+                (isReferenceCustomOperator(ex, classDescription))) {
 
             String name;
             if (ex instanceof IAttributeExpression) {
@@ -761,9 +796,9 @@ public class ExpressionTreeToRowData
                 name = oe.getOperatorName();
 
                 IExpression ex2;
-                if(isPerUserOperator(ex, classDescription)) {
+                if(isPerUserOperator(ex, classDescription) || isReferenceCustomOperator(ex, classDescription)) {
                     if (oe.getOperandList().size() < 1) {
-                        String s = "A PER_USER IOperatorExpression("+name+") "+
+                        String s = "A PER_USER or REFERENCE_CUSTOM_OPERATOR IOperatorExpression("+name+") "+
                                 "does not have any operands.  It should have at "+
                                 "least one operand such as AttributeExpression(this).";
                         throw(new IllegalArgumentException(s));
