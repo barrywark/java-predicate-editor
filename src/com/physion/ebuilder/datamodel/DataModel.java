@@ -4,12 +4,12 @@
  */
 package com.physion.ebuilder.datamodel;
 
-import java.util.ArrayList;
-
 import com.physion.ebuilder.datatypes.Attribute;
 import com.physion.ebuilder.datatypes.Cardinality;
 import com.physion.ebuilder.datatypes.ClassDescription;
 import com.physion.ebuilder.datatypes.Type;
+
+import java.util.ArrayList;
 
 
 /**
@@ -55,6 +55,7 @@ public class DataModel {
 
     /**
      * Get the one and only instance of the DataModel object.
+     * @return Singleton DataModel instance
      */
     public static DataModel getInstance() {
 
@@ -438,6 +439,12 @@ public class DataModel {
             epochGroupCD, Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
 
+        attribute = new Attribute("containing_experiments",
+                                  Type.PER_USER, //should be REFERENCE_CUSTOM_OPERATOR
+                                  experimentCD,
+                                  Cardinality.TO_MANY);
+        sourceCD.addAttribute(attribute);
+
         /**
          * Initialize values of the EpochGroup class.
          */
@@ -619,8 +626,8 @@ public class DataModel {
      * null.  We could instead throw an IllegalArgumentException.
      * What would the caller prefer?
      *
-     * @param name The name of the ClassDescription.  For example,
-     * "Epoch", "Source", "TaggableEntityBase".
+     * @param name The name of the ClassDescription.  For example, "Epoch", "Source", "TaggableEntityBase".
+     * @return ClassDescription for class name.
      */
     public static ClassDescription getClassDescription(String name) {
 
@@ -648,6 +655,7 @@ public class DataModel {
      *
      * Please note, this method does NOT return a copy of the
      * list, so don't mess with it.
+     * @return List of all known class descriptions
      */
     public static ArrayList<ClassDescription> getAllClassDescriptions() {
 
@@ -666,6 +674,7 @@ public class DataModel {
      *
      * Please note, this method does NOT return a copy of the
      * list, so don't mess with it.
+     * @return List of desired CUQs
      */
     public static ArrayList<ClassDescription> getPossibleCUQs() {
 
@@ -693,6 +702,7 @@ public class DataModel {
 
     /**
      * This is a simple test program for this class.
+     * @param args ignored
      */
     public static void main(String[] args) {
 
