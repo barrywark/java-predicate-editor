@@ -1002,6 +1002,7 @@ public class ExpressionBuilder
             classLogger.debug("\nModified expressionTree:\n" +
                     returnValue.expressionTree);
             
+            System.out.println(returnValue.rootRow);
             System.out.println(returnValue.expressionTree);
 
             if (returnValue.status == RETURN_STATUS_CANCEL) {

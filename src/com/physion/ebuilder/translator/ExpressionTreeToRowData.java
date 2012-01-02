@@ -183,7 +183,7 @@ public class ExpressionTreeToRowData
 
         IExpression tempEx = ol.get(0);
         if ((collectionOperator != null) &&
-            isElementsOfTypeOperator(tempEx, classDescription)) {
+            isElementsOfTypeOperator(tempEx)) {
             /**
              * We got a collection operator whose first operand
              * is IOperatorExpression(elementsOfType).  That means
@@ -327,6 +327,7 @@ public class ExpressionTreeToRowData
             /**
              * Now the second operand into the target.
              */
+            exTemp = oeAttributePath.getOperandList().get(1);
             setAttributePath(rowData, oeAttributePath, classDescription);
 
 
@@ -584,8 +585,7 @@ public class ExpressionTreeToRowData
      *
      * @param oe The IOperatorExpression whose list of operands will
      * define the RowData children we create.
-     * @param rowData
-     * @param classDescription
+     * @param classDescription data model class description
      */
     private static void createAndAddChildRows(RowData rowData,
         IOperatorExpression oe, ClassDescription classDescription) {
@@ -694,9 +694,11 @@ public class ExpressionTreeToRowData
      * Note, as of October 2011, the only Attributes of
      * Type.PER_USER_PARAMETERS_MAP are "properties" and
      * "myproperties".
+     *
+     * @return true if the given expression is an elements of type operator
+     * @param ex
      */
-    private static boolean isElementsOfTypeOperator(IExpression ex,
-                                                    ClassDescription cd) {
+    private static boolean isElementsOfTypeOperator(IExpression ex) {
 
         if (ex instanceof IOperatorExpression) {
 

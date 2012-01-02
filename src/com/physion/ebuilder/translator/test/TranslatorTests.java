@@ -76,6 +76,8 @@ public class TranslatorTests
             DataModel.getClassDescription("Note");
     private static ClassDescription timelineAnnotationCD =
             DataModel.getClassDescription("TimelineAnnotation");
+    private static ClassDescription experimentCD = 
+            DataModel.getClassDescription("Experiment");
 
 
     /**
@@ -1361,6 +1363,32 @@ public class TranslatorTests
         String s = getResultsString("Note annotation on Epoch", rootRow);
         Approvals.approve(s);
 
+    }
+
+    @UseReporter(JunitReporter.class)
+    public void testSourceContainingExperiments() throws Exception
+    {
+        /**
+         * Test Source.CONTAINING_EXPERIMENTS operator
+         */
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(sourceCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(sourceCD.getAttribute("containing_experiments"));
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        RowData rowData1 = new RowData();
+        rowData1.addAttribute(experimentCD.getAttribute("notes"));
+        rowData1.setAttributeOperator(Operator.EQUALS);
+        rowData1.setAttributeValue("foo");
+        rowData.addChildRow(rowData1);
+
+        String s = getResultsString("containing_experiments on Source", rootRow);
+        Approvals.approve(s);
     }
 
     /*
