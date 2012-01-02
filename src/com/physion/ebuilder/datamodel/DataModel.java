@@ -440,7 +440,7 @@ public class DataModel {
         sourceCD.addAttribute(attribute);
 
         attribute = new Attribute("containing_experiments",
-                                  Type.PER_USER, //Should be REFERENCE_CUSTOM_OPERATOR,
+                                  Type.REFERENCE_CUSTOM_OPERATOR,
                                   experimentCD,
                                   Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
