@@ -1,12 +1,12 @@
 ===== eg_containing_experiments on EpochGroup =====
 Original RowData:
 EpochGroup | All
-  EpochGroup | Containing Experiments Any have Any
+  EpochGroup | containing experiments Any have Any
     Experiment | notes == "foo"
 Test Translation: 
 Starting With RowData:
 EpochGroup | All
-  EpochGroup | Containing Experiments Any have Any
+  EpochGroup | containing experiments Any have Any
     Experiment | notes == "foo"
 RowData Translated To Expression:
 CUQ: EpochGroup
@@ -21,7 +21,7 @@ OperatorExpression(and)
         StringLiteralValueExpression(foo)
 ExpressionTree Translated Back To RowData:
 EpochGroup | All
-  EpochGroup | Containing Experiments Any have Any
+  EpochGroup | containing experiments Any have Any
     Experiment | notes == "foo"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.

@@ -443,7 +443,7 @@ public class DataModel {
             epochGroupCD, Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("containing_experiments", "Containing Experiments",
+        attribute = new Attribute("containing_experiments", "containing experiments",
                                   Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   experimentCD,
                                   Cardinality.TO_MANY);
@@ -475,7 +475,7 @@ public class DataModel {
                                   epochGroupCD, Cardinality.TO_MANY);
         epochGroupCD.addAttribute(attribute);
 
-        attribute = new Attribute("eg_containing_experiments", "Containing Experiments",
+        attribute = new Attribute("eg_containing_experiments", "containing experiments",
                                   Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   experimentCD,
                                   Cardinality.TO_MANY);
