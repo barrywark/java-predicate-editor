@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d72f3c4e-c872-48e7-839b-4d1ac8db54ca" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java" afterPath="$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java" />
     </list>
     <ignored path="java-predicate-editor.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -21,21 +21,6 @@
     <disable_hints />
   </component>
   <component name="DebuggerManager">
-    <line_breakpoints>
-      <breakpoint url="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java" line="570" class="com.physion.ebuilder.translator.ExpressionTreeToRowData" package="com.physion.ebuilder.translator">
-        <option name="ENABLED" value="true" />
-        <option name="LOG_ENABLED" value="false" />
-        <option name="LOG_EXPRESSION_ENABLED" value="false" />
-        <option name="SUSPEND_POLICY" value="SuspendAll" />
-        <option name="COUNT_FILTER_ENABLED" value="false" />
-        <option name="COUNT_FILTER" value="0" />
-        <option name="CONDITION_ENABLED" value="false" />
-        <option name="CLASS_FILTERS_ENABLED" value="false" />
-        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
-        <option name="CONDITION" value="" />
-        <option name="LOG_MESSAGE" value="" />
-      </breakpoint>
-    </line_breakpoints>
     <breakpoint_any>
       <breakpoint>
         <option name="NOTIFY_CAUGHT" value="true" />
@@ -121,10 +106,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DataModel.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="DataModel.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/DataModel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="462" column="64" selection-start="17545" selection-end="17545" vertical-scroll-proportion="2.246888">
+            <state line="465" column="59" selection-start="17652" selection-end="17652" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -135,7 +120,7 @@
       <file leaf-file-name="RowData.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/RowData.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1591" column="32" selection-start="55815" selection-end="55815" vertical-scroll-proportion="0.0">
+            <state line="1972" column="0" selection-start="68032" selection-end="68032" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -150,13 +135,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ExpressionTreeToRowData.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="ExpressionTreeToRowData.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="570" column="0" selection-start="23328" selection-end="23328" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="imports" expanded="false" />
-              </folding>
+            <state line="581" column="24" selection-start="23600" selection-end="23600" vertical-scroll-proportion="0.6078838">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -187,12 +170,12 @@
       <list>
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/translator/Translator.java" />
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/RowData.java" />
-        <option value="$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java" />
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/datatypes/Type.java" />
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/ExpressionBuilder.java" />
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/translator/RowDataToExpressionTree.java" />
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/translator/test/TranslatorTests.java" />
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/DataModel.java" />
+        <option value="$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java" />
       </list>
     </option>
   </component>
@@ -580,7 +563,7 @@
       <window_info id="Leiningen" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32954547" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32954547" sideWeight="0.0" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37642047" sideWeight="0.0" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.56534094" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -705,13 +688,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/RowData.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1591" column="32" selection-start="55815" selection-end="55815" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/Translator.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="28" column="31" selection-start="1067" selection-end="1067" vertical-scroll-proportion="0.0" />
@@ -724,15 +700,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="570" column="0" selection-start="23328" selection-end="23328" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/test/TranslatorTests.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="79" column="56" selection-start="3163" selection-end="3163" vertical-scroll-proportion="0.0">
@@ -742,10 +709,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/DataModel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="462" column="64" selection-start="17545" selection-end="17545" vertical-scroll-proportion="2.246888">
+        <state line="465" column="59" selection-start="17652" selection-end="17652" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/RowData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1972" column="0" selection-start="68032" selection-end="68032" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="581" column="24" selection-start="23600" selection-end="23600" vertical-scroll-proportion="0.6078838">
+          <folding />
         </state>
       </provider>
     </entry>

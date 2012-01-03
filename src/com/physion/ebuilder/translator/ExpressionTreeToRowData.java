@@ -531,8 +531,8 @@ public class ExpressionTreeToRowData
      *
      * @param rowData RowData
      * @param operandList list of operands
-     *                    @param classDescription DataModel class description
-     *                                            @param attributeOperator operator
+     * @param classDescription DataModel class description
+     * @param attributeOperator operator
      */
     private static void setAttributeOperatorPathAndValue(RowData rowData,
         List<IExpression> operandList, ClassDescription classDescription,
