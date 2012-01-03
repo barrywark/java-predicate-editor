@@ -1,4 +1,4 @@
-===== PER_USER Nested Twice CollectionOperator.NONE =====
+===== PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Nested Twice CollectionOperator.NONE =====
 Original RowData:
 Epoch | None
   Epoch | nextEpoch.nextEpoch.All Keywords None have All

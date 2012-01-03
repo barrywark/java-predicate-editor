@@ -1,4 +1,4 @@
-===== PER_USER Nested Thrice CollectionOperator.ALL =====
+===== PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Nested Thrice CollectionOperator.ALL =====
 Original RowData:
 Epoch | All
   Epoch | nextEpoch.nextEpoch.previousEpoch.All Keywords All have Any

@@ -1,27 +1,27 @@
-===== containing_experiments on Source =====
+===== eg_containing_experiments on EpochGroup =====
 Original RowData:
-Source | All
-  Source | Containing Experiments Any have Any
+EpochGroup | All
+  EpochGroup | Containing Experiments Any have Any
     Experiment | notes == "foo"
 Test Translation: 
 Starting With RowData:
-Source | All
-  Source | Containing Experiments Any have Any
+EpochGroup | All
+  EpochGroup | Containing Experiments Any have Any
     Experiment | notes == "foo"
 RowData Translated To Expression:
-CUQ: Source
+CUQ: EpochGroup
 rootExpression:
 OperatorExpression(and)
   OperatorExpression(any)
-    OperatorExpression(containing_experiments)
+    OperatorExpression(eg_containing_experiments)
       AttributeExpression(this)
     OperatorExpression(or)
       OperatorExpression(==)
         AttributeExpression(notes)
         StringLiteralValueExpression(foo)
 ExpressionTree Translated Back To RowData:
-Source | All
-  Source | Containing Experiments Any have Any
+EpochGroup | All
+  EpochGroup | Containing Experiments Any have Any
     Experiment | notes == "foo"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.

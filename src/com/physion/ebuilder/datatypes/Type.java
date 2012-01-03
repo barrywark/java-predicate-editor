@@ -37,23 +37,20 @@ public enum Type {
     PARAMETERS_MAP,
 
     /**
-     * This is "per-user" reference type.
+     * This is a reference (always to-many?) with a custom
+     * operator. This may be a "per-user" reference type.
      * For example, the attributes:
      *
      *      TaggableEntityBase.keywords
      *      Project.analysisRecords
      *      Epoch.derivedResponses
-     */
-    PER_USER,
-
-    /**
-     * This is a reference type, with a custom operator.
-     * For example, the attributes:
      *
-     *   Source.CONTAINING_EXPERIMENTS
-     *   EpochGroup.EG_CONTAINING_EXPERIMENTS
+     *  or reference custom operators, e.g.:
+     *
+     *      Source.CONTAINING_EXPERIMENTS
+     *      EpochGroup.EG_CONTAINING_EXPERIMENTS
      */
-    REFERENCE_CUSTOM_OPERATOR,
+    PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
 
     /**
      * This is "per-user parameters map" reference type.
@@ -100,9 +97,7 @@ public enum Type {
                 return("time");
             case REFERENCE:
                 return("reference");
-            case REFERENCE_CUSTOM_OPERATOR:
-                return("reference");
-            case PER_USER:
+            case PER_USER_OR_CUSTOM_REFERENCE_OPERATOR:
                 return("per-user");
             case PARAMETERS_MAP:
                 return("parameters map");

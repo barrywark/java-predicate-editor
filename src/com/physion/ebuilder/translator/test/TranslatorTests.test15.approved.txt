@@ -1,4 +1,4 @@
-===== PER_USER CollectionOperator.COUNT =====
+===== PER_USER_OR_CUSTOM_REFERENCE_OPERATOR CollectionOperator.COUNT =====
 Original RowData:
 Epoch | All
   Epoch | My Keywords Count == "5"

@@ -260,11 +260,11 @@ public class DataModel {
         /**
          * Initialize values of the TaggableEntityBase class.
          */
-        attribute = new Attribute("mykeywords", "My Keywords", Type.PER_USER,
+        attribute = new Attribute("mykeywords", "My Keywords", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   keywordTagCD, Cardinality.TO_MANY);
         taggableEntityBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("keywords", "All Keywords", Type.PER_USER,
+        attribute = new Attribute("keywords", "All Keywords", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   keywordTagCD, Cardinality.TO_MANY);
         taggableEntityBaseCD.addAttribute(attribute);
 
@@ -273,11 +273,11 @@ public class DataModel {
          * Initialize values of the AnnotatableEntityBase class
          */
 
-        attribute = new Attribute("notes", "All Notes", Type.PER_USER,
+        attribute = new Attribute("notes", "All Notes", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                 noteCD, Cardinality.TO_MANY);
         annotatableEntityBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("mynotes", "My Notes", Type.PER_USER,
+        attribute = new Attribute("mynotes", "My Notes", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                 noteCD, Cardinality.TO_MANY);
         annotatableEntityBaseCD.addAttribute(attribute);
 
@@ -319,11 +319,11 @@ public class DataModel {
         attribute = new Attribute("endTimeZone", Type.UTF_8_STRING);
         timelineElementCD.addAttribute(attribute);
 
-        attribute = new Attribute("timelineannotations", "All Timeline Annotations", Type.PER_USER,
+        attribute = new Attribute("timelineannotations", "All Timeline Annotations", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                 timelineAnnotationCD, Cardinality.TO_MANY);
         timelineElementCD.addAttribute(attribute);
 
-        attribute = new Attribute("mytimelineannotations", "My Timeline Annotations", Type.PER_USER,
+        attribute = new Attribute("mytimelineannotations", "My Timeline Annotations", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                 timelineAnnotationCD, Cardinality.TO_MANY);
         timelineElementCD.addAttribute(attribute);
 
@@ -373,12 +373,12 @@ public class DataModel {
         projectCD.addAttribute(attribute);
 
         attribute = new Attribute("myanalysisRecords", "My AnalysisRecords",
-                                  Type.PER_USER,
+                                  Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   analysisRecordCD, Cardinality.TO_MANY);
         projectCD.addAttribute(attribute);
 
         attribute = new Attribute("analysisRecords", "All AnalysisRecords",
-                                  Type.PER_USER,
+                                  Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   analysisRecordCD, Cardinality.TO_MANY);
         projectCD.addAttribute(attribute);
 
@@ -439,8 +439,8 @@ public class DataModel {
             epochGroupCD, Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("containing_experiments",
-                                  Type.REFERENCE_CUSTOM_OPERATOR,
+        attribute = new Attribute("containing_experiments", "Containing Experiments",
+                                  Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   experimentCD,
                                   Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
@@ -471,6 +471,12 @@ public class DataModel {
                                   epochGroupCD, Cardinality.TO_MANY);
         epochGroupCD.addAttribute(attribute);
 
+        attribute = new Attribute("eg_containing_experiments", "Containing Experiments",
+                                  Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
+                                  experimentCD,
+                                  Cardinality.TO_MANY);
+        epochGroupCD.addAttribute(attribute);
+
         /**
          * Initialize values of the Epoch class.
          */
@@ -493,12 +499,12 @@ public class DataModel {
         epochCD.addAttribute(attribute);
 
         attribute = new Attribute("myderivedResponses", "My DerivedResponses",
-                                  Type.PER_USER,
+                                  Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   derivedResponseCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 
         attribute = new Attribute("derivedResponses", "All DerivedResponses",
-                                  Type.PER_USER,
+                                  Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   derivedResponseCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 

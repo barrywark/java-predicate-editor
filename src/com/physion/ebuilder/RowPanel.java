@@ -632,7 +632,7 @@ class RowPanel
      * and we will append the special Attribute.MY_PROPERTY and
      * Attribute.ANY_PROPERTY.
      *
-     * Any attributes that are of type Type.PER_USER will cause
+     * Any attributes that are of type Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR will cause
      * two entries to be added to the comboBox model.  One entry
      * will be prepended with the string "My" and the other with
      * the string "All".  For example, if the attribute was called

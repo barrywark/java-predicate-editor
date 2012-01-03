@@ -597,7 +597,7 @@ public class ExpressionTreeToRowData
 
     /**
      * This returns true if the passed in IExpression is
-     * a PER_USER Attribute like "keywords", "mykeywords", etc.
+     * a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Attribute like "keywords", "mykeywords", etc.
      *
      * @return true if the given expression is a per-user operator
      * @param ex
@@ -613,35 +613,7 @@ public class ExpressionTreeToRowData
 
             Attribute attribute = cd.getAttribute(name);
             if ((attribute != null) &&
-                (attribute.getType() == Type.PER_USER)) {
-                return(true);
-            }
-        }
-
-        return(false);
-    }
-
-    /**
-     * This returns true if the passed in IExpression is
-     * a REFERENCE_CUSTOM_OPERATOR attribute like
-     * containing_experiments
-     *
-     * @return true if the given expression is a reference with custom operator
-     * @param ex
-     * @param cd
-     */
-    private static boolean isReferenceCustomOperator(IExpression ex,
-                                                     ClassDescription cd)
-    {
-
-        if (ex instanceof IOperatorExpression) {
-
-            IOperatorExpression oe = (IOperatorExpression)ex;
-            String name = oe.getOperatorName();
-
-            Attribute attribute = cd.getAttribute(name);
-            if ((attribute != null) &&
-                    (attribute.getType() == Type.REFERENCE_CUSTOM_OPERATOR)) {
+                (attribute.getType() == Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR)) {
                 return(true);
             }
         }
@@ -754,8 +726,7 @@ public class ExpressionTreeToRowData
 
         if ((ex instanceof IAttributeExpression) ||
             (isPerUserOperator(ex, classDescription)) ||
-            (isPerUserParametersMapOperator(ex, classDescription)) ||
-                (isReferenceCustomOperator(ex, classDescription))) {
+            (isPerUserParametersMapOperator(ex, classDescription))) {
 
             String name;
             if (ex instanceof IAttributeExpression) {
@@ -764,7 +735,7 @@ public class ExpressionTreeToRowData
             }
             else {
                 /**
-                 * ex is a PER_USER "operator" such as "keywords"
+                 * ex is a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR "operator" such as "keywords"
                  * or "mykeywords", or it is a PER_USER_PARAMETERS_MAP
                  * "operator" such as "properties" or "myproperties.
                  *
@@ -798,9 +769,9 @@ public class ExpressionTreeToRowData
                 name = oe.getOperatorName();
 
                 IExpression ex2;
-                if(isPerUserOperator(ex, classDescription) || isReferenceCustomOperator(ex, classDescription)) {
+                if(isPerUserOperator(ex, classDescription)) {
                     if (oe.getOperandList().size() < 1) {
-                        String s = "A PER_USER or REFERENCE_CUSTOM_OPERATOR IOperatorExpression("+name+") "+
+                        String s = "A PER_USER_OR_CUSTOM_REFERENCE_OPERATOR IOperatorExpression("+name+") "+
                                 "does not have any operands.  It should have at "+
                                 "least one operand such as AttributeExpression(this).";
                         throw(new IllegalArgumentException(s));
@@ -809,7 +780,7 @@ public class ExpressionTreeToRowData
                     ex2 = oe.getOperandList().get(0);
                 } else {
                     if (oe.getOperandList().size() < 1) {
-                        String s = "A PER_USER IOperatorExpression("+name+") "+
+                        String s = "A PER_USER_OR_CUSTOM_REFERENCE_OPERATOR IOperatorExpression("+name+") "+
                                 "does not have any operands.  It should have at "+
                                 "least two operands such as (key,AttributeExpression(this)).";
                         throw(new IllegalArgumentException(s));
@@ -835,7 +806,7 @@ public class ExpressionTreeToRowData
                 else {
                     /**
                      * Traverse the subtree that define the
-                     * attribute path to the special PER_USER
+                     * attribute path to the special PER_USER_OR_CUSTOM_REFERENCE_OPERATOR
                      * operator.  E.g. traverse the
                      * nextEpoch.nextEpoch.prevEpoch of the
                      * example attribute path described above.

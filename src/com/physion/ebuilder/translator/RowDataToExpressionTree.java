@@ -381,7 +381,7 @@ public class RowDataToExpressionTree
 
 
     /**
-     * Create the operands for a PER_USER expression.
+     * Create the operands for a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR expression.
      *
      * The comments use these example rowData values:
      *
@@ -854,7 +854,7 @@ public class RowDataToExpressionTree
         }
 
         /**
-         * Handle the special cases:  PARAMETERS_MAP, PER_USER
+         * Handle the special cases:  PARAMETERS_MAP, PER_USER_OR_CUSTOM_REFERENCE_OPERATOR
          *
          * They don't handle "nesting" in the normal way because
          * they cannot be an operand of the dot operator.
@@ -862,10 +862,8 @@ public class RowDataToExpressionTree
         if (lastAttribute.getType() == Type.PARAMETERS_MAP) {
             return(createExpressionParametersMap(attributePath, rowData));
         }
-        else if (lastAttribute.getType() == Type.PER_USER) {
+        else if (lastAttribute.getType() == Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR) {
             return(createPerUserExpression(rowData));
-        } else if(lastAttribute.getType() == Type.REFERENCE_CUSTOM_OPERATOR) {
-            return(createReferenceCustomOperatorExpression(rowData));
         }
 
         /**
@@ -892,8 +890,7 @@ public class RowDataToExpressionTree
                 return(null);
             }
 
-            if (attribute.getType() == Type.PER_USER ||
-                    attribute.getType() == Type.REFERENCE_CUSTOM_OPERATOR) {
+            if (attribute.getType() == Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR) {
                 /**
                  * TODO:  I don't think we get here any more.
                  */

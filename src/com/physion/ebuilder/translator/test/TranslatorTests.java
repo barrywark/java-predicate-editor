@@ -575,7 +575,7 @@ public class TranslatorTests
         RowData rowData2;
 
         /**
-         * Test a PER_USER attribute type.
+         * Test a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR attribute type.
          *
          *      Epoch | All
          *        Epoch | My keywords None have Any
@@ -596,7 +596,7 @@ public class TranslatorTests
         rowData2.setAttributeValue("xyz");
         rowData.addChildRow(rowData2);
 
-        String s = getResultsString("PER_USER", rootRow);
+        String s = getResultsString("PER_USER_OR_CUSTOM_REFERENCE_OPERATOR", rootRow);
         Approvals.approve(s);
     }
 
@@ -609,7 +609,7 @@ public class TranslatorTests
         RowData rowData;
 
         /**
-         * Test a PER_USER attribute type with Count.
+         * Test a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR attribute type with Count.
          *
          *      Epoch | All
          *        Epoch | My keywords Count == 5
@@ -626,7 +626,7 @@ public class TranslatorTests
         rootRow.addChildRow(rowData);
 
         String s = getResultsString(
-                "PER_USER CollectionOperator.COUNT", rootRow);
+                "PER_USER_OR_CUSTOM_REFERENCE_OPERATOR CollectionOperator.COUNT", rootRow);
         Approvals.approve(s);
     }
 
@@ -640,7 +640,7 @@ public class TranslatorTests
         RowData rowData2;
 
         /**
-         * Test a nested PER_USER attribute type.
+         * Test a nested PER_USER_OR_CUSTOM_REFERENCE_OPERATOR attribute type.
          *
          *      Epoch | Any
          *        Epoch | nextEpoch.All keywords Any have Any
@@ -664,7 +664,7 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-                "PER_USER Nested Once CollectionOperator.ANY", rootRow);
+                "PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Nested Once CollectionOperator.ANY", rootRow);
         Approvals.approve(s);
     }
 
@@ -678,7 +678,7 @@ public class TranslatorTests
         RowData rowData2;
 
         /**
-         * Test a nested PER_USER attribute type.
+         * Test a nested PER_USER_OR_CUSTOM_REFERENCE_OPERATOR attribute type.
          *
          *      Epoch | None
          *        Epoch | nextEpoch.nextEpoch.All keywords None have All
@@ -703,7 +703,7 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-                "PER_USER Nested Twice CollectionOperator.NONE", rootRow);
+                "PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Nested Twice CollectionOperator.NONE", rootRow);
         Approvals.approve(s);
     }
 
@@ -717,7 +717,7 @@ public class TranslatorTests
         RowData rowData2;
 
         /**
-         * Test a nested PER_USER attribute type.
+         * Test a nested PER_USER_OR_CUSTOM_REFERENCE_OPERATOR attribute type.
          *
          *     Epoch | All
          *       Epoch | nextEpoch.nextEpoch.previousEpoch.All keywords All have Any
@@ -743,7 +743,7 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-                "PER_USER Nested Thrice CollectionOperator.ALL", rootRow);
+                "PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Nested Thrice CollectionOperator.ALL", rootRow);
         Approvals.approve(s);
     }
 
@@ -1124,7 +1124,7 @@ public class TranslatorTests
         RowData rowData2;
 
         /**
-         * Test compound row with PARAMETERS_MAP, PER_USER children.
+         * Test compound row with PARAMETERS_MAP, PER_USER_OR_CUSTOM_REFERENCE_OPERATOR children.
          *
          *  Modified rootRow:
          *  Epoch | Any
@@ -1157,7 +1157,7 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-                "Nested PER_USER With PARAMETERS_MAP & PER_USER Children", rootRow);
+                "Nested PER_USER_OR_CUSTOM_REFERENCE_OPERATOR With PARAMETERS_MAP & PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Children", rootRow);
         Approvals.approve(s);
     }
 
@@ -1171,7 +1171,7 @@ public class TranslatorTests
         RowData rowData2;
 
         /**
-         * Test compound row with PARAMETERS_MAP, PER_USER, and
+         * Test compound row with PARAMETERS_MAP, PER_USER_OR_CUSTOM_REFERENCE_OPERATOR, and
          * PER_USER_PARAMETERS_MAP child.
          *
          *  Epoch | Any
@@ -1215,7 +1215,7 @@ public class TranslatorTests
         rowData.addChildRow(rowData2);
 
         String s = getResultsString(
-                "Nested PER_USER With PM, PU, and PUPM Children", rootRow);
+                "Nested PER_USER_OR_CUSTOM_REFERENCE_OPERATOR With PM, PU, and PUPM Children", rootRow);
         Approvals.approve(s);
     }
 
@@ -1388,6 +1388,32 @@ public class TranslatorTests
         rowData.addChildRow(rowData1);
 
         String s = getResultsString("containing_experiments on Source", rootRow);
+        Approvals.approve(s);
+    }
+
+    @UseReporter(JunitReporter.class)
+    public void testEpochGroupContainingExperiments() throws Exception
+    {
+        /**
+         * Test EpochGroup.EG_CONTAINING_EXPERIMENTS operator
+         */
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochGroupCD);
+        rootRow.setCollectionOperator(CollectionOperator.ALL);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochGroupCD.getAttribute("eg_containing_experiments"));
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        RowData rowData1 = new RowData();
+        rowData1.addAttribute(experimentCD.getAttribute("notes"));
+        rowData1.setAttributeOperator(Operator.EQUALS);
+        rowData1.setAttributeValue("foo");
+        rowData.addChildRow(rowData1);
+
+        String s = getResultsString("eg_containing_experiments on EpochGroup", rootRow);
         Approvals.approve(s);
     }
 

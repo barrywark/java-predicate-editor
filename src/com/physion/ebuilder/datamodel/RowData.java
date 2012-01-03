@@ -1587,10 +1587,9 @@ public class RowData
                  */
                 value = null;
             break;
-            case PER_USER:
+            case PER_USER_OR_CUSTOM_REFERENCE_OPERATOR:
             case PARAMETERS_MAP:
             case PER_USER_PARAMETERS_MAP:
-            case REFERENCE_CUSTOM_OPERATOR:
                 value = convertStringToAttributeValue(stringValue,
                                                       getPropType());
             break;
