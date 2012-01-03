@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d72f3c4e-c872-48e7-839b-4d1ac8db54ca" name="Default" comment="" />
+    <list default="true" id="d72f3c4e-c872-48e7-839b-4d1ac8db54ca" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <ignored path="java-predicate-editor.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -121,7 +124,7 @@
       <file leaf-file-name="DataModel.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/DataModel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="460" column="0" selection-start="17420" selection-end="17420" vertical-scroll-proportion="0.7904564">
+            <state line="462" column="64" selection-start="17545" selection-end="17545" vertical-scroll-proportion="2.246888">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -739,7 +742,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/DataModel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="460" column="0" selection-start="17420" selection-end="17420" vertical-scroll-proportion="0.7904564">
+        <state line="462" column="64" selection-start="17545" selection-end="17545" vertical-scroll-proportion="2.246888">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
