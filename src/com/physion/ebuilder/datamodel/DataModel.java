@@ -260,12 +260,16 @@ public class DataModel {
         /**
          * Initialize values of the TaggableEntityBase class.
          */
-        attribute = new Attribute("mykeywords", "My Keywords", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
-                                  keywordTagCD, Cardinality.TO_MANY);
+        attribute = new Attribute("mykeywords", "My Keywords",
+                                  Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
+                                  keywordTagCD,
+                                  Cardinality.TO_MANY);
         taggableEntityBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("keywords", "All Keywords", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
-                                  keywordTagCD, Cardinality.TO_MANY);
+        attribute = new Attribute("keywords", "All Keywords",
+                                  Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
+                                  keywordTagCD,
+                                  Cardinality.TO_MANY);
         taggableEntityBaseCD.addAttribute(attribute);
 
 

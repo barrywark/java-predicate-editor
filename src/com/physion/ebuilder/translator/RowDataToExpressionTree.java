@@ -388,34 +388,7 @@ public class RowDataToExpressionTree
      *      nextEpoch.nextEpoch.prevEpoch.My Keywords None
      *          uuid == "xyz"
      */
-    private static OperatorExpression createPerUserExpression(RowData rowData) {
-
-        Attribute childmostAttribute = rowData.getChildmostAttribute();
-        OperatorExpression oe;
-        oe = new OperatorExpression(childmostAttribute.getQueryName());
-
-        if (rowData.getAttributeCount() < 2) {
-            oe.addOperand(new AttributeExpression(AE_THIS));
-        }
-        else {
-            /**
-             * Add the expression that represents the
-             * "nextEpoch.nextEpoch.prevEpoch" path.
-             */
-            createAndAddDotPath(oe, rowData);
-        }
-        return(oe);
-    }
-
-    /**
-     * Create the operands for a REFERENCE_CUSTOM_OPERATOR expression.
-     *
-     * The comments use these example rowData values:
-     *
-     *      nextEpoch.epochGroup.source.containing_experiments None
-     *          uuid == "xyz"
-     */
-    private static OperatorExpression createReferenceCustomOperatorExpression(RowData rowData) {
+    private static OperatorExpression createCustomReferenceOperatorExpression(RowData rowData) {
 
         Attribute childmostAttribute = rowData.getChildmostAttribute();
         OperatorExpression oe;
@@ -863,7 +836,7 @@ public class RowDataToExpressionTree
             return(createExpressionParametersMap(attributePath, rowData));
         }
         else if (lastAttribute.getType() == Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR) {
-            return(createPerUserExpression(rowData));
+            return(createCustomReferenceOperatorExpression(rowData));
         }
 
         /**
