@@ -4,7 +4,6 @@
     <list default="true" id="d72f3c4e-c872-48e7-839b-4d1ac8db54ca" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java" afterPath="$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/physion/ebuilder/translator/Translator.java" afterPath="$PROJECT_DIR$/src/com/physion/ebuilder/translator/Translator.java" />
     </list>
     <ignored path="java-predicate-editor.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -83,7 +82,7 @@
       <file leaf-file-name="ExpressionBuilder.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/ExpressionBuilder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1021" column="14" selection-start="36800" selection-end="36800" vertical-scroll-proportion="0.0">
+            <state line="557" column="0" selection-start="19130" selection-end="19130" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -110,7 +109,7 @@
       <file leaf-file-name="RowData.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/RowData.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1972" column="0" selection-start="68032" selection-end="68032" vertical-scroll-proportion="0.0">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -128,7 +127,7 @@
       <file leaf-file-name="ExpressionTreeToRowData.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1004" column="19" selection-start="42235" selection-end="42235" vertical-scroll-proportion="0.36919317">
+            <state line="1021" column="59" selection-start="42964" selection-end="42964" vertical-scroll-proportion="0.7950237">
               <folding />
             </state>
           </provider>
@@ -137,7 +136,7 @@
       <file leaf-file-name="build.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/build.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="99" column="61" selection-start="3943" selection-end="3943" vertical-scroll-proportion="0.33333334">
+            <state line="99" column="61" selection-start="3943" selection-end="3943" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -209,7 +208,7 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -318,20 +317,20 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="74" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="83" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="79" />
-    <property name="MemberChooser.sorted" value="false" />
-    <property name="recentsLimit" value="5" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
+    <property name="recentsLimit" value="5" />
+    <property name="MemberChooser.sorted" value="false" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="79" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="86" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="879" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="881" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="879" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="85" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="81" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
@@ -374,25 +373,6 @@
         <option name="SBT.BeforeRunTask" enabled="false" runInCurrentModule="false" />
       </method>
     </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <method>
-        <option name="AntTarget" enabled="false" />
-        <option name="BuildArtifacts" enabled="false" />
-        <option name="Make" enabled="true" />
-        <option name="Maven.BeforeRunTask" enabled="false" />
-        <option name="SBT.BeforeRunTask" enabled="false" runInCurrentModule="false" />
-      </method>
-    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -418,6 +398,25 @@
       <envs />
       <properties />
       <listeners />
+      <method>
+        <option name="AntTarget" enabled="false" />
+        <option name="BuildArtifacts" enabled="false" />
+        <option name="Make" enabled="true" />
+        <option name="Maven.BeforeRunTask" enabled="false" />
+        <option name="SBT.BeforeRunTask" enabled="false" runInCurrentModule="false" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
       <method>
         <option name="AntTarget" enabled="false" />
         <option name="BuildArtifacts" enabled="false" />
@@ -558,23 +557,23 @@
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32954547" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32948422" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Leiningen" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.10376188" sideWeight="0.6705158" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.10334849" sideWeight="0.6705158" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32948422" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37642047" sideWeight="0.0" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32948422" sideWeight="0.0" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.56534094" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32948422" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32948422" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23646134" sideWeight="0.6705158" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.27636644" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1711451" sideWeight="0.6705158" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32948422" sideWeight="0.0" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32948422" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -613,7 +612,7 @@
     <option name="INCLUDE_TEXT_INTO_SHELF" value="false" />
     <option name="CREATE_PATCH_EXPAND_DETAILS_DEFAULT" value="true" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Localized UI changes for containing experiments operator" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added EG_CONTAINING_EXPERIMENTS, but still not sure how to handle OperatorExpression =&gt; RowData translation in ExpressionTreeToRowData." />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -634,6 +633,7 @@
     <MESSAGE value="1. Combined PER_USER and CUSTOM_REFERENCE_OPERATOR types.&#10;2. Added EpochGroup.EG_CUSTOM_OPERATOR" />
     <MESSAGE value="Minor cleanups" />
     <MESSAGE value="Localized UI changes for containing experiments operator" />
+    <MESSAGE value="Added EG_CONTAINING_EXPERIMENTS, but still not sure how to handle OperatorExpression =&gt; RowData translation in ExpressionTreeToRowData." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -679,13 +679,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/ExpressionBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1021" column="14" selection-start="36800" selection-end="36800" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/DataModel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="465" column="59" selection-start="17652" selection-end="17652" vertical-scroll-proportion="0.0">
@@ -693,30 +686,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/RowData.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1972" column="0" selection-start="68032" selection-end="68032" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/RowDataToExpressionTree.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="390" column="80" selection-start="13941" selection-end="13941" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/build.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="99" column="61" selection-start="3943" selection-end="3943" vertical-scroll-proportion="0.33333334">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/test/TranslatorTests.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="70" column="55" selection-start="2656" selection-end="2656" vertical-scroll-proportion="0.0">
+        <state line="99" column="61" selection-start="3943" selection-end="3943" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -728,9 +700,37 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/datamodel/RowData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/RowDataToExpressionTree.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="390" column="80" selection-start="13941" selection-end="13941" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/test/TranslatorTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="70" column="55" selection-start="2656" selection-end="2656" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/ExpressionBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="557" column="0" selection-start="19130" selection-end="19130" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/ExpressionTreeToRowData.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1004" column="19" selection-start="42235" selection-end="42235" vertical-scroll-proportion="0.36919317">
+        <state line="1021" column="59" selection-start="42964" selection-end="42964" vertical-scroll-proportion="0.7950237">
           <folding />
         </state>
       </provider>

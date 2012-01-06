@@ -997,9 +997,13 @@ public class ExpressionTreeToRowData
             }
             else if (OE_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName()) ||
                     OE_EG_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName())) {
-                String s = "\n*** Code to handle \""+oe.getOperatorName()+"\""+
-                    " needs to be written. ***\n";
-                (new Exception(s)).printStackTrace();
+//                String s = "\n*** Code to handle \""+oe.getOperatorName()+"\""+
+//                    " needs to be written. ***\n";
+//                (new Exception(s)).printStackTrace();
+
+                ClassDescription childClass = setAttributePath(rowData, oe.getOperandList().get(0), classDescription);
+                return(setAttributePath(rowData, oe, childClass));
+
             }
             else if (OE_IS_NULL.equals(oe.getOperatorName())) {
                 /**
