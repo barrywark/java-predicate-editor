@@ -995,7 +995,8 @@ public class ExpressionTreeToRowData
                 IExpression op = oe.getOperandList().get(0);
                 return(setAttributePath(rowData, op, classDescription));
             }
-            else if (OE_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName())) {
+            else if (OE_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName()) ||
+                    OE_EG_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName())) {
                 String s = "\n*** Code to handle \""+oe.getOperatorName()+"\""+
                     " needs to be written. ***\n";
                 (new Exception(s)).printStackTrace();
