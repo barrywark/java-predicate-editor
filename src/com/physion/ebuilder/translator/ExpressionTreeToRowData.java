@@ -995,6 +995,11 @@ public class ExpressionTreeToRowData
                 IExpression op = oe.getOperandList().get(0);
                 return(setAttributePath(rowData, op, classDescription));
             }
+            else if (OE_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName())) {
+                String s = "\n*** Code to handle \""+oe.getOperatorName()+"\""+
+                    " needs to be written. ***\n";
+                (new Exception(s)).printStackTrace();
+            }
             else if (OE_IS_NULL.equals(oe.getOperatorName())) {
                 /**
                  * Do nothing because the later call to
