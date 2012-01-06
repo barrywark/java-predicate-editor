@@ -153,7 +153,7 @@ public class ExpressionBuilder
     ExpressionBuilder(RowData originalRootRow) {
 
         super((Frame)null);
-        setTitle("Physion ooExpression Builder");
+        setTitle("Ovation Query Editor");
         setModal(true);
 
         if (originalRootRow == null) {
