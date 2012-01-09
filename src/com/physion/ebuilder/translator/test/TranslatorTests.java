@@ -1429,6 +1429,34 @@ public class TranslatorTests
         Approvals.approve(s);
     }
 
+    /**
+     * This test was added by Steve Ford on Jan 9, 2012.
+     */
+    @UseReporter(JunitReporter.class)
+    public void testPathToContainingExperiments() throws Exception
+    {
+        /**
+         * EpochGroup | Any
+         *   EpochGroup | source.parent.containing experiments Count == "4"
+         */
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochGroupCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochGroupCD.getAttribute("source"));
+        rowData.addAttribute(epochGroupCD.getAttribute("parent"));
+        rowData.addAttribute(sourceCD.getAttribute("containing_experiments"));
+        rowData.setCollectionOperator(CollectionOperator.COUNT);
+        rowData.setAttributeValue(new Integer(4));
+        rootRow.addChildRow(rowData);
+
+        String s = getResultsString("Path To containing_experiments", rootRow);
+        Approvals.approve(s);
+    }
+
+
     /*
     @UseReporter(JunitReporter.class)
     public void test1234()
