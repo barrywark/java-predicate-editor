@@ -597,23 +597,26 @@ public class ExpressionTreeToRowData
 
     /**
      * This returns true if the passed in IExpression is
-     * a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Attribute like "keywords", "mykeywords", etc.
+     * a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Attribute like
+     * "keywords", "mykeywords", etc.
+     *
+     * @param ex If the passed in IExpression is an IOperatorExpression
+     * we will get its operator name and see if it is an Attribute of
+     * a class.
      *
      * @return true if the given expression is a per-user operator
-     * @param ex
-     * @param cd
      */
-    private static boolean isPerUserOperator(IExpression ex,
-                                             ClassDescription cd) {
+    private static boolean isPerUserOperator(IExpression ex) {
 
         if (ex instanceof IOperatorExpression) {
 
             IOperatorExpression oe = (IOperatorExpression)ex;
             String name = oe.getOperatorName();
 
-            Attribute attribute = cd.getAttribute(name);
+            Attribute attribute = DataModel.getAttribute(name);
             if ((attribute != null) &&
-                (attribute.getType() == Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR)) {
+                (attribute.getType() ==
+                 Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR)) {
                 return(true);
             }
         }
@@ -627,19 +630,21 @@ public class ExpressionTreeToRowData
      * a PER_USER_PARAMETERS_MAP Attribute like "properties",
      * "myproperties", etc.
      *
-     * @return true if the given expression is a per-user parameters map operator
-     * @param ex
-     * @param cd
+     * @param ex If the passed in IExpression is an IOperatorExpression
+     * we will get its operator name and see if it is an Attribute of
+     * a class.
+     *
+     * @return true if the given expression is a per-user parameters
+     * map operator
      */
-    private static boolean isPerUserParametersMapOperator(IExpression ex,
-                                                          ClassDescription cd) {
+    private static boolean isPerUserParametersMapOperator(IExpression ex) {
 
         if (ex instanceof IOperatorExpression) {
 
             IOperatorExpression oe = (IOperatorExpression)ex;
             String name = oe.getOperatorName();
 
-            Attribute attribute = cd.getAttribute(name);
+            Attribute attribute = DataModel.getAttribute(name);
             if ((attribute != null) &&
                 (attribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
                 return(true);
@@ -699,6 +704,10 @@ public class ExpressionTreeToRowData
      * passed in as the "ex" parameter, this method calls itself
      * recursively to create the entire path.
      *
+     * TODO:  Perhaps the classDescription parameter passed in is
+     * unnecessary now that we are assuming that there will not
+     * be two Attributes with the same name that have different values.
+     *
      * @param rowData The RowData object whose attributePath we will set.
      *
      * @param ex This is the subtree that defines the attribute path.
@@ -711,9 +720,6 @@ public class ExpressionTreeToRowData
      * on which this method is currently working.  If the
      * Attribute is a primitive, (e.g. int, string), this returns null.
      */
-    /**
-     * @param ex The IExpression that is the left operand of an operator.
-     */
     private static ClassDescription setAttributePath(RowData rowData,
         IExpression ex, ClassDescription classDescription) {
 
@@ -725,8 +731,8 @@ public class ExpressionTreeToRowData
         */
 
         if ((ex instanceof IAttributeExpression) ||
-            (isPerUserOperator(ex, classDescription)) ||
-            (isPerUserParametersMapOperator(ex, classDescription))) {
+            (isPerUserOperator(ex)) ||
+            (isPerUserParametersMapOperator(ex))) {
 
             String name;
             if (ex instanceof IAttributeExpression) {
@@ -735,9 +741,10 @@ public class ExpressionTreeToRowData
             }
             else {
                 /**
-                 * ex is a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR "operator" such as "keywords"
-                 * or "mykeywords", or it is a PER_USER_PARAMETERS_MAP
-                 * "operator" such as "properties" or "myproperties.
+                 * ex is a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR "operator"
+                 * such as "keywords" or "mykeywords", or it is a
+                 * PER_USER_PARAMETERS_MAP "operator" such as
+                 * "properties" or "myproperties.
                  *
                  * In either case, it will have an attribute
                  * path as a subtree.  If so, we need to parse it
@@ -769,7 +776,7 @@ public class ExpressionTreeToRowData
                 name = oe.getOperatorName();
 
                 IExpression ex2;
-                if(isPerUserOperator(ex, classDescription)) {
+                if(isPerUserOperator(ex)) {
                     if (oe.getOperandList().size() < 1) {
                         String s = "A PER_USER_OR_CUSTOM_REFERENCE_OPERATOR IOperatorExpression("+name+") "+
                                 "does not have any operands.  It should have at "+
@@ -811,7 +818,7 @@ public class ExpressionTreeToRowData
                      * nextEpoch.nextEpoch.prevEpoch of the
                      * example attribute path described above.
                      */
-                    setAttributePath(rowData, ex2, classDescription);
+                    classDescription = setAttributePath(rowData, ex2, classDescription);
                 }
             }
 
@@ -995,16 +1002,6 @@ public class ExpressionTreeToRowData
                 IExpression op = oe.getOperandList().get(0);
                 return(setAttributePath(rowData, op, classDescription));
             }
-            else if (OE_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName()) ||
-                    OE_EG_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName())) {
-//                String s = "\n*** Code to handle \""+oe.getOperatorName()+"\""+
-//                    " needs to be written. ***\n";
-//                (new Exception(s)).printStackTrace();
-
-                ClassDescription childClass = setAttributePath(rowData, oe.getOperandList().get(0), classDescription);
-                return(setAttributePath(rowData, oe, childClass));
-
-            }
             else if (OE_IS_NULL.equals(oe.getOperatorName())) {
                 /**
                  * Do nothing because the later call to
@@ -1023,13 +1020,16 @@ public class ExpressionTreeToRowData
             }
             */
             else {
-                String s = "Unhandled IOperatorExpression: "+
-                    oe.getOperatorName();
-                (new Exception(s)).printStackTrace();
+                String s = "Unhandled IOperatorExpression with name \""+
+                    oe.getOperatorName()+"\".  You need to modify the code "+
+                    "in this class to handle it.";
+                throw(new IllegalArgumentException(s));
             }
         }
         else {
-            (new Exception("Unhandled IExpression")).printStackTrace();
+            String s = "Unhandled IExpression.  You need to modify the code "+
+                "in this class to handle it.";
+            throw(new IllegalArgumentException(s));
         }
         return(null);
     }
