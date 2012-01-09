@@ -29,8 +29,10 @@ public interface Translator {
     public static final String OE_PARAMETER = "parameter";
     public static final String OE_ANY = "any";
     public static final String OE_ELEMENTS_OF_TYPE = "elementsOfType";
-    public static final String OE_CONTAINING_EXPERIMENTS = "containing_experiments";
-    public static final String OE_EG_CONTAINING_EXPERIMENTS = "eg_containing_experiments";
+    public static final String OE_CONTAINING_EXPERIMENTS =
+        "containing_experiments";
+    public static final String OE_EG_CONTAINING_EXPERIMENTS =
+        "eg_containing_experiments";
 
     public static final String OE_EQUALS = "==";
     public static final String OE_NOT_EQUALS = "!=";
