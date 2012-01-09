@@ -748,6 +748,18 @@ public class TranslatorTests
     }
 
 
+    /**
+     * TODO:  Change the way the time is displayed by getResultsString()
+     * so that the "approved" test output is the same regardless of the
+     * timezone in which this test is run.  For example, as of January 2011
+     * the TranslatorTests.test19.approved.txt file contains the string:
+     *
+     *      Thu Dec 31 19:00:00 EST 2009
+     * 
+     * which means the test must be run in the eastern US timezone to match.
+     * One solution would be to have getResultsString always display the time
+     * as UTC time.
+     */
     @UseReporter(JunitReporter.class)
     public void test19()
             throws Exception {
