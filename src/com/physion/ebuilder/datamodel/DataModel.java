@@ -698,16 +698,26 @@ public class DataModel {
 
 
     /**
-     * Get a copy of the Attribute with the passed in name
-     * that is in the passed in classDescription.
+     * Get a COPY of the Attribute with the passed in name
+     * from ANY ClassDescription that contains it.
+     *
+     * @param queryName The name used in the PQL expressions.
+     * Not necessarily the same as the string used in the GUI.
+     * E.g. "mykeywords" instead of "My Keywords".
      */
-    /*
-    public static Attribute getAttribute(String queryName,
-        ClassDescription classDescription) {
+    public static Attribute getAttribute(String queryName) {
 
-        return(classDescription.getAttribute(queryName));
+        for (ClassDescription cd : allClassDescriptions) {
+            Attribute attribute = cd.getAttribute(queryName);
+            if (attribute != null)
+                return(attribute);
+        }
+
+        /**
+         * Didn't find this attribute in any class.
+         */
+        return(null);
     }
-    */
 
 
     /**
