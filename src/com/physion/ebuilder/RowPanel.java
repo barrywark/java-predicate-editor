@@ -1301,13 +1301,20 @@ class RowPanel
 
             if (Attribute.IS_NULL.equals(rowData.getAttribute(index)) ||
                 Attribute.IS_NOT_NULL.equals(rowData.getAttribute(index))) {
-                /**
-                 * We have hit a special Attribute.IS_NULL or
-                 * Attribute.IS_NOT_NULL that is not really an Attribute.
-                 * So, ignore it.  (No other Attributes should be after
-                 * this one, so we can just break out of this for-loop.)
-                 */
-                break;
+
+                if ((index > 0) &&
+                    (rowData.getAttribute(index-1).getType() ==
+                     Type.DATE_TIME)) {
+                    /**
+                     * We have hit a special Attribute.IS_NULL or
+                     * Attribute.IS_NOT_NULL that is not really an Attribute.
+                     * And the Attribute before the null/notnull Attribute
+                     * was a DATE_TIME Attribute, so ignore it.
+                     * (No other Attributes should be after
+                     * this one, so we can just break out of this for-loop.)
+                     */
+                    break;
+                }
             }
 
             //System.out.println("Adding comboBox at gridx "+gridx);
