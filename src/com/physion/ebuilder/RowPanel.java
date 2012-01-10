@@ -626,19 +626,9 @@ class RowPanel
      * Set the model for the passed in comboBox to be the attributes
      * of the passed in classDescription.
      *
-     * In addition, we will (optionally) prepend the special
+     * In addition, we will prepend the special
      * Attribute.SELECT_ATTRIBUTE attribute, and we will append
-     * the special Attribute.IS_NULL and Attribute.IS_NOT_NULL,
-     * and we will append the special Attribute.MY_PROPERTY and
-     * Attribute.ANY_PROPERTY.
-     *
-     * Any attributes that are of type Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR will cause
-     * two entries to be added to the comboBox model.  One entry
-     * will be prepended with the string "My" and the other with
-     * the string "All".  For example, if the attribute was called
-     * "analysisRecords", instead of inserting an entry called
-     * "analysisRecords" into the comboBox, we will insert two
-     * entries:  "My analysisRecords" and "All analysisRecords".
+     * the special Attribute.IS_NULL and Attribute.IS_NOT_NULL.
      *
      * @param comboBox The JComboBox whose model and selectedItem
      * we will set.
