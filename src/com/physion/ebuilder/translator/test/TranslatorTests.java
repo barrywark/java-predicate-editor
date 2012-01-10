@@ -379,10 +379,10 @@ public class TranslatorTests
         RowData rowData2;
 
         /**
-         * Test a compound row with lots of None collection operators:
+         * Test a nested compound row with lots of None collection operators:
          *
          *      Epoch | None
-         *        Epoch | responses None have None
+         *        Epoch | nextEpoch.nextEpoch.previousEpoch.responses None have None
          *          Response | uuid == "xyz"
          *          Response | samplingRate != 1.23
          */
@@ -433,7 +433,7 @@ public class TranslatorTests
          *      Epoch | All
          *        Epoch | responses All have Any
          *          Response | resources Any have Any
-         *            Epoch | protocolID != "Test 27"
+         *            Resource | uuid != "ID 27"
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
