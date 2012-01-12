@@ -1269,6 +1269,63 @@ public class TranslatorTests
     }
 
 
+    /**
+     * Added by Steve Ford, Jan 11, 2012.
+     *
+     *  Modified rootRow:
+     *  Epoch | Any
+     *    Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
+     *    Epoch | epochGroup.is not null is not null
+     *    Epoch | Any
+     *      Epoch | epochGroup.source.containing experiments Count == "6"
+     */
+    @UseReporter(JunitReporter.class)
+    public void test32()
+            throws Exception {
+
+        RowData rootRow;
+        RowData rowData;
+        RowData rowData2;
+        RowData rowData3;
+
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("previousEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
+        rowData.setAttributeOperator(Operator.GREATER_THAN_EQUALS);
+        rowData.setAttributeValue(new Integer(5));
+        rowData.setPropType(Type.INT_32);
+        rowData.setPropName("somePropName");
+        rootRow.addChildRow(rowData);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("epochGroup"));
+        rowData.addAttribute(Attribute.IS_NOT_NULL);
+        rowData.setAttributeOperator(Operator.IS_NOT_NULL); 
+        rootRow.addChildRow(rowData);
+
+        rowData = new RowData();
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(epochCD.getAttribute("epochGroup"));
+        rowData2.addAttribute(epochGroupCD.getAttribute("source"));
+        rowData2.addAttribute(sourceCD.getAttribute("containing_experiments"));
+        rowData2.setCollectionOperator(CollectionOperator.COUNT);
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue(new Integer(6));
+        rowData.addChildRow(rowData2);
+
+        String s = getResultsString(
+                "Complicated containing_experiments", rootRow);
+        Approvals.approve(s);
+    }
+
+
     @UseReporter(JunitReporter.class)
     public void testNoteAnnotation() throws Exception
     {
