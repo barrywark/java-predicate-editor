@@ -808,6 +808,16 @@ public class ExpressionTreeToRowData
 
         IStringLiteralValueExpression slve =
             (IStringLiteralValueExpression)exTemp;
+
+        if ((slve == null) || (slve.getValue() == null)) {
+            String s = "IOperatorExpression(parameter)'s second "+
+                "operand is of type "+
+                "IStringLiteralValueExpression but has a null value.  "+
+                "Have you failed to call RowData.setPropName("+
+                "\"<some string>\")?";
+            throw(new IllegalArgumentException(s));
+        }
+
         rowData.setPropName(slve.getValue().toString());
 
         return(childCD);
