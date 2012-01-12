@@ -1272,7 +1272,6 @@ public class TranslatorTests
     /**
      * Added by Steve Ford, Jan 11, 2012.
      *
-     *  Modified rootRow:
      *  Epoch | Any
      *    Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
      *    Epoch | epochGroup.is not null is not null
@@ -1322,6 +1321,45 @@ public class TranslatorTests
 
         String s = getResultsString(
                 "Complicated containing_experiments", rootRow);
+        Approvals.approve(s);
+    }
+
+
+    /**
+     * Added by Steve Ford, Jan 11, 2012.
+     *
+     *  Epoch | Any
+     *    Epoch | My Property.someProp(time) is null
+     *    Epoch | Any Property.someAnyProp(time) is not null
+     */
+    @UseReporter(JunitReporter.class)
+    public void test33()
+            throws Exception {
+
+        RowData rootRow;
+        RowData rowData;
+        RowData rowData2;
+
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("myproperties"));
+        rowData.setPropName("someProp");
+        rowData.setPropType(Type.DATE_TIME);
+        rowData.setAttributeOperator(Operator.IS_NULL);
+        rootRow.addChildRow(rowData);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("properties"));
+        rowData.setPropName("someAnyProp");
+        rowData.setPropType(Type.DATE_TIME);
+        rowData.setAttributeOperator(Operator.IS_NOT_NULL);
+        rootRow.addChildRow(rowData);
+
+        String s = getResultsString(
+                "My Property of type DATE_TIME, test for is null", rootRow);
         Approvals.approve(s);
     }
 
