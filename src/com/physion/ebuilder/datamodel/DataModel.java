@@ -233,14 +233,17 @@ public class DataModel {
         /**
          * Initialize values of the EntityBase class.
          */
-        attribute = new Attribute("owner", Type.REFERENCE,
+        attribute = new Attribute("owner", "Owner",
+                                  Type.REFERENCE,
                                   userCD, Cardinality.TO_ONE);
         entityBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("uuid", Type.UTF_8_STRING);
+        attribute = new Attribute("uuid", "UUID",
+                                  Type.UTF_8_STRING);
         entityBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("incomplete", Type.BOOLEAN);
+        attribute = new Attribute("incomplete", "Incomplete",
+                                  Type.BOOLEAN);
         entityBaseCD.addAttribute(attribute);
 
         attribute = new Attribute("myproperties", "My Property",
@@ -253,7 +256,8 @@ public class DataModel {
                                   null, Cardinality.TO_MANY);
         entityBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("resources", Type.REFERENCE,
+        attribute = new Attribute("resources", "Resources",
+                                  Type.REFERENCE,
                                   resourceCD, Cardinality.TO_MANY);
         entityBaseCD.addAttribute(attribute);
 
@@ -289,38 +293,47 @@ public class DataModel {
          * Initialize values for the Annotation class
          */
 
-        attribute = new Attribute("text", Type.UTF_8_STRING);
+        attribute = new Attribute("text", "Text",
+                                  Type.UTF_8_STRING);
         annotationCD.addAttribute(attribute);
 
         /**
          * Initialize values for the TimelineAnnotation class
          */
 
-        attribute = new Attribute("startTime", Type.DATE_TIME);
+        attribute = new Attribute("startTime", "Start Time",
+                                  Type.DATE_TIME);
         timelineAnnotationCD.addAttribute(attribute);
 
-        attribute = new Attribute("endTime", Type.DATE_TIME);
+        attribute = new Attribute("endTime", "End Time",
+                                  Type.DATE_TIME);
         timelineAnnotationCD.addAttribute(attribute);
 
-        attribute = new Attribute("startTimeZone", Type.UTF_8_STRING);
+        attribute = new Attribute("startTimeZone", "Start Timezone",
+                                  Type.UTF_8_STRING);
         timelineAnnotationCD.addAttribute(attribute);
 
-        attribute = new Attribute("endTimeZone", Type.UTF_8_STRING);
+        attribute = new Attribute("endTimeZone", "End Timezone",
+                                  Type.UTF_8_STRING);
         timelineAnnotationCD.addAttribute(attribute);
 
         /**
          * Initialize values of the TimelineElement class.
          */
-        attribute = new Attribute("startTime", Type.DATE_TIME);
+        attribute = new Attribute("startTime", "Start Time",
+                                  Type.DATE_TIME);
         timelineElementCD.addAttribute(attribute);
 
-        attribute = new Attribute("endTime", Type.DATE_TIME);
+        attribute = new Attribute("endTime", "End Time",
+                                  Type.DATE_TIME);
         timelineElementCD.addAttribute(attribute);
 
-        attribute = new Attribute("startTimeZone", Type.UTF_8_STRING);
+        attribute = new Attribute("startTimeZone", "Start Timezone",
+                                  Type.UTF_8_STRING);
         timelineElementCD.addAttribute(attribute);
 
-        attribute = new Attribute("endTimeZone", Type.UTF_8_STRING);
+        attribute = new Attribute("endTimeZone", "End Timezone",
+                                  Type.UTF_8_STRING);
         timelineElementCD.addAttribute(attribute);
 
         attribute = new Attribute("timelineannotations", "All Timeline Annotations", Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
@@ -334,45 +347,54 @@ public class DataModel {
         /**
          * Initialize values of the PurposeAndNotesEntity class.
          */
-        attribute = new Attribute("purpose", Type.UTF_8_STRING);
+        attribute = new Attribute("purpose", "Purpose",
+                                  Type.UTF_8_STRING);
         purposeAndNotesEntityCD.addAttribute(attribute);
 
-        attribute = new Attribute("notes", Type.UTF_8_STRING);
+        attribute = new Attribute("notes", "Notes",
+                                  Type.UTF_8_STRING);
         purposeAndNotesEntityCD.addAttribute(attribute);
 
         /**
          * Initialize values of the IOBase class.
          */
-        attribute = new Attribute("units", Type.UTF_8_STRING);
+        attribute = new Attribute("units", "Units",
+                                  Type.UTF_8_STRING);
         iOBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("externalDevice", Type.REFERENCE,
+        attribute = new Attribute("externalDevice", "External Device",
+                                  Type.REFERENCE,
             externalDeviceCD, Cardinality.TO_ONE);
         iOBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("externalDeviceParameters",
+        attribute = new Attribute("externalDeviceParameters", "External Device Parameters",
                                   Type.PARAMETERS_MAP, null, Cardinality.N_A);
         iOBaseCD.addAttribute(attribute);
 
         /**
          * Initialize values of the ResponseBase class.
          */
-        attribute = new Attribute("dateType", Type.INT_16);
+        attribute = new Attribute("dateType", "Data Type",
+                                  Type.INT_16);
         responseBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("byteOrder", Type.INT_16);
+        attribute = new Attribute("byteOrder", "Byte Order",
+                                  Type.INT_16);
         responseBaseCD.addAttribute(attribute);
 
-        attribute = new Attribute("sampleBytes", Type.INT_16);
+        attribute = new Attribute("sampleBytes", "Sample Size (bytes)",
+                                  Type.INT_16);
         responseBaseCD.addAttribute(attribute);
 
         /**
          * Initialize values of the Project class.
          */
-        attribute = new Attribute("name", Type.UTF_8_STRING);
+        attribute = new Attribute("name", "Name",
+                                  Type.UTF_8_STRING);
         projectCD.addAttribute(attribute);
 
-        attribute = new Attribute("experiments", Type.REFERENCE,
+        attribute = new Attribute("experiments", "Experiments",
+                                  Type.REFERENCE,
             experimentCD, Cardinality.TO_MANY);
         projectCD.addAttribute(attribute);
 
@@ -389,61 +411,74 @@ public class DataModel {
         /**
          * Initialize values of the Experiment class.
          */
-        attribute = new Attribute("project", Type.REFERENCE,
+        attribute = new Attribute("project", "Project",
+                                  Type.REFERENCE,
             projectCD, Cardinality.TO_MANY);
         experimentCD.addAttribute(attribute);
 
-        attribute = new Attribute("sources", Type.REFERENCE,
+        attribute = new Attribute("sources", "Sources",
+                                  Type.REFERENCE,
             sourceCD, Cardinality.TO_MANY);
         experimentCD.addAttribute(attribute);
 
-        attribute = new Attribute("externalDevices", Type.REFERENCE,
+        attribute = new Attribute("externalDevices", "External Devices",
+                                  Type.REFERENCE,
             externalDeviceCD, Cardinality.TO_MANY);
         experimentCD.addAttribute(attribute);
 
-        attribute = new Attribute("epochGroups", Type.REFERENCE,
+        attribute = new Attribute("epochGroups", "Epoch Groups",
+                                  Type.REFERENCE,
             epochGroupCD, Cardinality.TO_MANY);
         experimentCD.addAttribute(attribute);
 
-        attribute = new Attribute("curated", Type.BOOLEAN);
+        attribute = new Attribute("curated", "Curated",
+                                  Type.BOOLEAN);
         experimentCD.addAttribute(attribute);
 
         /**
          * Initialize values of the ExternalDevice class.
          */
-        attribute = new Attribute("name", Type.UTF_8_STRING);
+        attribute = new Attribute("name", "Name",
+                                  Type.UTF_8_STRING);
         externalDeviceCD.addAttribute(attribute);
 
-        attribute = new Attribute("manufacturer", Type.UTF_8_STRING);
+        attribute = new Attribute("manufacturer", "Manufacturer",
+                                  Type.UTF_8_STRING);
         externalDeviceCD.addAttribute(attribute);
 
-        attribute = new Attribute("experiments", Type.REFERENCE,
+        attribute = new Attribute("experiments", "Experiments",
+                                  Type.REFERENCE,
             experimentCD, Cardinality.TO_MANY);
         externalDeviceCD.addAttribute(attribute);
 
         /**
          * Initialize values of the Source class.
          */
-        attribute = new Attribute("label", Type.UTF_8_STRING);
+        attribute = new Attribute("label", "Label",
+                                  Type.UTF_8_STRING);
         sourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("experiments", Type.REFERENCE,
+        attribute = new Attribute("experiments", "Experiments",
+                                  Type.REFERENCE,
             experimentCD, Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("parent", Type.REFERENCE,
+        attribute = new Attribute("parent", "Parent",
+                                  Type.REFERENCE,
                                   sourceCD, Cardinality.TO_ONE);
         sourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("children", Type.REFERENCE,
+        attribute = new Attribute("children", "Children",
+                                  Type.REFERENCE,
                                   sourceCD, Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("epochGroups", Type.REFERENCE,
+        attribute = new Attribute("epochGroups", "Epoch Groups",
+                                  Type.REFERENCE,
             epochGroupCD, Cardinality.TO_MANY);
         sourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("containing_experiments", "containing experiments",
+        attribute = new Attribute("containing_experiments", "Containing Experiments",
                                   Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   experimentCD,
                                   Cardinality.TO_MANY);
@@ -452,30 +487,36 @@ public class DataModel {
         /**
          * Initialize values of the EpochGroup class.
          */
-        attribute = new Attribute("label", Type.UTF_8_STRING);
+        attribute = new Attribute("label", "Label",
+                                  Type.UTF_8_STRING);
         epochGroupCD.addAttribute(attribute);
 
-        attribute = new Attribute("experiment", Type.REFERENCE,
+        attribute = new Attribute("experiment", "Experiment",
+                                  Type.REFERENCE,
                                   experimentCD, Cardinality.TO_ONE);
         epochGroupCD.addAttribute(attribute);
 
-        attribute = new Attribute("source", Type.REFERENCE,
+        attribute = new Attribute("source", "Source",
+                                  Type.REFERENCE,
                                   sourceCD, Cardinality.TO_ONE);
         epochGroupCD.addAttribute(attribute);
 
-        attribute = new Attribute("epochs", Type.REFERENCE,
+        attribute = new Attribute("epochs", "Epochs",
+                                  Type.REFERENCE,
                                   epochCD, Cardinality.TO_MANY);
         epochGroupCD.addAttribute(attribute);
 
-        attribute = new Attribute("parent", Type.REFERENCE,
+        attribute = new Attribute("parent", "Parent",
+                                  Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
         epochGroupCD.addAttribute(attribute);
 
-        attribute = new Attribute("children", Type.REFERENCE,
+        attribute = new Attribute("children", "Children",
+                                  Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_MANY);
         epochGroupCD.addAttribute(attribute);
 
-        attribute = new Attribute("eg_containing_experiments", "containing experiments",
+        attribute = new Attribute("eg_containing_experiments", "Containing Experiments",
                                   Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR,
                                   experimentCD,
                                   Cardinality.TO_MANY);
@@ -484,21 +525,26 @@ public class DataModel {
         /**
          * Initialize values of the Epoch class.
          */
-        attribute = new Attribute("protocolID", Type.UTF_8_STRING);
+        attribute = new Attribute("protocolID", "Protocol ID",
+                                  Type.UTF_8_STRING);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("protocolParameters", Type.PARAMETERS_MAP,
+        attribute = new Attribute("protocolParameters", "Protocol Parameters",
+                                  Type.PARAMETERS_MAP,
                                   null, Cardinality.N_A);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("excludeFromAnalysis", Type.BOOLEAN);
+        attribute = new Attribute("excludeFromAnalysis", "Exclude from Analysis",
+                                  Type.BOOLEAN);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("stimuli", Type.REFERENCE,
+        attribute = new Attribute("stimuli", "Stimuli",
+                                  Type.REFERENCE,
                                   stimulusCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("responses", Type.REFERENCE,
+        attribute = new Attribute("responses", "Responses",
+                                  Type.REFERENCE,
                                   responseCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 
@@ -512,117 +558,141 @@ public class DataModel {
                                   derivedResponseCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("epochGroup", Type.REFERENCE,
+        attribute = new Attribute("epochGroup", "Epoch Group",
+                                  Type.REFERENCE,
                                   epochGroupCD, Cardinality.TO_ONE);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("analysisRecords", Type.REFERENCE,
+        attribute = new Attribute("analysisRecords", "Analysis Records",
+                                  Type.REFERENCE,
                                   analysisRecordCD, Cardinality.TO_MANY);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("nextEpoch", Type.REFERENCE,
+        attribute = new Attribute("nextEpoch", "Next Epoch",
+                                  Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         epochCD.addAttribute(attribute);
 
-        attribute = new Attribute("previousEpoch", Type.REFERENCE,
+        attribute = new Attribute("previousEpoch", "Previous Epoch",
+                                  Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         epochCD.addAttribute(attribute);
 
         /**
          * Initialize values of the Stimulus class.
          */
-        attribute = new Attribute("epoch", Type.REFERENCE,
+        attribute = new Attribute("epoch", "Epoch",
+                                  Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         stimulusCD.addAttribute(attribute);
 
-        attribute = new Attribute("pluginID", Type.UTF_8_STRING);
+        attribute = new Attribute("pluginID", "Plugin ID",
+                                  Type.UTF_8_STRING);
         stimulusCD.addAttribute(attribute);
 
-        attribute = new Attribute("stimulusParameters",
+        attribute = new Attribute("stimulusParameters", "Stimulus Parameters",
                                   Type.PARAMETERS_MAP, null, Cardinality.N_A);
         stimulusCD.addAttribute(attribute);
 
         /**
          * Initialize values of the Response class.
          */
-        attribute = new Attribute("epoch", Type.REFERENCE,
+        attribute = new Attribute("epoch", "Epoch",
+                                  Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         responseCD.addAttribute(attribute);
 
-        attribute = new Attribute("samplingRate", Type.FLOAT_64);
+        attribute = new Attribute("samplingRate", "Sampling Rate",
+                                  Type.FLOAT_64);
         responseCD.addAttribute(attribute);
 
-        attribute = new Attribute("samplingUnits", Type.UTF_8_STRING);
+        attribute = new Attribute("samplingUnits", "Sampling Rate Units",
+                                  Type.UTF_8_STRING);
         responseCD.addAttribute(attribute);
 
         /**
          * Initialize values of the DerivedResponse class.
          */
-        attribute = new Attribute("epoch", Type.REFERENCE,
+        attribute = new Attribute("epoch", "Epoch",
+                                  Type.REFERENCE,
                                   epochCD, Cardinality.TO_ONE);
         derivedResponseCD.addAttribute(attribute);
 
-        attribute = new Attribute("description", Type.UTF_8_STRING);
+        attribute = new Attribute("description", "Description",
+                                  Type.UTF_8_STRING);
         derivedResponseCD.addAttribute(attribute);
 
-        attribute = new Attribute("name", Type.UTF_8_STRING);
+        attribute = new Attribute("name", "Name",
+                                  Type.UTF_8_STRING);
         derivedResponseCD.addAttribute(attribute);
 
-        attribute = new Attribute("derivationParameters",
+        attribute = new Attribute("derivationParameters", "Derivation Parameters",
                                   Type.PARAMETERS_MAP, null, Cardinality.N_A);
         derivedResponseCD.addAttribute(attribute);
 
         /**
          * Initialize values of the KeywordTag class.
          */
-        attribute = new Attribute("tag", Type.UTF_8_STRING);
+        attribute = new Attribute("tag", "Keyword Tag",
+                                  Type.UTF_8_STRING);
         keywordTagCD.addAttribute(attribute);
 
         /**
          * Initialize values of the Resource class.
          */
-        attribute = new Attribute("uti", Type.UTF_8_STRING);
+        attribute = new Attribute("uti", "UTI",
+                                  Type.UTF_8_STRING);
         resourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("notes", Type.UTF_8_STRING);
+        attribute = new Attribute("notes", "Notes",
+                                  Type.UTF_8_STRING);
         resourceCD.addAttribute(attribute);
 
-        attribute = new Attribute("name", Type.UTF_8_STRING);
+        attribute = new Attribute("name", "Name",
+                                  Type.UTF_8_STRING);
         resourceCD.addAttribute(attribute);
 
         /**
          * Initialize values of the User class.
          */
-        attribute = new Attribute("userName", Type.UTF_8_STRING);
+        attribute = new Attribute("userName", "User Name",
+                                  Type.UTF_8_STRING);
         userCD.addAttribute(attribute);
 
         /**
          * Initialize values of the AnalysisRecord class.
          */
-        attribute = new Attribute("name", Type.UTF_8_STRING);
+        attribute = new Attribute("name", "Name",
+                                  Type.UTF_8_STRING);
         analysisRecordCD.addAttribute(attribute);
 
-        attribute = new Attribute("notes", Type.UTF_8_STRING);
+        attribute = new Attribute("notes", "Notes",
+                                  Type.UTF_8_STRING);
         analysisRecordCD.addAttribute(attribute);
 
-        attribute = new Attribute("scmRevision", Type.INT_32);
+        attribute = new Attribute("scmRevision", "Source Code Revision",
+                                  Type.INT_32);
         analysisRecordCD.addAttribute(attribute);
 
-        attribute = new Attribute("scmURL", Type.UTF_8_STRING);
+        attribute = new Attribute("scmURL", "Source Code Repository URL",
+                                  Type.UTF_8_STRING);
         analysisRecordCD.addAttribute(attribute);
 
-        attribute = new Attribute("entryFunctionName", Type.UTF_8_STRING);
+        attribute = new Attribute("entryFunctionName", "Entry Function Name",
+                                  Type.UTF_8_STRING);
         analysisRecordCD.addAttribute(attribute);
 
-        attribute = new Attribute("analysisParameters",
+        attribute = new Attribute("analysisParameters", "Analysis Parameters",
                                   Type.PARAMETERS_MAP, null, Cardinality.N_A);
         analysisRecordCD.addAttribute(attribute);
 
-        attribute = new Attribute("epochs", Type.REFERENCE,
+        attribute = new Attribute("epochs", "Epochs",
+                                  Type.REFERENCE,
                                   epochCD, Cardinality.TO_MANY);
         analysisRecordCD.addAttribute(attribute);
 
-        attribute = new Attribute("project", Type.REFERENCE,
+        attribute = new Attribute("project", "Project",
+                                  Type.REFERENCE,
                                   projectCD, Cardinality.TO_ONE);
         analysisRecordCD.addAttribute(attribute);
     }

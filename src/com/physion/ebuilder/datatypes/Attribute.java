@@ -177,7 +177,25 @@ public class Attribute
      * boolean, int, float, string, time/date.
      */
     public Attribute(String queryName, Type type) {
-        this(queryName, null, type, null, Cardinality.N_A);
+        this(queryName, null, type);
+    }
+
+    /**
+     * Constructor with some values defaulted:
+     *
+     *   classDescription = null
+     *   cardinality = Cardinality.N_A
+     *
+     * Use this construtor to create a "primitive" Attribute such as
+     * boolean, int, float, string, time/date with a display name.
+     *
+     * @param queryName attribute name
+     * @param displayName UI display name
+     * @param type attribute type
+     */
+    public Attribute(String queryName, String displayName, Type type)
+    {
+        this(queryName, displayName, type, null, Cardinality.N_A);
     }
 
 
