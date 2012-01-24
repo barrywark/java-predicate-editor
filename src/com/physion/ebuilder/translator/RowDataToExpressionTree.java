@@ -186,6 +186,9 @@ public class RowDataToExpressionTree
      *        <thing being tested to see if it is true>
      *        BooleanLiteralValueExpression(true)
      *
+     * @param co You can pass null if there is CollectionOperator.
+     *
+     * @param ao The Operator object.  E.g. Operator.IS_NULL.
      */
     private static OperatorExpression getOEForAO(CollectionOperator co,
                                                  Operator ao) {
@@ -435,9 +438,6 @@ public class RowDataToExpressionTree
      * to the OperatorExpression("any").
      * (This is always the case for an Attribute of type
      * PER_USER_PARAMETERS_MAP as far as I understand.)
-     *
-     * An example tree might look like this:
-     *
      */
     private static void createAndAddPerUserParametersMap(
         OperatorExpression lastOperator, RowData rowData) {
@@ -450,8 +450,9 @@ public class RowDataToExpressionTree
         elementsOfTypeOperator = new OperatorExpression(OE_ELEMENTS_OF_TYPE);
         lastOperator.addOperand(elementsOfTypeOperator);
 
-        op2 = new OperatorExpression(
-            rowData.getAttributeOperator().toString());
+        //op2 = new OperatorExpression(
+        //    rowData.getAttributeOperator().toString());
+        op2 = getOEForAO(null, rowData.getAttributeOperator());
         lastOperator.addOperand(op2);
 
         op2.addOperand(new AttributeExpression(AE_VALUE));
@@ -484,7 +485,6 @@ public class RowDataToExpressionTree
         else {
             createAndAddDotPath(pupmOperator, rowData);
         }
-
     }
 
 

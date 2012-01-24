@@ -379,10 +379,10 @@ public class TranslatorTests
         RowData rowData2;
 
         /**
-         * Test a compound row with lots of None collection operators:
+         * Test a nested compound row with lots of None collection operators:
          *
          *      Epoch | None
-         *        Epoch | responses None have None
+         *        Epoch | nextEpoch.nextEpoch.previousEpoch.responses None have None
          *          Response | uuid == "xyz"
          *          Response | samplingRate != 1.23
          */
@@ -433,7 +433,7 @@ public class TranslatorTests
          *      Epoch | All
          *        Epoch | responses All have Any
          *          Response | resources Any have Any
-         *            Epoch | protocolID != "Test 27"
+         *            Resource | uuid != "ID 27"
          */
         rootRow = new RowData();
         rootRow.setClassUnderQualification(epochCD);
@@ -748,6 +748,18 @@ public class TranslatorTests
     }
 
 
+    /**
+     * TODO:  Change the way the time is displayed by getResultsString()
+     * so that the "approved" test output is the same regardless of the
+     * timezone in which this test is run.  For example, as of January 2011
+     * the TranslatorTests.test19.approved.txt file contains the string:
+     *
+     *      Thu Dec 31 19:00:00 EST 2009
+     * 
+     * which means the test must be run in the eastern US timezone to match.
+     * One solution would be to have getResultsString always display the time
+     * as UTC time.
+     */
     @UseReporter(JunitReporter.class)
     public void test19()
             throws Exception {
@@ -1257,6 +1269,101 @@ public class TranslatorTests
     }
 
 
+    /**
+     * Added by Steve Ford, Jan 11, 2012.
+     *
+     *  Epoch | Any
+     *    Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
+     *    Epoch | epochGroup.is not null is not null
+     *    Epoch | Any
+     *      Epoch | epochGroup.source.containing experiments Count == "6"
+     */
+    @UseReporter(JunitReporter.class)
+    public void test32()
+            throws Exception {
+
+        RowData rootRow;
+        RowData rowData;
+        RowData rowData2;
+        RowData rowData3;
+
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("previousEpoch"));
+        rowData.addAttribute(epochCD.getAttribute("protocolParameters"));
+        rowData.setAttributeOperator(Operator.GREATER_THAN_EQUALS);
+        rowData.setAttributeValue(new Integer(5));
+        rowData.setPropType(Type.INT_32);
+        rowData.setPropName("somePropName");
+        rootRow.addChildRow(rowData);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("epochGroup"));
+        rowData.addAttribute(Attribute.IS_NOT_NULL);
+        rowData.setAttributeOperator(Operator.IS_NOT_NULL); 
+        rootRow.addChildRow(rowData);
+
+        rowData = new RowData();
+        rowData.setCollectionOperator(CollectionOperator.ANY);
+        rootRow.addChildRow(rowData);
+
+        rowData2 = new RowData();
+        rowData2.addAttribute(epochCD.getAttribute("epochGroup"));
+        rowData2.addAttribute(epochGroupCD.getAttribute("source"));
+        rowData2.addAttribute(sourceCD.getAttribute("containing_experiments"));
+        rowData2.setCollectionOperator(CollectionOperator.COUNT);
+        rowData2.setAttributeOperator(Operator.EQUALS);
+        rowData2.setAttributeValue(new Integer(6));
+        rowData.addChildRow(rowData2);
+
+        String s = getResultsString(
+                "Complicated containing_experiments", rootRow);
+        Approvals.approve(s);
+    }
+
+
+    /**
+     * Added by Steve Ford, Jan 11, 2012.
+     *
+     *  Epoch | Any
+     *    Epoch | My Property.someProp(time) is null
+     *    Epoch | Any Property.someAnyProp(time) is not null
+     */
+    @UseReporter(JunitReporter.class)
+    public void test33()
+            throws Exception {
+
+        RowData rootRow;
+        RowData rowData;
+        RowData rowData2;
+
+        rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("myproperties"));
+        rowData.setPropName("someProp");
+        rowData.setPropType(Type.DATE_TIME);
+        rowData.setAttributeOperator(Operator.IS_NULL);
+        rootRow.addChildRow(rowData);
+
+        rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("properties"));
+        rowData.setPropName("someAnyProp");
+        rowData.setPropType(Type.DATE_TIME);
+        rowData.setAttributeOperator(Operator.IS_NOT_NULL);
+        rootRow.addChildRow(rowData);
+
+        String s = getResultsString(
+                "My Property of type DATE_TIME, test for is null", rootRow);
+        Approvals.approve(s);
+    }
+
+
     @UseReporter(JunitReporter.class)
     public void testNoteAnnotation() throws Exception
     {
@@ -1416,6 +1523,34 @@ public class TranslatorTests
         String s = getResultsString("eg_containing_experiments on EpochGroup", rootRow);
         Approvals.approve(s);
     }
+
+    /**
+     * This test was added by Steve Ford on Jan 9, 2012.
+     */
+    @UseReporter(JunitReporter.class)
+    public void testPathToContainingExperiments() throws Exception
+    {
+        /**
+         * EpochGroup | Any
+         *   EpochGroup | source.parent.containing experiments Count == "4"
+         */
+
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochGroupCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochGroupCD.getAttribute("source"));
+        rowData.addAttribute(epochGroupCD.getAttribute("parent"));
+        rowData.addAttribute(sourceCD.getAttribute("containing_experiments"));
+        rowData.setCollectionOperator(CollectionOperator.COUNT);
+        rowData.setAttributeValue(new Integer(4));
+        rootRow.addChildRow(rowData);
+
+        String s = getResultsString("Path To containing_experiments", rootRow);
+        Approvals.approve(s);
+    }
+
 
     /*
     @UseReporter(JunitReporter.class)

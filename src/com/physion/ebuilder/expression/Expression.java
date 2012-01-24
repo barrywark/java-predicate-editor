@@ -36,13 +36,22 @@ public class Expression
 
     /**
      * Get a string version of this class that can be used
+     * for testing/debugging purposes.
+     */
+    public String toString() {
+        return(toString(""));
+    }
+
+
+    /**
+     * Get a string version of this class that can be used
      * for debugging purposes.
      *
      * @param indent The lines of the returned string will
      * all be indented by (at least) this amount.
      */
     public String toString(String indent) {
-        return("ERROR: You need to override this method.");
+        return("ERROR: You need to override the toString(String indent) method.");
     }
 }
 

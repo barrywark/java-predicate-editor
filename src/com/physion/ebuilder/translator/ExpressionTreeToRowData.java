@@ -201,8 +201,8 @@ public class ExpressionTreeToRowData
              *        OperatorExpression(any)
              *          OperatorExpression(elementsOfType)
              *            OperatorExpression(properties)
-             *              AttributeExpression(this)
              *              StringLiteralValueExpression(someKey)
+             *              AttributeExpression(this)
              *            ClassLiteralValueExpression(ovation.IntegerValue)
              *          OperatorExpression(!=)
              *            AttributeExpression(value)
@@ -325,11 +325,13 @@ public class ExpressionTreeToRowData
             rowData.setPropName(slve.getValue().toString());
 
             /**
-             * Now the second operand into the target.
+             * Now turn the second operand into the target.
              */
-            exTemp = oeAttributePath.getOperandList().get(1);
-            setAttributePath(rowData, oeAttributePath, classDescription);
 
+            exTemp = oeAttributePath.getOperandList().get(1);
+            //setAttributePath(rowData, oeAttributePath, classDescription);
+            //setAttributePath2(rowData, oeAttributePath, classDescription);
+            setAttributePath1(rowData, oeAttributePath, classDescription);
 
             /**
              * Set the attributeOperator and (possibly) the
@@ -382,7 +384,9 @@ public class ExpressionTreeToRowData
                      * attributePath.
                      */
                     IExpression firstOperand = ol.get(olIndex++);
-                    setAttributePath(rowData, firstOperand, classDescription);
+                    //setAttributePath(rowData, firstOperand, classDescription);
+                    //setAttributePath2(rowData, firstOperand, classDescription);
+                    setAttributePath1(rowData, firstOperand, classDescription);
                     //System.out.println("rowData so far: "+
                     //    rowData.getRowString());
                     Attribute childmostAttribute =
@@ -555,7 +559,15 @@ public class ExpressionTreeToRowData
                 ex = ((IOperatorExpression)ex).getOperandList().get(0);
             }
         }
-        setAttributePath(rowData, ex, classDescription);
+        //setAttributePath(rowData, ex, classDescription);
+
+        //System.out.println("\n*** Calling getChildmostClassDescription");
+        //ClassDescription xxx = getChildmostClassDescription(ex,
+        //                                                    classDescription);
+        //System.out.println("*** childmostCD = "+xxx+"\n");
+
+        //setAttributePath2(rowData, ex, classDescription);
+        setAttributePath1(rowData, ex, classDescription);
 
         /**
          * Now handle the second (right) operand.
@@ -597,7 +609,8 @@ public class ExpressionTreeToRowData
 
     /**
      * This returns true if the passed in IExpression is
-     * a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Attribute like "keywords", "mykeywords", etc.
+     * a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Attribute like
+     * "keywords", "mykeywords", etc.
      *
      * @return true if the given expression is a per-user operator
      * @param ex
@@ -611,9 +624,11 @@ public class ExpressionTreeToRowData
             IOperatorExpression oe = (IOperatorExpression)ex;
             String name = oe.getOperatorName();
 
+            //Attribute attribute = DataModel.getAttribute(name);
             Attribute attribute = cd.getAttribute(name);
             if ((attribute != null) &&
-                (attribute.getType() == Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR)) {
+                (attribute.getType() ==
+                 Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR)) {
                 return(true);
             }
         }
@@ -627,7 +642,8 @@ public class ExpressionTreeToRowData
      * a PER_USER_PARAMETERS_MAP Attribute like "properties",
      * "myproperties", etc.
      *
-     * @return true if the given expression is a per-user parameters map operator
+     * @return true if the given expression is a per-user parameters
+     * map operator
      * @param ex
      * @param cd
      */
@@ -639,6 +655,7 @@ public class ExpressionTreeToRowData
             IOperatorExpression oe = (IOperatorExpression)ex;
             String name = oe.getOperatorName();
 
+            //Attribute attribute = DataModel.getAttribute(name);
             Attribute attribute = cd.getAttribute(name);
             if ((attribute != null) &&
                 (attribute.getType() == Type.PER_USER_PARAMETERS_MAP)) {
@@ -686,328 +703,572 @@ public class ExpressionTreeToRowData
 
 
     /**
-     * Set the value of the rowData's attributePath to be the
-     * equivalent of the value in the IExpression.
-     * This method converts the passed in IExpression tree
-     * into Attributes and adds them to the rowData's attributePath.
+     * Parse a PARAMETERS_MAP attribute path.
      *
-     * Please note, this method calls itself recursively.
-     * So, for each RowData object, (i.e. each row in the GUI),
-     * this method is only called once by another function,
-     * but after that initial call with the node that is
-     * the "top" of the attribute path part of the expression
-     * passed in as the "ex" parameter, this method calls itself
-     * recursively to create the entire path.
+     * Here is an example that is not "nested" after
+     * other attributes:
      *
-     * @param rowData The RowData object whose attributePath we will set.
+     * protocolParameters.someTimeKey(time) == "Fri Jan 01 2010"
      *
-     * @param ex This is the subtree that defines the attribute path.
-     * This is probably the "left" (i.e. first) operand of an operator.
+     * OperatorExpression(and)
+     *   OperatorExpression(==)
+     *     OperatorExpression(.)
+     *       OperatorExpression(as)
+     *         OperatorExpression(parameter)
+     *           AttributeExpression(protocolParameters)
+     *           StringLiteralValueExpression(someTimeKey)
+     *         ClassLiteralValueExpression(ovation.DateValue)
+     *       AttributeExpression(value)
+     *     TimeLiteralValueExpression(Fri Jan 01 2010)
      *
-     * @param classDescription This is the "parent" class that
-     * is the class of the leftmost Attribute of the path.
+     * Here is an example that is "nested":
      *
-     * @return The ClassDescription of the leftmost Attribute
-     * on which this method is currently working.  If the
-     * Attribute is a primitive, (e.g. int, string), this returns null.
+     * nextEpoch.nextEpoch.prevEpoch.protocolParameters.key(float) == "12.3"
+     *
+     * OperatorExpression(and)
+     *   OperatorExpression(==)
+     *     OperatorExpression(.)
+     *       OperatorExpression(as)
+     *         OperatorExpression(parameter)
+     *           OperatorExpression(.)
+     *             OperatorExpression(.)
+     *               OperatorExpression(.)
+     *                 AttributeExpression(nextEpoch)
+     *                 AttributeExpression(nextEpoch)
+     *               AttributeExpression(prevEpoch)
+     *             AttributeExpression(protocolParameters)
+     *           StringLiteralValueExpression(key)
+     *         ClassLiteralValueExpression(ovation.FloatingPointValue)
+     *       AttributeExpression(value)
+     *     Float64LiteralValueExpression(12.3)
+     *
+     * The other, (i.e. right) operand should be AttributeExpression(value).
+     * TODO:  Should we check that this is actually the case?
+     *
+     * The OperatorExpression(as) node should have two
+     * operands:  OperatorExpression(parameter) and
+     * ClassLiteralValueExpression(ovation.<someType>).
+     * Where <someType> is a value like: ovation.DateValue,
+     * ovation.FloatingPointValue, ovation.IntegerValue, etc.
+     *
+     * @param leftOperand Should be OperatorExpression(parameter)
+     * @param rightOperand Tells us the property type.  e.g. int,
+     * float, boolean, etc.
      */
+    private static ClassDescription parseAsExpression(RowData rowData,
+        IOperatorExpression leftOperand,
+        IClassLiteralValueExpression rightOperand,
+        ClassDescription classDescription, ClassDescription childmostCD) {
+
+        /**
+         * First, because it is simple and easy, handle
+         * the rightOperand which gives us the property type.
+         */
+        Type type = getTypeForCLVE(rightOperand);
+        rowData.setPropType(type);
+
+        /**
+         * Now deal with the leftOperand, which should be
+         * OperatorExpression(parameter).
+         *
+         * The OperatorExpression(parameter) node should have
+         * two operands.  The first is an IExpression
+         * node/tree that is the path to the attribute
+         * name.  For example, protocolParameters, or
+         * nextEpoch.nextEpoch.prevEpoch.protocolParameter.
+         * The second operand is a StringLiteralValueExpression
+         * that gives key.  The string "someTimeKey" or "key"
+         * in the examples in the comments above.
+         *
+         * Turn the first operand into an attribute path.
+         * Use the second operand to set the property name
+         * field in the RowData.
+         */
+
+        if (leftOperand.getOperandList().size() != 2) {
+            String s = "IOperatorExpression(parameter) does not "+
+                "have two operands.";
+            throw(new IllegalArgumentException(s));
+        }
+
+        IExpression exTemp = leftOperand.getOperandList().get(0);
+        //System.out.println("Calling setAttributePath2 to process path");
+        ClassDescription childCD;
+        childCD = setAttributePath2(rowData, exTemp, classDescription,
+                                    childmostCD);
+        //System.out.println("Returned childCD = "+childCD);
+
+        exTemp = leftOperand.getOperandList().get(1);
+        if (!(exTemp instanceof IStringLiteralValueExpression)) {
+            String s = "IOperatorExpression(parameter)'s second "+
+                "operand is not of type "+
+                "IStringLiteralValueExpression.";
+            throw(new IllegalArgumentException(s));
+        }
+
+        IStringLiteralValueExpression slve =
+            (IStringLiteralValueExpression)exTemp;
+
+        if ((slve == null) || (slve.getValue() == null)) {
+            String s = "IOperatorExpression(parameter)'s second "+
+                "operand is of type "+
+                "IStringLiteralValueExpression but has a null value.  "+
+                "Have you failed to call RowData.setPropName("+
+                "\"<some string>\")?";
+            throw(new IllegalArgumentException(s));
+        }
+
+        rowData.setPropName(slve.getValue().toString());
+
+        return(childCD);
+    }
+
+
+    private static ClassDescription parseDotExpression(RowData rowData,
+        IExpression leftOperand, IExpression rightOperand,
+        ClassDescription classDescription, ClassDescription childmostCD) {
+    
+        ClassDescription childCD;
+
+        /**
+         * Parse the leftOperand.
+         */
+        childCD = setAttributePath2(rowData, leftOperand, classDescription,
+                                    childmostCD);
+
+        /**
+         * Now check to make sure we want to parse the rightOperand.
+         * We don't want to if the leftOperand is the "as" operator.
+         */
+
+        if (leftOperand instanceof IOperatorExpression) {
+            IOperatorExpression oe = (IOperatorExpression)leftOperand;
+            if (OE_AS.equals(oe.getOperatorName())) {
+
+                /**
+                 * Do NOT parse the rightOperand, which must be
+                 * AttributeExpression(value).
+                 */
+                return(childCD);
+            }
+        }
+
+        /**
+         * Parse the rightOperand.
+         */
+        childCD = setAttributePath2(rowData, rightOperand, childCD,
+                                    childmostCD);
+
+        return(childCD);
+    }
+
+
     /**
-     * @param ex The IExpression that is the left operand of an operator.
+     * Parse an OperatorExpression(count) subtree, adding
+     * Attributes to the passed in rowData's attributePath.
+     *
+     * @param rowData The RowData object for one row that
+     * we are constructing.
+     *
+     * @param onlyOperand This should be the only operand in the
+     * OperatorExpression(count) list of operands.
+     *
+     * @param classDescription The ClassDescription that is the
+     * starting class for whatever Attributes are in the onlyOperand's
+     * attributePath.
+     *
+     * @return The childmost ClassDescription of the attributePath.
+     * I.e. the class of the rightmost Attribute.
      */
-    private static ClassDescription setAttributePath(RowData rowData,
+    private static ClassDescription parseCountExpression(RowData rowData,
+        IExpression onlyOperand, ClassDescription classDescription,
+        ClassDescription childmostCD) {
+    
+        ClassDescription childCD;
+
+        childCD = setAttributePath2(rowData, onlyOperand, classDescription,
+                                    childmostCD);
+
+        return(childCD);
+    }
+
+
+    /**
+     * Parse a PER_USER_PARAMETERS_MAP attribute.
+     * For example, "My Property" OperatorExpression(myproperties) or
+     * "Any Property" OperatorExpression(properties).
+     *
+     * For example, the RowData below:
+     *
+     *      Any Property.someKey(int) != "34"
+     *
+     * is equivalent to the Expression:
+     *
+     *      OperatorExpression(and)
+     *        OperatorExpression(any)
+     *          OperatorExpression(elementsOfType)
+     *            OperatorExpression(properties)
+     *              AttributeExpression(this)
+     *              StringLiteralValueExpression(someKey)
+     *            ClassLiteralValueExpression(ovation.IntegerValue)
+     *          OperatorExpression(!=)
+     *            AttributeExpression(value)
+     *            Int32LiteralValueExpression(34)
+     *
+     * A more complicated RowData example with nesting:
+     *
+     *  nextEpoch.nextEpoch.prevEpoch.Any Property.someKey(int) != "34"
+     *
+     * is equivalent to the Expression:
+     *
+     *  OperatorExpression(and)
+     *    OperatorExpression(any)
+     *      OperatorExpression(elementsOfType)
+     *        OperatorExpression(properties)
+     *          StringLiteralValueExpression(someKey)
+     *          OperatorExpression(.)
+     *            OperatorExpression(.)
+     *              AttributeExpression(nextEpoch)
+     *              AttributeExpression(nextEpoch)
+     *            AttributeExpression(prevEpoch)
+     *        ClassLiteralValueExpression(ovation.IntegerValue)
+     *      OperatorExpression(!=)
+     *        AttributeExpression(value)
+     *        Int32LiteralValueExpression(34)
+     *
+     * @param leftOperand An IStringLiteralValueExpression that is
+     * the name of the property.  E.g. "prop27".
+     *
+     * @param rightOperand An IAttributeExpression such as "this", or an
+     * IOperatorExpression such as the "." operator.
+     *
+     */
+    private static ClassDescription parsePerUserParametersMap(RowData rowData,
+        String attributeName,
+        IStringLiteralValueExpression leftOperand,
+        IExpression rightOperand, ClassDescription classDescription,
+        ClassDescription childmostCD) {
+
+        ClassDescription childCD = classDescription;
+
+        /**
+         * Now (possibly) parse the rightOperand.
+         * Check whether the rightOperand is the special
+         * AttributeExpression(this) value.
+         */
+        if ((rightOperand instanceof IAttributeExpression) &&
+            AE_THIS.equals(((IAttributeExpression)rightOperand).
+                            getAttributeName())) {
+            /**
+             * The operand is AttributeExpresion(this).
+             * It is NOT added to the attribute path.
+             * It is something that exists in
+             * the Expression tree, but not in the GUI.
+             */
+        }
+        else {
+            /**
+             * Traverse the subtree that defines the
+             * attribute path to the special
+             * operator.  E.g. traverse the
+             * nextEpoch.nextEpoch.prevEpoch of the
+             * example attribute path described above.
+             */
+            childCD = setAttributePath2(rowData, rightOperand,
+                                        classDescription, childmostCD);
+        }
+
+        Attribute attribute = childCD.getAttribute(attributeName);
+        /*
+        System.out.println("Adding attribute \""+
+            childCD.getName()+"."+attribute.getQueryName()+
+            "\" to path.");
+        */
+        rowData.addAttribute(attribute);
+
+        return(childCD);
+    }
+
+
+    /**
+     * Parse a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR attribute.
+     * For example:
+     *
+     *      "My Keywords" OperatorExpression(mykeywords) 
+     *      "Any Property" OperatorExpression(keywords)
+     *      "My Notes" OperatorExpression(mynotes)
+     *      "Any Notes" OperatorExpression(notes)
+     *
+     * @param rowData The RowData object for one row that
+     * we are constructing.
+     *
+     * @param attributeName The name of the Attribute.
+     * For example:  notes, mynotes, mykeywords.
+     *
+     * @param onlyOperand This should be the only operand in the
+     * OperatorExpression(****) list of operands.
+     *
+     * @param classDescription The ClassDescription that is the
+     * starting class for whatever Attributes are in the onlyOperand's
+     * attributePath.
+     *
+     * @return The childmost ClassDescription of the attributePath.
+     * I.e. the class of the rightmost Attribute.
+     */
+    private static ClassDescription parsePerUserOrCustomReferenceOperator(
+        RowData rowData, String attributeName, IExpression onlyOperand,
+        ClassDescription classDescription, ClassDescription childmostCD) {
+
+        ClassDescription childCD = classDescription;
+
+        if (!(onlyOperand instanceof IAttributeExpression) &&
+            !(onlyOperand instanceof IOperatorExpression)) {
+
+            String s = "IOperatorExpression("+attributeName+
+                ")'s first operand is not of type IAttributeExpression, "+
+                "nor is it of type IOperatorExpression.  "+
+                "onlyOperand = "+onlyOperand;
+            throw(new IllegalArgumentException(s));
+        }
+    
+        /**
+         * If the onlyOperand is the AttributeExpression(this) value,
+         * ignore it as far as the RowData object's attributePath is
+         * concerned.
+         *
+         * I.e. only call setAttributePath2() if it is NOT 
+         * AttributeExpression(this).
+         */
+        boolean isAEThis = false;
+        if ((onlyOperand instanceof IAttributeExpression) &&
+            AE_THIS.equals(((IAttributeExpression)onlyOperand).
+                             getAttributeName())) {
+            isAEThis = true;
+        }
+
+        if (!isAEThis) {
+
+            //System.out.println("Calling setAttributePath with onlyOperand");
+            childCD = setAttributePath2(rowData, onlyOperand, classDescription,
+                                        childmostCD);
+        }
+
+        Attribute attribute = childCD.getAttribute(attributeName);
+        /*
+        System.out.println("Adding attribute \""+
+            childCD.getName()+"."+attribute.getQueryName()+
+            "\" to path.");
+        */
+        rowData.addAttribute(attribute);
+
+        return(childCD);
+    }
+
+
+    /**
+     * Get the ClassDescription of the childmost Attribute in
+     * the expression.
+     */
+    private static ClassDescription getChildmostClassDescription(
         IExpression ex, ClassDescription classDescription) {
 
         /*
-        System.out.println("Enter setAttributePath");
-        System.out.println("rowData: "+rowData.getRowString());
+        System.out.println("\nEnter getChildmostClassDescription");
         System.out.println("ex: "+((Expression)ex));
         System.out.println("classDescription: "+classDescription);
         */
 
-        if ((ex instanceof IAttributeExpression) ||
-            (isPerUserOperator(ex, classDescription)) ||
-            (isPerUserParametersMapOperator(ex, classDescription))) {
+        ClassDescription childCD = classDescription;
 
-            String name;
-            if (ex instanceof IAttributeExpression) {
-                IAttributeExpression ae = (IAttributeExpression)ex;
-                name = ae.getAttributeName();
-            }
-            else {
-                /**
-                 * ex is a PER_USER_OR_CUSTOM_REFERENCE_OPERATOR "operator" such as "keywords"
-                 * or "mykeywords", or it is a PER_USER_PARAMETERS_MAP
-                 * "operator" such as "properties" or "myproperties.
-                 *
-                 * In either case, it will have an attribute
-                 * path as a subtree.  If so, we need to parse it
-                 * and prepend it to the attribute path.
-                 * For example:
-                 *
-                 *      OperatorExpression(and)
-                 *        OperatorExpression(all)
-                 *          OperatorExpression(keywords)
-                 *            OperatorExpression(.)
-                 *              OperatorExpression(.)
-                 *                AttributeExpression(nextEpoch)
-                 *                AttributeExpression(nextEpoch)
-                 *              AttributeExpression(prevEpoch)
-                 *          OperatorExpression(or)
-                 *            OperatorExpression(==)
-                 *              AttributeExpression(uuid)
-                 *              StringLiteralValueExpression(xyz)
-                 *
-                 * needs to become:
-                 *
-                 *      nextEpoch.nextEpoch.prevEpoch.All Keywords All have Any
-                 *
-                 * Note that if there is no "path", the subtree
-                 * under OperatorExpression(keywords) will
-                 * be just the AttributeExpression(this).
-                 */
-                IOperatorExpression oe = (IOperatorExpression)ex;
-                name = oe.getOperatorName();
-
-                IExpression ex2;
-                if(isPerUserOperator(ex, classDescription)) {
-                    if (oe.getOperandList().size() < 1) {
-                        String s = "A PER_USER_OR_CUSTOM_REFERENCE_OPERATOR IOperatorExpression("+name+") "+
-                                "does not have any operands.  It should have at "+
-                                "least one operand such as AttributeExpression(this).";
-                        throw(new IllegalArgumentException(s));
-                    }
-
-                    ex2 = oe.getOperandList().get(0);
-                } else {
-                    if (oe.getOperandList().size() < 1) {
-                        String s = "A PER_USER_OR_CUSTOM_REFERENCE_OPERATOR IOperatorExpression("+name+") "+
-                                "does not have any operands.  It should have at "+
-                                "least two operands such as (key,AttributeExpression(this)).";
-                        throw(new IllegalArgumentException(s));
-                    }
-
-                    ex2 = oe.getOperandList().get(1);
-                }
-
-                /**
-                 * Check whether the operand is the special
-                 * AttributeExpression(this) value.
-                 */
-                if ((ex2 instanceof IAttributeExpression) &&
-                    AE_THIS.equals(((IAttributeExpression)ex2).
-                                    getAttributeName())) {
-                    /**
-                     * The operand is AttributeExpresion(this).
-                     * It is NOT added to the attribute path.
-                     * It is something that exists in
-                     * the Expression tree, but not in the GUI.
-                     */
-                }
-                else {
-                    /**
-                     * Traverse the subtree that define the
-                     * attribute path to the special PER_USER_OR_CUSTOM_REFERENCE_OPERATOR
-                     * operator.  E.g. traverse the
-                     * nextEpoch.nextEpoch.prevEpoch of the
-                     * example attribute path described above.
-                     */
-                    setAttributePath(rowData, ex2, classDescription);
-                }
-            }
-
-            Attribute attribute = getAttribute(name, classDescription);
-
-            if (attribute == null) {
-                String s = "Attribute name \""+name+
-                    "\" does not exist in class \""+classDescription.getName()+
-                    "\"";
-                throw(new IllegalArgumentException(s));
-            }
-
-            //System.out.println("Adding attribute \""+attribute+"\" to path.");
-            rowData.addAttribute(attribute);
-            return(attribute.getClassDescription());
-        }
-        else if (ex instanceof IOperatorExpression) {
+        if (ex instanceof IOperatorExpression) {
 
             IOperatorExpression oe = (IOperatorExpression)ex;
+            //System.out.println("oe = "+oe.getOperatorName());
+
+            IExpression leftOperand = oe.getOperandList().get(0);
+            IExpression rightOperand = null;
+            if (oe.getOperandList().size() > 1) {
+                rightOperand = oe.getOperandList().get(1);
+            }
+
+            //System.out.println("leftOperand = "+leftOperand);
+            //System.out.println("rightOperand = "+rightOperand);
+
             if (OE_DOT.equals(oe.getOperatorName())) {
 
-                /**
-                 * The operator is a ".", so this could be a
-                 * "normal" attribute path or this could
-                 * be a PARAMETERS_MAP attribute path.
-                 */
+                IAttributeExpression rightOperandAE = (IAttributeExpression)
+                    rightOperand;
+                 
+                childCD = getChildmostClassDescription(leftOperand,
+                    classDescription);
 
-                IExpression op = oe.getOperandList().get(0);
+                /*
+                System.out.println("Looking for attribute \""+
+                    childCD.getName()+"."+rightOperandAE.getAttributeName()+
+                    "\"");
+                */
+                Attribute attribute = childCD.getAttribute(
+                    rightOperandAE.getAttributeName());
 
-                if ((op instanceof IOperatorExpression) &&
-                    OE_AS.equals(((IOperatorExpression)op).getOperatorName())) {
+                if (attribute != null) {
 
-                    /**
-                     * This is a PARAMETERS_MAP attribute path.
-                     *
-                     * Here is an example that is not "nested" after
-                     * other attributes:
-                     *
-                     * protocolParameters.someTimeKey(time) == "Fri Jan 01 2010"
-                     *
-                     * OperatorExpression(and)
-                     *   OperatorExpression(==)
-                     *     OperatorExpression(.)
-                     *       OperatorExpression(as)
-                     *         OperatorExpression(parameter)
-                     *           AttributeExpression(protocolParameters)
-                     *           StringLiteralValueExpression(someTimeKey)
-                     *         ClassLiteralValueExpression(ovation.DateValue)
-                     *       AttributeExpression(value)
-                     *     TimeLiteralValueExpression(Fri Jan 01 2010)
-                     *
-                     * Here is an example that is "nested":
-                     *
-                     * nextEpoch.nextEpoch.prevEpoch.protocolParameters.key(float) == "12.3"
-                     *
-                     * OperatorExpression(and)
-                     *   OperatorExpression(==)
-                     *     OperatorExpression(.)
-                     *       OperatorExpression(as)
-                     *         OperatorExpression(parameter)
-                     *           OperatorExpression(.)
-                     *             OperatorExpression(.)
-                     *               OperatorExpression(.)
-                     *                 AttributeExpression(nextEpoch)
-                     *                 AttributeExpression(nextEpoch)
-                     *               AttributeExpression(prevEpoch)
-                     *             AttributeExpression(protocolParameters)
-                     *           StringLiteralValueExpression(key)
-                     *         ClassLiteralValueExpression(ovation.FloatingPointValue)
-                     *       AttributeExpression(value)
-                     *     Float64LiteralValueExpression(12.3)
-                     *
-                     * The other operand should be AttributeExpression(value).
-                     * TODO:  Do we need to check that that is the case?
-                     *
-                     * The OperatorExpression(as) node should have two
-                     * operands:  OperatorExpression(parameter) and
-                     * ClassLiteralValueExpression(ovation.<someType>).
-                     * Where <someType> is a value like: ovation.DateValue,
-                     * ovation.FloatingPointValue, ovation.IntegerValue, etc.
-                     */
-                    IOperatorExpression oeAs = (IOperatorExpression)op;
-                    if (oeAs.getOperandList().size() != 2) {
-                        String s = "IOperatorExpression(as) does not have "+
-                            "two operands.";
-                        throw(new IllegalArgumentException(s));
-                    }
-
-                    /**
-                     * First, because it is simple and easy, handle
-                     * the IOperatorExpression(as) node's second
-                     * operand which gives us the property type.
-                     */
-
-                    IExpression exTemp = oeAs.getOperandList().get(1);
-                    if (!(exTemp instanceof IClassLiteralValueExpression)) {
-                        String s = "IOperatorExpression(as)'s second "+
-                            "operand is not of type "+
-                            "IClassLiteralValueExpression.";
-                        throw(new IllegalArgumentException(s));
-                    }
-
-                    IClassLiteralValueExpression clve =
-                        (IClassLiteralValueExpression)exTemp;
-                    Type type = getTypeForCLVE(clve);
-                    rowData.setPropType(type);
-
-                    /**
-                     * Now deal with the IOperatorExpression(as) node's
-                     * first operand.
-                     */
-
-                    exTemp = oeAs.getOperandList().get(0);
-                    if ((!(exTemp instanceof IOperatorExpression)) ||
-                        !OE_PARAMETER.equals(((IOperatorExpression)exTemp).
-                                             getOperatorName())) {
-                        String s = "IOperatorExpression(as) does not have "+
-                            "IOperatorExpression(parameter) as its first "+
-                            "operand.";
-                        throw(new IllegalArgumentException(s));
-                    }
-
-                    IOperatorExpression oeParameter =
-                        (IOperatorExpression)exTemp;
-
-                    /**
-                     * The OperatorExpression(parameter) node should have
-                     * two operands.  The first is an IExpression
-                     * node/tree that is the path to the attribute
-                     * name.  For example, protocolParameters, or
-                     * nextEpoch.nextEpoch.prevEpoch.protocolParameter.
-                     * The second operand is a StringLiteralValueExpression
-                     * that gives key.  The string "someTimeKey" or "key"
-                     * in the examples in the comments above.
-                     *
-                     * Turn the first operand into an attribute path.
-                     * Use the second operand to set the property name
-                     * field in the RowData.
-                     */
-
-                    if (oeParameter.getOperandList().size() != 2) {
-                        String s = "IOperatorExpression(parameter) does not "+
-                            "have two operands.";
-                        throw(new IllegalArgumentException(s));
-                    }
-
-                    exTemp = oeParameter.getOperandList().get(0);
-                    setAttributePath(rowData, exTemp, classDescription);
-
-                    exTemp = oeParameter.getOperandList().get(1);
-                    if (!(exTemp instanceof IStringLiteralValueExpression)) {
-                        String s = "IOperatorExpression(parameter)'s second "+
-                            "operand is not of type "+
-                            "IStringLiteralValueExpression.";
-                        throw(new IllegalArgumentException(s));
-                    }
-
-                    IStringLiteralValueExpression slve =
-                        (IStringLiteralValueExpression)exTemp;
-                    rowData.setPropName(slve.getValue().toString());
+                    /*
+                    System.out.println("Found attribute \""+
+                        childCD.getName()+"."+attribute.getQueryName()+
+                        "\" in path.");
+                    */
+                    return(attribute.getClassDescription());
                 }
                 else {
-
-                    ClassDescription childClass;
-                    childClass = setAttributePath(rowData, op,
-                                                  classDescription);
-
-                    if (oe.getOperandList().size() > 1) {
-                        op = oe.getOperandList().get(1);
-                        return(setAttributePath(rowData, op, childClass));
-                    }
-                    else {
-                        /**
-                         * This should never happen.  A dot operator must
-                         * always have two operands.
-                         */
-                    }
+                    return(childCD);
                 }
             }
+            else {
+                childCD = getChildmostClassDescription(leftOperand,
+                    classDescription);
+
+                if (childCD == null) {
+                    childCD = classDescription;
+                }
+            }
+        }
+        else if (ex instanceof IAttributeExpression) {
+        
+            IAttributeExpression ae = (IAttributeExpression)ex;
+            //System.out.println("ae = "+ae.getAttributeName());
+
+            Attribute attribute = classDescription.getAttribute(
+                ae.getAttributeName());
+
+            if ((attribute != null) &&
+                (attribute.getClassDescription() != null)) {
+                /*
+                System.out.println("Found attribute \""+
+                    classDescription.getName()+"."+attribute.getQueryName()+
+                    "\" in path.");
+                */
+                childCD = attribute.getClassDescription();
+            }
+
+            return(childCD);
+        }
+
+        return(childCD);
+    }
+
+
+    /**
+     * All this method does is first call getChildmostClassDescription(),
+     * and then call setAttributePath2() using that value.
+     *
+     * This is because we don't know how to properly parse the
+     * tree until we know what sort of Attributes we are parsing,
+     * e.g. PER_USER_PARAMETER, etc., and we don't know that until
+     * we can get the Attribute from the ClassDescription that contains it.
+     */
+    private static ClassDescription setAttributePath1(RowData rowData,
+        IExpression ex, ClassDescription classDescription) {
+
+        /**
+         * Get the ClassDescription of the childmost Attribute.
+         */
+        ClassDescription childmostCD = getChildmostClassDescription(
+            ex, classDescription);
+
+        return(setAttributePath2(rowData, ex, classDescription, childmostCD));
+    }
+
+
+    /**
+     * @return The ClassDescription (if applicable) of the
+     * Attribute that we parsed and added last to the RowData's attributePath.
+     */
+    private static ClassDescription setAttributePath2(RowData rowData,
+        IExpression ex, ClassDescription classDescription,
+            ClassDescription childmostCD) {
+
+        /*
+        System.out.println("\nEnter setAttributePath2");
+        System.out.println("rowData: "+rowData.getRowString());
+        System.out.println("ex: "+((Expression)ex));
+        System.out.println("classDescription: "+classDescription);
+        System.out.println("ex instanceof IAttributeExpression = "+
+                           (ex instanceof IAttributeExpression));
+        */
+
+        if (ex instanceof IOperatorExpression) {
+
+            IOperatorExpression oe = (IOperatorExpression)ex;
+            //System.out.println("oe = "+oe.getOperatorName());
+
+            IExpression leftOperand = oe.getOperandList().get(0);
+            IExpression rightOperand = null;
+            if (oe.getOperandList().size() > 1) {
+                rightOperand = oe.getOperandList().get(1);
+            }
+
+            //System.out.println("leftOperand = "+leftOperand);
+            //System.out.println("rightOperand = "+rightOperand);
+
+            ClassDescription childCD = null;
+
+            if (OE_DOT.equals(oe.getOperatorName())) {
+                childCD = parseDotExpression(rowData, leftOperand, rightOperand,
+                                             classDescription, childmostCD);
+            }
             else if (OE_COUNT.equals(oe.getOperatorName())) {
-                IExpression op = oe.getOperandList().get(0);
-                return(setAttributePath(rowData, op, classDescription));
+                childCD = parseCountExpression(rowData, leftOperand,
+                                               classDescription, childmostCD);
             }
-            else if (OE_CONTAINING_EXPERIMENTS.equals(oe.getOperatorName())) {
-                String s = "\n*** Code to handle \""+oe.getOperatorName()+"\""+
-                    " needs to be written. ***\n";
-                (new Exception(s)).printStackTrace();
+            else if (OE_AS.equals(oe.getOperatorName())) {
+
+                if (!(leftOperand instanceof IOperatorExpression)) {
+                    String s = "IOperatorExpression(as)'s first "+
+                        "operand is not of type "+
+                        "IOperatorExpression.  leftOperand = "+leftOperand;
+                    throw(new IllegalArgumentException(s));
+                }
+                IOperatorExpression leftOperandOE =
+                    (IOperatorExpression)leftOperand;
+                if (!OE_PARAMETER.equals(leftOperandOE.getOperatorName())) {
+                    String s = "IOperatorExpression(as) does not have "+
+                        "IOperatorExpression(parameter) as its first "+
+                        "operand.";
+                    throw(new IllegalArgumentException(s));
+                }
+                if (!(rightOperand instanceof IClassLiteralValueExpression)) {
+                    String s = "IOperatorExpression(as)'s second "+
+                        "operand is not of type "+
+                        "IClassLiteralValueExpression.  rightOperand = "+
+                        rightOperand;
+                    throw(new IllegalArgumentException(s));
+                }
+
+                childCD = parseAsExpression(rowData, leftOperandOE,
+                    (IClassLiteralValueExpression)rightOperand,
+                    classDescription, childmostCD);
             }
-            else if (OE_IS_NULL.equals(oe.getOperatorName())) {
-                /**
-                 * Do nothing because the later call to
-                 * RowData.setAttributeOperator() calls
-                 * addAttribute() with the correct
-                 * Attribute.IS_NULL or Attribute.IS_NOT_NULL
-                 * value.
-                 */
+            //else if (isPerUserParametersMapOperator(oe, classDescription)) {
+            else if (isPerUserParametersMapOperator(oe, childmostCD)) {
+
+                if (!(leftOperand instanceof IStringLiteralValueExpression)) {
+                    String s = "IOperatorExpression("+oe.getOperatorName()+
+                        ")'s first operand is not of type "+
+                        "IStringLiteralValueExpression.  leftOperand = "+
+                        leftOperand;
+                    throw(new IllegalArgumentException(s));
+                }
+                childCD = parsePerUserParametersMap(rowData,
+                    oe.getOperatorName(),
+                    (IStringLiteralValueExpression)leftOperand, rightOperand,
+                    classDescription, childmostCD);
+            }
+            //else if (isPerUserOperator(oe, classDescription)) {
+            else if (isPerUserOperator(oe, childmostCD)) {
+
+                childCD = parsePerUserOrCustomReferenceOperator(rowData,
+                    oe.getOperatorName(), leftOperand,
+                    classDescription, childmostCD);
             }
             /* Should not get any of these
             else if (OE_ANY.equals(oe.getOperatorName())) {
@@ -1016,17 +1277,72 @@ public class ExpressionTreeToRowData
             }
             else if (OE_ALL.equals(oe.getOperatorName())) {
             }
+            else if (OE_IS_NULL.equals(oe.getOperatorName())) {
+            }
+            else if (OE_PARAMETER.equals(oe.getOperatorName())) {
+            }
             */
             else {
+                /**
+                 * An engineer needs to write some code to handle this
+                 * new/unexpected operator.
+                 */
                 String s = "Unhandled IOperatorExpression: "+
                     oe.getOperatorName();
-                (new Exception(s)).printStackTrace();
+                throw(new IllegalArgumentException(s));
             }
+
+            /*
+            if (childCD == null) {
+                childCD = classDescription;
+            }
+            */
+
+            //System.out.println("Return childCD = "+childCD);
+            return(childCD);
+        }
+        else if (ex instanceof IAttributeExpression) {
+        
+            IAttributeExpression ae = (IAttributeExpression)ex;
+            //System.out.println("ae = "+ae.getAttributeName());
+
+            Attribute attribute = classDescription.getAttribute(
+                ae.getAttributeName());
+            
+            ClassDescription childCD = classDescription;
+            if (attribute != null) {
+                /*
+                System.out.println("Adding attribute \""+
+                    classDescription.getName()+"."+attribute.getQueryName()+
+                    "\" to path.");
+                */
+                rowData.addAttribute(attribute);
+
+                if (attribute.getClassDescription() != null) {
+                    childCD = attribute.getClassDescription();
+                }
+            }
+            else {
+                /**
+                 * Could be an Attribute such as "is null".
+                 */
+            }
+
+            return(childCD);
         }
         else {
-            (new Exception("Unhandled IExpression")).printStackTrace();
+            /**
+             * An engineer needs to write some code to handle this
+             * new/unexpected operator, or the input ExpresssionTree
+             * is structured badly.
+             */
+            String s = "Unhandled IExpression: "+ex.toString();
+            throw(new IllegalArgumentException(s));
         }
-        return(null);
+
+        //System.out.println("Return null");
+        //return(null);
+        //return(classDescription);  // return value not matter?
     }
 
 

@@ -1,0 +1,40 @@
+===== My Property of type DATE_TIME, test for is null =====
+Original RowData:
+Epoch | Any
+  Epoch | My Property.someProp(time) is null
+  Epoch | Any Property.someAnyProp(time) is not null
+Test Translation: 
+Starting With RowData:
+Epoch | Any
+  Epoch | My Property.someProp(time) is null
+  Epoch | Any Property.someAnyProp(time) is not null
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(any)
+    OperatorExpression(elementsOfType)
+      OperatorExpression(myproperties)
+        StringLiteralValueExpression(someProp)
+        AttributeExpression(this)
+      ClassLiteralValueExpression(ovation.DateValue)
+    OperatorExpression(isnull)
+      AttributeExpression(value)
+      TimeLiteralValueExpression(null)
+  OperatorExpression(any)
+    OperatorExpression(elementsOfType)
+      OperatorExpression(properties)
+        StringLiteralValueExpression(someAnyProp)
+        AttributeExpression(this)
+      ClassLiteralValueExpression(ovation.DateValue)
+    OperatorExpression(not)
+      OperatorExpression(isnull)
+      AttributeExpression(value)
+      TimeLiteralValueExpression(null)
+ExpressionTree Translated Back To RowData:
+Epoch | Any
+  Epoch | My Property.someProp(time) is null
+  Epoch | Any Property.someAnyProp(time) is not null
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

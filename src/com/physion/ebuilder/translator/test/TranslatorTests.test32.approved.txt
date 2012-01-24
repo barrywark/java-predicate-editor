@@ -1,0 +1,49 @@
+===== Complicated containing_experiments =====
+Original RowData:
+Epoch | Any
+  Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
+  Epoch | epochGroup.is not null is not null
+  Epoch | Any
+    Epoch | epochGroup.source.containing experiments Count == "6"
+Test Translation: 
+Starting With RowData:
+Epoch | Any
+  Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
+  Epoch | epochGroup.is not null is not null
+  Epoch | Any
+    Epoch | epochGroup.source.containing experiments Count == "6"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(>=)
+    OperatorExpression(.)
+      OperatorExpression(as)
+        OperatorExpression(parameter)
+          OperatorExpression(.)
+            AttributeExpression(previousEpoch)
+            AttributeExpression(protocolParameters)
+          StringLiteralValueExpression(somePropName)
+        ClassLiteralValueExpression(ovation.IntegerValue)
+      AttributeExpression(value)
+    Int32LiteralValueExpression(5)
+  OperatorExpression(not)
+    OperatorExpression(isnull)
+      AttributeExpression(epochGroup)
+  OperatorExpression(or)
+    OperatorExpression(==)
+      OperatorExpression(count)
+        OperatorExpression(containing_experiments)
+          OperatorExpression(.)
+            AttributeExpression(epochGroup)
+            AttributeExpression(source)
+      Int32LiteralValueExpression(6)
+ExpressionTree Translated Back To RowData:
+Epoch | Any
+  Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
+  Epoch | epochGroup.is not null is not null
+  Epoch | Any
+    Epoch | epochGroup.source.containing experiments Count == "6"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

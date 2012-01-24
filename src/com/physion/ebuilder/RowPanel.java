@@ -626,19 +626,9 @@ class RowPanel
      * Set the model for the passed in comboBox to be the attributes
      * of the passed in classDescription.
      *
-     * In addition, we will (optionally) prepend the special
+     * In addition, we will prepend the special
      * Attribute.SELECT_ATTRIBUTE attribute, and we will append
-     * the special Attribute.IS_NULL and Attribute.IS_NOT_NULL,
-     * and we will append the special Attribute.MY_PROPERTY and
-     * Attribute.ANY_PROPERTY.
-     *
-     * Any attributes that are of type Type.PER_USER_OR_CUSTOM_REFERENCE_OPERATOR will cause
-     * two entries to be added to the comboBox model.  One entry
-     * will be prepended with the string "My" and the other with
-     * the string "All".  For example, if the attribute was called
-     * "analysisRecords", instead of inserting an entry called
-     * "analysisRecords" into the comboBox, we will insert two
-     * entries:  "My analysisRecords" and "All analysisRecords".
+     * the special Attribute.IS_NULL and Attribute.IS_NOT_NULL.
      *
      * @param comboBox The JComboBox whose model and selectedItem
      * we will set.
@@ -1311,13 +1301,20 @@ class RowPanel
 
             if (Attribute.IS_NULL.equals(rowData.getAttribute(index)) ||
                 Attribute.IS_NOT_NULL.equals(rowData.getAttribute(index))) {
-                /**
-                 * We have hit a special Attribute.IS_NULL or
-                 * Attribute.IS_NOT_NULL that is not really an Attribute.
-                 * So, ignore it.  (No other Attributes should be after
-                 * this one, so we can just break out of this for-loop.)
-                 */
-                break;
+
+                if ((index > 0) &&
+                    (rowData.getAttribute(index-1).getType() ==
+                     Type.DATE_TIME)) {
+                    /**
+                     * We have hit a special Attribute.IS_NULL or
+                     * Attribute.IS_NOT_NULL that is not really an Attribute.
+                     * And the Attribute before the null/notnull Attribute
+                     * was a DATE_TIME Attribute, so ignore it.
+                     * (No other Attributes should be after
+                     * this one, so we can just break out of this for-loop.)
+                     */
+                    break;
+                }
             }
 
             //System.out.println("Adding comboBox at gridx "+gridx);

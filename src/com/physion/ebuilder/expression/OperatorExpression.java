@@ -134,15 +134,6 @@ public class OperatorExpression
     /**
      * Get a string version of this class that can be used
      * for testing/debugging purposes.
-     */
-    public String toString() {
-        return(toString(""));
-    }
-
-
-    /**
-     * Get a string version of this class that can be used
-     * for testing/debugging purposes.
      *
      * @param indent The lines of the returned string will
      * all be indented by (at least) this amount.
