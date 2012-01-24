@@ -39,7 +39,7 @@ public enum Type {
     /**
      * This is a reference (always to-many?) with a custom
      * operator. This may be a "per-user" reference type.
-     * For example, the attributes:
+     * For example, the per-user attributes:
      *
      *      TaggableEntityBase.keywords
      *      Project.analysisRecords
