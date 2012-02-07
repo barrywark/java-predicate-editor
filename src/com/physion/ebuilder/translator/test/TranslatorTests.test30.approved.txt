@@ -1,17 +1,17 @@
 ===== Nested PER_USER_OR_CUSTOM_REFERENCE_OPERATOR With PM, PU, and PUPM Children =====
 Original RowData:
 Epoch | Any
-  Epoch | nextEpoch.My DerivedResponses None have Any
-    DerivedResponse | derivationParameters.someKey(boolean) is true
+  Epoch | Next Epoch.My DerivedResponses None have Any
+    DerivedResponse | Derivation Parameters.someKey(boolean) is true
     DerivedResponse | My Keywords Count == "5"
-    DerivedResponse | externalDevice.My Property.someKey2(float) == "34.5"
+    DerivedResponse | External Device.My Property.someKey2(float) == "34.5"
 Test Translation: 
 Starting With RowData:
 Epoch | Any
-  Epoch | nextEpoch.My DerivedResponses None have Any
-    DerivedResponse | derivationParameters.someKey(boolean) is true
+  Epoch | Next Epoch.My DerivedResponses None have Any
+    DerivedResponse | Derivation Parameters.someKey(boolean) is true
     DerivedResponse | My Keywords Count == "5"
-    DerivedResponse | externalDevice.My Property.someKey2(float) == "34.5"
+    DerivedResponse | External Device.My Property.someKey2(float) == "34.5"
 RowData Translated To Expression:
 CUQ: Epoch
 rootExpression:
@@ -46,10 +46,10 @@ OperatorExpression(or)
             Float64LiteralValueExpression(34.5)
 ExpressionTree Translated Back To RowData:
 Epoch | Any
-  Epoch | nextEpoch.My DerivedResponses None have Any
-    DerivedResponse | derivationParameters.someKey(boolean) is true
+  Epoch | Next Epoch.My DerivedResponses None have Any
+    DerivedResponse | Derivation Parameters.someKey(boolean) is true
     DerivedResponse | My Keywords Count == "5"
-    DerivedResponse | externalDevice.My Property.someKey2(float) == "34.5"
+    DerivedResponse | External Device.My Property.someKey2(float) == "34.5"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.
 Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

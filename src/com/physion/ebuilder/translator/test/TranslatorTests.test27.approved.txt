@@ -4,14 +4,14 @@ Epoch | Any
   Epoch | Any
     Epoch | All
       Epoch | None
-        Epoch | protocolID =~~ "xyz"
+        Epoch | Protocol ID =~~ "xyz"
 Test Translation: 
 Starting With RowData:
 Epoch | Any
   Epoch | Any
     Epoch | All
       Epoch | None
-        Epoch | protocolID =~~ "xyz"
+        Epoch | Protocol ID =~~ "xyz"
 RowData Translated To Expression:
 CUQ: Epoch
 rootExpression:
@@ -28,7 +28,7 @@ Epoch | Any
   Epoch | Any
     Epoch | All
       Epoch | None
-        Epoch | protocolID =~~ "xyz"
+        Epoch | Protocol ID =~~ "xyz"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.
 Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

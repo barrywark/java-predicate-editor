@@ -1,13 +1,13 @@
 ===== Compound Row ALL COUNT =====
 Original RowData:
 Epoch | All
-  Epoch | responses All have Any
-    Response | resources Count <= "5"
+  Epoch | Responses All have Any
+    Response | Resources Count <= "5"
 Test Translation: 
 Starting With RowData:
 Epoch | All
-  Epoch | responses All have Any
-    Response | resources Count <= "5"
+  Epoch | Responses All have Any
+    Response | Resources Count <= "5"
 RowData Translated To Expression:
 CUQ: Epoch
 rootExpression:
@@ -21,8 +21,8 @@ OperatorExpression(and)
         Int32LiteralValueExpression(5)
 ExpressionTree Translated Back To RowData:
 Epoch | All
-  Epoch | responses All have Any
-    Response | resources Count <= "5"
+  Epoch | Responses All have Any
+    Response | Resources Count <= "5"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.
 Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.
