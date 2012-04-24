@@ -2,15 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d72f3c4e-c872-48e7-839b-4d1ac8db54ca" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/swingx.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/org/jdesktop/swingx/DateTimePicker.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/datetimepicker3.3.jar" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/lib.xml" afterPath="$PROJECT_DIR$/.idea/libraries/lib.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Java-predicate-editor.iml" afterPath="$PROJECT_DIR$/Java-predicate-editor.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ivy.xml" afterPath="$PROJECT_DIR$/ivy.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/physion/ebuilder/RowPanel.java" afterPath="$PROJECT_DIR$/src/com/physion/ebuilder/RowPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/physion/ebuilder/Util.java" afterPath="$PROJECT_DIR$/src/com/physion/ebuilder/Util.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.rst" afterPath="$PROJECT_DIR$/README.rst" />
     </list>
     <ignored path="java-predicate-editor.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -95,10 +88,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RowPanel.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="RowPanel.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/RowPanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="395" column="48" selection-start="14147" selection-end="14147" vertical-scroll-proportion="0.8483412">
+            <state line="357" column="62" selection-start="12474" selection-end="12474" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#4934#4964#0" expanded="true" />
@@ -122,6 +115,15 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="README.rst" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.rst">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="42" column="22" selection-start="1840" selection-end="1840" vertical-scroll-proportion="0.75812274">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="Util.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/Util.java">
           <provider selected="true" editor-type-id="text-editor">
@@ -140,15 +142,6 @@
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RowDataToExpressionTree.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/RowDataToExpressionTree.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="390" column="58" selection-start="13958" selection-end="13958" vertical-scroll-proportion="0.0">
-              <folding />
             </state>
           </provider>
         </entry>
@@ -213,6 +206,7 @@
         <option value="$PROJECT_DIR$/src/org/jdesktop/swingx/DateTimePicker.java" />
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/Util.java" />
         <option value="$PROJECT_DIR$/src/com/physion/ebuilder/RowPanel.java" />
+        <option value="$PROJECT_DIR$/README.rst" />
       </list>
     </option>
   </component>
@@ -298,20 +292,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="ebuilder" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java-predicate-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java-predicate-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="lib" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -569,6 +549,11 @@
       <created>1324648383629</created>
       <updated>1324648383629</updated>
     </task>
+    <task id="LOCAL-00001" summary="Adds swingx dependency, and a JXDatePicker subclass to replace datetimepicker's proprietary (and ugly) DateTimePicker. We're now 100% OSS (with LGPL-licensed) DateTimePicker.">
+      <created>1335296760162</created>
+      <updated>1335296760162</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -636,7 +621,7 @@
     <option name="SHOW_VCS_ERROR_NOTIFICATIONS" value="true" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Getting close, but no cigar." />
+    <option name="LAST_COMMIT_MESSAGE" value="Adds swingx dependency, and a JXDatePicker subclass to replace datetimepicker's proprietary (and ugly) DateTimePicker. We're now 100% OSS (with LGPL-licensed) DateTimePicker." />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -659,6 +644,7 @@
     <MESSAGE value="Localized UI changes for containing experiments operator" />
     <MESSAGE value="Added EG_CONTAINING_EXPERIMENTS, but still not sure how to handle OperatorExpression =&gt; RowData translation in ExpressionTreeToRowData." />
     <MESSAGE value="Getting close, but no cigar." />
+    <MESSAGE value="Adds swingx dependency, and a JXDatePicker subclass to replace datetimepicker's proprietary (and ugly) DateTimePicker. We're now 100% OSS (with LGPL-licensed) DateTimePicker." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -687,11 +673,6 @@
     </buildFile>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/translator/test/TranslatorTests.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="70" column="55" selection-start="2656" selection-end="2656" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/expression/ExpressionTree.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="39" column="13" selection-start="1215" selection-end="1215" vertical-scroll-proportion="0.0" />
@@ -778,7 +759,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/physion/ebuilder/RowPanel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="395" column="48" selection-start="14147" selection-end="14147" vertical-scroll-proportion="0.8483412">
+        <state line="357" column="62" selection-start="12474" selection-end="12474" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#4934#4964#0" expanded="true" />
@@ -798,6 +779,13 @@
             <element signature="e#42905#42935#0" expanded="true" />
             <element signature="e#67165#67195#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="42" column="22" selection-start="1840" selection-end="1840" vertical-scroll-proportion="0.75812274">
+          <folding />
         </state>
       </provider>
     </entry>
