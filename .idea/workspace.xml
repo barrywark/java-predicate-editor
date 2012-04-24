@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d72f3c4e-c872-48e7-839b-4d1ac8db54ca" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.rst" afterPath="$PROJECT_DIR$/README.rst" />
     </list>
     <ignored path="java-predicate-editor.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -553,7 +552,11 @@
       <created>1335296760162</created>
       <updated>1335296760162</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Updated Readme license.txt for LGPL-licensed SwingX">
+      <created>1335296984387</created>
+      <updated>1335296984387</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -621,7 +624,7 @@
     <option name="SHOW_VCS_ERROR_NOTIFICATIONS" value="true" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adds swingx dependency, and a JXDatePicker subclass to replace datetimepicker's proprietary (and ugly) DateTimePicker. We're now 100% OSS (with LGPL-licensed) DateTimePicker." />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated Readme license.txt for LGPL-licensed SwingX" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -645,6 +648,7 @@
     <MESSAGE value="Added EG_CONTAINING_EXPERIMENTS, but still not sure how to handle OperatorExpression =&gt; RowData translation in ExpressionTreeToRowData." />
     <MESSAGE value="Getting close, but no cigar." />
     <MESSAGE value="Adds swingx dependency, and a JXDatePicker subclass to replace datetimepicker's proprietary (and ugly) DateTimePicker. We're now 100% OSS (with LGPL-licensed) DateTimePicker." />
+    <MESSAGE value="Updated Readme license.txt for LGPL-licensed SwingX" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
