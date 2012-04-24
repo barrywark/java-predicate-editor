@@ -13,6 +13,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +49,7 @@ import com.physion.ebuilder.datatypes.CollectionOperator;
 import com.physion.ebuilder.datatypes.Operator;
 import com.physion.ebuilder.datatypes.Type;
 import org.jdesktop.swingx.DateTimePicker;
+import org.jdesktop.swingx.JXDatePicker;
 
 
 /**
@@ -69,7 +75,7 @@ import org.jdesktop.swingx.DateTimePicker;
 class RowPanel
     extends JPanel
     implements ActionListener, DocumentListener, ChangeListener,
-        RowDataListener {
+        RowDataListener, VetoableChangeListener, FocusListener {
 
 	/**
 	 * We never serialize this class, so this declaration is
@@ -364,9 +370,13 @@ class RowPanel
         Util.setupAutoScrolling(propNameTextField);
 
         dateTimePicker = new DateTimePicker();
-        dateTimePicker.setFormats( DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) );
-        dateTimePicker.setTimeFormat( DateFormat.getTimeInstance( DateFormat.MEDIUM ) );
+        dateTimePicker.setFormats(
+                new DateFormat[] { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
+                DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT) }
+        );
+        dateTimePicker.setTimeFormat(DateFormat.getTimeInstance(DateFormat.MEDIUM));
         dateTimePicker.addActionListener(this);
+        dateTimePicker.getEditor().addFocusListener(this);
         Util.setupAutoScrolling(dateTimePicker);
 
         /**
@@ -784,7 +794,7 @@ class RowPanel
         else if (e.getSource() == deleteRowButton) {
             rowData.removeFromParent();
         }
-        else if (e.getSource() instanceof DateTimePicker) {
+        else if (e.getSource() instanceof JXDatePicker) {
             dateTimeChanged();
         }
         else if (e.getSource() instanceof JComboBox) {
@@ -811,6 +821,9 @@ class RowPanel
             return;
 
         Date date = dateTimePicker.getDate();
+
+        System.out.println("New date: " + date);
+
         rowData.setAttributeValue(date);
     }
 
@@ -2026,5 +2039,19 @@ class RowPanel
     public void paint(Graphics g) {
         super.paint(g);
         g.drawLine(0, getHeight()-1, getWidth()-1, getHeight()-1);
+    }
+
+    @Override
+    public void focusGained(FocusEvent focusEvent) {
+        System.out.println("Focus gained");
+        //pass
+    }
+
+    @Override
+    public void focusLost(FocusEvent focusEvent) {
+        System.out.println("Focus lost");
+        if (focusEvent.getComponent() == dateTimePicker.getEditor()) {
+            dateTimeChanged();
+        }
     }
 }

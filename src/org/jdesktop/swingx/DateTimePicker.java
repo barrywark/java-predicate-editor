@@ -1,6 +1,7 @@
 package org.jdesktop.swingx;
 
 import org.jdesktop.swingx.calendar.SingleDaySelectionModel;
+import sun.misc.Cleaner;
 
 import javax.swing.*;
 import javax.swing.text.DefaultFormatterFactory;
@@ -85,8 +86,7 @@ public class DateTimePicker extends JXDatePicker {
             calendar.setTime(date);
             calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get( Calendar.HOUR_OF_DAY ) );
             calendar.set(Calendar.MINUTE, timeCalendar.get( Calendar.MINUTE ) );
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.set(Calendar.SECOND, timeCalendar.get( Calendar.SECOND ));
 
             Date newDate = calendar.getTime();
             setDate(newDate);
