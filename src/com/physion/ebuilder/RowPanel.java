@@ -75,7 +75,7 @@ import org.jdesktop.swingx.JXDatePicker;
 class RowPanel
     extends JPanel
     implements ActionListener, DocumentListener, ChangeListener,
-        RowDataListener, VetoableChangeListener, FocusListener {
+        RowDataListener, FocusListener {
 
 	/**
 	 * We never serialize this class, so this declaration is
