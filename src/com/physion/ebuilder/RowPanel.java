@@ -13,6 +13,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -32,8 +33,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
-import com.lavantech.gui.comp.DateTimePicker;
-import com.lavantech.gui.comp.TimePanel;
 import com.physion.ebuilder.datamodel.DataModel;
 import com.physion.ebuilder.datamodel.RowData;
 import com.physion.ebuilder.datamodel.RowDataEvent;
@@ -44,6 +43,7 @@ import com.physion.ebuilder.datatypes.ClassDescription;
 import com.physion.ebuilder.datatypes.CollectionOperator;
 import com.physion.ebuilder.datatypes.Operator;
 import com.physion.ebuilder.datatypes.Type;
+import org.jdesktop.swingx.DateTimePicker;
 
 
 /**
@@ -364,8 +364,8 @@ class RowPanel
         Util.setupAutoScrolling(propNameTextField);
 
         dateTimePicker = new DateTimePicker();
-        TimePanel timePanel = dateTimePicker.getTimePanel();
-        timePanel.setSecDisplayed(false);
+        dateTimePicker.setFormats( DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) );
+        dateTimePicker.setTimeFormat( DateFormat.getTimeInstance( DateFormat.MEDIUM ) );
         dateTimePicker.addActionListener(this);
         Util.setupAutoScrolling(dateTimePicker);
 
@@ -1006,23 +1006,7 @@ class RowPanel
             if (component.isFocusable()) {
 
                 if (!(component == buttonPanel)) {
-                    /**
-                     * Set the focus to "component".
-                     * Note we have to handle the DateTimePicker
-                     * specially to get the focus into one of its
-                     * sub-components.
-                     */
-                    if (component == dateTimePicker) {
-                        dateTimePicker.getRenderer().requestFocusInWindow();
-                    }
-                    else {
-                        /**
-                         * It is an ordinary Component, so we
-                         * can simply call requestFocusInWindow()
-                         * to set the focus to it.
-                         */
-                        component.requestFocusInWindow();
-                    }
+                    component.requestFocusInWindow();
                 }
                 else {
                     /**
