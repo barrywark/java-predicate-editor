@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.text.DateFormat;
@@ -371,12 +372,21 @@ class RowPanel
 
         dateTimePicker = new DateTimePicker();
         dateTimePicker.setFormats(
-                new DateFormat[] { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
-                DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT) }
+                new DateFormat[]{DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
+                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)}
         );
         dateTimePicker.setTimeFormat(DateFormat.getTimeInstance(DateFormat.MEDIUM));
         dateTimePicker.addActionListener(this);
-        dateTimePicker.getEditor().addFocusListener(this);
+        dateTimePicker.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+                if("date".equals(propertyChangeEvent.getPropertyName())) {
+                    System.out.println("Date changed");
+                    dateTimeChanged();
+                }
+            }
+        });
+        //dateTimePicker.getEditor().addFocusListener(this);
         Util.setupAutoScrolling(dateTimePicker);
 
         /**
