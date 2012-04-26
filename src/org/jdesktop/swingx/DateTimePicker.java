@@ -3,7 +3,7 @@ package org.jdesktop.swingx;
 import org.jdesktop.swingx.calendar.SingleDaySelectionModel;
 
 import java.text.DateFormat;
-import java.util.*;
+import java.util.Date;
 
 /**
  * This is licensed under LGPL.  License can be found here:  http://www.gnu.org/licenses/lgpl-3.0.txt

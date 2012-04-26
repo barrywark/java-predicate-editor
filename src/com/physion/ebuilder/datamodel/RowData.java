@@ -4,29 +4,17 @@
  */
 package com.physion.ebuilder.datamodel;
 
-import java.lang.ClassNotFoundException;
-import java.io.InvalidClassException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.io.IOException;
+import com.physion.ebuilder.datatypes.*;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 
+import javax.swing.event.EventListenerList;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import javax.swing.event.EventListenerList;
-
-import com.physion.ebuilder.datatypes.ClassDescription;
-import com.physion.ebuilder.datatypes.Attribute;
-import com.physion.ebuilder.datatypes.Operator;
-import com.physion.ebuilder.datatypes.CollectionOperator;
-import com.physion.ebuilder.datatypes.Type;
-import com.physion.ebuilder.datatypes.Cardinality;
-import org.apache.log4j.Logger;
+import java.util.List;
 
 
 /**
@@ -990,7 +978,7 @@ public class RowData
             (attributeOperator != Operator.IS_NULL) &&
             (attributeOperator != Operator.IS_NOT_NULL) &&
             ((getAttributeValue() == null) ||
-             !(getAttributeValue() instanceof Date))) {
+             !(getAttributeValue() instanceof Date || getAttributeValue() instanceof LocalDateTime))) { //TODO convert to DateTime
             setAttributeValue(new Date());
         }
 
@@ -2341,6 +2329,8 @@ public class RowData
          * listeners and other things like that.  We just want
          * the data values.
          */
+
+        System.out.println("rowData write attribute value: " + getAttributeValue());
         RowData rowData = new RowData(this);
         outputStream.writeObject(rowData);
     }

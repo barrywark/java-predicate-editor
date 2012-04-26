@@ -4,53 +4,31 @@
  */
 package com.physion.ebuilder;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import com.physion.ebuilder.datamodel.DataModel;
+import com.physion.ebuilder.datamodel.RowData;
+import com.physion.ebuilder.datamodel.RowDataEvent;
+import com.physion.ebuilder.datamodel.RowDataListener;
+import com.physion.ebuilder.datatypes.*;
+import org.jdesktop.swingx.DateTimePicker;
+import org.jdesktop.swingx.JXDatePicker;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 
-import javax.swing.BorderFactory;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
+import javax.swing.*;
 import javax.swing.FocusManager;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
-
-import com.physion.ebuilder.datamodel.DataModel;
-import com.physion.ebuilder.datamodel.RowData;
-import com.physion.ebuilder.datamodel.RowDataEvent;
-import com.physion.ebuilder.datamodel.RowDataListener;
-import com.physion.ebuilder.datatypes.Attribute;
-import com.physion.ebuilder.datatypes.Cardinality;
-import com.physion.ebuilder.datatypes.ClassDescription;
-import com.physion.ebuilder.datatypes.CollectionOperator;
-import com.physion.ebuilder.datatypes.Operator;
-import com.physion.ebuilder.datatypes.Type;
-import org.jdesktop.swingx.DateTimePicker;
-import org.jdesktop.swingx.JXDatePicker;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 
 /**
@@ -381,12 +359,10 @@ class RowPanel
             @Override
             public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
                 if("date".equals(propertyChangeEvent.getPropertyName())) {
-                    System.out.println("Date changed");
                     dateTimeChanged();
                 }
             }
         });
-        //dateTimePicker.getEditor().addFocusListener(this);
         Util.setupAutoScrolling(dateTimePicker);
 
         /**
@@ -833,7 +809,7 @@ class RowPanel
         Date date = dateTimePicker.getDate();
 
         rowData.setAttributeValue(date);
-        System.out.println("New rowData date: " + rowData.getAttributeValue());
+        //System.out.println("New rowData date: " + rowData.getAttributeValue());
     }
 
 
@@ -1492,8 +1468,11 @@ class RowPanel
                     rowData.getAttributeOperator());
                 if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
                     (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
-                    System.out.println("rowData date: " + (Date)rowData.getAttributeValue());
-                    dateTimePicker.setDate((Date)rowData.getAttributeValue());
+                    if(rowData.getAttributeValue() instanceof Date) {
+                        dateTimePicker.setDate((Date)rowData.getAttributeValue());
+                    } else {
+                        dateTimePicker.setDate(((LocalDateTime)rowData.getAttributeValue()).toDateTime(DateTimeZone.UTC).toDate());
+                    }
                 }
             }
             else if (childmostAttribute.getType() == Type.INT_16) {

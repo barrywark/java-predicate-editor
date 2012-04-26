@@ -67,6 +67,7 @@
         <ivy:retrieve/>
     </target>
 
+    <!--TODO: convert to paths, and use pathrefs-->
     <target name="compile-production">
         <mkdir dir="${production.classes.dir}"/>
 
@@ -78,6 +79,7 @@
             />
     </target>
 
+    <!--TODO: update for libraries, replace datetimepicker with swingx-->
     <target name="jar" depends="compile-production">
         <mkdir dir="${artifacts.dir}"/>
         <jar destfile="${output.jar.path}">
