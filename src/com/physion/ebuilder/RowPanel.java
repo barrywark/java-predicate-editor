@@ -76,7 +76,7 @@ import org.jdesktop.swingx.JXDatePicker;
 class RowPanel
     extends JPanel
     implements ActionListener, DocumentListener, ChangeListener,
-        RowDataListener, FocusListener {
+        RowDataListener {
 
 	/**
 	 * We never serialize this class, so this declaration is
@@ -832,9 +832,8 @@ class RowPanel
 
         Date date = dateTimePicker.getDate();
 
-        System.out.println("New date: " + date);
-
         rowData.setAttributeValue(date);
+        System.out.println("New rowData date: " + rowData.getAttributeValue());
     }
 
 
@@ -1493,6 +1492,7 @@ class RowPanel
                     rowData.getAttributeOperator());
                 if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
                     (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
+                    System.out.println("rowData date: " + (Date)rowData.getAttributeValue());
                     dateTimePicker.setDate((Date)rowData.getAttributeValue());
                 }
             }
@@ -2049,19 +2049,5 @@ class RowPanel
     public void paint(Graphics g) {
         super.paint(g);
         g.drawLine(0, getHeight()-1, getWidth()-1, getHeight()-1);
-    }
-
-    @Override
-    public void focusGained(FocusEvent focusEvent) {
-        System.out.println("Focus gained");
-        //pass
-    }
-
-    @Override
-    public void focusLost(FocusEvent focusEvent) {
-        System.out.println("Focus lost");
-        if (focusEvent.getComponent() == dateTimePicker.getEditor()) {
-            dateTimeChanged();
-        }
     }
 }

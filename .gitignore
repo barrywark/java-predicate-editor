@@ -15,3 +15,5 @@ temp.rowData
 build/
 artifacts/
 saved.ExpTree
+
+.idea/workspace.xml
