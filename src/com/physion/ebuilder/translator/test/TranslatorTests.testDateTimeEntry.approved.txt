@@ -1,0 +1,21 @@
+===== DateTime entry =====
+Original RowData:
+Epoch | Any
+  Epoch | Start Time == "1979-12-01T09:00:00.000Z"
+Test Translation: 
+Starting With RowData:
+Epoch | Any
+  Epoch | Start Time == "1979-12-01T09:00:00.000Z"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(==)
+    AttributeExpression(startTime)
+    TimeLiteralValueExpression(1979-12-01T09:00:00.000Z)
+ExpressionTree Translated Back To RowData:
+Epoch | Any
+  Epoch | Start Time == "1979-12-01T09:00:00.000Z"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.
