@@ -17,8 +17,6 @@ import org.approvaltests.reporters.JunitReporter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import java.util.Date;
-
 
 /**
  * Tests for the Translator subclasses and for serialization.
@@ -775,7 +773,7 @@ public class TranslatorTests
         rowData.setPropName("someTimeKey");
         rowData.setPropType(Type.DATE_TIME);
         rowData.setAttributeOperator(Operator.EQUALS);
-        rowData.setAttributeValue(new Date(1262304000000L));
+        rowData.setAttributeValue(new DateTime(1262304000000L));
         rootRow.addChildRow(rowData);
 
         String s = getResultsString("PARAMETERS_MAP Type Date", rootRow);
@@ -1564,7 +1562,7 @@ public class TranslatorTests
         RowData rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("startTime"));
         rowData.setAttributeOperator(Operator.fromString("=="));
-        rowData.setAttributeValue(new DateTime(1979, 12, 1, 9, 0, 0, 0, DateTimeZone.UTC).toDate());
+        rowData.setAttributeValue(new DateTime(1979, 12, 1, 9, 0, 0, 0, DateTimeZone.UTC));
         rootRow.addChildRow(rowData);
 
         String s = getResultsString("DateTime entry", rootRow);

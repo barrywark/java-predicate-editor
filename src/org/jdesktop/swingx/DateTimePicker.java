@@ -1,9 +1,10 @@
 package org.jdesktop.swingx;
 
 import org.jdesktop.swingx.calendar.SingleDaySelectionModel;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.text.DateFormat;
-import java.util.Date;
 
 /**
  * This is licensed under LGPL.  License can be found here:  http://www.gnu.org/licenses/lgpl-3.0.txt
@@ -18,13 +19,17 @@ public class DateTimePicker extends JXDatePicker {
         getMonthView().setSelectionModel(new SingleDaySelectionModel());
     }
 
-    public DateTimePicker( Date d ) {
+    public DateTimePicker( DateTime d ) {
         this();
-        setDate(d);
+        setDate(d.toDate());
     }
 
     public DateFormat getTimeFormat() {
         return timeFormat;
+    }
+
+    public void setDate(DateTime d) {
+        super.setDate(d.withZone(DateTimeZone.forTimeZone(getTimeZone())).toDate());
     }
 
     public void setTimeFormat(DateFormat timeFormat) {

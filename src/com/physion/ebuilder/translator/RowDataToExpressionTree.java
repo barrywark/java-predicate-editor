@@ -10,8 +10,8 @@ import com.physion.ebuilder.datatypes.CollectionOperator;
 import com.physion.ebuilder.datatypes.Operator;
 import com.physion.ebuilder.datatypes.Type;
 import com.physion.ebuilder.expression.*;
+import org.joda.time.DateTime;
 
-import java.util.Date;
 import java.util.List;
 
 
@@ -586,8 +586,7 @@ public class RowDataToExpressionTree
                        ((Number)rowData.getAttributeValue()).doubleValue()));
 
             case DATE_TIME:
-                return(new TimeLiteralValueExpression(
-                       ((Date)rowData.getAttributeValue())));
+                return(new TimeLiteralValueExpression((DateTime)rowData.getAttributeValue()));
 
             case REFERENCE:
                 return(new ClassLiteralValueExpression(

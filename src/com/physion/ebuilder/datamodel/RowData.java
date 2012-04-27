@@ -7,12 +7,12 @@ package com.physion.ebuilder.datamodel;
 import com.physion.ebuilder.datatypes.*;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 
 import javax.swing.event.EventListenerList;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -973,13 +973,13 @@ public class RowData
          * make sure the attributeValue is a Date.
          */
         if ((getChildmostAttribute() != null) &&
-            (Type.DATE_TIME.equals(getChildmostAttribute().getType()) ||
-             Type.DATE_TIME.equals(getPropType())) &&
-            (attributeOperator != Operator.IS_NULL) &&
-            (attributeOperator != Operator.IS_NOT_NULL) &&
-            ((getAttributeValue() == null) ||
-             !(getAttributeValue() instanceof Date || getAttributeValue() instanceof LocalDateTime))) { //TODO convert to DateTime
-            setAttributeValue(new Date());
+                (Type.DATE_TIME.equals(getChildmostAttribute().getType()) ||
+                        Type.DATE_TIME.equals(getPropType())) &&
+                (attributeOperator != Operator.IS_NULL) &&
+                (attributeOperator != Operator.IS_NOT_NULL) &&
+                ((getAttributeValue() == null) ||
+                        !(getAttributeValue() instanceof DateTime))) {
+            setAttributeValue(new DateTime().withZone(DateTimeZone.UTC));
         }
 
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
@@ -1739,8 +1739,8 @@ public class RowData
                 if (!Operator.isOperatorDateTime(attributeOperator)) {
                     setAttributeOperator(Operator.OPERATORS_DATE_TIME[0]);
                 }
-                if (!(getAttributeValue() instanceof Date))
-                    setAttributeValue(new Date());
+                if (!(getAttributeValue() instanceof LocalDateTime))
+                    setAttributeValue(new LocalDateTime(DateTimeZone.UTC));
             break;
             default:
                 System.err.println("ERROR:  Unhandled type.\n"+
@@ -2222,7 +2222,7 @@ public class RowData
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("endTime"));
         rowData.setAttributeOperator(Operator.LESS_THAN_EQUALS);
-        rowData.setAttributeValue(new Date());
+        rowData.setAttributeValue(new LocalDateTime(DateTimeZone.UTC));
         rootRow.addChildRow(rowData);
 
         /**
