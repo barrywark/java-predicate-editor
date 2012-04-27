@@ -1,11 +1,11 @@
 ===== PARAMETERS_MAP Type Date =====
 Original RowData:
 Epoch | All
-  Epoch | protocolParameters.someTimeKey(time) == "Thu Dec 31 19:00:00 EST 2009"
+  Epoch | Protocol Parameters.someTimeKey(time) == "Thu Dec 31 19:00:00 EST 2009"
 Test Translation: 
 Starting With RowData:
 Epoch | All
-  Epoch | protocolParameters.someTimeKey(time) == "Thu Dec 31 19:00:00 EST 2009"
+  Epoch | Protocol Parameters.someTimeKey(time) == "Thu Dec 31 19:00:00 EST 2009"
 RowData Translated To Expression:
 CUQ: Epoch
 rootExpression:
@@ -21,7 +21,7 @@ OperatorExpression(and)
     TimeLiteralValueExpression(Thu Dec 31 19:00:00 EST 2009)
 ExpressionTree Translated Back To RowData:
 Epoch | All
-  Epoch | protocolParameters.someTimeKey(time) == "2009-12-31T19:00:00.000"
+  Epoch | Protocol Parameters.someTimeKey(time) == "2009-12-31T19:00:00.000"
 ERROR:  Original and translated versions are different.
 Test RowData Serialization: RowData de/serialization succeed.
 Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

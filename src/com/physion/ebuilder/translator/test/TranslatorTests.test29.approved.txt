@@ -1,14 +1,14 @@
 ===== Nested PER_USER_OR_CUSTOM_REFERENCE_OPERATOR With PARAMETERS_MAP & PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Children =====
 Original RowData:
 Epoch | Any
-  Epoch | nextEpoch.My DerivedResponses None have Any
-    DerivedResponse | derivationParameters.someKey(boolean) is true
+  Epoch | Next Epoch.My DerivedResponses None have Any
+    DerivedResponse | Derivation Parameters.someKey(boolean) is true
     DerivedResponse | My Keywords Count == "5"
 Test Translation: 
 Starting With RowData:
 Epoch | Any
-  Epoch | nextEpoch.My DerivedResponses None have Any
-    DerivedResponse | derivationParameters.someKey(boolean) is true
+  Epoch | Next Epoch.My DerivedResponses None have Any
+    DerivedResponse | Derivation Parameters.someKey(boolean) is true
     DerivedResponse | My Keywords Count == "5"
 RowData Translated To Expression:
 CUQ: Epoch
@@ -35,8 +35,8 @@ OperatorExpression(or)
           Int32LiteralValueExpression(5)
 ExpressionTree Translated Back To RowData:
 Epoch | Any
-  Epoch | nextEpoch.My DerivedResponses None have Any
-    DerivedResponse | derivationParameters.someKey(boolean) is true
+  Epoch | Next Epoch.My DerivedResponses None have Any
+    DerivedResponse | Derivation Parameters.someKey(boolean) is true
     DerivedResponse | My Keywords Count == "5"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.

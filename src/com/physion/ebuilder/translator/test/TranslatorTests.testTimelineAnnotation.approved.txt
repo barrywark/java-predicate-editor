@@ -2,12 +2,12 @@
 Original RowData:
 Epoch | All
   Epoch | All Timeline Annotations Any have Any
-    TimelineAnnotation | startTimeZone == "America/Chicago"
+    TimelineAnnotation | Start Timezone == "America/Chicago"
 Test Translation: 
 Starting With RowData:
 Epoch | All
   Epoch | All Timeline Annotations Any have Any
-    TimelineAnnotation | startTimeZone == "America/Chicago"
+    TimelineAnnotation | Start Timezone == "America/Chicago"
 RowData Translated To Expression:
 CUQ: Epoch
 rootExpression:
@@ -22,7 +22,7 @@ OperatorExpression(and)
 ExpressionTree Translated Back To RowData:
 Epoch | All
   Epoch | All Timeline Annotations Any have Any
-    TimelineAnnotation | startTimeZone == "America/Chicago"
+    TimelineAnnotation | Start Timezone == "America/Chicago"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.
 Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

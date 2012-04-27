@@ -1,17 +1,17 @@
 ===== Complicated containing_experiments =====
 Original RowData:
 Epoch | Any
-  Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
-  Epoch | epochGroup.is not null is not null
+  Epoch | Previous Epoch.Protocol Parameters.somePropName(int) >= "5"
+  Epoch | Epoch Group.is not null is not null
   Epoch | Any
-    Epoch | epochGroup.source.containing experiments Count == "6"
+    Epoch | Epoch Group.Source.Containing Experiments Count == "6"
 Test Translation: 
 Starting With RowData:
 Epoch | Any
-  Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
-  Epoch | epochGroup.is not null is not null
+  Epoch | Previous Epoch.Protocol Parameters.somePropName(int) >= "5"
+  Epoch | Epoch Group.is not null is not null
   Epoch | Any
-    Epoch | epochGroup.source.containing experiments Count == "6"
+    Epoch | Epoch Group.Source.Containing Experiments Count == "6"
 RowData Translated To Expression:
 CUQ: Epoch
 rootExpression:
@@ -40,10 +40,10 @@ OperatorExpression(or)
       Int32LiteralValueExpression(6)
 ExpressionTree Translated Back To RowData:
 Epoch | Any
-  Epoch | previousEpoch.protocolParameters.somePropName(int) >= "5"
-  Epoch | epochGroup.is not null is not null
+  Epoch | Previous Epoch.Protocol Parameters.somePropName(int) >= "5"
+  Epoch | Epoch Group.is not null is not null
   Epoch | Any
-    Epoch | epochGroup.source.containing experiments Count == "6"
+    Epoch | Epoch Group.Source.Containing Experiments Count == "6"
 Original and translated versions are the same.
 Test RowData Serialization: RowData de/serialization succeed.
 Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.
