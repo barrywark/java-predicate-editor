@@ -67,13 +67,20 @@
         <ivy:retrieve/>
     </target>
 
-    <!--TODO: convert to paths, and use pathrefs-->
+    <property name="swingx.jar.path" value="${lib.dir}/swingx-1.6.1.jar"/>
+    <path id="lib-path">
+        <pathelement location="${jodatime.jar.path}"/>
+        <pathelement location="${log4j.jar.path}"/>
+        <pathelement location="${swingx.jar.path}"/>
+        <pathelement location="${junit.jar.path}"/>
+        <pathelement location="${approvaltests.jar.path}"/>
+    </path>
     <target name="compile-production">
         <mkdir dir="${production.classes.dir}"/>
 
         <javac srcdir="${production.src.dir}"
             destdir="${production.classes.dir}"
-            classpath="${datetimepicker.jar.path}:${jodatime.jar.path}:${log4j.jar.path}:${junit.jar.path}:${approvaltests.jar.path}"
+            classpathref="lib-path"
             includeAntRuntime="no"
             debug="true"
             />
@@ -88,7 +95,7 @@
                 <attribute name="Main-Class"
                     value="com.physion.ebuilder.ExpressionBuilder"/>
             </manifest>
-            <zipfileset includes="**/*" src="${datetimepicker.jar.path}"/>
+            <zipfileset includes="**/*" src="${swingx.jar.path}"/>
             <zipfileset includes="**/*" src="${jodatime.jar.path}"/>
             <zipfileset includes="**/*" src="${log4j.jar.path}"/>
         </jar>
