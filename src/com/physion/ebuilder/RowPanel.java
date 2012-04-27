@@ -13,7 +13,6 @@ import org.jdesktop.swingx.DateTimePicker;
 import org.jdesktop.swingx.JXDatePicker;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDateTime;
 
 import javax.swing.*;
 import javax.swing.FocusManager;
@@ -817,7 +816,7 @@ class RowPanel
 
         Date date = dateTimePicker.getDate();
 
-        rowData.setAttributeValue(new LocalDateTime(date, DateTimeZone.UTC));
+        rowData.setAttributeValue(new DateTime(date, DateTimeZone.forTimeZone(dateTimePicker.getTimeZone())));
         //System.out.println("New rowData date: " + rowData.getAttributeValue());
     }
 
@@ -1482,7 +1481,7 @@ class RowPanel
                     (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
                     if(rowData.getAttributeValue() instanceof DateTime) {
                         dateTimePicker.setDate(
-                                ((DateTime)rowData.getAttributeValue()));
+                                ((DateTime) rowData.getAttributeValue()));
                     }
                 }
             }
