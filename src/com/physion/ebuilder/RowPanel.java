@@ -4,46 +4,32 @@
  */
 package com.physion.ebuilder;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Date;
+import com.physion.ebuilder.datamodel.DataModel;
+import com.physion.ebuilder.datamodel.RowData;
+import com.physion.ebuilder.datamodel.RowDataEvent;
+import com.physion.ebuilder.datamodel.RowDataListener;
+import com.physion.ebuilder.datatypes.*;
+import org.jdesktop.swingx.DateTimePicker;
+import org.jdesktop.swingx.JXDatePicker;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
-import javax.swing.BorderFactory;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
+import javax.swing.*;
 import javax.swing.FocusManager;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
-
-import com.lavantech.gui.comp.DateTimePicker;
-import com.lavantech.gui.comp.TimePanel;
-import com.physion.ebuilder.datamodel.DataModel;
-import com.physion.ebuilder.datamodel.RowData;
-import com.physion.ebuilder.datamodel.RowDataEvent;
-import com.physion.ebuilder.datamodel.RowDataListener;
-import com.physion.ebuilder.datatypes.Attribute;
-import com.physion.ebuilder.datatypes.Cardinality;
-import com.physion.ebuilder.datatypes.ClassDescription;
-import com.physion.ebuilder.datatypes.CollectionOperator;
-import com.physion.ebuilder.datatypes.Operator;
-import com.physion.ebuilder.datatypes.Type;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 
 
 /**
@@ -364,9 +350,21 @@ class RowPanel
         Util.setupAutoScrolling(propNameTextField);
 
         dateTimePicker = new DateTimePicker();
-        TimePanel timePanel = dateTimePicker.getTimePanel();
-        timePanel.setSecDisplayed(false);
+        dateTimePicker.setTimeZone(TimeZone.getTimeZone("UTC"));
+        dateTimePicker.setFormats(
+                new DateFormat[]{DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
+                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)}
+        );
+        dateTimePicker.setTimeFormat(DateFormat.getTimeInstance(DateFormat.MEDIUM));
         dateTimePicker.addActionListener(this);
+        dateTimePicker.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+                if("date".equals(propertyChangeEvent.getPropertyName())) {
+                    dateTimeChanged();
+                }
+            }
+        });
         Util.setupAutoScrolling(dateTimePicker);
 
         /**
@@ -462,10 +460,11 @@ class RowPanel
 	private JComboBox createComboBox(ComboBoxModel model) {
 
         JComboBox comboBox;
-        if (model == null)
+        if (model == null) {
             comboBox = new JComboBox();
-        else
+        } else {
             comboBox = new JComboBox(model);
+        }
 
         comboBox.setEditable(false);
         Util.setupAutoScrolling(comboBox);
@@ -498,8 +497,9 @@ class RowPanel
      */
     private void initializeComponents() {
 
-        if (inProcess)
+        if (inProcess) {
             return;
+        }
 
         inProcess = true;
         initializeComponentsProtected();
@@ -561,10 +561,11 @@ class RowPanel
         gc = new GridBagConstraints();
         gc.gridx = gridx++;
         add(indentWidget, gc);
-        if (rowData != null)
+        if (rowData != null) {
             indentWidget.setText(rowData.getIndentString());
-        else
+        } else {
             indentWidget.setText("");
+        }
 
         /**
          * Now add the components that are needed.
@@ -614,10 +615,11 @@ class RowPanel
          * focusable component is in this RowPanel.
          */
         if (componentWithFocus != null) {
-            if (componentWithFocus.getParent() != null)
+            if (componentWithFocus.getParent() != null) {
                 componentWithFocus.requestFocusInWindow();
-            else
+            } else {
                 setFocusToFirstFocusableComponent();
+            }
         }
     }
 
@@ -702,8 +704,9 @@ class RowPanel
 
         DefaultComboBoxModel model = new DefaultComboBoxModel(items);
         comboBox.setModel(model);
-        if (selectedItem != null)
+        if (selectedItem != null) {
             comboBox.setSelectedItem(selectedItem);
+        }
 
         if (((DefaultComboBoxModel)(comboBox.getModel())).
             getIndexOf(selectedItem) < 0) {
@@ -784,7 +787,7 @@ class RowPanel
         else if (e.getSource() == deleteRowButton) {
             rowData.removeFromParent();
         }
-        else if (e.getSource() instanceof DateTimePicker) {
+        else if (e.getSource() instanceof JXDatePicker) {
             dateTimeChanged();
         }
         else if (e.getSource() instanceof JComboBox) {
@@ -807,11 +810,14 @@ class RowPanel
          * If we are in the process of updating the RowData due
          * to a programmatic change, ignore this.
          */
-        if (inProcess)
+        if (inProcess) {
             return;
+        }
 
         Date date = dateTimePicker.getDate();
-        rowData.setAttributeValue(date);
+
+        rowData.setAttributeValue(new DateTime(date, DateTimeZone.forTimeZone(dateTimePicker.getTimeZone())));
+        //System.out.println("New rowData date: " + rowData.getAttributeValue());
     }
 
 
@@ -827,8 +833,9 @@ class RowPanel
          * If we are in the process of updating the RowData due
          * to a comboBox change, ignore this change.
          */
-        if (inProcess)
+        if (inProcess) {
             return;
+        }
 
         /**
          * Change the appropriate value in this row's RowData
@@ -996,8 +1003,9 @@ class RowPanel
          * had the focus, but we don't want to move the focus to
          * the JPanel that holds the buttons.
          */
-        if ((focusedComboBoxIndex + 1) < (components.length - 1))
+        if ((focusedComboBoxIndex + 1) < (components.length - 1)) {
             focusedComboBoxIndex++;
+        }
 
         for (int index = focusedComboBoxIndex;
              index < components.length; index++) {
@@ -1006,23 +1014,7 @@ class RowPanel
             if (component.isFocusable()) {
 
                 if (!(component == buttonPanel)) {
-                    /**
-                     * Set the focus to "component".
-                     * Note we have to handle the DateTimePicker
-                     * specially to get the focus into one of its
-                     * sub-components.
-                     */
-                    if (component == dateTimePicker) {
-                        dateTimePicker.getRenderer().requestFocusInWindow();
-                    }
-                    else {
-                        /**
-                         * It is an ordinary Component, so we
-                         * can simply call requestFocusInWindow()
-                         * to set the focus to it.
-                         */
-                        component.requestFocusInWindow();
-                    }
+                    component.requestFocusInWindow();
                 }
                 else {
                     /**
@@ -1154,8 +1146,9 @@ class RowPanel
         GridBagConstraints gc = new GridBagConstraints();
         gc.gridx = gridx++;
         gc.anchor = GridBagConstraints.EAST;
-        if (someWidgetFillingEmptySpace == false)
+        if (someWidgetFillingEmptySpace == false) {
             gc.weightx = 1;
+        }
         add(buttonPanel, gc);
     }
 
@@ -1486,7 +1479,10 @@ class RowPanel
                     rowData.getAttributeOperator());
                 if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
                     (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
-                    dateTimePicker.setDate((Date)rowData.getAttributeValue());
+                    if(rowData.getAttributeValue() instanceof DateTime) {
+                        dateTimePicker.setDate(
+                                ((DateTime) rowData.getAttributeValue()));
+                    }
                 }
             }
             else if (childmostAttribute.getType() == Type.INT_16) {
@@ -1520,8 +1516,9 @@ class RowPanel
                 operatorComboBox.setSelectedItem(
                     rowData.getAttributeOperator());
                 Object attributeValue = rowData.getAttributeValue();
-                if (attributeValue == null)
+                if (attributeValue == null) {
                     attributeValue = "";
+                }
                 valueTextField.setText(attributeValue.toString());
             }
         }
@@ -1666,11 +1663,12 @@ class RowPanel
             else if ((rowData.getPropType() == Type.FLOAT_64) ||
                      (rowData.getPropType() == Type.UTF_8_STRING)) {
 
-                if (rowData.getAttributeValue() != null)
+                if (rowData.getAttributeValue() != null) {
                     valueTextField.setText(
-                        rowData.getAttributeValue().toString());
-                else
+                            rowData.getAttributeValue().toString());
+                } else {
                     valueTextField.setText("");
+                }
             }
             else if (rowData.getPropType() == Type.DATE_TIME) {
                 /**
@@ -1681,13 +1679,11 @@ class RowPanel
                 if ((rowData.getAttributeOperator() != Operator.IS_NULL) &&
                     (rowData.getAttributeOperator() != Operator.IS_NOT_NULL)) {
 
-                    if (rowData.getAttributeValue() instanceof Date) {
-                        dateTimePicker.setDate(
-                            (Date)rowData.getAttributeValue());
-                    }
-                    else {
-                        System.err.println("attributeValue not an instance "+
-                            "of a Date.  This should never happen.");
+                    if (rowData.getAttributeValue() instanceof DateTime) {
+                        dateTimePicker.setDate((DateTime)rowData.getAttributeValue());
+                    } else {
+                        System.err.println("attributeValue not an instance " +
+                                                   "of a Date.  This should never happen.");
                     }
                 }
             }
@@ -1998,8 +1994,9 @@ class RowPanel
          * If we are in the process of updating the RowData due
          * to a programmatic change, ignore this.
          */
-        if (inProcess)
+        if (inProcess) {
             return;
+        }
 
         Object value = ((JSpinner)event.getSource()).getValue();
         rowData.setAttributeValue(value);
@@ -2016,13 +2013,15 @@ class RowPanel
          * If we are in the process of updating the RowData due
          * to a programmatic change, ignore this.
          */
-        if (inProcess)
+        if (inProcess) {
             return;
+        }
 
-        if (document == valueTextField.getDocument())
+        if (document == valueTextField.getDocument()) {
             rowData.setAttributeValueUsingString(valueTextField.getText());
-        else if (document == propNameTextField.getDocument())
+        } else if (document == propNameTextField.getDocument()) {
             rowData.setPropName(propNameTextField.getText());
+        }
     }
 
 

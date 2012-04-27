@@ -1,7 +1,6 @@
 <component name="libraryTable">
-  <library name="lib">
+  <library name="testing">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/datetimepicker3.3.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/junit-4.10.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/ApprovalTests.jar!/" />
     </CLASSES>

@@ -4,29 +4,17 @@
  */
 package com.physion.ebuilder.datamodel;
 
-import java.lang.ClassNotFoundException;
-import java.io.InvalidClassException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import javax.swing.event.EventListenerList;
-
-import com.physion.ebuilder.datatypes.ClassDescription;
-import com.physion.ebuilder.datatypes.Attribute;
-import com.physion.ebuilder.datatypes.Operator;
-import com.physion.ebuilder.datatypes.CollectionOperator;
-import com.physion.ebuilder.datatypes.Type;
-import com.physion.ebuilder.datatypes.Cardinality;
+import com.physion.ebuilder.datatypes.*;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
+
+import javax.swing.event.EventListenerList;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 
 /**
@@ -985,13 +973,13 @@ public class RowData
          * make sure the attributeValue is a Date.
          */
         if ((getChildmostAttribute() != null) &&
-            (Type.DATE_TIME.equals(getChildmostAttribute().getType()) ||
-             Type.DATE_TIME.equals(getPropType())) &&
-            (attributeOperator != Operator.IS_NULL) &&
-            (attributeOperator != Operator.IS_NOT_NULL) &&
-            ((getAttributeValue() == null) ||
-             !(getAttributeValue() instanceof Date))) {
-            setAttributeValue(new Date());
+                (Type.DATE_TIME.equals(getChildmostAttribute().getType()) ||
+                        Type.DATE_TIME.equals(getPropType())) &&
+                (attributeOperator != Operator.IS_NULL) &&
+                (attributeOperator != Operator.IS_NOT_NULL) &&
+                ((getAttributeValue() == null) ||
+                        !(getAttributeValue() instanceof DateTime))) {
+            setAttributeValue(new DateTime().withZone(DateTimeZone.UTC));
         }
 
         fireRowDataEvent(RowDataEvent.TIMING_AFTER,
@@ -1751,8 +1739,8 @@ public class RowData
                 if (!Operator.isOperatorDateTime(attributeOperator)) {
                     setAttributeOperator(Operator.OPERATORS_DATE_TIME[0]);
                 }
-                if (!(getAttributeValue() instanceof Date))
-                    setAttributeValue(new Date());
+                if (!(getAttributeValue() instanceof LocalDateTime))
+                    setAttributeValue(new LocalDateTime(DateTimeZone.UTC));
             break;
             default:
                 System.err.println("ERROR:  Unhandled type.\n"+
@@ -2234,7 +2222,7 @@ public class RowData
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("endTime"));
         rowData.setAttributeOperator(Operator.LESS_THAN_EQUALS);
-        rowData.setAttributeValue(new Date());
+        rowData.setAttributeValue(new LocalDateTime(DateTimeZone.UTC));
         rootRow.addChildRow(rowData);
 
         /**
@@ -2341,6 +2329,8 @@ public class RowData
          * listeners and other things like that.  We just want
          * the data values.
          */
+
+        System.out.println("rowData write attribute value: " + getAttributeValue());
         RowData rowData = new RowData(this);
         outputStream.writeObject(rowData);
     }
