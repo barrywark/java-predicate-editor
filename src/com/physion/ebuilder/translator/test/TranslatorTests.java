@@ -4,24 +4,18 @@
  */
 package com.physion.ebuilder.translator.test;
 
-import java.util.Date;
-
-import junit.framework.TestCase;
-
-import org.approvaltests.Approvals;
-import org.approvaltests.UseReporter;
-import org.approvaltests.reporters.JunitReporter;
-
 import com.physion.ebuilder.datamodel.DataModel;
 import com.physion.ebuilder.datamodel.RowData;
-import com.physion.ebuilder.datatypes.Attribute;
-import com.physion.ebuilder.datatypes.ClassDescription;
-import com.physion.ebuilder.datatypes.CollectionOperator;
-import com.physion.ebuilder.datatypes.Operator;
-import com.physion.ebuilder.datatypes.Type;
+import com.physion.ebuilder.datatypes.*;
 import com.physion.ebuilder.expression.ExpressionTree;
 import com.physion.ebuilder.translator.ExpressionTreeToRowData;
 import com.physion.ebuilder.translator.RowDataToExpressionTree;
+import junit.framework.TestCase;
+import org.approvaltests.Approvals;
+import org.approvaltests.UseReporter;
+import org.approvaltests.reporters.JunitReporter;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 
 /**
@@ -779,7 +773,7 @@ public class TranslatorTests
         rowData.setPropName("someTimeKey");
         rowData.setPropType(Type.DATE_TIME);
         rowData.setAttributeOperator(Operator.EQUALS);
-        rowData.setAttributeValue(new Date(1262304000000L));
+        rowData.setAttributeValue(new DateTime(1262304000000L));
         rootRow.addChildRow(rowData);
 
         String s = getResultsString("PARAMETERS_MAP Type Date", rootRow);
@@ -1549,6 +1543,49 @@ public class TranslatorTests
 
         String s = getResultsString("Path To containing_experiments", rootRow);
         Approvals.approve(s);
+    }
+
+    /**
+     * Test for date/time
+     */
+    @UseReporter(JunitReporter.class)
+    public void testDateTimeEntry() throws Exception
+    {
+        /**
+         * Epoch | Any
+         *  Epoch | Start Time == "Sat Dec 01 10:00:00 EST 1979"
+         */
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("startTime"));
+        rowData.setAttributeOperator(Operator.fromString("=="));
+        rowData.setAttributeValue(new DateTime(1979, 12, 1, 9, 0, 0, 0, DateTimeZone.UTC));
+        rootRow.addChildRow(rowData);
+
+        String s = getResultsString("DateTime entry", rootRow);
+        Approvals.approve(s);
+    }
+
+    public void testDateTimeRowDataSerialization() throws Exception
+    {
+        /**
+         * Epoch | Any
+         *  Epoch | Start Time == "Sat Dec 01 10:00:00 EST 1979"
+         */
+        RowData rootRow = new RowData();
+        rootRow.setClassUnderQualification(epochCD);
+        rootRow.setCollectionOperator(CollectionOperator.ANY);
+
+        RowData rowData = new RowData();
+        rowData.addAttribute(epochCD.getAttribute("startTime"));
+        rowData.setAttributeOperator(Operator.fromString("=="));
+        rowData.setAttributeValue(new DateTime(1979, 12, 1, 9, 0, 0, 0, DateTimeZone.UTC).toDate());
+        rootRow.addChildRow(rowData);
+
+        assertTrue(rootRow.testSerialization());
     }
 
 

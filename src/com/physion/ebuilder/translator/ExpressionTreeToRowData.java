@@ -585,7 +585,6 @@ public class ExpressionTreeToRowData
             rowData.setAttributeValue(attributeValue);
         }
 
-        //System.out.println("Calling rowData.setAttributeOperator");
         rowData.setAttributeOperator(attributeOperator);
     }
 

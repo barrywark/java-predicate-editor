@@ -4,6 +4,8 @@
  */
 package com.physion.ebuilder;
 
+import org.jdesktop.swingx.DateTimePicker;
+
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -16,7 +18,6 @@ import javax.swing.JSpinner;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 
-import com.lavantech.gui.comp.DateTimePicker;
 
 
 /**
@@ -56,16 +57,6 @@ class Util {
             JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor)
                 ((JSpinner)component).getEditor();
             setupAutoScrolling(editor.getTextField());
-            return;
-        }
-
-        /**
-         * DateTimePickers have to be handled specially.
-         * They contain two components.
-         */
-        if (component instanceof DateTimePicker) {
-            setupAutoScrolling(((DateTimePicker)component).getRenderer());
-            setupAutoScrolling(((DateTimePicker)component).getDropDownButton());
             return;
         }
 

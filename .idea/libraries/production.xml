@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="production">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/joda-time-1.6.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.16.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

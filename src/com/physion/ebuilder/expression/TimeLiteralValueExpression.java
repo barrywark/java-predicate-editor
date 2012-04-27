@@ -4,10 +4,9 @@
  */
 package com.physion.ebuilder.expression;
 
-import org.joda.time.LocalDateTime;
+import org.joda.time.DateTime;
 
 import java.io.Serializable;
-import java.util.Date;
 
 
 /**
@@ -29,7 +28,7 @@ public class TimeLiteralValueExpression
 
 	private static final long serialVersionUID = 1L;
 
-	private Date value;
+	private DateTime value;
 
 
     /**
@@ -41,13 +40,13 @@ public class TimeLiteralValueExpression
     }
 
     @Override
-    public LocalDateTime getTimeValue() {
-        return(new LocalDateTime(value));
+    public DateTime getTimeValue() {
+        return(new DateTime(value));
     }
 
 
-    public TimeLiteralValueExpression(Date value) {
-        this.value = value;
+    public TimeLiteralValueExpression(DateTime dateTime) {
+        this.value = dateTime;
     }
 
 
