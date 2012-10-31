@@ -1,5 +1,5 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
-    name="ovation"
+    name="query-builder"
     basedir="."
     default="jar">
 
@@ -16,18 +16,14 @@
     <property name="build.dir" value="${basedir}/build"/>
     <property name="lib.dir" value="${basedir}/lib"/>
 
-    <property name="jodatime.jar.path" value="${lib.dir}/joda-time-1.6.2.jar"/>
-    <property name="log4j.jar.path" value="${lib.dir}/log4j-1.2.16.jar"/>
-    <property name="swingx.jar.path" value="${lib.dir}/swingx-1.6.1.jar"/>
-
-    <property name="artifacts.dir" value="${basedir}/artifacts"/>
+    <property name="artifacts.dir" value="${basedir}/bin/jars"/>
 
     <property name="junit.report.dir" value="${build.dir}/junit-reports"/>
 
     <property name="production.classes.dir" value="${build.dir}/production/classes/"/>
     <property name="production.src.dir" value="${basedir}/src"/>
     <property name="test.src.dir" value="${basedir}/src"/>
-    <property name="output.jar.path" value="${artifacts.dir}/ovpredicate.jar"/>
+    <property name="output.jar.path" value="${artifacts.dir}/query-builder.jar"/>
 
 
     <target name="clean">
@@ -62,9 +58,6 @@
                 <attribute name="Main-Class"
                     value="com.physion.ebuilder.ExpressionBuilder"/>
             </manifest>
-            <zipfileset includes="**/*" src="${swingx.jar.path}"/>
-            <zipfileset includes="**/*" src="${jodatime.jar.path}"/>
-            <zipfileset includes="**/*" src="${log4j.jar.path}"/>
         </jar>
     </target>
 
@@ -133,19 +126,19 @@
 
     <target name="ivy-gen-pom" depends="init-ivy" description="--> Generate POM file">
         <ivy:makepom ivyfile="ivy.xml" pomfile="bin/poms/${ant.project.name}.pom">
-            <mapping conf="production" scope="compile"/>
+            <!--<mapping conf="production" scope="compile"/>-->
         </ivy:makepom>
     </target>
 
     <target name="ivy-publish-local" depends="jar,ivy-gen-pom" description="--> Publish jar to maven repo mounted at ~/.m2/repository">
-        <ivy:publish resolver="local-m2-publish" forcedeliver="true" overwrite="true" publishivy="false">
-            <artifacts pattern="bin/[type]s/[artifact].[ext]"/>
+        <ivy:publish resolver="local-maven2" forcedeliver="true" overwrite="true" publishivy="false">
+            <ivy:artifacts pattern="bin/[type]s/[artifact].[ext]"/>
         </ivy:publish>
     </target>
 
     <target name="ivy-publish-share" depends="jar,ivy-gen-pom" description="--> Publish jar/source to maven repo mounted at ~/repo">
         <ivy:publish resolver="share-m2" forcedeliver="true" overwrite="true" publishivy="false">
-            <artifacts pattern="bin/[type]s/[artifact].[ext]" />
+            <ivy:artifacts pattern="bin/[type]s/[artifact].[ext]" />
         </ivy:publish>
     </target>
 
