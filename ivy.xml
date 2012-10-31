@@ -1,5 +1,8 @@
 <ivy-module version="2.0">
-    <info organisation="us.physion" module="query-builder"/>
+    <info organisation="us.physion"
+          module="query-builder"
+          revision="1.0-SNAPSHOT"
+            />
 
     <configurations>
         <conf name="production"

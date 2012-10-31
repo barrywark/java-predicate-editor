@@ -13,6 +13,10 @@
     <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
     <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
 
+    <property name="project.revision" value="1.0"/>
+    <property name="project.qualifier" value="-SNAPSHOT" />
+
+
     <property name="build.dir" value="${basedir}/build"/>
     <property name="lib.dir" value="${basedir}/lib"/>
 
@@ -130,8 +134,15 @@
         </ivy:makepom>
     </target>
 
+
     <target name="ivy-publish-local" depends="jar,ivy-gen-pom" description="--> Publish jar to maven repo mounted at ~/.m2/repository">
-        <ivy:publish resolver="local-maven2" forcedeliver="true" overwrite="true" publishivy="false">
+        <ivy:publish resolver="local-maven2"
+                     forcedeliver="true"
+                     overwrite="true"
+                     publishivy="false"
+                     revision="${project.revision}${project.qualifier}"
+                     pubrevision="${project.revision}${project.qualifier}">
+
             <ivy:artifacts pattern="bin/[type]s/[artifact].[ext]"/>
         </ivy:publish>
     </target>
