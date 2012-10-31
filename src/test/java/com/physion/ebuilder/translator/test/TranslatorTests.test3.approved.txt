@@ -1,0 +1,24 @@
+===== Attribute Path Nested Twice =====
+Original RowData:
+Epoch | None
+  Epoch | Epoch Group.Label == "Test 27"
+Test Translation: 
+Starting With RowData:
+Epoch | None
+  Epoch | Epoch Group.Label == "Test 27"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(==)
+      OperatorExpression(.)
+        AttributeExpression(epochGroup)
+        AttributeExpression(label)
+      StringLiteralValueExpression(Test 27)
+ExpressionTree Translated Back To RowData:
+Epoch | None
+  Epoch | Epoch Group.Label == "Test 27"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

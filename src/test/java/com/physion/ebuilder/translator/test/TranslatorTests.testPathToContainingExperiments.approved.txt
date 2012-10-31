@@ -1,0 +1,25 @@
+===== Path To containing_experiments =====
+Original RowData:
+EpochGroup | Any
+  EpochGroup | Source.Parent.Containing Experiments Count == "4"
+Test Translation: 
+Starting With RowData:
+EpochGroup | Any
+  EpochGroup | Source.Parent.Containing Experiments Count == "4"
+RowData Translated To Expression:
+CUQ: EpochGroup
+rootExpression:
+OperatorExpression(or)
+  OperatorExpression(==)
+    OperatorExpression(count)
+      OperatorExpression(containing_experiments)
+        OperatorExpression(.)
+          AttributeExpression(source)
+          AttributeExpression(parent)
+    Int32LiteralValueExpression(4)
+ExpressionTree Translated Back To RowData:
+EpochGroup | Any
+  EpochGroup | Source.Parent.Containing Experiments Count == "4"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

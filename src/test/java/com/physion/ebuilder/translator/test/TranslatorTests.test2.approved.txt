@@ -1,0 +1,21 @@
+===== Attribute Boolean Operator.IS_TRUE =====
+Original RowData:
+Epoch | All
+  Epoch | Incomplete is true
+Test Translation: 
+Starting With RowData:
+Epoch | All
+  Epoch | Incomplete is true
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    AttributeExpression(incomplete)
+    BooleanLiteralValueExpression(true)
+ExpressionTree Translated Back To RowData:
+Epoch | All
+  Epoch | Incomplete is true
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

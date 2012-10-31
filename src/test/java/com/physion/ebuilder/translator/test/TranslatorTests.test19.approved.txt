@@ -1,0 +1,27 @@
+===== PARAMETERS_MAP Type Date =====
+Original RowData:
+Epoch | All
+  Epoch | Protocol Parameters.someTimeKey(time) == "2009-12-31T19:00:00.000-05:00"
+Test Translation: 
+Starting With RowData:
+Epoch | All
+  Epoch | Protocol Parameters.someTimeKey(time) == "2009-12-31T19:00:00.000-05:00"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(and)
+  OperatorExpression(==)
+    OperatorExpression(.)
+      OperatorExpression(as)
+        OperatorExpression(parameter)
+          AttributeExpression(protocolParameters)
+          StringLiteralValueExpression(someTimeKey)
+        ClassLiteralValueExpression(ovation.DateValue)
+      AttributeExpression(value)
+    TimeLiteralValueExpression(2009-12-31T19:00:00.000-05:00)
+ExpressionTree Translated Back To RowData:
+Epoch | All
+  Epoch | Protocol Parameters.someTimeKey(time) == "2009-12-31T19:00:00.000-05:00"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

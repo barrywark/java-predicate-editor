@@ -1,0 +1,34 @@
+===== Compound Row, Class Change Between Parent And Child =====
+Original RowData:
+Epoch | None
+  Epoch | Responses None have Any
+    Response | None
+      Response | Sampling Rate >= "55.2"
+Test Translation: 
+Starting With RowData:
+Epoch | None
+  Epoch | Responses None have Any
+    Response | None
+      Response | Sampling Rate >= "55.2"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        AttributeExpression(responses)
+        OperatorExpression(or)
+          OperatorExpression(not)
+            OperatorExpression(or)
+              OperatorExpression(>=)
+                AttributeExpression(samplingRate)
+                Float64LiteralValueExpression(55.2)
+ExpressionTree Translated Back To RowData:
+Epoch | None
+  Epoch | Responses None have Any
+    Response | None
+      Response | Sampling Rate >= "55.2"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.

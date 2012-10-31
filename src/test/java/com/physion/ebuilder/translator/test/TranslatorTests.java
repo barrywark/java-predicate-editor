@@ -16,6 +16,7 @@ import org.approvaltests.UseReporter;
 import org.approvaltests.reporters.JunitReporter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.junit.Test;
 
 
 /**
@@ -49,6 +50,8 @@ import org.joda.time.DateTimeZone;
  * I would expect a method called test123() to be created that
  * demonstrates that the bug is fixed.
  */
+
+
 public class TranslatorTests
         extends TestCase {
 
@@ -70,7 +73,7 @@ public class TranslatorTests
             DataModel.getClassDescription("Note");
     private static ClassDescription timelineAnnotationCD =
             DataModel.getClassDescription("TimelineAnnotation");
-    private static ClassDescription experimentCD = 
+    private static ClassDescription experimentCD =
             DataModel.getClassDescription("Experiment");
 
 
@@ -91,6 +94,7 @@ public class TranslatorTests
      */
     //@UseReporter(QuietReporter.class)
     @UseReporter(JunitReporter.class)
+    @Test
     public void test1()
             throws Exception {
 
@@ -124,6 +128,7 @@ public class TranslatorTests
 
 
     @UseReporter(JunitReporter.class)
+    @Test
     public void test2()
             throws Exception {
 
@@ -749,7 +754,7 @@ public class TranslatorTests
      * the TranslatorTests.test19.approved.txt file contains the string:
      *
      *      Thu Dec 31 19:00:00 EST 2009
-     * 
+     *
      * which means the test must be run in the eastern US timezone to match.
      * One solution would be to have getResultsString always display the time
      * as UTC time.
@@ -1297,7 +1302,7 @@ public class TranslatorTests
         rowData = new RowData();
         rowData.addAttribute(epochCD.getAttribute("epochGroup"));
         rowData.addAttribute(Attribute.IS_NOT_NULL);
-        rowData.setAttributeOperator(Operator.IS_NOT_NULL); 
+        rowData.setAttributeOperator(Operator.IS_NOT_NULL);
         rootRow.addChildRow(rowData);
 
         rowData = new RowData();

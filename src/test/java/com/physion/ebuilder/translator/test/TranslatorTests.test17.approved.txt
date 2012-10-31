@@ -1,0 +1,32 @@
+===== PER_USER_OR_CUSTOM_REFERENCE_OPERATOR Nested Twice CollectionOperator.NONE =====
+Original RowData:
+Epoch | None
+  Epoch | Next Epoch.Next Epoch.All Keywords None have All
+    KeywordTag | UUID == "xyz"
+Test Translation: 
+Starting With RowData:
+Epoch | None
+  Epoch | Next Epoch.Next Epoch.All Keywords None have All
+    KeywordTag | UUID == "xyz"
+RowData Translated To Expression:
+CUQ: Epoch
+rootExpression:
+OperatorExpression(not)
+  OperatorExpression(or)
+    OperatorExpression(not)
+      OperatorExpression(any)
+        OperatorExpression(keywords)
+          OperatorExpression(.)
+            AttributeExpression(nextEpoch)
+            AttributeExpression(nextEpoch)
+        OperatorExpression(and)
+          OperatorExpression(==)
+            AttributeExpression(uuid)
+            StringLiteralValueExpression(xyz)
+ExpressionTree Translated Back To RowData:
+Epoch | None
+  Epoch | Next Epoch.Next Epoch.All Keywords None have All
+    KeywordTag | UUID == "xyz"
+Original and translated versions are the same.
+Test RowData Serialization: RowData de/serialization succeed.
+Test ExpressionTree Serialization: ExpressionTree de/serialization succeed.
