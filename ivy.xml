@@ -1,20 +1,55 @@
 <ivy-module version="2.0">
-    <info organisation="com.physionconsulting" module="ebuilder"/>
-    <dependencies>
+    <info organisation="us.physion" module="query-builder"/>
 
+    <configurations>
+        <conf name="production"
+              description="The query builder"/>
+        <conf name="test"
+              extends="production"
+              visibility="private"
+              description="for testing query builder"/>
+    </configurations>
+
+    <publications>
+        <!--List the pom as an artifact so that ivy uploads it to the maven repo-->
+        <artifact type="pom" ext="pom" conf="production"/>
+
+        <artifact name="query-builder" type="jar"  conf="production" ext="jar"/>
+    </publications>
+
+    <dependencies>
         <!-- Production -->
-        <dependency org="joda-time" name="joda-time" rev="1.6.2"/>
-        <dependency org="log4j" name="log4j" rev="1.2.16"/>
-        <dependency org="com.google.guava" name="guava" rev="10.0.1"/>
-        <dependency org="org.swinglabs" name="swingx" rev="1.6.1"/>
+        <dependency org="joda-time"
+                    name="joda-time"
+                    rev="1.6.2"
+                    conf="production->default"/>
+        <dependency org="log4j"
+                    name="log4j"
+                    rev="1.2.16"
+                    conf="production->default"/>
+        <dependency org="com.google.guava"
+                    name="guava"
+                    rev="10.0.1"
+                    conf="production->default"/>
+        <dependency org="org.swinglabs"
+                    name="swingx"
+                    rev="1.6.1"
+                    conf="production->default"/>
 
 
         <!-- Testing -->
-        <dependency org="junit" name="junit" rev="4.10"/>
-        <!--<dependency org="ant" name="ant-junit" rev="1.6"/>-->
-        <dependency org="net.sourceforge.cobertura" name="cobertura" rev="1.9"/>
+        <dependency org="junit"
+                    name="junit"
+                    rev="4.10"
+                    conf="test->default"/>
+        <dependency org="net.sourceforge.cobertura"
+                    name="cobertura"
+                    rev="1.9"
+                    conf="test->default"/>
+        <dependency org="net.sourceforge"
+                    name="approvaltests"
+                    rev="0.12"
+                    conf="test->default"/>
 
-        <!-- Unmanaged dependencies -->
-        <!-- ApprovalTests, datetimepicker 3.3 -->
     </dependencies>
 </ivy-module>

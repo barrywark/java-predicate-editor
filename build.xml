@@ -16,11 +16,9 @@
     <property name="build.dir" value="${basedir}/build"/>
     <property name="lib.dir" value="${basedir}/lib"/>
 
-    <property name="datetimepicker.jar.path" value="${lib.dir}/datetimepicker3.3.jar"/>
     <property name="jodatime.jar.path" value="${lib.dir}/joda-time-1.6.2.jar"/>
     <property name="log4j.jar.path" value="${lib.dir}/log4j-1.2.16.jar"/>
-    <property name="junit.jar.path" value="${lib.dir}/junit-4.10.jar"/>
-    <property name="approvaltests.jar.path" value="${lib.dir}/ApprovalTests.jar"/>
+    <property name="swingx.jar.path" value="${lib.dir}/swingx-1.6.1.jar"/>
 
     <property name="artifacts.dir" value="${basedir}/artifacts"/>
 
@@ -38,28 +36,6 @@
     </target>
 
 
-    <target name="download-ivy" unless="offline">
-
-        <mkdir dir="${ivy.jar.dir}"/>
-        <!-- download Ivy from web site so that it can be used even without any special installation -->
-        <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
-            dest="${ivy.jar.file}" usetimestamp="true"/>
-    </target>
-
-
-    <target name="init-ivy" depends="download-ivy">
-        <!-- try to load ivy here from ivy home, in case the user has not already dropped
-        it into ant's lib dir (note that the latter copy will always take precedence).
-        We will not fail as long as local lib dir exists (it may be empty) and
-        ivy is in at least one of ant's lib dir or the local lib dir. -->
-        <path id="ivy.lib.path">
-            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
-
-        </path>
-        <taskdef resource="org/apache/ivy/ant/antlib.xml"
-            uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
-    </target>
-
     <target name="resolve"
         description="--> retrieve dependencies with ivy"
         depends="init-ivy"
@@ -67,26 +43,17 @@
         <ivy:retrieve/>
     </target>
 
-    <property name="swingx.jar.path" value="${lib.dir}/swingx-1.6.1.jar"/>
-    <path id="lib-path">
-        <pathelement location="${jodatime.jar.path}"/>
-        <pathelement location="${log4j.jar.path}"/>
-        <pathelement location="${swingx.jar.path}"/>
-        <pathelement location="${junit.jar.path}"/>
-        <pathelement location="${approvaltests.jar.path}"/>
-    </path>
-    <target name="compile-production">
+    <target name="compile-production" depends="init-ivy,resolve">
         <mkdir dir="${production.classes.dir}"/>
 
         <javac srcdir="${production.src.dir}"
             destdir="${production.classes.dir}"
-            classpathref="lib-path"
+            classpathref="production.ivy.classpath.id"
             includeAntRuntime="no"
             debug="true"
             />
     </target>
 
-    <!--TODO: update for libraries, replace datetimepicker with swingx-->
     <target name="jar" depends="compile-production">
         <mkdir dir="${artifacts.dir}"/>
         <jar destfile="${output.jar.path}">
@@ -100,11 +67,12 @@
             <zipfileset includes="**/*" src="${log4j.jar.path}"/>
         </jar>
     </target>
-    
+
     <target name="test" depends="junit"/>
 
     <target name="junit" depends="jar">
         <mkdir dir="${junit.report.dir}"/>
+
 
         <junit printsummary="yes" fork="yes" forkmode="once">
             <sysproperty key="net.sourceforge.cobertura.datafile"
@@ -112,11 +80,7 @@
 
             <classpath>
                 <pathelement location="${output.jar.path}"/>
-                <pathelement location="${junit.jar.path}"/>
-                <pathelement location="${approvaltests.jar.path}"/>
-                <fileset dir="${lib.dir}">
-                    <include name="**/*.jar"/>
-                </fileset>
+                <path refid="test.ivy.classpath.id"/>
             </classpath>
 
             <formatter type="xml"/>
@@ -128,7 +92,7 @@
             </batchtest>
         </junit>
     </target>
-    
+
     <target name="run" depends="jar">
         <java jar="${output.jar.path}"
                 dir="${basedir}"
@@ -138,5 +102,52 @@
              </classpath>
         </java>
     </target>
+
+
+
+    <!-- IVY -->
+    <target name="download-ivy" unless="offline">
+
+        <mkdir dir="${ivy.jar.dir}"/>
+        <!-- download Ivy from web site so that it can be used even without any special installation -->
+        <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+             dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+
+    <target name="init-ivy" depends="download-ivy">
+        <!-- try to load ivy here from ivy home, in case the user has not already dropped
+        it into ant's lib dir (note that the latter copy will always take precedence).
+        We will not fail as long as local lib dir exists (it may be empty) and
+        ivy is in at least one of ant's lib dir or the local lib dir. -->
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+        </path>
+
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+                 uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+
+        <ivy:cachepath pathid="test.ivy.classpath.id" conf="test"/>
+        <ivy:cachepath pathid="production.ivy.classpath.id" conf="production"/>
+
+    </target>
+
+    <target name="ivy-gen-pom" depends="init-ivy" description="--> Generate POM file">
+        <ivy:makepom ivyfile="ivy.xml" pomfile="bin/poms/${ant.project.name}.pom">
+            <mapping conf="production" scope="compile"/>
+        </ivy:makepom>
+    </target>
+
+    <target name="ivy-publish-local" depends="jar,ivy-gen-pom" description="--> Publish jar to maven repo mounted at ~/.m2/repository">
+        <ivy:publish resolver="local-m2-publish" forcedeliver="true" overwrite="true" publishivy="false">
+            <artifacts pattern="bin/[type]s/[artifact].[ext]"/>
+        </ivy:publish>
+    </target>
+
+    <target name="ivy-publish-share" depends="jar,ivy-gen-pom" description="--> Publish jar/source to maven repo mounted at ~/repo">
+        <ivy:publish resolver="share-m2" forcedeliver="true" overwrite="true" publishivy="false">
+            <artifacts pattern="bin/[type]s/[artifact].[ext]" />
+        </ivy:publish>
+    </target>
+
 </project>
 
