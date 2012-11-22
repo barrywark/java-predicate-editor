@@ -13,7 +13,8 @@ import com.physion.ebuilder.expression.ExpressionTree;
 import com.physion.ebuilder.expression.OperatorExpression;
 import com.physion.ebuilder.translator.ExpressionTreeToRowData;
 import com.physion.ebuilder.translator.RowDataToExpressionTree;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -139,7 +140,7 @@ public class ExpressionBuilder
      */
     private int stateIndex = -1;
 
-    private transient Logger logger = Logger.getLogger(getClass().getCanonicalName());
+    private transient Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
 
     /**
      * Create an ExpressionBuilder dialog with its expression
@@ -814,7 +815,7 @@ public class ExpressionBuilder
     }
 
 
-    private static Logger classLogger = Logger.getLogger(ExpressionBuilder.class.getCanonicalName());
+    private static Logger classLogger = LoggerFactory.getLogger(ExpressionBuilder.class.getCanonicalName());
 
     /**
      * Set the look and feel to something specific.
