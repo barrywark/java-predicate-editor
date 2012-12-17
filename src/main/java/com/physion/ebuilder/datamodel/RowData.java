@@ -5,10 +5,11 @@
 package com.physion.ebuilder.datamodel;
 
 import com.physion.ebuilder.datatypes.*;
-import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.event.EventListenerList;
 import java.io.*;
@@ -1474,7 +1475,7 @@ public class RowData
     }
 
 
-    private transient Logger logger = Logger.getLogger(getClass().getCanonicalName());
+    private transient Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
     /**
      * Set the value of attributeValue using a String.
      * The GUI currently has widgets that let the user enter

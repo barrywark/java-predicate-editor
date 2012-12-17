@@ -8,22 +8,21 @@ The directory "src" and its subdirectories contain all the source code needed.
 The directory "lib" and its subdirectories contain libraries, i.e. .jar files,
 that are needed.
 
+To install the ApprovalTests.jar as the necessary Maven repository artifact::
+
+	$ mvn install:install-file -DgroupId=net.sourceforge -DartifactId=approvaltests -Dversion=0.12 -Dpackaging=jar -Dfile=lib/ApprovalTests.jar
+
 
 Build/test/run
 --------------
 
 To build the project's JAR::
 
-    $ ant resolve # To download IVY dependencies
-    $ ant jar # To build the ebuilder JAR
+    $ mvn package
 
 To run the project acceptance tests::
 
-    $ ant test
-
-To run the Ebuilder UI::
-
-    $ ant run
+    $ mvn test
 
 
 License

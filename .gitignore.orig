@@ -18,6 +18,10 @@ saved.ExpTree
 
 .idea/workspace.xml
 
+<<<<<<< HEAD
+*received.txt
+target/
+=======
 testSaved.RDTree
 
 query-builder.iml
@@ -25,3 +29,4 @@ query-builder.iml
 query-builder.ipr
 
 query-builder.iws
+>>>>>>> 21d668f109b78685ea75afc2d1b5b07d6b554995
