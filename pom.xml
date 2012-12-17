@@ -54,6 +54,30 @@
                     </descriptors>
                 </configuration>
             </plugin>
+
+            <!--Cobertura-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <instrumentation>
+                        <ignores>
+                            <ignore>com.physion.ebuilder.*</ignore>
+                        </ignores>
+                        <excludes>
+                            <exclude>com/physion/ebuilder/**/*Test.class</exclude>
+                        </excludes>
+                    </instrumentation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -67,6 +91,13 @@
                 <configuration>
                     <show>public</show>
                 </configuration>
+            </plugin>
+
+            <!--Cobertura-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.5.2</version>
             </plugin>
         </plugins>
     </reporting>
