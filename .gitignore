@@ -17,3 +17,6 @@ artifacts/
 saved.ExpTree
 
 .idea/workspace.xml
+
+*received.txt
+target/

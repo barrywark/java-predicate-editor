@@ -16,6 +16,7 @@ import org.approvaltests.UseReporter;
 import org.approvaltests.reporters.JunitReporter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.junit.Assert;
 import org.junit.Test;
 
 
@@ -52,8 +53,7 @@ import org.junit.Test;
  */
 
 
-public class TranslatorTests
-        extends TestCase {
+public class TranslatorTests extends TestCase {
 
     private static ClassDescription epochCD =
             DataModel.getClassDescription("Epoch");
@@ -170,6 +170,7 @@ public class TranslatorTests
 
 
     @UseReporter(JunitReporter.class)
+    @Test
     public void test3()
             throws Exception {
 
@@ -1590,7 +1591,7 @@ public class TranslatorTests
         rowData.setAttributeValue(new DateTime(1979, 12, 1, 9, 0, 0, 0, DateTimeZone.UTC).toDate());
         rootRow.addChildRow(rowData);
 
-        assertTrue(rootRow.testSerialization());
+        Assert.assertTrue(rootRow.testSerialization());
     }
 
 
@@ -1727,13 +1728,5 @@ public class TranslatorTests
             s += "ExpressionTree de/serialization failed.";
 
         return(s);
-    }
-
-
-    /**
-     * This starts the testing.
-     */
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(TranslatorTests.class);
     }
 }
